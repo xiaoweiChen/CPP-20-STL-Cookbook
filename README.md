@@ -2,6 +2,8 @@
 
 *Leverage the latest features of the STL to solve real-world problems*
 
+<a href="https://www.packtpub.com/product/c-20-stl-cookbook/9781803248714?utm_source=github&utm_medium=repository&utm_campaign=9781803248714"><img src="https://static.packt-cdn.com/products/9781803248714/cover/smaller" alt="C++20 STL Cookbook" height="256px" align="right"></a>
+
 * 作者：Bill Weinman 
 * 译者：陈晓伟
 * 首次发布时间：2022年5月27日([来源](https://www.amazon.com/20-STL-Cookbook-Leverage-real-world/dp/1803248718/ref=sr_1_3?keywords=Modern+CMake+for+C%2B%2B&qid=1661265799&s=books&sr=1-3))

@@ -2,6 +2,8 @@
 
 *Leverage the latest features of the STL to solve real-world problems*
 
+*使用STL的新特性来解决实际问题*
+
 <a href="https://www.packtpub.com/product/c-20-stl-cookbook/9781803248714?utm_source=github&utm_medium=repository&utm_campaign=9781803248714"><img src="https://static.packt-cdn.com/products/9781803248714/cover/smaller" alt="C++20 STL Cookbook" height="256px" align="right"></a>
 
 * 作者：Bill Weinman 
@@ -14,52 +16,52 @@
 
 ## 本书概述
 
-Fast, efficient, and flexible, the C++ programming language has come a long way and is used in every area of the industry to solve many problems. The latest version C++20 will see programmers change the way they code as it brings a whole array of features enabling the quick deployment of applications. This book will get you up and running with using the STL in the best way possible.
+快速、高效和灵活是C++编程语言一直以来的特点，从而应用于行业的各个领域来解决许多问题。最新版本的C++ 20将改变开发者的编码方式，因为它带来了一系列支持应用程序快速部署的特性。这本书将帮助您以最优的方式使用STL。
 
-Beginning with new language features in C++20, this book will help you understand the language's mechanics and library features and offer insights into how they work. Unlike other books, the C++20 STL Cookbook takes an implementation-specific, problem-solution approach that will help you overcome hurdles quickly. You'll learn core STL concepts, such as containers, algorithms, utility classes, lambda expressions, iterators, and more, while working on real-world recipes. This book is a reference guide for using the C++ STL with its latest capabilities and exploring the cutting-edge features in functional programming and lambda expressions.
+本书将从C++ 20中的新语言特性开始，帮助您理解该语言的机制和库特性，并了解它们是如何工作的。与其他书籍不同，C++ 20 STL Cookbook采用了一种特定于实现的问题解决方法，将帮助您快速克服障碍。您将学习核心STL概念，如容器、算法、实用程序类、Lambda表达式、迭代器等，学习的同时结合实践。本书是使用C++ STL及其最新功能的参考指南，可用来探索函数式编程和Lambda表达式中的前沿特性。
 
-By the end of the book C++20 book, you'll be able to leverage the latest C++ features and save time and effort while solving tasks elegantly using the STL.
+阅读完这本书后，您将能够利用最新的C++特性，并节省时间和精力，同时可以优雅地使用STL解决实际问题。
 
 #### 关键特性
 
-- Become familiar with the latest features of C++20 and write better code using the STL
+- 熟悉C++ 20的最新特性，并使用STL编写更好的代码
 
-- Reduce the development time for your applications and enable faster deployment
-- Get up and running with the new and leaner STL capabilities introduced in the latest release
+- 减少应用的开发时间，并支持更快的部署
+- 启动和使用新版本中引入的、更精简的STL功能
 
 #### 将会学到
 
-- Understand the new language features and the problems they can solve
+- 理解新的语言特性和其可以解决的问题
 
-- Implement generic features of the STL with practical examples
+- 用实际例子实现STL的通用特性
 
-- Understand standard support classes for concurrency and synchronization
+- 理解并发和同步的标准支持类
 
-- Perform efficient memory management using the STL
+- 使用STL执行高效的内存管理
 
-- Implement seamless formatting using std::format
+- 使用std::format实现格式化
 
-- Work with strings the STL way instead of handcrafting C-style code
+- 使用STL方式处理字符串，而不是手工编写C风格的代码
 
   
 
 ## 适读人群
 
-This book is for intermediate to advanced C++ programmers who want to get the most out of the Standard Template Library of C++20, the newest version of C++. Basic knowledge of coding and C++ concepts is necessary to get started with this book.
+这本书是为中高级的C++开发者准备的，他们希望从C++ 20的标准模板库(C++的最新版本)中收益。开始阅读这本书前，必须具备编码和基本的C++知识。
 
 ## 作者简介
 
-Bill Weinman has been involved in technology since he built his first computer at age 16, in 1971. He’s been coding in C and C++ since the early 1970s. He’s written systems and applications for major clients, including NASA, Bank of America, Xerox, IBM, and the US Navy. Also an electronics engineer, he worked on the Voyager II spacecraft, audio amplifiers for SAE, and sound systems for Altec Lansing.
+**Bill Weinman** 自从他在1971年16岁时拥有了他的第一台计算机以来，他一直在从事技术工作。自20世纪70年代初以来，一直用C和C++编程，为包括NASA、美国银行、施乐、IBM和美国海军在内的主要客户编写系统和应用程序。他还是一名电子工程师，曾为旅行者II号宇宙飞船、SAE的音频放大器和Altec Lansing的音响系统工作。
 
-Since the mid-1990s, Mr. Weinman has focused on writing and teaching. His books and courses cover HTML, SQL, CGI, Python, and of course, C and C++. An early contributor to online learning, his clear, concise writing has made his courses a popular feature on lynda and LinkedIn Learning.
+自20世纪90年代中期以来，Weinman先生一直专注于写作和教学。他的书和课程涵盖了HTML、SQL、CGI、Python，当然还有C和C++。作为在线学习的早期贡献者，清晰、简洁的授课方式使他的课程在lynda和LinkedIn learning上很受欢迎。
 
-Follow Bill on his website at bw.org.  
+可以关注Bill的网站:bw.org。
 
 
 
 ## 审评者介绍
 
-Vitalijs Vaznais was born in Daugavpils, Latvia. His favorite programming languages are C and C++, which he has been using for the last 26 years (and commercially for 24 years). He is pleased with the latest changes/evolution in both these languages and looks forward to seeing how they start to evolve.  
+**Vitalijs Vaznais** 出生在拉脱维亚的道格夫皮尔斯。他最喜欢的编程语言是C和C++，这两种语言他已经使用了26年(商业使用了24年)。他对这两种语言的最新变化/演变感到满意，并期待看到更多。
 
 
 
@@ -67,6 +69,8 @@ Vitalijs Vaznais was born in Daugavpils, Latvia. His favorite programming langua
 
 * github地址：https://github.com/xiaoweiChen/CPP-20-STL-Cookbook
 * 译文的LaTeX 环境配置：https://www.cnblogs.com/1625--H/p/11524968.html 
+  * 禁用拼写检查：https://blog.csdn.net/weixin_39278265/article/details/87931348
+
 * vscode中配置latex：https://blog.csdn.net/Ruins_LEE/article/details/123555016
 * 原书示例：https://github.com/PacktPublishing/CPP-20-STL-Cookbook
 

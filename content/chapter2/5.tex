@@ -1,9 +1,206 @@
 
+Template argument deduction occurs when the types of the arguments to a template function, or class template constructor (beginning with C++17), are clear enough to be understood by the compiler without the use of template arguments. There are certain rules to this feature, but it's mostly intuitive.
 
 \subsubsection{How to do it…}
 
+In general, template argument deduction happens automatically when you use a template with clearly compatible arguments. Let's consider some examples.
+
+\begin{itemize}
+\item 
+In a function template, argument deduction usually looks something like this:
+
+\begin{lstlisting}[style=styleCXX]
+template<typename T>
+const char * f(const T a) {
+	return typeid(T).name();
+}
+int main() {
+	cout << format("T is {}\n", f(47));
+	cout << format("T is {}\n", f(47L));
+	cout << format("T is {}\n", f(47.0));
+	cout << format("T is {}\n", f("47"));
+	cout << format("T is {}\n", f("47"s));
+}
+\end{lstlisting}
+
+Output:
+
+\begin{tcblisting}{commandshell={}}
+T is int
+T is long
+T is double
+T is char const *
+T is class std::basic_string<char...
+\end{tcblisting}
+
+Because the types are easily discernable there is no reason to specify a template parameter like f<int>(47) in the function call. The compiler can deduce the <int> type from the argument.
+
+\begin{tcolorbox}[colback=webgreen!5!white,colframe=webgreen!75!black,title=Note]
+The above output shows meaningful type names where most compilers will use shorthand, like i for int and PKc for const char *, and so on.
+\end{tcolorbox}
+
+\item 
+This works just as well for multiple template parameters:
+
+\begin{lstlisting}[style=styleCXX]
+template<typename T1, typename T2>
+string f(const T1 a, const T2 b) {
+	return format("{} {}", typeid(T1).name(),
+	typeid(T2).name());
+}
+
+int main() {
+	cout << format("T1 T2: {}\n", f(47, 47L));
+	cout << format("T1 T2: {}\n", f(47L, 47.0));
+	cout << format("T1 T2: {}\n", f(47.0, "47"));
+}
+\end{lstlisting}
+
+Output:
+
+\begin{tcblisting}{commandshell={}}
+T1 T2: int long
+T1 T2: long double
+T1 T2: double char const *
+\end{tcblisting}
+
+Here the compiler is deducing types for both T1 and T2.
+
+\item 
+Notice that the types must be compatible with the template. For example, you cannot take a reference from a literal:
+
+\begin{lstlisting}[style=styleCXX]
+template<typename T>
+const char * f(const T& a) {
+	return typeid(T).name();
+}
+int main() {
+	int x{47};
+	f(47); // this will not compile
+	f(x); // but this will
+}
+\end{lstlisting}
+
+\item 
+Beginning with C++17 you can also use template parameter deduction with classes. So now this will work:
+
+\begin{lstlisting}[style=styleCXX]
+pair p(47, 47.0); // deduces to pair<int, double>
+tuple t(9, 17, 2.5); // deduces to tuple<int, int, double>
+\end{lstlisting}
+
+This eliminates the need for std::make\_pair() and std::make\_tuple() as you can now initialize these classes directly without the explicit template parameters. The std::make\_* helper functions will remain available for backward compatibility.
+\end{itemize}
 
 \subsubsection{How it works…}
 
+Let's define a class so we can see how this works:
+
+\begin{lstlisting}[style=styleCXX]
+template<typename T1, typename T2, typename T3>
+class Thing {
+	T1 v1{};
+	T2 v2{};
+	T3 v3{};
+	public:
+	explicit Thing(T1 p1, T2 p2, T3 p3)
+	: v1{p1}, v2{p2}, v3{p3} {}
+	string print() {
+		return format("{}, {}, {}\n",
+			typeid(v1).name(),
+			typeid(v2).name(),
+			typeid(v3).name()
+		);
+	}
+};
+\end{lstlisting}
+
+This is a template class with three types and three corresponding data members. It has a print() function, which returns a formatted string with the three type names.
+
+Without template parameter deduction, I would have to instantiate an object of this type like this:
+
+\begin{lstlisting}[style=styleCXX]
+Things<int, double, string> thing1{1, 47.0, "three" }
+\end{lstlisting}
+
+Now I can do it like this:
+
+\begin{lstlisting}[style=styleCXX]
+Things thing1{1, 47.0, "three" }
+\end{lstlisting}
+
+This is both simpler and less error prone.
+
+When I call the print() function on the thing1 object, I get this result:
+
+\begin{lstlisting}[style=styleCXX]
+cout << thing1.print();
+\end{lstlisting}
+
+Output:
+
+\begin{tcblisting}{commandshell={}}
+int, double, char const *
+\end{tcblisting}
+
+The STL includes a few of these helper functions, like make\_pair() and make\_tuple(), etc. These are now obsolescent, but will be maintained for compatibility with older code.
 
 \subsubsection{There's more…}
+
+Consider the case of a constructor with a parameter pack:
+
+\begin{lstlisting}[style=styleCXX]
+template <typename T>
+class Sum {
+	T v{};
+public:
+	template <typename... Ts>
+	Sum(Ts&& ... values) : v{ (values + ...) } {}
+	const T& value() const { return v; }
+};
+\end{lstlisting}
+
+Notice the fold expression in the constructor (values + ...). This is a C++17 feature that applies an operator to all the members of a parameter pack. In this case, it initializes v to the sum of the parameter pack.
+
+The constructor for this class accepts an arbitrary number of parameters, where each parameter may be a different class. For example, I could call it like this:
+
+\begin{lstlisting}[style=styleCXX]
+Sum s1 { 1u, 2.0, 3, 4.0f }; // unsigned, double, int,
+							 // float
+Sum s2 { "abc"s, "def" }; // std::sring, c-string
+\end{lstlisting}
+
+This, of course, doesn't compile. The template argument deduction fails to find a common type for all those different parameters. We get an error message to the effect of:
+
+\begin{tcblisting}{commandshell={}}
+cannot deduce template arguments for 'Sum'
+\end{tcblisting}
+
+We can fix this with a template deduction guide. A deduction guide is a helper pattern to assist the compiler with a complex deduction. Here's a guide for our constructor:
+
+\begin{lstlisting}[style=styleCXX]
+template <typename... Ts>
+Sum(Ts&& ... ts) -> Sum<std::common_type_t<Ts...>>;
+\end{lstlisting}
+
+This tells the compiler to use the std::common\_type\_t trait, which attempts to find a common type for all the parameters in the pack. Now our argument deduction works and we can see what types it settled on:
+
+\begin{lstlisting}[style=styleCXX]
+Sum s1 { 1u, 2.0, 3, 4.0f }; // unsigned, double, int,
+							 // float
+Sum s2 { "abc"s, "def" }; // std::sring, c-string
+
+auto v1 = s1.value();
+auto v2 = s2.value();
+cout << format("s1 is {} {}, s2 is {} {}",
+		typeid(v1).name(), v1, typeid(v2).name(), v2);
+\end{lstlisting}
+
+Output:
+
+\begin{tcblisting}{commandshell={}}
+s1 is double 10, s2 is class std::string abcdef
+\end{tcblisting}
+
+
+

@@ -1,4 +1,181 @@
+
+This recipe uses the unique key property of the map container to count duplicate words from a stream of text.
+
+The STL map container is an associative container. It consists of elements organized in key-value pairs. The keys are used for lookup and must be unique.
+
+In this recipe, we will leverage the unique key requirement of the STL map container to count the number of occurrences of each word in a text file.
+
 \subsubsection{How to do it…}
 
+There are a few parts to this task that we can solve separately:
+
+\begin{enumerate}
+\item 
+We need to get the text from a file. We'll use the cin stream for this.
+
+\item 
+We need to separate words from punctuation and other non-word content. We'll use the regex (Regular Expression) library for this.
+
+\item 
+We need to count the frequency of each word. This is the main objective of the recipe. We'll use the STL map container for this.
+
+\item 
+Finally, we need to sort the results, first by frequency and then alphabetically by word within frequency. For this we'll use a the STL sort algorithm with a vector container.
+\end{enumerate}
+
+Even with all those tasks, the resulting code is relatively short, just about 70 lines with headers and all. Let's dive in:
+
+\begin{itemize}
+\item 
+We'll start with some aliases for convenience:
+
+\begin{lstlisting}[style=styleCXX]
+namespace ranges = std::ranges;
+namespace regex_constants = std::regex_constants;
+\end{lstlisting}
+
+For namespaces within the std:: space, I like to make aliases that are shorter, but still let me know that I'm using a token in a particular namespace. Especially with the ranges namespace, which often re-uses the names of existing algorithms.
+
+\item 
+We store the regular expression in a constant. I don't like to clutter up the global namespace because that can lead to collisions. I tend to use a namespace based on my initials for things like this:
+
+\begin{lstlisting}[style=styleCXX]
+namespace bw {
+	constexpr const char * re{"(\\w+)"};
+}
+\end{lstlisting}
+
+It's easy enough to get it later using bw::re, and that tells me exactly what it is.
+
+\item 
+At the top of main(), we define our data structures:
+
+\begin{lstlisting}[style=styleCXX]
+int main() {
+	map<string, int> wordmap{};
+	vector<pair<string, int>> wordvec{};
+	regex word_re(bw::re);
+	size_t total_words{};
+\end{lstlisting}
+
+Our main map is called wordmap. We have a vector named wordvec that we'll use as a sorting container. And finally, our regex class, word\_re.
+
+\item 
+The for loop is where most of the work happens. We read text from the cin stream, apply the regex, and store words in the map:
+
+\begin{lstlisting}[style=styleCXX]
+for(string s{}; cin >> s; ) {
+	auto words_begin{
+		sregex_iterator(s.begin(), s.end(), word_re) };
+	auto words_end{ sregex_iterator() };
+	for(auto r_it{words_begin}; r_it != words_end;
+	++r_it) {
+		smatch match{ *r_it };
+		auto word_str{match.str()};
+		ranges::transform(word_str, word_str.begin(),
+			[](unsigned char c){ return tolower(c); });
+		auto [map_it, result] =
+			wordmap.try_emplace(word_str, 0);
+		auto & [w, count] = *map_it;
+		++total_words;
+		++count;
+	}
+}
+\end{lstlisting}
+
+I like a for loop for this because it allows me to contain the scope of the s variable.
+
+We start by defining iterators for the regex results. This allows us to distinguish multiple words even when surrounded only by punctuation. The for(r\_it...) loop returns individual words from the cin string.
+
+The smatch type is a specialization of a regex string match class. It gives us the next word from our regex.
+
+We then use the transform algorithm to make the words lowercase – so we can count words regardless of case. (For example, "The" is the same word as "the".) 
+
+Next, we use try\_emplace() to add the word to the map. If it's already there, it will not be replaced.
+
+Finally, we increment the count for the word in the map with ++count.
+
+\item 
+Now we have the words and their frequency counts in our map. But they're in alphabetical order and we want them in descending order of frequency. For this, we put them in a vector and sort them:
+
+\begin{lstlisting}[style=styleCXX]
+auto unique_words = wordmap.size();
+wordvec.reserve(unique_words);
+ranges::move(wordmap, back_inserter(wordvec));
+ranges::sort(wordvec, [](const auto& a, const
+auto& b) {
+	if(a.second != b.second)
+	return (a.second > b.second);
+	return (a.first < b.first);
+});
+cout << format("unique word count: {}\n",
+	total_words);
+cout << format("unique word count: {}\n",
+	unique_words);
+\end{lstlisting}
+
+wordvec is a vector of pairs, with the word and the frequency count.
+
+We use the ranges::move() algorithm to populate the vector, then the ranges::sort() algorithm to sort the vector. Notice that the predicate lambda function sorts first by the count (descending) and then by the word (ascending).
+
+\item 
+Finally, we print the results:
+
+\begin{lstlisting}[style=styleCXX]
+	for(int limit{20}; auto& [w, count] : wordvec) {
+		cout << format("{}: {}\n", count, w);
+		if(--limit == 0) break;
+	}
+}
+\end{lstlisting}
+
+I set a limit to print only the first 20 entries. You can comment out the if(-limit == 0) break; line to print the whole list.
+
+\item 
+In the example files, I've included a text file with a copy of The Raven, by Edgar Allen Poe. The poem is in the public domain. We can use this to test the program:
+
+\begin{tcblisting}{commandshell={}}
+$ ./word-count < the-raven.txt
+total word count: 1098
+unique word count: 439
+56: the
+38: and
+32: i
+24: my
+21: of
+17: that
+17: this
+15: a
+14: door
+11: chamber
+11: is
+11: nevermore
+10: bird
+10: on
+10: raven
+9: me
+8: at
+8: from
+8: in
+8: lenore
+\end{tcblisting}
+
+\end{itemize}
+
+The poem has 1,098 words total, and 439 of them are unique.
 
 \subsubsection{How it works…}
+
+The core of the recipe is the use of a map object to count duplicate words. But there are other parts that merit consideration.
+
+We use the cin stream to read text from the standard input. By default, cin will skip whitespace when reading into a string object. By putting a string object on the right-hand side of the >{}> operator (cin >{}> s) we get chunks of text separated by whitespace. This is a good enough definition of a word-at-a-time for many purposes, but we need linguistic words. And for that we will use a regular expression.
+
+The regex class provides a choice of regular expression grammars and it defaults to ECMA grammar. In the ECMA grammar, the regular expression "(\verb|\|w+)" is a shortcut for "([A-Za-z0-9\_]+)". This will select words that include these characters.
+
+Regular expressions are a language unto themselves. To learn more about regular expressions, I recommend the book Mastering Regular Expressions by Jeffrey Friedl.
+
+As we get each word from the regex engine, we use the map object's try\_emplace() method to conditionally add the word to our wordmap. If the word is not in the map, we add it with a count of 0. If the word is already in the map, the count is untouched. We increment the count later in the loop, so it's always correct.
+
+After the map is populated with all the unique words from the file, we transfer it to a vector using the ranges::move() algorithm. The move() algorithm makes this transfer quick and efficient. Then we can sort it in the vector using ranges::sort(). The predicate lambda function for sorting includes comparisons for both sides of the pair, so we end up with a result that's sorted by both word count (descending) and the word.
+
+

@@ -1,11 +1,111 @@
 
-
+Beginning with C++17, if and switch now have initialization syntax, much like the for loop has had since C99. This allows you to limit the scope of variables used within the condition.
 
 \subsubsection{How to do it…}
 
+You may be accustomed to code like this:
+
+\begin{lstlisting}[style=styleCXX]
+const string artist{ "Jimi Hendrix" };
+size_t pos{ artist.find("Jimi") };
+if(pos != string::npos) {
+	cout << "found\n";
+} else {
+	cout << "not found\n";
+}
+\end{lstlisting}
+
+This leaves the variable pos exposed outside the scope of the conditional statement, where it needs to be managed, or it can collide with other attempts to use the same symbol.
+
+Now you can put the initialization expression inside the if condition:
+
+\begin{lstlisting}[style=styleCXX]
+if(size_t pos{ artist.find("Jimi") }; pos != string::npos) {
+	cout << "found\n";
+} else {
+	cout << "not found\n";
+}
+\end{lstlisting}
+
+Now the scope of the pos variable is confined to the scope of the conditional. This keeps your namespace clean and manageable.
 
 \subsubsection{How it works…}
 
+The initializer expression can be used in either if or switch statements. Here are some examples of each.
+
+\begin{itemize}
+\item 
+Use an initializer expression with an if statement:
+
+\begin{lstlisting}[style=styleCXX]
+if(auto var{ init_value }; condition) {
+	// var is visible
+} else {
+	// var is visible
+}
+// var is NOT visible
+\end{lstlisting}
+
+The variable defined in the initializer expression is visible within the scope of the entire if statement, including the else clause. Once control flows out of the if statement scope, the variable will no longer be visible, and any relevant destructors will be called.
+
+\item 
+Use an initializer expression with a switch statement:
+
+\begin{lstlisting}[style=styleCXX]
+switch(auto var{ init_value }; var) {
+	case 1: ...
+	case 2: ...
+	case 3: ...
+	...
+	Default: ...
+}
+// var is NOT visible
+\end{lstlisting}
+
+The variable defined in the initializer expression is visible within the scope of the entire switch statement, including all the case clauses and the default clause, if included. Once control flows out of the switch statement scope, the variable will no longer be visible, and any relevant destructors will be called.
+
+\end{itemize}
+
 \subsubsection{There's more…}
+
+One interesting use case is to limit the scope of a lock\_guard that's locking a mutex. This becomes simple with an initializer expression:
+
+\begin{lstlisting}[style=styleCXX]
+if (lock_guard<mutex> lg{ my_mutex }; condition) {
+	// interesting things happen here
+}
+\end{lstlisting}
+
+The lock\_guard locks the mutex in its constructor and unlocks it in its destructor. Now the lock\_guard will be automatically destroyed when it runs out of the scope of the if statement. In the past you would have had to delete it or enclose the whole if statement in an extra block of braces.
+
+Another use case could be using a legacy interface that uses output parameters, like this one from SQLite:
+
+\begin{lstlisting}[style=styleCXX]
+if(
+	sqlite3_stmt** stmt,
+	auto rc = sqlite3_prepare_v2(db, sql, -1, &_stmt,
+	nullptr);
+	!rc) {
+	// do SQL things
+} else { // handle the error
+	// use the error code
+	return 0;
+}
+\end{lstlisting}
+
+Here I can keep the statement handle and the error code localized to the scope of the if statement. Otherwise, I would need to manage those objects globally.
+
+Using initializer expressions will help keep your code tight and uncluttered, more compact, and easier to read. Refactoring and managing your code will also become easier.
+
+
+
+
+
+
+
+
+
+
+
 
 

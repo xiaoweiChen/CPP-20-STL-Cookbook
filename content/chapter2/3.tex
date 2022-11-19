@@ -1,8 +1,229 @@
 
+Structured binding makes it easy to unpack the values of a structure into separate variables, improving the readability of your code.
+
+With structured binding you can directly assign the member values to variables like this:
+
+\begin{lstlisting}[style=styleCXX]
+things_pair<int,int> { 47, 9 };
+auto [this, that] = things_pair;
+cout << format("{} {}\n", this, that);
+\end{lstlisting}
+
+Output:
+
+\begin{tcblisting}{commandshell={}}
+47 9
+\end{tcblisting}
 
 \subsubsection{How to do it…}
 
+\begin{itemize}
+\item 
+Structured binding works with pair, tuple, array, and struct. Beginning with C++20, this includes bit-fields. This example uses a C-array:
+
+\begin{lstlisting}[style=styleCXX]
+int nums[] { 1, 2, 3, 4, 5 };
+auto [ a, b, c, d, e ] = nums;
+cout << format("{} {} {} {} {}\n", a, b, c, d, e);
+\end{lstlisting}
+
+Output:
+
+\begin{tcblisting}{commandshell={}}
+1 2 3 4 5
+\end{tcblisting}
+
+Because the structured binding uses automatic type deduction, its type must be auto. The names of the individual variables are within the square brackets, [ a, b, c, d, e ].
+
+In this example the int C-array nums holds five values. These five values are assigned to the variables (a, b, c, d, and e) using structured binding.
+
+\item 
+This also works with an STL array object:
+
+\begin{lstlisting}[style=styleCXX]
+array<int,5> nums { 1, 2, 3, 4, 5 };
+auto [ a, b, c, d, e ] = nums;
+cout << format("{} {} {} {} {}\n", a, b, c, d, e);
+\end{lstlisting}
+
+Output:
+
+\begin{tcblisting}{commandshell={}}
+1 2 3 4 5
+\end{tcblisting}
+
+\item 
+Or you can use it with a tuple:
+
+\begin{lstlisting}[style=styleCXX]
+tuple<int, double, string> nums{ 1, 2.7, "three" };
+auto [ a, b, c ] = nums;
+cout << format("{} {} {}\n", a, b, c);
+\end{lstlisting}
+
+Output:
+
+\begin{tcblisting}{commandshell={}}
+1 2.7 three
+\end{tcblisting}
+
+\item 
+When you use it with a struct it will take the variables in the order they're defined:
+
+\begin{lstlisting}[style=styleCXX]
+struct Things { int i{}; double d{}; string s{}; };
+Things nums{ 1, 2.7, "three" };
+auto [ a, b, c ] = nums;
+cout << format("{} {} {}\n", a, b, c);
+\end{lstlisting}
+
+Output:
+
+\begin{tcblisting}{commandshell={}}
+1 2.7 three
+\end{tcblisting}
+
+\item 
+You can use a reference with a structured binding, which allows you to modify the values in the bound container, while avoiding duplication of the data:
+
+\begin{lstlisting}[style=styleCXX]
+array<int,5> nums { 1, 2, 3, 4, 5 };
+auto& [ a, b, c, d, e ] = nums;
+cout << format("{} {}\n", nums[2], c);
+c = 47;
+cout << format("{} {}\n", nums[2], c);
+\end{lstlisting}
+
+Output:
+
+\begin{tcblisting}{commandshell={}}
+3 3
+47 47
+\end{tcblisting}
+
+Because the variables are bound as a reference, you can assign a value to c and it will change the value in the array as well (nums[2]).
+
+\item 
+You can declare the array const to prevent values from being changed:
+
+\begin{lstlisting}[style=styleCXX]
+const array<int,5> nums { 1, 2, 3, 4, 5 };
+auto& [ a, b, c, d, e ] = nums;
+c = 47; // this is now an error
+\end{lstlisting}
+
+Or you can declare the binding const for the same effect, while allowing the array to be changed elsewhere and still avoid copying data:
+
+\begin{lstlisting}[style=styleCXX]
+array<int,5> nums { 1, 2, 3, 4, 5 };
+const auto& [ a, b, c, d, e ] = nums;
+c = 47; // this is also an error
+\end{lstlisting}
+
+\end{itemize}
+
 
 \subsubsection{How it works…}
+
+Structured binding uses automatic type deduction to unpack the structure into your variables. It determines the type of each value independently, and assigns a corresponding type to each variable.
+
+\begin{itemize}
+\item 
+Because structured binding uses automatic type deduction, you cannot specify a type for the binding. You must use auto. You should get a reasonable error message if you try to use a type for the binding:
+
+\begin{lstlisting}[style=styleCXX]
+array<int,5> nums { 1, 2, 3, 4, 5 };
+int [ a, b, c, d, e ] = nums;
+\end{lstlisting}
+
+Output:
+
+\begin{tcblisting}{commandshell={}}
+error: structured binding declaration cannot have type 'int'
+note: type must be cv-qualified 'auto' or reference to
+cv-qualified 'auto'
+\end{tcblisting}
+
+Above is the error from GCC when I try to use int with the structured binding declaration.
+
+\item 
+It's common to use structured binding for a return type from a function:
+
+\begin{lstlisting}[style=styleCXX]
+struct div_result {
+	long quo;
+	long rem;
+};
+
+div_result int_div(const long & num, const long & denom)
+{
+	struct div_result r{};
+	r.quo = num / denom;
+	r.rem = num % denom;
+	return r;
+}
+
+int main() {
+	auto [quo, rem] = int_div(47, 5);
+	cout << format("quotient: {}, remainder {}\n",
+		quo, rem);
+}
+\end{lstlisting}
+
+Output:
+
+\begin{tcblisting}{commandshell={}}
+quotient: 9, remainder 2
+\end{tcblisting}
+
+\item 
+Because the map container classes return a pair for each element, it can be convenient to use structured binding to retrieve key/value pairs:
+
+\begin{lstlisting}[style=styleCXX]
+map<string, uint64_t> inhabitants {
+	{ "humans", 7000000000 },
+	{ "pokemon", 17863376 },
+	{ "klingons", 24246291 },
+	{ "cats", 1086881528 }
+};
+
+// I like commas
+string make_commas(const uint64_t num) {
+	string s{ std::to_string(num) };
+	for(int l = s.length() - 3; l > 0; l -= 3) {
+		s.insert(l, ",");
+	}
+	return s;
+}
+
+int main() {
+	for(const auto & [creature, pop] : inhabitants) {
+		cout << format("there are {} {}\n",
+		make_commas(pop), creature);
+	}
+}
+\end{lstlisting}
+
+Output:
+
+\begin{tcblisting}{commandshell={}}
+there are 1,086,881,528 cats
+there are 7,000,000,000 humans
+there are 24,246,291 klingons
+there are 17,863,376 pokemon
+\end{tcblisting}
+
+Using structured binding to unpack structures should make your code clearer and easier to maintain.
+\end{itemize}
+
+
+
+
+
+
+
+
+
+
 
 

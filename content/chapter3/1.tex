@@ -1,10 +1,118 @@
 
-
+The STL provides a comprehensive set of container types, including sequential containers, associative containers, and container adapters. Here's a brief overview:
 
 \subsubsection{Sequential containers}
 
 
+The sequential containers provide an interface where the elements are arranged in sequence. While you may use the elements sequentially, some of these containers use contiguous storage, and others do not. The STL includes these sequential containers:
+
+\begin{itemize}
+\item 
+The array is a fixed-size sequence that holds a specific number of elements in contiguous storage. Once allocated, it cannot change size. This is the simplest and fastest contiguous storage container.
+
+\item 
+The vector is like an array that can shrink and grow. Its elements are stored contiguously, so changing size may involve the expense of allocating memory and moving data. A vector may keep extra space in reserve to mitigate that cost. Inserting and deleting elements from anywhere other than the back of a vector will trigger realignment of the elements to maintain contiguous storage.
+
+\item 
+The list is a doubly-linked list structure that allows elements to be inserted and deleted in constant (O(1)) time. Traversing the list happens in linear O(n) time. A single-linked variant is available as forward\_list, which only iterates forward. A forward\_list uses less space and is somewhat more efficient than a doubly-linked list, but lacks some capability.
+
+\item 
+The deque (commonly pronounced, deck) is a double-ended queue. It's a sequential container that can be expanded or contracted on both ends. A deque allows random access to its elements, much like a vector, but does not guarantee contiguous storage.
+\end{itemize}
+
 \subsubsection{Associative containers}
 
+An associative container associates a key with each element. Elements are referenced by their key, rather than their position in the container. STL associative containers include these containers:
+
+\begin{itemize}
+\item 
+The set is an associative container where each element is also its own key. Elements are ordered, usually by some sort of binary tree. Elements in a set are immutable and cannot be modified, but they can be inserted and removed. Elements in a set are unique, duplicates are not allowed. A set iterates in order according to its sorting operators.
+
+\item 
+The multiset is like a set with non-unique keys, where duplicates are allowed.
+
+\item 
+The unordered\_set is like a set that does not iterate in order. Elements are not sorted in any specific order, but are organized according to their hash values for fast access.
+
+\item 
+The unordered\_multiset is like an unordered\_set with non-unique keys, where duplicates are allowed.
+
+\item 
+The map is an associative container for key-value pairs, where each key is mapped to a specific value (or payload). The types of the key and value may be different. Keys are unique but values are not. A map iterates in order of its keys, according to its sorting operators.
+
+\item 
+The multimap is like a map with non-unique keys, where duplicate keys are allowed.
+
+\item 
+The unordered\_map is like a map that does not iterate in order.
+
+\item 
+The unordered\_multimap is like an unordered\_map with non-unique keys, where duplicates are allowed.
+\end{itemize}
 
 \subsubsection{Container adapters}
+
+A container adapter is a class which encapsulates an underlying container. The container class provides a specific set of member functions to access the underlying container elements. The STL provides these container adapters:
+
+\begin{itemize}
+\item 
+The stack provides a LIFO (last-in, first-out) interface where elements may be added and extracted from only one end of the container. The underlying container may be one of vector, deque, or list. If no underlying container is specified, the default is deque.
+
+\item 
+The queue provides a FIFO (first-in, first-out) interface where elements may be added at one end of the container and extracted from the other end. The underlying container may be one of deque or list. If no underlying container is specified, the default is deque.
+
+\item 
+The priority\_queue keeps the greatest value element at the top, according to a strict weak ordering. It provides a constant time lookup of the greatest value element, at the expense of logarithmic time insertion and extraction. The underlying container may be one of vector or deque. If no underlying container is specified, the default is vector.
+\end{itemize}
+
+我们将讨论以下主题:
+
+\begin{itemize}
+\item 
+Use uniform erasure functions to delete items from a container
+
+\item 
+Delete items from an unsorted vector in constant time
+
+\item 
+Access vector elements directly and safely
+
+\item 
+Keep vector elements sorted
+
+\item 
+Efficiently insert elements into a map
+
+\item 
+Efficiently modify the keys of map items
+
+\item 
+Use unordered\_map with custom keys
+
+\item 
+Use set to sort and filter user input
+
+\item 
+A simple RPN calculator with deque
+
+\item 
+A word frequency counter with map
+
+\item 
+Find long sentences with a vector of vectors
+
+\item 
+A ToDo list using multimap
+\end{itemize}
+
+
+
+
+
+
+
+
+
+
+
+

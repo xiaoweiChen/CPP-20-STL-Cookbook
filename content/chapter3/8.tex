@@ -1,8 +1,187 @@
 
+A map is an associative container that stores key-value pairs. The container is ordered by the keys. The keys must be unique and they are const-qualified, so they cannot be changed.
+
+For example, if I populate a map and attempt to change the key, I'll get an error at compilation time:
+
+\begin{lstlisting}[style=styleCXX]
+map<int, string> mymap {
+	{1, "foo"}, {2, "bar"}, {3, "baz"}
+};
+auto it = mymap.begin();
+it->first = 47;
+\end{lstlisting}
+
+Output:
+
+\begin{tcblisting}{commandshell={}}
+error: assignment of read-only member ...
+5 | it->first = 47;
+  |  ~~~~~~~~~~^~~~
+\end{tcblisting}
+
+If you need to re-order a map container, you may do so by swapping keys using the extract() method. New with C++17, extract() is a member function in the map class and its derivatives.
+
+It allows elements of a map to be extracted from the sequence without touching the payload. Once extracted, the key is no longer const-qualified and may be modified.
+
+Let's look at an example.
 
 \subsubsection{How to do it…}
 
+In this example we'll define a map that represents contestants in a race. At some point during the race, the order changes and we need to modify the keys of the map.
+
+\begin{itemize}
+\item 
+We'll start by defining an alias for the map type:
+
+\begin{lstlisting}[style=styleCXX]
+using Racermap = map<unsigned int, string>;
+\end{lstlisting}
+
+This allows us to use the type consistently throughout our code.
+
+\item 
+We'll write a function for printing out the map:
+
+\begin{lstlisting}[style=styleCXX]
+void printm(const Racermap &m)
+{
+	cout << "Rank:\n";
+	for (const auto& [rank, racer] : m) {
+		cout << format("{}:{}\n", rank, racer);
+	}
+}
+\end{lstlisting}
+
+We can pass the map to this function at any time to print out the current rankings of our contestants.
+
+\item 
+In our main() function we define a map with the initial state of our racers:
+
+\begin{lstlisting}[style=styleCXX]
+int main() {
+	Racermap racers {
+		{1, "Mario"}, {2, "Luigi"}, {3, "Bowser"},
+		{4, "Peach"}, {5, "Donkey Kong Jr"}
+	};
+	printm(racers);
+	node_swap(racers, 3, 5);
+	printm(racers);
+}
+\end{lstlisting}
+
+The key is an int indicating the rank of the racer. The value is a string with the name of the racer.
+
+We then call printm() to print the current rank. The call to node\_swap() will swap the keys of two racers, then we print gain.
+
+\item 
+At some point, one of the racers falls behind and another racer takes the opportunity to move up in the rankings. The node\_swap() function will swap the ranking of two racers:
+
+\begin{lstlisting}[style=styleCXX]
+template<typename M, typename K>
+bool node_swap(M & m, K k1, K k2) {
+	auto node1{ m.extract(k1) };
+	auto node2{ m.extract(k2) };
+	if(node1.empty() || node2.empty()) {
+		return false;
+	}
+	swap(node1.key(), node2.key());
+	m.insert(move(node1));
+	m.insert(move(node2));
+	return true;
+}
+\end{lstlisting}
+
+This function uses the map.extract() method to extract the specified elements from the map. These extracted elements are called nodes.
+
+A node is a new concept beginning with C++17. This allows an element to be extracted from a map-type structure without touching the element itself. The node is unlinked, and a node handle is returned. Once extracted, the node handle provides writable access to the key via the node's key() function. We can then swap the keys and insert them back into the map, without ever having to copy or manipulate the payload.
+
+\item 
+When we run this code we get a printout of the map, before and after the node swap: 
+
+Output:
+
+\begin{tcblisting}{commandshell={}}
+Rank:
+1:Mario
+2:Luigi
+3:Bowser
+4:Peach
+5:Donkey Kong Jr
+Rank:
+1:Mario
+2:Luigi
+3:Donkey Kong Jr
+4:Peach
+5:Bowser
+\end{tcblisting}
+\end{itemize}
+
+This is all made possible by the extract() method and the new node\_handle class.
+Let's take a closer look at how this works.
 
 \subsubsection{How it works…}
 
+This technique uses the new extract() function, which returns a node\_handle object. As the name suggests, a node\_handle is a handle to a node, which consists of an associative element and its related structures. The extract function disassociates the node while leaving it in place, and returns a node\_handle object. This has the effect of removing the node from the associative container without touching the data itself. The node\_handle allows you to access the disassociated node.
+
+The node\_handle has a member function, key(), which returns a writable reference to the node key. This allows you to change the key, while it's disassociated from the container.
+
 \subsubsection{There's more…}
+
+There are a few things to keep in mind when using extract() and a node\_handle:
+
+\begin{itemize}
+\item 
+If the key is not found, the extract() function returns an empty node handle.
+You can test if a node handle is empty with the empty() function:
+
+\begin{lstlisting}[style=styleCXX]
+auto node{ mapthing.extract(key) };
+if(node.empty()) {
+	// node handle is empty
+}
+\end{lstlisting}
+
+\item 
+There are two overloads of the exract() function:
+
+\begin{lstlisting}[style=styleCXX]
+node_type extract(const key_type& x);
+node_type extract(const_iterator position);
+\end{lstlisting}
+
+We used the first form, by passing a key. You may also use an iterator, which should not require a lookup.
+
+\item 
+Keep in mind that you cannot make a reference from a literal, so a call like extract(1) will usually crash with a segmentation fault.
+
+\item 
+Keys must remain unique when inserted into a map.
+
+For example, if I try to change a key to a value already in the map:
+
+\begin{lstlisting}[style=styleCXX]
+auto node_x{ racers.extract(racers.begin()) };
+node_x.key() = 5; // 5 is Donkey Kong Jr
+auto status = racers.insert(move(node_x));
+if(!status.inserted) {
+	cout << format("insert failed, dup key: {}",
+		status.position->second);
+	exit(1);
+}
+\end{lstlisting}
+
+The insert fails and we get our error message:
+
+\begin{tcblisting}{commandshell={}}
+insert failed, dup key: Donkey Kong Jr
+\end{tcblisting}
+
+In this example I've passed the begin() iterator to extract(). I then assigned the key a value that's already in use (5, Donkey Kong Jr). The insert failed and the resulting status.inserted is false. status.position is an iterator to the found key. In the if() block, I used format() to print the value the found key.
+\end{itemize}
+
+
+
+
+
+
+

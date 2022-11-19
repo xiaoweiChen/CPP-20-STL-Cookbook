@@ -1,4 +1,175 @@
+
+It can be useful for a writer to make sure they are using variety of sentence lengths, or to ensure none of their sentences are too long. Let's build a tool that evaluates a text file for sentence length.
+Choosing the appropriate container is key when using the STL. If you need something ordered, it's often best to use an associative container, such as map or multimap. In this case, however, since we need a custom sort, it's easier to sort a vector.
+
+The vector is generally the most flexible of the STL containers. Whenever another container type seems appropriate, but is missing one important capability, the vector is often an effective solution. In this case, where we need a custom sort, the vector works great.
+
+This recipe uses a vector of vectors. The inner vector stores the words of a sentence, and the outer vector stores the inner vectors. As you'll see, this affords a lot of flexibility while retaining all the relevant data.
+
 \subsubsection{How to do it…}
+
+This program needs to read in words, find the ends of sentences, store and sort the sentences, then print out the results.
+
+\begin{itemize}
+\item 
+We'll start by writing a little function to tell us when we've hit the end of a sentence:
+
+\begin{lstlisting}[style=styleCXX]
+bool is_eos(const string_view & str) {
+	constexpr const char * end_punct{ ".!?" };
+	for(auto c : str) {
+		if(strchr(end_punct, c) != nullptr) return
+		true;
+	}
+	return false;
+}
+\end{lstlisting}
+
+The is\_eos() function uses string\_view because it's efficient and we don't need anything more. Then we use the strchr() library function to check if a word contains one of the end-of-sentence punctuation characters (".!?"). These are the three possible characters to end a sentence in the English language.
+
+\item 
+In the main() function, we start by defining the vector of vectors:
+
+\begin{lstlisting}[style=styleCXX]
+vector<vector<string>> vv_sentences{vector<string>{}};
+\end{lstlisting}
+
+This defines a vector of elements typed vector<string> named vv\_sentences. The vv\_sentences object is initialized with one empty vector for the first sentence.
+
+This creates a vector that contains other vectors. The inner vectors will each hold a sentence of words.
+
+\item 
+Now we can process the stream of words:
+
+\begin{lstlisting}[style=styleCXX]
+for(string s{}; cin >> s; ) {
+	vv_sentences.back().emplace_back(s);
+	if(is_eos(s)) {
+		vv_sentences.emplace_back(vector<string>{});
+	}
+}
+\end{lstlisting}
+
+The for loop returns one word at a time from the input stream. The back() method on the vv\_sentences object is used to access the current vector of words, and the current word is added using emplace\_back(). Then we call is\_eos() to see if this was the end of a sentence. If so, we add a new empty vector to vv\_sentences to start the next sentence.
+
+\item 
+Because we always add a new empty vector to the end of vv\_sentences after each end-of-sentence character, we will usually end up with an empty sentence vector at the end. Here we check for this, and delete it if necessary:
+
+\begin{lstlisting}[style=styleCXX]
+	// delete back if empty
+	if(vv_sentences.back().empty())
+		vv_sentences.pop_back();
+\end{lstlisting}
+
+\item 
+Now we can sort the vv\_sentences vector by the size of the sentences:
+
+\begin{lstlisting}[style=styleCXX]
+	sort(vv_sentences, [](const auto& l,
+		const auto& r) {
+			return l.size() > r.size();
+		});
+\end{lstlisting}
+
+This is why the vector is so convenient for this project. It's quick and easy to sort using the ranges::sort() algorithm with a simple predicate for sorting by size in descending order.
+
+\item 
+Now we can print our result:
+
+\begin{lstlisting}[style=styleCXX]
+	constexpr int WLIMIT{10};
+	for(auto& v : vv_sentences) {
+		size_t size = v.size();
+		size_t limit{WLIMIT};
+		cout << format("{}: ", size);
+		for(auto& s : v) {
+			cout << format("{} ", s);
+			if(--limit == 0) {
+				if(size > WLIMIT) cout << "...";
+				break;
+			}
+		}
+		cout << '\n';
+	}
+	cout << '\n';
+}
+\end{lstlisting}
+
+The outer loop and the inner loop correspond to the outer and inner vectors. We simply loop through the vectors and print out the size of the inner vector with format("{}: ", size) and then each word with format("{} ", s). We don't want to print the very long sentences in their entirety, so we define a limit of 10 words and print an ellipsis if there's more.
+
+\item 
+The output looks like this, using the first few paragraphs of this recipe for input:
+
+\begin{tcblisting}{commandshell={}}
+$ ./sentences < sentences.txt
+27: It can be useful for a writer to make sure ...
+19: Whenever another container type seems appropriate,
+but is missing one ...
+18: If you need something ordered, it's often best to use
+...
+17: The inner vector stores the words of a sentence, and
+...
+16: In this case, however, since we need a descending
+sort, ...
+16: In this case, where we need our output sorted in ...
+15: As you'll see, this affords a lot of flexibility
+while ...
+12: Let's build a tool that evaluates a text file for ...
+11: The vector is generally the most flexible of the STL
+...
+9: Choosing the appropriate container key when using the
+STL.
+7: This recipe uses a vector of vectors.
+\end{tcblisting}
+
+\end{itemize}
 
 
 \subsubsection{How it works…}
+
+Finding punctuation is simple using the strchr() function from the C Standard Library. Remember, all of C and its Standard Library are included in the definition of the C++ language. There's no reason not to use it where appropriate.
+
+\begin{lstlisting}[style=styleCXX]
+bool is_eos(const string_view & str) {
+	constexpr const char * end_punct{ ".!?" };
+	for(auto c : str) {
+		if(strchr(end_punct, c) != nullptr) return true;
+	}
+	return false;
+}
+\end{lstlisting}
+
+This function will fail to properly separate sentences if there's punctuation in the middle of words. That may happen in some forms of poetry or in a badly formatted text file. I've seen this done with std::string iterators, and with regular expressions, but for our purposes this is quick and easy.
+
+We read the text file one word at a time using cin:
+
+\begin{lstlisting}[style=styleCXX]
+for(string s{}; cin >> s; ) {
+	...
+}
+\end{lstlisting}
+
+This avoids the overhead of reading a large file into memory all at once. The vector will already be large, containing all the words of the file. It's not necessary to also hold the entire text file in memory. In the rare case that a file is too large, it would be necessary to find another strategy, or use a database.
+
+The vector of vectors may look complex at first glance, but it's no more complicated than using two separate vectors.
+
+\begin{lstlisting}[style=styleCXX]
+vector<vector<string>> vv_sentences{vector<string>{}};
+\end{lstlisting}
+
+This declares an outer vector, with inner elements of type vector<string>. The outer vector is named vv\_sentences. The inner vectors are anonymous; they require no name. This definition initializes the vv\_sentences object with one element, an empty vector<string> object.
+
+The current inner vector will always be available as vv\_senteces.back():
+
+\begin{lstlisting}[style=styleCXX]
+vv_sentences.back().emplace_back(s);
+\end{lstlisting}
+
+When we've completed one inner vector, we simply create a new one with:
+
+\begin{lstlisting}[style=styleCXX]
+vv_sentences.emplace_back(vector<string>{});
+\end{lstlisting}
+
+This creates a new anonymous vector<string> object and emplaces it at the back of the vv\_sentences object.
+

@@ -1,8 +1,74 @@
 
+C++20 allows the use of constexpr in several new contexts. This provides improved efficiency, in that these things may be evaluated at compile time, instead of run time.
+
 
 \subsubsection{How to do it…}
 
+The specification includes the ability to use string and vector objects in constexpr context. It's important to note that these objects may not themselves be declared constexpr, but they may be used in a compile-time context:
+
+\begin{lstlisting}[style=styleCXX]
+constexpr auto use_string() {
+	string str{"string"};
+	return str.size();
+}
+\end{lstlisting}
+
+You can also use algorithms in constexpr context:
+
+\begin{lstlisting}[style=styleCXX]
+constexpr auto use_vector() {
+	vector<int> vec{ 1, 2, 3, 4, 5};
+	return accumulate(begin(vec), end(vec), 0);
+}
+\end{lstlisting}
+
+The result of the accumulate algorithm is available at compile time and in constexpr context.
 
 \subsubsection{How it works…}
+
+The constexpr specifier declares a variable or function that may be evaluated at compile time. Before C++20, this was limited to objects initialized with a literal value, or a function within limited constraints. C++17 allowed a somewhat expanded use and C++20 expands it further.
+
+As of C++20, the STL string and vector classes now have constexpr-qualified constructors and destructors, which allow them to be invoked at compile time. This also means that the memory allocated for the string or vector object must be freed at compile time.
+
+For example, this constexpr function, which returns a vector, will compile without error:
+
+\begin{lstlisting}[style=styleCXX]
+constexpr auto use_vector() {
+	vector<int> vec{ 1, 2, 3, 4, 5};
+	return vec;
+}
+\end{lstlisting}
+
+But if you try to use the result in a run-time context, you will get an error about memory that was allocated during constant evaluation:
+
+\begin{lstlisting}[style=styleCXX]
+int main() {
+	constexpr auto vec = use_vector();
+	return vec[0];
+}
+\end{lstlisting}
+
+This is because the vector object was allocated and freed during compilation. So, the object is no longer available at run time.
+
+On the other hand, you can use some constexpr-qualified methods from the vector object, such as size(), at run time:
+
+\begin{lstlisting}[style=styleCXX]
+int main() {
+	constexpr auto value = use_vector().size();
+	return value;
+}
+\end{lstlisting}
+
+Because the size() method is constexpr-qualified, the expression can be evaluated at compile time.
+
+
+
+
+
+
+
+
+
+
 
 

@@ -1,9 +1,144 @@
 
+The vector is one of the most widely used containers in the STL, and for good reason. It's just as convenient as an array but far more powerful and flexible. It's common practice to use the [] operator to access elements in a vector like this:
+
+\begin{lstlisting}[style=styleCXX]
+vector v{ 19, 71, 47, 192, 4004 };
+auto & i = v[2];
+\end{lstlisting}
+
+The vector class also provides a member function for the same purpose:
+
+\begin{lstlisting}[style=styleCXX]
+auto & i = v.at(2);
+\end{lstlisting}
+
+The result is the same but there is an important difference. The at() function does bounds checking and the [] operator does not. This is intentional, as it allows the [] operator to maintain compatibility with the original C-array. Let's examine this in a bit more detail.
 
 \subsubsection{How to do it…}
 
+There are two ways to access an element with an index in a vector. The at() member function does bounds checking, and the [] operator does not.
+
+\begin{itemize}
+\item 
+Here's a simple main() function that initializes a vector and accesses an element:
+
+\begin{lstlisting}[style=styleCXX]
+int main() {
+	vector v{ 19, 71, 47, 192, 4004 };
+	auto & i = v[2];
+	cout << format("element is {}\n", i);
+}
+\end{lstlisting}
+
+Output:
+
+\begin{tcblisting}{commandshell={}}
+element is 47
+\end{tcblisting}
+
+Here, I used the [] operator to directly access the third element in the vector. As with most sequential objects in C++, the index starts at 0 so the third element is number 2.
+
+\item 
+The vector has five elements, numbered 0 through 4. If I were to try to access element number 5 that would be beyond the boundary of the vector:
+
+\begin{lstlisting}[style=styleCXX]
+vector v{ 19, 71, 47, 192, 4004 };
+auto & i = v[5];
+cout << format("element is {}\n", i);
+\end{lstlisting}
+
+Output:
+
+\begin{tcblisting}{commandshell={}}
+element is 0
+\end{tcblisting}
+
+This result is extremely deceiving. It's a common error, since humans tend to count from 1, not 0. But there is no guarantee that an element past the end of the vector has any particular value.
+
+\item 
+Even worse, the [] operator will silently allow you to write to a position beyond the end of the vector:
+
+\begin{lstlisting}[style=styleCXX]
+vector v{ 19, 71, 47, 192, 4004 };
+v[5] = 2001;
+auto & i = v[5];
+cout << format("element is {}\n", i);
+\end{lstlisting}
+
+Output:
+
+\begin{tcblisting}{commandshell={}}
+element is 2001
+\end{tcblisting}
+
+I have now written to memory that is not under my control and the compiler has silently allowed it, with no error messages or crashes. But do not be fooled—this is extremely dangerous code, and it will cause problems at some point in the future. Out of bounds memory access is one of the primary causes of security breaches.
+
+\item 
+The solution is to use the at() member function wherever possible, instead of the [] operator:
+
+\begin{lstlisting}[style=styleCXX]
+vector v{ 19, 71, 47, 192, 4004 };
+auto & i = v.at(5);
+cout << format("element is {}\n", i);
+\end{lstlisting}
+
+Now we get a run-time exception:
+
+\begin{tcblisting}{commandshell={}}
+terminate called after throwing an instance of 'std::out_
+of_range'
+	what(): vector::_M_range_check: __n (which is 5) >=
+this->size() (which is 5)
+Aborted
+\end{tcblisting}
+
+The code compiles without error, but the at() function checks the boundaries of the container and throws a run-time exception when you try to access memory outside of those boundaries. This is the exception message from code compiled with the GCC compiler. The message will be different in different environments.
+\end{itemize}
 
 \subsubsection{How it works…}
 
+The [] operator and the at() member function do the same job; they provide direct access to container elements based on their indexed position. The [] operator does it without any bounds checking, so it may be a tiny bit faster in some intensely iterative applications.
+
+That said, the at() function should be your default choice. While the bounds checking may take a few CPU cycles, it's cheap insurance. For most applications the benefit is well worth the cost.
+
+While the vector class is commonly used as a direct-access container, the array and deque containers also support both the [] operator and the at() member function. These caveats apply there as well.
 
 \subsubsection{There's more…}
+
+In some applications you may not want your application to just crash when an out-ofbounds condition is encountered. In this case, you can catch the exception, like this:
+
+\begin{lstlisting}[style=styleCXX]
+int main() {
+	vector v{ 19, 71, 47, 192, 4004 };
+	try {
+		v.at(5) = 2001;
+	} catch (const std::out_of_range & e) {
+		std::cout <<
+		format("Ouch!\n{}\n", e.what());
+	}
+	cout << format("end element is {}\n", v.back());
+}
+\end{lstlisting}
+
+Output:
+
+\begin{tcblisting}{commandshell={}}
+Ouch!
+vector::_M_range_check: __n (which is 5) >= this->size() (which is 5)
+end element is 4004
+\end{tcblisting}
+
+The try block catches the exception specified in the catch clause, in this case the exception is std::out\_of\_range. The e.what() function returns a C-string with the error message from the STL library. Each library will have different messages.
+
+Keep in mind that this also applies to array and deque containers.
+
+
+
+
+
+
+
+
+
+
+

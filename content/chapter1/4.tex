@@ -1,10 +1,86 @@
 
+Comparing different types of integers may not always produce the expected results. For example:
 
+\begin{lstlisting}[style=styleCXX]
+int x{ -3 };
+unsigned y{ 7 };
+if(x < y) puts("true");
+else puts("false");
+\end{lstlisting}
+
+You may expect this code to print true, and that's understandable. -3 is usually less than 7. But it will print false.
+
+The problem is that x is signed and y is unsigned. The standardized behavior is to convert the signed type to unsigned for the comparison. That seems counterintuitive, doesn't it? Indeed, you cannot reliably convert an unsigned value to a signed value of the same size, because a signed integer uses two's complement representation (which uses the most significant bit as a sign). Given the same sized integer, the maximum signed value is half that of an unsigned value. Using this example, if your integers are 32-bits, -3 (signed) becomes FFFF FFFD (hexadecimal), or 4,294,967,293 (unsigned decimal), which is not less than 7.
+
+Some compilers may issue a warning when you try to compare signed with unsigned integer values, but most do not.
+
+The C++20 standard includes a set of integer-safe comparison functions in the <utility> header.
 
 \subsubsection{How to do it…}
 
+The new integer comparison functions are found in the <utility> header. They each take two arguments, which correspond with the left- and right-hand sides of the operator.
+
+\begin{lstlisting}[style=styleCXX]
+#include <utility>
+int main() {
+	int x{ -3 };
+	unsigned y{ 7 };
+	if(cmp_less(x, y)) puts("true");
+	else puts("false");
+}
+\end{lstlisting}
+
+The cmp\_less() function gives us the result we expect. -3 is less than 7 and the program now prints true.
+
+The <utility> header provides a full complement of integer comparison functions. Assuming our values for x and y, we get these comparisons:
+
+\begin{lstlisting}[style=styleCXX]
+cmp_equal(x, y) // x == y is false
+cmp_not_equal(x, y) // x != y is true
+cmp_less(x, y) // x < y is true
+cmp_less_equal(x, y) // x <= y is true
+cmp_greater(x, y) // x > y is false
+cmp_greater_equal(x, y) // x >= y is false
+\end{lstlisting}
 
 \subsubsection{How it works…}
+
+Here's the sample implementation of the cmp\_less() function from the C++20 standard, to give you a more complete picture of how it works:
+
+\begin{lstlisting}[style=styleCXX]
+template< class T, class U >
+constexpr bool cmp_less( T t, U u ) noexcept
+{
+	using UT = make_unsigned_t<T>;
+	using UU = make_unsigned_t<U>;
+	if constexpr (is_signed_v<T> == is_signed_v<U>)
+		return t < u;
+	else if constexpr (is_signed_v<T>)
+		return t < 0 ? true : UT(t) < u;
+	else
+		return u < 0 ? false : t < UU(u);
+}
+\end{lstlisting}
+
+The UT and UU aliases are declared as make\_unsigned\_t, a useful helper type introduced with C++17. This allows safe conversions of signed to unsigned types.
+
+The function first tests if both arguments are either signed or unsigned. If so, it returns a simple comparison.
+
+It then tests if either side is signed. If that signed value is less than zero, it can return true or false without performing a comparison. Otherwise, it converts the signed value to unsigned and returns the comparison.
+
+Similar logic is applied to each of the other comparison functions.
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

@@ -1,6 +1,169 @@
+
+This recipe describes a simple class that generates an iterable range, suitable for use with the range-based for loop. The idea is to create a sequence generator that iterates from a beginning value to an ending value.
+
+To accomplish this task, we need an iterator class, along with the object interface class.
+
 \subsubsection{How to do it…}
 
+There's two major parts to this recipe, the main interface, Seq, and the iterator class.
+
+\begin{itemize}
+\item 
+First, we'll define the Seq class. It only needs to implement the begin() and end() member functions:
+
+\begin{lstlisting}[style=styleCXX]
+template<typename T>
+class Seq {
+	T start_{};
+	T end_{};
+public:
+	Seq(T start, T end) : start_{start}, end_{end} {}
+	iterator<T> begin() const {
+		return iterator{start_};
+	}
+	iterator<T> end() const { return iterator{end_}; }
+};
+\end{lstlisting}
+
+The constructor sets up the start\_ and end\_ variables. These are used to construct the begin() and end() iterators, respectively. The member functions begin() and end() return iterator objects.
+
+\item 
+The iterator class is normally defined inside the public section of the container class. This is called a member class or a nested class. We'll insert it right after the Seq constructor:
+
+\begin{lstlisting}[style=styleCXX]
+public:
+	Seq(T start, T end) : start_{ start }, end_{ end } {}
+	class iterator {
+		T value_{};
+		public:
+		explicit iterator(T position = 0)
+		: value_{position} {}
+		T operator*() const { return value_; }
+		iterator& operator++() {
+			++value_;
+			return *this;
+		}
+		bool operator!=(const iterator& other) const {
+			return value_ != other.value_;
+		}
+	};
+\end{lstlisting}
+
+It's traditional to name the iterator class iterator. This allows it to be referenced as Seq<type>::iterator.
+
+The iterator constructor is qualified explicit to avoid implicit conversions.
+
+The value\_ variable is maintained by the iterator. This is used to return a value from the pointer dereference.
+
+The minimum requirement for supporting the range-based for loop is a dereference operator *, a pre-increment operator ++, and the not-equal comparison operator !=.
+
+\item 
+Now we can write a main() function to test our sequence generator:
+
+\begin{lstlisting}[style=styleCXX]
+int main()
+{
+	Seq<int> r{ 100, 110 };
+	for (auto v : r) {
+		cout << format("{} ", v);
+	}
+	cout << '\n';
+}
+\end{lstlisting}
+
+This constructs a Seq object and prints out its sequence.
+
+The output looks like this:
+
+\begin{tcblisting}{commandshell={}}
+$ ./seq
+100 101 102 103 104 105 106 107 108 109
+\end{tcblisting}
+
+\end{itemize}
 
 \subsubsection{How it works…}
 
+The point of this recipe is to make a sequence generator that works with a range-based for loop. Let's first consider the equivalent code for the range-based for loop:
+
+\begin{lstlisting}[style=styleCXX]
+{
+	auto begin_it{ std::begin(container) };
+	auto end_it{ std::end(container) };
+	for ( ; begin_it != end_it; ++begin_it) {
+		auto v{ *begin_it };
+		cout << v << '\n';
+	}
+}
+\end{lstlisting}
+
+From this equivalent code, we can deduce the requirements for an object to work with the for loop:
+
+\begin{itemize}
+\item 
+begin() and end() iterators
+
+\item 
+Iterator support for the not-equal comparison != operator
+
+\item 
+Iterator support for the prefix increment ++ operator
+
+\item 
+Iterator support for the dereference * operator
+\end{itemize}
+
+Our main Seq class interface only has three public member functions: the constructor, and the begin() and end() iterators:
+
+\begin{lstlisting}[style=styleCXX]
+Seq(T start, T end) : start_{ start }, end_{ end } {}
+iterator begin() const { return iterator{start_}; }
+iterator end() const { return iterator{end_}; }
+\end{lstlisting}
+
+The implementation of the Seq::iterator class carries the actual payload:
+
+\begin{lstlisting}[style=styleCXX]
+class iterator {
+	T value_{};
+\end{lstlisting}
+
+This is the common configuration because the payload is only accessed through iterators.
+
+We've implemented only the three operators we need:
+
+\begin{lstlisting}[style=styleCXX]
+T operator*() const { return value_; }
+iterator& operator++() {
+	++value_;
+	return *this;
+}
+bool operator!=(const iterator& other) const {
+	return value_ != other.value_;
+}
+\end{lstlisting}
+
+This is all we need to support the range-based for loop:
+
+\begin{lstlisting}[style=styleCXX]
+Seq<int> r{ 100, 110 };
+for (auto v : r) {
+	cout << format("{} ", v);
+}
+\end{lstlisting}
+
 \subsubsection{There's more…}
+
+It's traditional, but not required, to define the iterator as a member class of the container.
+This allows the iterator type to be subordinate to the container type:
+
+\begin{lstlisting}[style=styleCXX]
+Seq<int>::iterator it = r.begin();
+\end{lstlisting}
+
+It's not as important post C++11 because of the auto type, but it's still considered best practice.
+
+
+
+
+

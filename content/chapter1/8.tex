@@ -1,8 +1,214 @@
 
+Header files have been around since the very beginning of the C language. Originally, they were mainly used for text substitution macros and linking external symbols between translation units. With the introduction of templates, C++ leveraged header files to carry actual code. Because templates need to be recompiled for changes in specializations, we've been carrying them around in header files for many years. As the STL continues to grow over the years, these header files have grown as well. The situation has become unwieldy and is no longer scalable for the future.
+
+Header files typically contain a lot more than templates. They often contain configuration macros and other symbols that are required for system purposes, but not useful for the application. As the number of headers grows, the number of opportunities for symbol collisions grows as well. This is even more problematic when you consider the abundance of macros, which are not subject to namespace restrictions nor any form of type safety.
+
+C++20 addresses this problem with modules.
 
 \subsubsection{How to do it…}
 
+You may be used to creating header files like this:
+
+\begin{lstlisting}[style=styleCXX]
+#ifndef BW_MATH
+#define BW_MATH
+namespace bw {
+	template<typename T>
+	T add(T lhs, T rhs) {
+		return lhs + rhs;
+	}
+}
+#endif // BW_MATH
+\end{lstlisting}
+
+This minimalist example illustrates several of the problems that modules address. The BW\_MATH symbol is used as an include guard. Its only purpose is to prevent the header file from being included more than once, yet its symbol is carried throughout the translation unit. When you include this header in your source file, it may look like this:
+
+\begin{lstlisting}[style=styleCXX]
+#include "bw-math.h"
+#include <format>
+#include <string>
+#include <iostream>
+\end{lstlisting}
+
+Now that BW\_MATH symbol is available to every other header you've included, and every header included by the other headers, and on and on. That's a lot of opportunities for collision. And keep in mind, the compiler cannot check for these collisions. They're macros. That means they're translated by the preprocessor before the compiler ever has a chance to see them.
+
+Now we get to the actual point of the header, the template function:
+
+\begin{lstlisting}[style=styleCXX]
+template<typename T>
+T add(T lhs, T rhs) {
+	return lhs + rhs;
+}
+\end{lstlisting}
+
+Because it's a template, every time you use the add() function the compiler must create a separate specialization. This means that the template function must be parsed and specialized each time it's invoked. That's why templates go in header files; the source must be available at compile time. As the STL grows and evolves, with its many large template classes and functions, this becomes a significant scalability problem.
+
+Modules solve these problems and more.
+
+As a module, bw-math.h becomes bw-math.ixx (in the MSVC naming convention) and it looks like this:
+
+\begin{lstlisting}[style=styleCXX]
+export module bw_math;
+export template<typename T>
+T add(T lhs, T rhs) {
+	return lhs + rhs;
+}
+\end{lstlisting}
+
+Notice that the only symbols exported are the name of the module, bw\_math, and the name of the function, add(). This keeps the namespace clean.
+
+The usage is cleaner as well. When we use it in module-test.cpp, it looks like this:
+
+\begin{lstlisting}[style=styleCXX]
+import bw_math;
+import std.core;
+
+int main() {
+	double f = add(1.23, 4.56);
+	int i = add(7, 42);
+	string s = add<string>("one ", "two");
+	
+	cout <<
+		"double: " << f << "\n" <<
+		"int: " << i << "\n" <<
+		"string: " << s << "\n";
+}
+\end{lstlisting}
+
+The import declarations are used where we might otherwise use \#include preprocessor directives. These import the symbol tables from the modules for linkage.
+
+The output of our example looks like this:
+
+\begin{tcblisting}{commandshell={}}
+$ ./module-test
+double: 5.79
+int: 49
+string: one two
+\end{tcblisting}
+
+The module version works exactly as it did in a header file, only cleaner and more efficiently.
+
+\begin{tcolorbox}[colback=webgreen!5!white,colframe=webgreen!75!black,title=Note]
+The compiled module includes a separate metadata file (module-name.ifc in the MSVC naming convention), which describes the module interface. This allows the module to support templates. The metadata includes sufficient information for the compiler to create template specializations.
+\end{tcolorbox}
 
 \subsubsection{How it works…}
 
+The import and export declarations are at the core of the Modules implementation. Let's take another look at the bw-math.ixx module:
 
+\begin{lstlisting}[style=styleCXX]
+export module bw_math;
+export template<typename T>
+T add(T lhs, T rhs) {
+	return lhs + rhs;
+}
+\end{lstlisting}
+
+Notice the two export declarations. The first exports the module itself with export module bw\_math. This declares the translation unit as a module. There must be a module declaration at the top of every module file, and before any other statements. The second export makes the function name add() available to the module consumer.
+
+If your module requires \#include directives, or other global fragments, you will need to first declare your module with a simple module declaration like this:
+
+\begin{lstlisting}[style=styleCXX]
+module;
+#define SOME_MACRO 42
+#include <stdlib.h>
+export module bw_math;
+...
+\end{lstlisting}
+
+The module; declaration, on a line by itself at the top of the file, introduces a global module fragment. Only preprocessor directives may appear in the global module fragment. This must be immediately followed by a standard module declaration (export module bw\_math;) and the rest of the module content. Let's look closer at how this works:
+
+\begin{itemize}
+\item 
+An export declaration makes a symbol visible to the module consumer, that is, the code that imports the module. Symbols default to private.
+
+\begin{lstlisting}[style=styleCXX]
+export int a{7}; // visible to consumer
+int b{42}; // not visible
+\end{lstlisting}
+
+\item 
+You can export a block, like this:
+
+\begin{lstlisting}[style=styleCXX]
+export {
+	int a() { return 7; }; // visible
+	int b() { return 42; }; // also visible
+}
+\end{lstlisting}
+
+\item 
+You can export a namespace:
+
+\begin{lstlisting}[style=styleCXX]
+export namespace bw { // all of the bw namespace is
+	visible
+	template<typename T>
+	T add(T lhs, T rhs) { // visible as bw::add()
+		return lhs + rhs;
+	}
+}
+\end{lstlisting}
+
+\item 
+Or, you can export individual symbols from a namespace:
+
+\begin{lstlisting}[style=styleCXX]
+namespace bw { // all of the bw namespace is visible
+	export template<typename T>
+	T add(T lhs, T rhs) { // visible as bw::add()
+		return lhs + rhs;
+	}
+}
+\end{lstlisting}
+
+
+\item 
+An import declaration imports a module in the consumer:
+
+\begin{lstlisting}[style=styleCXX]
+import bw_math;
+int main() {
+	double f = bw::add(1.23, 4.56);
+	int i = bw::add(7, 42);
+	string s = bw::add<string>("one ", "two");
+}
+\end{lstlisting}
+
+\item 
+You can even import a module and export it to the consumer to pass it along:
+
+\begin{lstlisting}[style=styleCXX]
+export module bw_math;
+export import std.core;
+\end{lstlisting}
+
+The export keyword must precede the import keyword.
+
+The std.core module is now available for the consumer:
+
+\begin{lstlisting}[style=styleCXX]
+import bw_math;
+using std::cout, std::string, std::format;
+
+int main() {
+	double f = bw::add(1.23, 4.56);
+	int i = bw::add(7, 42);
+	string s = bw::add<string>("one ", "two");
+	
+	cout <<
+		format("double {} \n", f) <<
+		format("int {} \n", i) <<
+		format("string {} \n", s);
+}
+\end{lstlisting}
+
+\end{itemize}
+
+As you can see, modules are a simple, straightforward alternative to header files. I know a lot of us are looking forward to the broad availability of modules. I can see this greatly reducing our dependency on header files.
+
+\begin{tcolorbox}[colback=webgreen!5!white,colframe=webgreen!75!black,title=Note]
+At the time of writing, the only complete implementation of modules is in a preview release of MSVC. The module filename extension (.ixx) may be different for other compilers. Also, the amalgamated std.core module is part of how MSVC implements the STL as modules in this release. Other compilers may not use this convention. Some details may change when fully compliant implementations are released.
+\end{tcolorbox}
+
+In the example files, I've included a module version of my format-based print() function. This works on the current preview release of MSVC. It may require some small modifications to make it work on other systems, once they support enough of the modules specification.

@@ -1,9 +1,217 @@
 
+Until now, if you wanted to format text, you could use either the legacy printf functions or the STL iostream library. Both have their strengths and flaws.
+
+The printf-based functions are inherited from C and have proven efficient, flexible, and convenient for over 50 years. The formatting syntax can look a bit cryptic, but it's simple enough once you get used to it.
+
+\begin{lstlisting}[style=styleCXX]
+printf("Hello, %s\n", c_string);
+\end{lstlisting}
+
+The main weakness in printf is its lack of type safety. The common printf() function (and its relatives) use C's variadic arguments model to pass parameters to a formatter. This works great when it works, but it can cause serious problems when a parameter type doesn't match its corresponding format specifier. Modern compilers do as much type-checking as they can, but the model is inherently flawed and the protection can only go so far.
+
+The STL iostream library brings type safety at the expense of readability and run-time performance. The iostream syntax is unusual, yet familiar. It overloads the bitwise left-shift operator (<<) to allow a chain of objects, operands, and formatting manipulators, which produce the formatted output.
+
+\begin{lstlisting}[style=styleCXX]
+cout << "Hello, " << str << endl;
+\end{lstlisting}
+
+The weakness of iostream is its complexity, in both syntax and implementation. Building a formatted string can be verbose and obscure. Many of the formatting manipulators must be reset after use, or they create cascading formatting errors that can be difficult to debug. The library itself is vast and complex, resulting in code significantly larger and slower than its printf equivalent.
+
+This dismal situation has left C++ programmers with little option but to choose between two flawed systems, until now.
 
 \subsubsection{How to do it…}
 
+The new format library is in the <format> header. As of this writing, format is implemented only in the MSVC (Microsoft) compiler. By the time you read this, it should be available on more systems. Otherwise, you may use its reference implementation as a third-party library from fmt.dev (j.bw.org/fmt).
+
+The format library is modeled on the str.format() method from Python 3. Format strings are substantially the same as those in Python and, for most purposes, they should be interchangeable. Let's examine some simple examples:
+
+\begin{itemize}
+\item 
+In its simplest form, the format() function takes a string\_view format string and a variadic parameter pack of arguments. It returns a string. Its function signature looks like this:
+
+\begin{lstlisting}[style=styleCXX]
+template<typename... Args>
+string format(string_view fmt, const Args&... args);
+\end{lstlisting}
+
+\item 
+The format() function returns a string representation of virtually any type or value. For example:
+
+\begin{lstlisting}[style=styleCXX]
+string who{ "everyone" };
+int ival{ 42 };
+double pi{ std::numbers::pi };
+
+format("Hello, {}!\n ", who); // Hello, everyone!
+format("Integer: {}\n ", ival); // Integer: 42
+format("π: {}\n", pi); // π: 3.141592653589793
+\end{lstlisting}
+
+The format string uses braces \{\} as a placeholder. With no format specifiers, the braces are effectively a type-safe placeholder which will convert a value of any compatible type to a reasonable string representation.
+
+\item 
+You can include multiple placeholders in your format string, like this:
+
+\begin{lstlisting}[style=styleCXX]
+format("Hello {} {}", ival, who); // Hello 42
+								  // everyone
+\end{lstlisting}
+
+\item 
+You can specify the order of the replacement values. This could be useful for internationalization:
+
+\begin{lstlisting}[style=styleCXX]
+format("Hello {1} {0}", ival, who); // Hello everyone 42
+format("Hola {0} {1}", ival, who); // Hola 42 everyone
+\end{lstlisting}
+
+\item 
+You can align values, left (<), right (>), or center (\^), with or without a fill character:
+
+\begin{lstlisting}[style=styleCXX]
+format("{:.<10}", ival); // 42........
+format("{:.>10}", ival); // ........42
+format("{:.^10}", ival); // ....42....
+\end{lstlisting}
+
+\item 
+You can set the decimal precision of values:
+
+\begin{lstlisting}[style=styleCXX]
+format("π: {:.5}", pi); // π: 3.1416
+\end{lstlisting}
+
+\item 
+And much, much more.
+\end{itemize}
+
+It's a rich and complete formatting specification that provides the type-safety of iostream with the performance and simplicity of printf, for the best of both worlds.
 
 \subsubsection{How it works…}
 
+The format library does not yet include a print() function, which is planned for C++23. The format() function itself returns a string object. So, if you want to print the string, you'll need to use either iostream or cstdio. (Sad face.) 
+
+You can print the string using iostream:
+
+\begin{lstlisting}[style=styleCXX]
+cout << format("Hello, {}", who) << "\n";
+\end{lstlisting}
+
+Or you may use cstdio:
+
+\begin{lstlisting}[style=styleCXX]
+puts(format("Hello, {}", who).c_str());
+\end{lstlisting}
+
+Neither is ideal, but it's not very hard to write a simple print() function. And we can use this process to understand a bit of the format library's inner workings.
+
+Here's a simple implementation of a print() function using the format library:
+
+\begin{lstlisting}[style=styleCXX]
+#include <format>
+#include <string_view>
+#include <cstdio>
+
+template<typename... Args>
+void print(const string_view fmt_str, Args&&... args) {
+	auto fmt_args{ make_format_args(args...) };
+	string outstr{ vformat(fmt_str, fmt_args) };
+	fputs(outstr.c_str(), stdout);
+}
+\end{lstlisting}
+
+This uses the same arguments as the format() function. The first argument is a string\_view object for the format string. This is followed by a variadic parameter pack for the arguments.
+
+The make\_format\_args() function takes the parameter pack and returns an object that contains type-erased values suitable for formatting. This object is then passed to vformat(), which returns a string suitable for printing. We use fputs() to print the value to the console because it's far more efficient than cout.
+
+We can now use this print() function in place of the cout << format() combination:
+
+\begin{lstlisting}[style=styleCXX]
+print("Hello, {}!\n", who);
+print("π: {}\n", pi);
+print("Hello {1} {0}\n", ival, who);
+print("{:.^10}\n", ival);
+print("{:.5}\n", pi);
+\end{lstlisting}
+
+Output:
+
+\begin{tcblisting}{commandshell={}}
+Hello, everyone!
+π: 3.141592653589793
+Hello everyone 42
+....42....
+3.1416
+\end{tcblisting}
+
+When you eventually get a C++23 complier with print() support, you should be able to simply replace the above print() template function definition with using std::print; and all the print() calls should continue to work.
 
 \subsubsection{There's more…}
+
+It's nice to have the ability to format strings and primitives, but for the format library to be fully functional, it needs customization to work with your own classes.
+
+For example, here's a simple struct with two members: a numerator and denominator. We would like this to print as a fraction:
+
+\begin{lstlisting}[style=styleCXX]
+struct Frac {
+	long n;
+	long d;
+};
+
+int main() {
+	Frac f{ 5, 3 };
+	print("Frac: {}\n", f);
+}
+\end{lstlisting}
+
+When I compile this, it leads to a cascade of errors to the effect of, "No user-defined conversion operator…". Cool. So, let's fix it!
+
+When the format system encounters an object for conversion, it looks for a specialization of a formatter object with the corresponding type. Standard specializations are included for common objects such as strings and numbers and such.
+It's quite simple to create a specialization for our Frac type:
+
+\begin{lstlisting}[style=styleCXX]
+template<>
+struct std::formatter<Frac>
+{
+	template<typename ParseContext>
+	constexpr auto parse(ParseContext& ctx) {
+		return ctx.begin();
+	}
+	template<typename FormatContext>
+	auto format(const Frac& f, FormatContext& ctx) {
+		return format_to(ctx.out(), "{0:d}/{1:d}",
+		f.n, f.d);
+	}
+};
+\end{lstlisting}
+
+This formatter specialization is a class with two short template functions:
+
+\begin{itemize}
+\item 
+The parse() function parses the format string from after the colon (or, if there is no colon, after the opening brace) up to but not including the closing brace. (In other words, the part that specifies the type of the object.) It takes a ParseContext object and returns an iterator. For our purposes, we can just return the begin() iterator because we don't need any new syntax for our type. You will rarely need to put anything else here.
+
+\item 
+The format() function takes a Frac object and a FormatContext object.
+It returns an end iterator. The format\_to() function makes this easy. It takes an iterator, a format string, and a parameter pack. In this case, the parameter pack is the two properties of our Frac class, the numerator and denominator.
+
+All we need to do here is provide a simple format string "\{0\}/\{1\}" and the numerator and denominator values. (The 0 and 1 indicate the position of the parameters. They're not strictly necessary but they could come in handy later.)
+\end{itemize}
+
+Now that we have a specialization for Frac, we can pass our object to print() to get a readable result:
+
+\begin{lstlisting}[style=styleCXX]
+int main() {
+	Frac f{ 5, 3 };
+	print("Frac: {}\n", f);
+}
+\end{lstlisting}
+
+Output:
+
+\begin{tcblisting}{commandshell={}}
+Frac: 5/3
+\end{tcblisting}
+
+The C++20 format library solves a long-standing problem by providing a type-safe text formatting library that is both efficient and convenient.
+

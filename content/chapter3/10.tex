@@ -1,4 +1,101 @@
+
+The set container is an associative container where each element is a single value, which is used as the key. Elements in a set are maintained in sorted order and duplicate keys are not allowed.
+
+The set container is often misunderstood, and it does have fewer and more specific uses than more general containers such as vector and map. One common use for a set is to filter duplicates from a set of values.
+
 \subsubsection{How to do it…}
 
+In this recipe we will read words from the standard input and filter out the duplicates.
+
+\begin{itemize}
+\item 
+We'll start by defining an alias for an istream iterator. We'll use this to get input from the command line.
+
+\begin{lstlisting}[style=styleCXX]
+using input_it = istream_iterator<string>;
+\end{lstlisting}
+
+\item 
+In the main() function, we'll define a set for our words:
+
+\begin{lstlisting}[style=styleCXX]
+int main() {
+	set<string> words;
+\end{lstlisting}
+
+The set is defined as a set of string elements.
+
+\item 
+We define a pair of iterators for use with the inserter() function:
+
+\begin{lstlisting}[style=styleCXX]
+input_it it{ cin };
+input_it end{};
+\end{lstlisting}
+
+The end iterator is initialized with its default constructor. This is known as the end-of-stream iterator. When our input ends, this iterator will compare equal with the cin iterator.
+
+\item 
+The inserter() function is used to insert elements into the set container:
+
+\begin{lstlisting}[style=styleCXX]
+copy(it, end, inserter(words, words.end()));
+\end{lstlisting}
+
+We use std::copy() to conveniently copy words from the input stream.
+
+\item 
+Now we can print out our set to see the results:
+
+\begin{lstlisting}[style=styleCXX]
+for(const string & w : words) {
+	cout << format("{} ", w);
+}
+cout << '\n';
+\end{lstlisting}
+
+\item 
+We can run the program by piping a bunch of words to its input:
+
+\begin{tcblisting}{commandshell={}}
+$ echo "a a a b c this that this foo foo foo" | ./
+set-words
+a b c foo that this
+\end{tcblisting}
+\end{itemize}
+
+The set has eliminated the duplicates and retained a sorted list of the words that were inserted.
 
 \subsubsection{How it works…}
+
+The set container is the heart of this recipe. It only holds unique elements. When you insert a duplicate, that insert will fail. So, you end up with a sorted list of each unique element.
+
+But that's not the only interesting part of this recipe.
+
+The istream\_iterator is an input iterator that reads objects from a stream.
+We instantiated the input iterator like this:
+
+\begin{lstlisting}[style=styleCXX]
+istream_iterator<string> it{ cin };
+\end{lstlisting}
+
+Now we have an input iterator of type string from the cin stream. Every time we dereference this iterator, it will return one word from the input stream.
+
+We also instantiated another istream\_iterator:
+
+\begin{lstlisting}[style=styleCXX]
+istream_iterator<string> end{};
+\end{lstlisting}
+
+This calls the default constructor, which gives us a special end-of-stream iterator. When the input iterator reaches the end of the stream, it will become equal to the end-of-stream iterator. This is convenient for ending loops, such as the one created by the copy() algorithm.
+
+The copy() algorithm takes three iterators, the beginning and end of the range to copy, and a destination iterator:
+
+\begin{lstlisting}[style=styleCXX]
+copy(it, end, inserter(words, words.end()));
+\end{lstlisting}
+
+The inserter() function takes a container and an iterator for the insertion point, and returns an insert\_iterator of the appropriate type for the container and its elements.
+
+This combination of copy() and inserter() makes it easy to copy elements from a stream into the set container
+

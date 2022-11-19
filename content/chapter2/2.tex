@@ -1,7 +1,90 @@
 
+New for C++20, the std::span class is a simple wrapper that creates a view over a contiguous sequence of objects. The span doesn't own any of its own data, it refers to the data in the underlying structure. Think of it as string\_view for C-arrays. The underlying structure may be a C-array, a vector, or an STL array.
 
 \subsubsection{How to do it…}
 
+You can create a span from any compatible contiguous-storage structure. The most common use case will involve a C-array. For example, if you try to pass a C-array directly to a function, the array is demoted to a pointer and the function has no easy way to know the size of the array:
+
+\begin{lstlisting}[style=styleCXX]
+void parray(int * a); // loses size information
+\end{lstlisting}
+
+If you define your function with a span parameter, you can pass it a C-array and it will be promoted to span. Here's a template function that takes a span and prints out the size in elements and in bytes:
+
+\begin{lstlisting}[style=styleCXX]
+template<typename T>
+void pspan(span<T> s) {
+	cout << format("number of elements: {}\n", s.size());
+	cout << format("size of span: {}\n", s.size_bytes());
+	for(auto e : s) cout << format("{} ", e);
+	cout << "\n";
+}
+\end{lstlisting}
+
+You can pass a C-array to this function and it's automatically promoted to span:
+
+\begin{lstlisting}[style=styleCXX]
+int main() {
+	int carray[] { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
+	pspan<int>(carray);
+}
+\end{lstlisting}
+
+Output:
+
+\begin{tcblisting}{commandshell={}}
+number of elements: 10
+number of bytes: 40
+1 2 3 4 5 6 7 8 9 10
+\end{tcblisting}
+
+The purpose of span is to encapsulate the raw data to provide a measure of safety and utility, with a minimum of overhead.
 
 \subsubsection{How it works…}
+
+The span class itself doesn't own any data. The data belongs to the underlying data structure. The span is essentially a view over the underlying data. It also provides some useful member functions.
+
+Defined in the <span> header, the span class looks something like:
+
+\begin{lstlisting}[style=styleCXX]
+template<typename T, size_t Extent = std::dynamic_extent>
+class span {
+	T * data;
+	size_t count;
+	public:
+	...
+};
+\end{lstlisting}
+
+The Extent parameter is a constant of type constexpr size\_t, which is computed at compile time. It's either the number of elements in the underlying data or the std:: dynamic\_extent constant, which indicates that the size is variable. This allows span to use an underlying structure like a vector, which may not always be the same size.
+
+All member functions are constexpr and const qualified. Member functions include:
+
+\begin{table}[H]
+\begin{tabular}{|l|l|}
+\hline
+Public member function & Return value                                  \\ \hline
+T\& front()            & The first element                             \\ \hline
+T\& back()             & The last element                              \\ \hline
+T\& operator{[}{]}     & An indexed element                            \\ \hline
+T* data()              & A pointer to the beginning of the sequence    \\ \hline
+iterator begin()       & An iterator to the first element              \\ \hline
+iterator end()         & An iterator following the last element        \\ \hline
+iterator rbegin()      & A reverse iterator to the first element       \\ \hline
+iterator rend()        & A reverse iterator following the last element \\ \hline
+size\_t size()         & The number of elements in the sequence        \\ \hline
+size\_t size\_bytes()  & The number of bytes in the sequence           \\ \hline
+bool empty()           & True if empty                                 \\ \hline
+\begin{tabular}[c]{@{}l@{}}span\textless{}T\textgreater first\textless{}count\textgreater{}()\\ span\textless{}T\textgreater first(count)\end{tabular} &
+\begin{tabular}[c]{@{}l@{}}A sub-span consisting of the first count elements\\ of the sequence\end{tabular} \\ \hline
+\begin{tabular}[c]{@{}l@{}}span\textless{}T\textgreater last\textless{}count\textgreater{}()\\ span\textless{}T\textgreater last(count)\end{tabular} &
+Returns a sub-span of the last count elements \\ \hline
+\begin{tabular}[c]{@{}l@{}}span\textless{}T\textgreater subspan(offset, \\ count)\end{tabular} &
+\begin{tabular}[c]{@{}l@{}}Retures a sub-span consisting of count elements\\ beginning of offset\end{tabular} \\ \hline
+\end{tabular}
+\end{table}
+
+\begin{tcolorbox}[colback=webgreen!5!white,colframe=webgreen!75!black,title=Important Note]
+The span class is but a simple wrapper that performs no bounds checking. So, if you try to access element n+1 in a span of n elements, the result is undefined, which is tech for, "Bad. Don't do that."
+\end{tcolorbox}
 

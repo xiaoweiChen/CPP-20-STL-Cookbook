@@ -1,8 +1,62 @@
 
+An if constexpr(condition) statement is used where code needs to be executed based on a compile-time condition. The condition may be any constexpr expression of type bool.
 
 \subsubsection{How to do it…}
 
+Consider the case where you have a template function that needs to operate differently depending upon the type of the template parameter.
+
+\begin{lstlisting}[style=styleCXX]
+template<typename T>
+auto value_of(const T v) {
+	if constexpr (std::is_pointer_v<T>) {
+		return *v; // dereference the pointer
+	} else {
+		return v; // return the value
+	}
+}
+
+int main() {
+	int x{47};
+	int* y{&x};
+	cout << format("value is {}\n", value_of(x)); // value
+	cout << format("value is {}\n", value_of(y)); // pointer
+	return 0;
+}
+\end{lstlisting}
+
+Output:
+
+\begin{tcblisting}{commandshell={}}
+value is 47
+value is 47
+\end{tcblisting}
+
+The type of the template parameter T is available at compile time. The constexpr if statement allows the code to easily distinguish between a pointer and a value.
 
 \subsubsection{How it works…}
+
+The constexpr if statement works like a normal if statement except it's evaluated at compile time. The runtime code will not contain any branch statements from a constexpr if statement. Consider our branch statement from above:
+
+\begin{lstlisting}[style=styleCXX]
+if constexpr (std::is_pointer_v<T>) {
+	return *v; // dereference the pointer
+} else {
+	return v; // return the value
+}
+\end{lstlisting}
+
+The condition is\_pointer\_v<T> tests a template parameter, which is not available at runtime. The constexpr keyword tells the compiler that this if statement needs to evaluate at compile time, while the template parameter <T> is available.
+
+This should make a lot of meta programming situations much easier. The if constexpr statement is available in C++17 and later
+
+
+
+
+
+
+
+
+
+
 
 

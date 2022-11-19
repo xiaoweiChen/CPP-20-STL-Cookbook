@@ -1,9 +1,318 @@
 
+The new ranges library is one of the more significant additions to C++20. It provides a new paradigm for filtering and processing containers. Ranges provide clean and intuitive building blocks for more effective and readable code.
+
+Let's start by defining a few terms:
+
+\begin{itemize}
+\item 
+A Range is a collection of objects which can be iterated. In other words, any structure that supports the begin() and end() iterators is a range. This includes most STL containers.
+
+\item 
+A View is a range that transforms another underlying range. Views are lazy, meaning they only operate as the range iterates. A view returns data from the underlying range and does not own any data itself. Views operate in O(1) constant time.
+
+\item 
+A View Adapter is an object that takes a range and returns a view object.
+A view adapter may be chained with other view adapters using the | operator.
+\end{itemize}
+
+\begin{tcolorbox}[colback=webgreen!5!white,colframe=webgreen!75!black,title=Note]
+The <ranges> library uses the std::ranges and the std::ranges::view namespaces. Recognizing that this is cumbersome, the standard includes an alias for std::ranges::view as the simply, std::view. I still find that cumbersome. For this recipe I will use the following aliases, to save space and because I find it more elegant:
+
+\begin{lstlisting}[style=styleCXX]
+namespace ranges = std::ranges; // save the fingers!
+namespace views = std::ranges::views;
+\end{lstlisting}
+
+This applies to all the code in this recipe.
+\end{tcolorbox}
 
 \subsubsection{How to do it…}
 
+The ranges and views classes are in the <ranges> header. Let's look at how you can use them:
+
+\begin{itemize}
+\item 
+A View is applied to a Range, like this:
+
+\begin{lstlisting}[style=styleCXX]
+const vector<int> nums{ 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
+auto result = ranges::take_view(nums, 5);
+for (auto v: result) cout << v << " ";
+\end{lstlisting}
+
+Output:
+
+\begin{tcblisting}{commandshell={}}
+1 2 3 4 5
+\end{tcblisting}
+
+ranges::take\_view(range, n) is a view that returns the first n elements.
+
+You may also use the view adapter version of take\_view():
+
+\begin{lstlisting}[style=styleCXX]
+auto result = nums | views::take(5);
+for (auto v: result) cout << v << " ";
+\end{lstlisting}
+
+Output:
+
+\begin{tcblisting}{commandshell={}}
+1 2 3 4 5
+\end{tcblisting}
+
+View adapters are in the std::ranges::views namespace. A view adapter takes the range operand from the left-hand side of the | operator, much like the iostreams usage of the <{}< operator. The | operands are evaluated left-to-right.
+
+\item 
+Because a view adapter is iterable, it also qualifies as a range. This allows them to be applied serially, like this:
+
+\begin{lstlisting}[style=styleCXX]
+const vector<int> nums{ 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
+auto result = nums | views::take(5) | views::reverse;
+\end{lstlisting}
+
+Output:
+
+\begin{tcblisting}{commandshell={}}
+5 4 3 2 1
+\end{tcblisting}
+
+\item 
+The filter() view uses a predicate function:
+
+\begin{lstlisting}[style=styleCXX]
+auto result = nums |
+	views::filter([](int i){ return 0 == i % 2; });
+\end{lstlisting}
+
+Output:
+
+\begin{tcblisting}{commandshell={}}
+2 4 6 8 10
+\end{tcblisting}
+
+\item 
+The transform() view uses a transformation function:
+
+\begin{lstlisting}[style=styleCXX]
+auto result = nums |
+	views::transform([](int i){ return i * i; });
+\end{lstlisting}
+
+Output:
+
+\begin{tcblisting}{commandshell={}}
+1 4 9 16 25 36 49 64 81 100
+\end{tcblisting}
+
+\item 
+Of course, these views and adapters work on ranges of any type:
+
+\begin{lstlisting}[style=styleCXX]
+cosnt vector<string>
+words{ "one", "two", "three", "four", "five" };
+auto result = words | views::reverse;
+\end{lstlisting}
+
+Output:
+
+\begin{tcblisting}{commandshell={}}
+five four three two one
+\end{tcblisting}
+
+\item 
+The ranges library also includes a few range factories. The iota factory will generate an incrementing series of values:
+
+\begin{lstlisting}[style=styleCXX]
+auto rnums = views::iota(1, 10);
+\end{lstlisting}
+
+Output:
+
+\begin{tcblisting}{commandshell={}}
+1 2 3 4 5 6 7 8 9
+\end{tcblisting}
+
+\item 
+The iota(value, bound) function generates a sequence starting with value and ending before bound. If bound is omitted, the sequence is infinite:
+
+\begin{lstlisting}[style=styleCXX]
+auto rnums = views::iota(1) | views::take(200);
+\end{lstlisting}
+
+Output:
+
+\begin{tcblisting}{commandshell={}}
+1 2 3 4 5 6 7 8 9 10 11 12 […] 196 197 198 199 200
+\end{tcblisting}
+\end{itemize}
+
+Ranges, Views, and View Adapters are incredibly flexible and useful. Let's take a deeper look for a better understanding.
 
 \subsubsection{How it works…}
 
+To satisfy the basic requirements for a Range, an object must have at least two iterators, begin() and end(), where the end() iterator is a sentinel, used to determine the end point of a range. Most STL containers qualify as ranges, including string, vector, array, map, and others, with the notable exception of container-adapters, like stack and queue, which don't have begin and end iterators.
+
+A View is an object which operates on a range and returns a modified range. A view operates lazily, and contains no data of its own. Instead of keeping a copy of the underlying data, it simply returns iterators to underlying elements as needed. Let's examine this code snippet:
+
+\begin{lstlisting}[style=styleCXX]
+vector<int> vi { 0, 1, 2, 3, 4, 5 };
+ranges::take_view tv{vi, 2};
+for(int i : tv) {
+	cout << i << " ";
+}
+cout << "\n";
+\end{lstlisting}
+
+Output:
+
+\begin{tcblisting}{commandshell={}}
+0 1
+\end{tcblisting}
+
+In this example, the take\_view object takes two parameters, a range (in this case, a vector<int> object), and a count. The result is a view with the first count objects from the vector. At evaluation time, during the iteration of the for loop, the take\_view object simply returns iterators that point to elements of the vector object, as needed.
+
+The vector object is not modified in this process.
+
+Many of the views in the ranges namespace have corresponding range adapters in the views namespace. These adapters may be used with the bitwise or (|) operator, as a pipe, like this:
+
+\begin{lstlisting}[style=styleCXX]
+vector<int> vi { 0, 1, 2, 3, 4, 5 };
+auto tview = vi | views::take(2);
+for(int i : tview) {
+	cout << i << " ";
+}
+cout << "\n";
+\end{lstlisting}
+
+Output:
+
+\begin{tcblisting}{commandshell={}}
+0 1
+\end{tcblisting}
+
+As expected, the | operator evaluates left to right. And because the result of the range adapter is another range, these adapter expressions may be chained:
+
+\begin{lstlisting}[style=styleCXX]
+vector<int> vi { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 };
+auto tview = vi | views::reverse | views::take(5);
+for(int i : tview) {
+	cout << i << " ";
+}
+cout << "\n";
+\end{lstlisting}
+
+Output:
+
+\begin{tcblisting}{commandshell={}}
+9 8 7 6 5
+\end{tcblisting}
+
+The library includes a filter view that is used with a predicate, for defining simple filters:
+
+\begin{lstlisting}[style=styleCXX]
+vector<int> vi { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 };
+auto even = [](long i) { return 0 == i % 2; };
+auto tview = vi | views::filter(even);
+\end{lstlisting}
+
+Output:
+
+\begin{tcblisting}{commandshell={}}
+0 2 4 6 8
+\end{tcblisting}
+
+Also included, is a transform view that is used with a transform function for transforming results:
+
+\begin{lstlisting}[style=styleCXX]
+vector<int> vi { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 };
+auto even = [](int i) { return 0 == i % 2; };
+auto x2 = [](auto i) { return i * 2; };
+auto tview = vi | views::filter(even) | views::transform(x2);
+\end{lstlisting}
+
+Output:
+
+\begin{tcblisting}{commandshell={}}
+0 4 8 12 16
+\end{tcblisting}
+
+There are quite a few useful views and view adapters in the library. Please check your favorite reference site, or (\url{https://j.bw.org/ranges}) for a complete list.
 
 \subsubsection{There's more…}
+
+Beginning with C++20, most of the algorithms in the <algorithm> header include versions for use with ranges. These versions are still in the <algorithm> header, but in the std::ranges namespace. This distinguishes them from the legacy algorithms.
+
+This means that, instead of calling an algorithm with two iterators:
+
+\begin{lstlisting}[style=styleCXX]
+sort(v.begin(), v.end());
+\end{lstlisting}
+
+You can now call it with just a range, like this:
+
+\begin{lstlisting}[style=styleCXX]
+ranges::sort(v);
+\end{lstlisting}
+
+That's certainly more convenient, but how does it really help?
+
+Consider the case where you want to sort part of a vector, you could do that the old way, like this:
+
+\begin{lstlisting}[style=styleCXX]
+sort(v.begin() + 5, v.end());
+\end{lstlisting}
+
+This would sort the elements of the vector after the first 5. With the ranges version, you can use a view to skip the first 5 elements:
+
+\begin{lstlisting}[style=styleCXX]
+ranges::sort(views::drop(v, 5));
+\end{lstlisting}
+
+You can even combine views:
+
+\begin{lstlisting}[style=styleCXX]
+ranges::sort(views::drop(views::reverse(v), 5));
+\end{lstlisting}
+
+In fact, you can even use range adapters as the argument to ranges::sort:
+
+\begin{lstlisting}[style=styleCXX]
+	ranges::sort(views::drop(v, 5));
+\end{lstlisting}
+
+In contrast, if you wanted to do this with the traditional sort algorithm and vector iterators, it would look something like this:
+
+\begin{lstlisting}[style=styleCXX]
+	ranges::sort(views::drop(v, 5));
+\end{lstlisting}
+
+While that's certainly shorter, and not impossible to understand, I find the range adapters version far more intuitive.
+
+You can find a complete list of algorithms that have been constrained to work with ranges on the cppreference site (\url{https://j.bw.org/algoranges}).
+
+In this recipe, we've only scratched the surface of Ranges and Views. This feature is the culmination of over a decade of work by many different teams, and I expect it to fundamentally change the way we use containers in the STL.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

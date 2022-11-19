@@ -1,6 +1,127 @@
+
+Many STL algorithms require iterators to conform to certain traits. Unfortunately, these requirements are inconsistent across compilers, systems, and C++ versions.
+
+For our purposes, we'll use the class from the Create an iterable range recipe to illustrate the issue. You may find this makes more sense if you read that recipe before continuing.
+
+In main(), if I add a call to the minmax\_element() algorithm:
+
+\begin{lstlisting}[style=styleCXX]
+Seq<int> r{ 100, 110 };
+auto [min_it, max_it] = minmax_element(r.begin(), r.end());
+cout << format("{} - {}\n", *min_it, *max_it);
+\end{lstlisting}
+
+It does not compile. The error messages are vague, cryptic, and cascading, but if you look closely, you'll see that our iterator does not meet the requirements to be compatible with this algorithm.
+
+Okay, let's fix that.
+
 \subsubsection{How to do it…}
 
+We need to make a few simple additions to our iterator to make it compatible with the algorithm. Our iterator needs to meet the minimum requirements for a forward iterator, so let's start there:
+
+\begin{itemize}
+\item 
+We have almost all the operators necessary for a forward iterator. The only one we're missing is the equality comparison operator ==. We can easily add this to our iterator with an operator==() overload:
+
+\begin{lstlisting}[style=styleCXX]
+bool operator==(const iterator& other) const {
+	return value_ == other.value_;
+}
+\end{lstlisting}
+
+Interestingly, this makes the code compile and run on some systems, but not on Clang, where we get the error message:
+
+\begin{tcblisting}{commandshell={}}
+No type named 'value_type' in 'std::iterator_
+traits<Seq<int>::iterator>'
+\end{tcblisting}
+
+This tells me that we need to set up the traits in the iterator.
+
+\item 
+The iterator\_traits class looks for a set of type definitions (implemented as using aliases) in the iterator class:
+
+\begin{lstlisting}[style=styleCXX]
+public:
+	using iterator_concept = std::forward_iterator_tag;
+	using iterator_category =
+	std::forward_iterator_tag;
+	using value_type = std::remove_cv_t<T>;
+	using difference_type = std::ptrdiff_t;
+	using pointer = const T*;
+	using reference = const T&;
+\end{lstlisting}
+
+I tend to put these at the top of the public: section of the iterator class, where they'll be easy to see.
+
+Now we have a fully conforming forward iterator class, and the code runs on all the compilers I have.
+
+\end{itemize}
 
 \subsubsection{How it works…}
 
+The using statements are traits that may be used to define what capabilities the iterator can perform. Let's look at each of them:
+
+\begin{lstlisting}[style=styleCXX]
+using iterator_concept = std::forward_iterator_tag;
+using iterator_category = std::forward_iterator_tag;
+\end{lstlisting}
+
+The first two are the category and the concept, and both are set to forward\_iterator\_tag. This value indicates that the iterator conforms to the forward iterator specification.
+
+Some code doesn't look at those values, and instead looks for individual settings and capabilities:
+
+\begin{lstlisting}[style=styleCXX]
+using value_type = std::remove_cv_t<T>;
+using difference_type = std::ptrdiff_t;
+using pointer = const T*;
+using reference = const T&;
+\end{lstlisting}
+
+The value\_type alias is set to std::remove\_cv\_t<T>, which is the type of the value, with any const qualifier removed.
+
+The difference\_type alias is set to std::ptrdiff\_t, as special type for pointer differences.
+
+The pointer and reference aliases are set to const-qualified versions of the pointer and reference, respectively.
+
+Defining these type aliases is a basic requirement for most iterators.
+
 \subsubsection{There's more…}
+
+It's worth noting that defining these traits allows us to use concept-restricted templates with our iterator. For example:
+
+\begin{lstlisting}[style=styleCXX]
+template<typename T>
+requires std::forward_iterator<typename T::iterator>
+void printc(const T & c) {
+	for(auto v : c) {
+		cout << format("{} ", v);
+	}
+	cout << '\n';
+}
+\end{lstlisting}
+
+This function that prints our sequence is restricted by the forward\_iterator concept. If our class did not qualify, it wouldn't compile.
+
+We can also use the ranges:: versions of the algorithms:
+
+\begin{lstlisting}[style=styleCXX]
+auto [min_it, max_it] = ranges::minmax_element(r);
+\end{lstlisting}
+
+This makes it more convenient to use our iterators.
+
+We can test for forward\_range compatibility with a static assertion:
+
+\begin{lstlisting}[style=styleCXX]
+static_assert(ranges::forward_range<Seq<int>>);
+\end{lstlisting}
+
+
+
+
+
+
+
+
+

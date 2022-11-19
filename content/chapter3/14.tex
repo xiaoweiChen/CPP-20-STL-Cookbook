@@ -1,4 +1,91 @@
+
+An ordered task list (or a ToDo list) is a common computing application. Formally stated, it's a list of tasks associated with a priority, sorted in reverse numerical order.
+
+You may be tempted to use a priority\_queue for this, because as the name implies, it's already sorted in priority (reverse numerical) order. The disadvantage of a priority\_queue is that it has no iterators, so it's difficult to operate on it without pushing and popping items to and from the queue.
+
+For this recipe, we'll use a multimap for the ordered list. The multimap associative container keeps items in order, and it can be accessed using reverse iterators for the proper sort order.
+
 \subsubsection{How to do it…}
+
+This is a short and simple recipe that initializes a multimap and prints it in reverse order.
+
+\begin{itemize}
+\item 
+We start with a type alias for our multimap:
+
+\begin{lstlisting}[style=styleCXX]
+using todomap = multimap<int, string>;
+\end{lstlisting}
+
+Our todomap is a multimap with an int key and a string payload.
+
+\item 
+We have a small utility function for printing the todomap in reverse order:
+
+\begin{lstlisting}[style=styleCXX]
+void rprint(todomap& todo) {
+	for(auto it = todo.rbegin(); it != todo.rend();
+	++it) {
+		cout << format("{}: {}\n", it->first,
+		it->second);
+	}
+	cout << '\n';
+}
+\end{lstlisting}
+
+This uses reverse iterators to print the todomap.
+
+\item 
+The main() function is short and sweet:
+
+\begin{lstlisting}[style=styleCXX]
+int main()
+{
+	todomap todo {
+		{1, "wash dishes"},
+		{0, "watch teevee"},
+		{2, "do homework"},
+		{0, "read comics"}
+	};
+	rprint(todo);
+}
+\end{lstlisting}
+
+We initialize the todomap with tasks. Notice that the tasks are not in any particular order, but they do have priorities in the keys. The rprint() function will print them in priority order.
+
+\item 
+The output looks like this:
+
+\begin{tcblisting}{commandshell={}}
+$ ./todo
+2: do homework
+1: wash dishes
+0: read comics
+0: watch teevee
+\end{tcblisting}
+
+The ToDo list prints out in priority order, just as we need it.
+
+\end{itemize}
 
 
 \subsubsection{How it works…}
+
+It's a short and simple recipe. It uses the multimap container to hold items for a prioritized list.
+
+The only trick is in the rprint() function:
+
+\begin{lstlisting}[style=styleCXX]
+void rprint(todomap& todo) {
+	for(auto it = todo.rbegin(); it != todo.rend(); ++it) {
+		cout << format("{}: {}\n", it->first, it->second);
+	}
+	cout << '\n';
+}
+\end{lstlisting}
+
+Notice the reverse iterators, rbegin() and rend(). It's not possible to change the sort order of a multimap, but it does provide reverse iterators. This makes the multimap behave exactly as we need it for our prioritized list.
+
+
+
+

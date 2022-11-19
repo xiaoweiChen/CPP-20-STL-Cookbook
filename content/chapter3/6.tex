@@ -1,10 +1,153 @@
 
+The vector is a sequential container that keeps elements in the order in which they were inserted. It does not sort elements, nor change their order in any way. Other containers, such as set and map, keep elements sorted, but those containers are not random-access and may not have the features you need. You can, however, keep your vector sorted. It just requires a little bit of management.
 
 \subsubsection{How to do it…}
 
+The idea with this recipe is to create a simple function, insert\_sorted(), that inserts an element into the correct position in a vector to keep the vector sorted.
+
+\begin{itemize}
+\item 
+For convenience, we'll start with a type alias for a vector of strings:
+
+\begin{lstlisting}[style=styleCXX]
+using Vstr = std::vector<std::string>;
+\end{lstlisting}
+
+I like a type alias here because the exact details of the vector are not so important as its application.
+
+\item 
+Then we can define a couple of support functions:
+
+\begin{lstlisting}[style=styleCXX]
+// print a vector
+void printv(const auto& v) {
+	for(const auto& e : v) {
+		cout << format("{} ", e);
+	}
+	cout << "\n";
+}
+
+// is it sorted?
+void psorted(const Vstr& v) {
+	if(std::ranges::is_sorted(v)) cout<< "sorted: ";
+	else cout << "unsorted: ";
+	printv(v);
+}
+\end{lstlisting}
+
+The printv() function is simple enough; it prints the elements of the vector on one line.
+
+The psorted() function uses the ranges version of the is\_sorted() algorithm to tell us if the vector is sorted. Then it calls printv() to print the vector.
+
+\item 
+Now we can initialize a Vstr vector in our main() function:
+
+\begin{lstlisting}[style=styleCXX]
+int main() {
+	Vstr v{
+		"Miles",
+		"Hendrix",
+		"Beatles",
+		"Zappa",
+		"Shostakovich"
+	};
+	psorted(v);
+}
+\end{lstlisting}
+
+Output:
+
+\begin{tcblisting}{commandshell={}}
+unsorted: Miles Hendrix Beatles Zappa Shostakovich
+\end{tcblisting}
+
+At this point we have a Vstr vector with the names of some interesting musicians, in no particular order.
+
+\item 
+Let's sort our vector using the ranges version of the sort() algorithm.
+
+\begin{lstlisting}[style=styleCXX]
+std::ranges::sort(v);
+psorted(v);
+\end{lstlisting}
+
+Output:
+
+\begin{tcblisting}{commandshell={}}
+sorted: Beatles Hendrix Miles Shostakovich Zappa
+\end{tcblisting}
+
+\item 
+At this point, we want to be able to insert items into the vector so that they're already in sorted order. The insert\_sorted() function does this for us:
+
+\begin{lstlisting}[style=styleCXX]
+void insert_sorted(Vstr& v, const string& s) {
+	const auto pos{ std::ranges::lower_bound(v, s) };
+	v.insert(pos, s);
+}
+\end{lstlisting}
+
+The insert\_sorted() function uses the ranges version of the lower\_bound() algorithm to get an iterator for the insert() function that keeps the vector sorted.
+
+\item 
+Now we can use the insert\_sorted() function to insert more musicians into the vector:
+
+\begin{lstlisting}[style=styleCXX]
+insert_sorted(v, "Ella");
+insert_sorted(v, "Stones");
+\end{lstlisting}
+
+Output:
+
+\begin{tcblisting}{commandshell={}}
+sorted: Beatles Ella Hendrix Miles Shostakovich Stones Zappa
+\end{tcblisting}
+\end{itemize}
 
 \subsubsection{How it works…}
 
+The insert\_sorted() function is used to insert elements into a sorted vector while maintaining its order:
+
+\begin{lstlisting}[style=styleCXX]
+void insert_sorted(Vstr& v, const string& s) {
+	const auto pos{ std::ranges::lower_bound(v, s) };
+	v.insert(pos, s);
+}
+\end{lstlisting}
+
+The lower\_bound() algorithm finds the first element not less than the argument. We then use the iterator returned by lower\_bound() to insert an element at the correct position.
+
+In this case we're using the ranges version of lower\_bound(), but either version will work.
 
 \subsubsection{There's more…}
+
+The insert\_sorted() function can be made more generic by using a template. This version will work with other container types, such as set, deque, and list.
+
+\begin{lstlisting}[style=styleCXX]
+template<typename C, typename E>
+void insert_sorted(C& c, const E& e) {
+	const auto pos{ std::ranges::lower_bound(c, e) };
+	c.insert(pos, e);
+}
+\end{lstlisting}
+
+Keep in mind that the std::sort() algorithm (and its derivatives) requires a container that supports random access. Not all STL containers fulfill this requirement. Notably, std::list does not.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 

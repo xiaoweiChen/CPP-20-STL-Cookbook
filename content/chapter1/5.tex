@@ -1,9 +1,190 @@
 
+The three-way comparison operator (<=>), commonly called the spaceship operator because it looks like a flying saucer in profile, is new in C++20. You may wonder, what's wrong with the existing six comparison operators? Nothing at all, and you will continue using them. The purpose of the spaceship is to provide a unified comparison operator for objects.
+
+The common two-way comparison operators return one of two states, true or false, according to the result of the comparison. For example:
+
+\begin{lstlisting}[style=styleCXX]
+const int a = 7;
+const int b = 42;
+static_assert(a < b);
+\end{lstlisting}
+
+The a < b expression uses the less-than comparison operator (<) to test if a is less than b. The comparison operator returns true if the condition is satisfied, or false if not. In this case it returns true because 7 is less than 42.
+
+The three-way comparison works differently. It returns one of three states. The spaceship operator will return a value equal to 0 if the operands are equal, negative if the left-hand operand is less than the right-hand operand, or positive if the left-hand operand is greater than the right-hand operator.
+
+\begin{lstlisting}[style=styleCXX]
+const int a = 7;
+const int b = 42;
+static_assert((a <=> b) < 0);
+\end{lstlisting}
+
+The returned value is not an integer. It's an object from the <compare> header that compares with 0.
+
+If the operands have an integral type, the operator returns a strong\_ordering object from the <compare> library.
+
+\begin{lstlisting}[style=styleCXX]
+strong_ordering::equal // operands are equal
+strong_ordering::less // lhs is less than rhs
+strong_ordering::greater // lhs is greater than rhs
+\end{lstlisting}
+
+If the operands have a floating-point type, the operator returns a partial\_ordering object:
+
+\begin{lstlisting}[style=styleCXX]
+partial_ordering::equivalent // operands are equivelant
+partial_ordering::less // lhs is less than rhs
+partial_ordering::greater // lhs is greater than rhs
+partial_ordering::unordered // if an operand is unordered
+\end{lstlisting}
+
+These objects are designed to compare against a literal zero (0) with conventional comparison operators (for example, (a <=> b) < 0). This allows the results of the three-way comparison to be more precise than conventional comparisons.
+
+If all of that seems a bit complicated, that's okay. For most applications you will never use the spaceship operator directly. Its real power is in its application as a unified comparison operator for objects. Let's dig a bit deeper.
 
 \subsubsection{How to do it…}
 
+Let's look at a simple class that encapsulates an integer and provides comparison operators:
+
+\begin{lstlisting}[style=styleCXX]
+struct Num {
+	int a;
+	constexpr bool operator==(const Num& rhs) const
+	{ return a == rhs.a; }
+	constexpr bool operator!=(const Num& rhs) const
+	{ return !(a == rhs.a); }
+	constexpr bool operator<(const Num& rhs) const
+	{ return a < rhs.a; }
+	constexpr bool operator>(const Num& rhs) const
+	{ return rhs.a < a; }
+	constexpr bool operator<=(const Num& rhs) const
+	{ return !(rhs.a < a); }
+	constexpr bool operator>=(const Num& rhs) const
+	{ return !(a < rhs.a); }
+};
+\end{lstlisting}
+
+It's not uncommon to see a list of comparison operator overloads like this. In fact, it should be even more complicated with non-member friends that work with objects on either side of the operator.
+
+With the new spaceship operator, all of this can be accomplished with one overload:
+
+\begin{lstlisting}[style=styleCXX]
+#include <compare>
+struct Num {
+	int a;
+	constexpr Num(int a) : a{a} {}
+	auto operator<=>(const Num&) const = default;
+};
+\end{lstlisting}
+
+Notice that we need to include the <compare> header for the three-way operator return types. Now we can declare some variables and test them with comparisons:
+
+\begin{lstlisting}[style=styleCXX]
+constexpr Num a{ 7 };
+constexpr Num b{ 7 };
+constexpr Num c{ 42 };
+
+int main() {
+	static_assert(a < c);
+	static_assert(c > a);
+	static_assert(a == b);
+	static_assert(a <= b);
+	static_assert(a <= c);
+	static_assert(c >= a);
+	static_assert(a != c);
+	puts("done.");
+}
+\end{lstlisting}
+
+The compiler will automatically favor the <=> operator for each of the comparisons.
+
+Because the default <=> operator is already constexpr safe, we don't need to declare it as such in our member function.
 
 \subsubsection{How it works…}
 
+The operator<=> overload takes advantage of a new C++20 concept, rewritten expressions. During overload resolution, the compiler rewrites the expression according to a set of rules. For example, if we write a < b, the compiler will rewrite it to (a <=> b < 0) so that it works with our member operator. The compiler will rewrite every relevant comparison expression for the <=> operator, where we haven't included a more specific operator.
+
+In fact, we no longer need a non-member function to handle comparisons with a compatible type on the left-hand side. The compiler will synthesize an expression that works with the member operator. For example, if we write 42 > a, the compiler will synthesize an expression with the operators reversed (a <=> 42 < 0) so that it works with our member operator.
+
+\begin{tcolorbox}[colback=webgreen!5!white,colframe=webgreen!75!black,title=Note]
+The <=> operator has higher precedence than the other comparison operators
+so it will always evaluate first. All comparison operators evaluate left-to-right.
+\end{tcolorbox}
 
 \subsubsection{There's more…}
+
+The default operator will work just fine with a wide variety of classes, including classes with multiple numeric members of different types:
+
+\begin{lstlisting}[style=styleCXX]
+struct Nums {
+	int i;
+	char c;
+	float f;
+	double d;
+	auto operator<=>(const Nums&) const = default;
+};
+\end{lstlisting}
+
+But what if you have a more complex type? Here's an example of a simple fraction class:
+
+\begin{lstlisting}[style=styleCXX]
+struct Frac {
+	long n;
+	long d;
+	constexpr Frac(int a, int b) : n{a}, d{b} {}
+	constexpr double dbl() const {
+		return static_cast<double>(n) /
+		static_cast<double>(d);
+	}
+	constexpr auto operator<=>(const Frac& rhs) const {
+		return dbl() <=> rhs.dbl();
+	};
+	constexpr auto operator==(const Frac& rhs) const {
+		return dbl() <=> rhs.dbl() == 0;
+	};
+};
+\end{lstlisting}
+
+In this case we need to define the operator<=> overload because our data members are not stand-alone scalar values. It's still quite simple and it works just as well.
+
+Notice that we also needed an operator== overload. This is because the expression rewrite rules will not rewrite == and != with a custom operator<=> overload. You only need to define operator==. The compiler will rewrite the != expression as needed.
+
+Now we can define some objects:
+
+\begin{lstlisting}[style=styleCXX]
+constexpr Frac a(10,15); // compares equal with 2/3
+constexpr Frac b(2,3);
+constexpr Frac c(5,3);
+\end{lstlisting}
+
+And we can test them with normal comparison operators, as expected:
+
+\begin{lstlisting}[style=styleCXX]
+int main() {
+	static_assert(a < c);
+	static_assert(c > a);
+	static_assert(a == b);
+	static_assert(a <= b);
+	static_assert(a <= c);
+	static_assert(c >= a);
+	static_assert(a != c);
+}
+\end{lstlisting}
+
+The power of the spaceship operator is in its ability to streamline comparison overloads in your classes. It improves both simplicity and efficiency when compared to overloading each operator independently
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

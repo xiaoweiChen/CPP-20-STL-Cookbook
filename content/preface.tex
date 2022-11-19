@@ -1,0 +1,253 @@
+\begin{flushright}
+	\zihao{1} 前言
+\end{flushright}
+
+\noindent
+\textbf{About this book }
+
+The C++20 STL Cookbook provides recipes to help you get the most out of the C++ STL (Standard Template Library), including new features introduced with C++20.
+
+C++ is a rich and powerful language. Built upon C, with syntactic extensions for type safety, generic programming, and object-oriented programming, C++ is essentially a low-level language. The STL provides a broad set of higher-level classes, functions, and algorithms to make your programming job easier, more effective, and less prone to error.
+
+I've often said that C++ is five languages cobbled into one. The formal specification includes 1) the entire C language, 2) C's cryptic-yet-powerful macro preprocessor, 3) a feature-rich class/object model, 4) a generic programming model called templates, and finally, built upon C++ classes and templates, 5) the STL.
+
+\noindent
+\textbf{Prerequisite knowledge}
+
+This book presumes that you have a basic understanding of C++, including syntax, structure, data types, classes and objects, templates, and the STL.
+
+The recipes and examples in this book presume that you understand the need to \#include certain headers to use library functions. The recipes don't usually list all the necessary headers, preferring to focus on the techniques at hand. You're encouraged to download the example code, which has all the necessary \#include directives and other front matter.
+
+You may download the example code from GitHub: \url{https://github.com/ PacktPublishing/CPP-20-STL-Cookbook}.
+
+\noindent
+\textbf{This book uses the C++20 standard}
+
+The C++ language is standardized by the International Organization for Standardization (ISO) on a roughly three-year cycle. The current standard is called C++20 (which was preceded by C++17, C++14, and C++11 before that). C++20 was approved in September 2020.
+
+C++20 adds many important features to the language and the STL. New features like format, modules, ranges, and more will have significant impact on the way we use the STL.
+
+There are also convenience changes. For example, if you want to remove every matching element of a vector, you may have been using the erase-remove idiom like this:
+
+\begin{lstlisting}[style=styleCXX]
+auto it = std::remove(vec1.begin(), vec1.end(), value);
+vec1.erase(it, vec1.end());
+\end{lstlisting}
+
+Starting with C++20 you can use the new std::erase function and do all of that in one simple, optimized function call:
+
+\begin{lstlisting}[style=styleCXX]
+std::erase(vec1, value);
+\end{lstlisting}
+
+C++20 has many improvements, both subtle and substantial. In this book, we will cover much of it, especially what's relevant to the STL.
+
+\noindent
+\textbf{Braced initialization}
+
+You may notice that the recipes in this book often use braced initialization in place of the more familiar copy initialization.
+
+\begin{lstlisting}[style=styleCMake]
+std::string name{ "Jimi Hendrix" }; // braced initialization
+std::string name = "Jimi Hendrix"; // copy initialization
+\end{lstlisting}
+
+The = operator pulls double-duty as both an assignment and a copy operator. It's common, familiar, and it works, so we've all been using it forever.
+
+The downside of the = operator is that it's also a copy constructor, which often means implicit narrowing conversion. This is both inefficient and can lead to unintended type conversions, which can be difficult to debug.
+
+Braced initialization uses the list initialization operator \{\} (introduced in C++11) to avoid those side effects. It's a good habit to get into and you'll see it a lot in this book.
+
+It's also worth noting that the special case of T\{\} is guaranteed to be zero-initialized.
+
+\begin{lstlisting}[style=styleCXX]
+int x; // uninitialized bad :(
+int x = 0; // zero (copy constructed) good :)
+int x{}; // zero (zero-initialized) best :D
+\end{lstlisting}
+
+The empty brace zero initialization offers a useful shortcut for initializing new variables.
+
+\noindent
+\textbf{Hiding the std:: namespace}
+
+In most instances, the exercises in this book will hide the std:: namespace. This is mostly for page space and readability considerations. We all know that most STL identifiers are in the std:: namespace. I will normally use some form of the using declaration to avoid cluttering the examples with repetitive prefixes. For example, when using cout you can presume I've included a using declaration like this:
+
+\begin{lstlisting}[style=styleCXX]
+using std::cout; // cout is now sans prefix
+cout << "Hello, Jimi!\n";
+\end{lstlisting}
+
+I usually will not show the using declaration in the recipe listings. This allows us to focus on the purpose of the example.
+
+It is poor practice to import the entire std:: namespace in your code. You should avoid a using namespace declaration like this:
+
+\begin{lstlisting}[style=styleCXX]
+using namespace std; // bad. don't do that.
+cout << "Hello, Jimi!\n";
+\end{lstlisting}
+
+The std:: namespace includes thousands of identifiers and there's no good reason to clutter your namespace with them. The potential for collisions is not trivial, and can be hard to track down. When you want to use a name without the std:: prefix, the preferred method is to import a single name at a time, as above.
+
+To further avoid namespace collisions, I often use a separate namespace for classes that will be re-used. I tend to use namespace bw for my personal namespace. You may use something else that works for you.
+
+\noindent
+\textbf{Type aliases with using}
+
+This book uses the using directive for type aliases instead of typedef.
+
+STL classes and types can be verbose at times. A templated iterator class, for example, may look like this:
+
+\begin{lstlisting}[style=styleCXX]
+std::vector<std::pair<int,std::string>>::iterator
+\end{lstlisting}
+
+Long type names are not just hard to type, they are prone to error.
+
+One common technique is to abbreviate long type names with typedef:
+
+\begin{lstlisting}[style=styleCXX]
+typedef std::vector<std::pair<int,std::string>>::iterator
+vecit_t
+\end{lstlisting}
+
+This declares an alias for our unwieldy iterator type. typedef is inherited from C and its syntax reflects that.
+
+Beginning with C+11, the using keyword may be used to create a type alias:
+
+\begin{lstlisting}[style=styleCXX]
+using vecit_t =
+std::vector<std::pair<int,std::string>>::iterator;
+\end{lstlisting}
+
+In most circumstances, a using alias is equivalent to typedef. The most significant difference is that a using alias may be templated:
+
+\begin{lstlisting}[style=styleCXX]
+template<typename T>
+using v = std::vector<T>;
+v<int> x{};
+\end{lstlisting}
+
+For these reasons, and for the sake of clarity, this book prefers the using directive for type aliases.
+
+\noindent
+\textbf{Abbreviated function templates}
+
+Beginning with C++20, an abbreviated function template may be specified without the template header. For example:
+
+\begin{lstlisting}[style=styleCXX]
+void printc(const auto& c) {
+	for (auto i : c) {
+		std::cout << i << '\n';
+	}
+}
+\end{lstlisting}
+
+The auto type in a parameter list works like an anonymous template typename. It is equivalent to:
+
+\begin{lstlisting}[style=styleCXX]
+template<typename C>
+void printc(const C& c) {
+	for (auto i : c) {
+		std::cout << i << '\n';
+	}
+}
+\end{lstlisting}
+
+Though new in C++20, abbreviated function templates have been supported by the major compilers for some time already. This book will use abbreviated function templates in many of the examples.
+
+\noindent
+\textbf{The C++20 format() functi}
+
+Until C++20 we've had a choice of using legacy printf() or the STL cout for formatting text. Both have serious flaws but we've used them because they work. Beginning with C++20, the format() function provides text formatting inspired by Python 3's formatter.
+
+This course uses the new STL format() function liberally. Please see Chapter 1, New C++20 Features, for a more comprehensive description.
+
+\noindent
+\textbf{Use the STL to solve real-world problems }
+
+The recipes in this book use the STL to provide real-world solutions to real-world problems. They have been designed to rely exclusively on the STL and C++ standard libraries, with no external libraries. This should make it easy for you to experiment and learn without the distractions of installing and configuring third-party code.
+
+Now, let's go have some fun with the STL. Happy learning!
+
+\hspace*{\fill} \\ %插入空行
+\noindent
+\textbf{Who this book is for}
+
+This book is for intermediate to advanced C++ programmers who want to get more out of the C++20 Standard Template Library. Basic knowledge of coding and C++ concepts are necessary to get the most out of this book.
+
+\hspace*{\fill} \\ %插入空行
+\noindent
+\textbf{What this book covers}
+
+Chapter 1, New C++20 Features, introduces the new STL features in C++20. It aims to familiarize you with the new language features so you may use them with the STL.
+
+Chapter 2, General STL Features, discusses modern STL features added in recent C++ versions.
+
+Chapter 3, STL Containers, covers the STL's comprehensive library of containers.
+
+Chapter 4, Compatible Iterators, shows how to use and create STL-compatible iterators.
+
+Chapter 5, Lambda Expressions, covers the use of lambdas with STL functions and algorithms.
+
+Chapter 6, STL Algorithms, provides recipes for using and creating STL-compatible algorithms.
+
+Chapter 7, Strings, Stream, and Formatting, describes the STL string and formatter classes.
+
+Chapter 8, Utility Classes, covers STL utilities for date-and-time, smart pointers, optionals, and more.
+
+Chapter 9, Concurrency and Parallelism, describes support for concurrency, including threads, async, atomic types, and more.
+
+Chapter 10, Using the File System, covers the std::filesystem classes and how to put them to use with the latest advancements that came out with C++20.
+
+Chapter 11, A Few More Ideas, provides a few more solutions, including a trie class, string split, and more. This provides advanced examples on how to put the STL to use for realworld problems.
+
+\hspace*{\fill} \\ %插入空行
+\noindent
+\textbf{The recipes in this book use the GCC compiler}
+
+Unless otherwise noted, most of the recipes in this book have been developed and tested using the GCC compiler, version 11.2, the latest stable version as of this writing.
+
+As I write this, C++20 is still new and is not fully implemented on any available compiler. Of the three major compilers, GCC (GNU), MSVC (Microsoft), and Clang (Apple), the MSVC compiler is furthest along in implementing the new standard. Occasionally, we may run into a feature that is implemented on MSVC or another compiler, but not on GCC, in which case I will note which compiler I used. If a feature is not yet implemented on any available compiler, I will explain that I was unable to test it.
+
+
+\begin{table}[H]
+	\begin{tabular}{|cc|}
+		\hline
+		\multicolumn{2}{|c|}{Where possible, code has been tested on one or more of these compilers} \\ \hline
+		\multicolumn{1}{|c|}{GCC 11.2}                  & Debian Linux 5.16.11    \\ \hline
+		\multicolumn{1}{|c|}{LLVM/Clang 13.1.6}         & macOS 12.13/Darwin 21.4 \\ \hline
+		\multicolumn{1}{|c|}{Microsoft C++ 19.32.31302} & Windows 10              \\ \hline
+	\end{tabular}
+\end{table}
+
+
+I strongly recommend that you install GCC to follow along with the recipes in this book. GCC is freely available under the GNU General Public License (GPL). The easiest way to get the latest version of GCC is to install Debian Linux (also GPL) and use apt with the testing repository.
+
+\textbf{如果您正在使用这本书的数字版本，建议您自己输入代码或从本书的GitHub存储库访问代码(下一节有链接)。这样做将帮助您避免与复制和粘贴代码相关的错误。}
+
+
+\hspace*{\fill} \\ %插入空行
+\noindent
+\textbf{下载示例}
+
+可以从GitHub上下载这本书的示例代码文件\url{https://github.com/PacktPublishing/CPP-20-STL-Cookbook}。若代码有更新，会在GitHub存储库中更新。
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

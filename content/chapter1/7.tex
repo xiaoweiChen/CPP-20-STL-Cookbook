@@ -1,9 +1,240 @@
 
+Templates are great for writing code that works with different types. For example, this function will work with any numeric type:
+
+\begin{lstlisting}[style=styleCXX]
+template <typename T>
+T arg42(const T & arg) {
+	return arg + 42;
+}
+\end{lstlisting}
+
+But what happens when you try to call it with a non-numeric type?
+
+\begin{lstlisting}[style=styleCXX]
+const char * n = "7";
+cout << "result is " << arg42(n) << "\n";
+\end{lstlisting}
+
+Output:
+
+\begin{tcblisting}{commandshell={}}
+Result is ion
+\end{tcblisting}
+
+This compiles and runs without error, but the result is unpredictable. In fact, the call is dangerous and it could easily crash or become a vulnerability. I would much prefer the compiler generate an error message so I can fix the code.
+
+Now, with concepts, I can write it like this:
+
+\begin{lstlisting}[style=styleCXX]
+template <typename T>
+requires Numeric<T>
+T arg42(const T & arg) {
+	return arg + 42;
+}
+\end{lstlisting}
+
+The requires keyword is new for C++20. It applies constraints to a template. Numeric is the name of a concept that only accepts integer and floating-point types. Now, when I compile this code with a non-numeric parameter, I get a reasonable compiler error:
+
+\begin{tcblisting}{commandshell={}}
+error: 'arg42': no matching overloaded function found
+error: 'arg42': the associated constraints are not satisfied
+\end{tcblisting}
+
+Error messages like this are far more useful than most compiler errors.
+
+Let's take a closer look at how to use concepts and constraints in your code.
+
 
 \subsubsection{How to do it…}
 
+A concept is simply a named constraint. The Numeric concept from above looks like this:
+
+\begin{lstlisting}[style=styleCXX]
+#include <concepts>
+template <typename T>
+concept Numeric = integral<T> || floating_point<T>;
+\end{lstlisting}
+
+This concept requires a type T, which satisfies either the std::integral or std::floating\_point predefined concepts. These concepts are included in the <concepts> header.
+
+Concepts and constraints may be used in class templates, function templates, or variable templates. We've seen a constrained function template, now here's a simple constrained class template example:
+
+\begin{lstlisting}[style=styleCXX]
+template<typename T>
+requires Numeric<T>
+struct Num {
+	T n;
+	Num(T n) : n{n} {}
+};
+\end{lstlisting}
+
+And here's a simple variable template example:
+
+\begin{lstlisting}[style=styleCXX]
+template<typename T>
+requires floating_point<T>
+T pi{3.1415926535897932385L};
+\end{lstlisting}
+
+You can use concepts and constraints on any template. Let's consider some further examples. We'll be using function templates in these examples for simplicity.
+
+\begin{itemize}
+\item 
+A constraint may use concepts or type traits to evaluate the characteristics of a type. You may use any of the type traits found in the <type\_traits> header, so long as it returns a bool.
+
+For example:
+
+\begin{lstlisting}[style=styleCXX]
+template<typename T>
+requires is_integral<T>::value // value is bool
+constexpr double avg(vector<T> const& vec) {
+	double sum{ accumulate(vec.begin(), vec.end(),
+		0.0)
+	};
+	return sum / vec.size();
+}
+\end{lstlisting}
+
+\item 
+The requires keyword is new in C++20. It introduces a constraint for the template arguments. In this example, the constraint expression tests the template argument against the type trait is\_integral.
+
+\item 
+You can use one of the pre-defined traits found in the <type\_traits> header, or you can define your own, just as you would a template variable. For use in constraints, the variable must return constexpr bool. For example:
+
+\begin{lstlisting}[style=styleCXX]
+template<typename T>
+constexpr bool is_gt_byte{ sizeof(T) > 1 };
+\end{lstlisting}
+
+This defines a type trait called is\_gt\_byte. This trait uses the sizeof operator to test if the type T is larger than 1 byte.
+
+\item 
+A concept is simply a named set of constraints. For example:
+
+\begin{lstlisting}[style=styleCXX]
+template<typename T>
+concept Numeric = is_gt_byte<T> &&
+	(integral<T> || floating_point<T>);
+\end{lstlisting}
+
+This defines a concept named Numeric. It uses our is\_gt\_byte constraint, along with the floating\_point and integral concepts from the <concepts> header. We can use it to constrain a template to only accept numeric types that are greater than 1 byte in size.
+
+\begin{lstlisting}[style=styleCXX]
+template<Numeric T>
+T arg42(const T & arg) {
+	return arg + 42;
+}
+\end{lstlisting}
+
+You'll notice that I've applied the constraint in the template declaration, rather than on a separate line in a requires expression. There are a few ways to apply a concept. Let's look at how this works.
+\end{itemize}
 
 \subsubsection{How it works…}
 
+There are several different ways you can apply a concept or constraint:
+
+\begin{itemize}
+\item 
+You can apply a concept or constraint with the requires keyword:
+
+\begin{lstlisting}[style=styleCXX]
+template<typename T>
+requires Numeric<T>
+T arg42(const T & arg) {
+	return arg + 42;
+}
+\end{lstlisting}
+
+
+\item 
+You can apply a concept in the template declaration:
+
+\begin{lstlisting}[style=styleCXX]
+template<Numeric T>
+T arg42(const T & arg) {
+	return arg + 42;
+}
+\end{lstlisting}
+
+\item 
+You can use the requires keyword in a function signature:
+
+\begin{lstlisting}[style=styleCXX]
+template<typename T>
+T arg42(const T & arg) requires Numeric<T> {
+	return arg + 42;
+}
+\end{lstlisting}
+
+\item 
+Or you can use a concept in a parameter list for an abbreviated function template:
+
+\begin{lstlisting}[style=styleCXX]
+auto arg42(Numeric auto & arg) {
+	return arg + 42;
+}
+\end{lstlisting}
+\end{itemize}
+
+For many purposes, choosing one of these strategies may be a matter of style. And there are circumstances where one may be a better option than another.
 
 \subsubsection{There's more…}
+
+The standard uses the terms conjunction, disjunction, and atomic, to describe types of expressions that can be used to construct a constraint. Let's define these terms.
+
+You can combine concepts and constraints using the \&\& and || operators. These combinations are called conjunctions and disjunctions, respectively. You can think of them as logical AND and OR.
+
+A constraint conjunction is formed by using the \&\& operator with two constraints:
+
+\begin{lstlisting}[style=styleCXX]
+Template <typename T>
+concept Integral_s = Integral<T> && is_signed<T>::value;
+\end{lstlisting}
+
+A conjunction is satisfied only if both sides of the \&\& operator are satisfied. It is evaluated left-to-right. The operands of a conjunction are short-circuited, that is, if the left side constraint is not satisfied the right side will not be evaluated.
+
+A constraint disjunction is formed by using the || operator with two constraints:
+
+\begin{lstlisting}[style=styleCXX]
+Template <typename T>
+concept Numeric = integral<T> || floating_point<T>;
+\end{lstlisting}
+
+A disjunction is satisfied if either side of the || operator is satisfied. It is evaluated left-to-right. The operands of a conjunction are short-circuited, that is, if the left side constraint is satisfied the right side will not be evaluated.
+
+An atomic constraint is an expression that returns a bool type, which cannot be further decomposed. In other words, it is not a conjunction or a disjunction.
+
+\begin{lstlisting}[style=styleCXX]
+template<typename T>
+concept is_gt_byte = sizeof(T) > 1;
+\end{lstlisting}
+
+You can also use the logical! (NOT) operator in an atomic constraint:
+
+\begin{lstlisting}[style=styleCXX]
+template<typename T>
+concept is_byte = !is_gt_byte<T>;
+\end{lstlisting}
+
+As expected, the ! operator inverts the value of the bool expression to the right of the !.
+
+Of course, we can combine all these expression types into a larger expression. We see examples of each of these constraint expressions in the following example:
+
+\begin{lstlisting}[style=styleCXX]
+template<typename T>
+concept Numeric = is_gt_byte<T> &&
+(integral<T> || floating_point<T>);
+\end{lstlisting}
+
+Let's break this down. The sub-expression, (integral<T> || floating\_point<T>) is a disjunction. The sub-expression, is\_gt\_byte<T> \&\& (…) is a conjunction. And each of the sub-expressions integral<T>, floating\_point<T>, and is\_gt\_byte<T>, are atomic.
+
+These distinctions are mostly for descriptive purposes. While it's good to understand the details, as you write your code, it's safe to think of them as simple logical ||, \&\&, and ! operators.
+
+Concepts and constraints are a welcome addition to the C++ standard and I'm looking forward to using them in my future projects.
+
+
+
+
+
+
+

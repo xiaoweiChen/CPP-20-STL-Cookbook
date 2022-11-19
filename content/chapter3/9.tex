@@ -1,8 +1,152 @@
 
+With an ordered map, the type of the key must be sortable, which means it must at least support the less-than < comparison operator. Suppose you want to use an associative container with a custom type that is not sortable. For example, a vector where (0, 1) is not smaller or larger than (1, 0), it simply points in a different direction. In such cases, you may still use the unordered\_map type. Let's look at how to do this.
 
 \subsubsection{How to do it…}
 
+For this recipe we'll create an unordered\_map object that uses x/y coordinates for the key. We will need a few support functions for this.
+
+\begin{itemize}
+\item 
+First, we'll define a structure for the coordinates:
+
+\begin{lstlisting}[style=styleCXX]
+struct Coord {
+	int x{};
+	int y{};
+};
+\end{lstlisting}
+
+This is a simple structure with two members, x and y, for the coordinates.
+
+\item 
+Our map will use the Coord structure for the key, and an int for the value:
+
+\begin{lstlisting}[style=styleCXX]
+using Coordmap = unordered_map<Coord, int>;
+\end{lstlisting}
+
+We use a using alias to make it convenient to use our map.
+
+\item 
+To use the Coord struct as a key, we need a couple of overloads. These are required for use with an unordered\_map. First, we'll define an equality comparison operator:
+
+\begin{lstlisting}[style=styleCXX]
+bool operator==(const Coord& lhs, const Coord& rhs) {
+	return lhs.x == rhs.x && lhs.y == rhs.y;
+}
+\end{lstlisting}
+
+It's a simple function that compares the x members with each other, and the y members with each other.
+
+\item 
+We also need a std::hash class specialization. This makes it possible to retrieve map elements with the key:
+
+\begin{lstlisting}[style=styleCXX]
+namespace std {
+	template<>
+	struct hash<Coord> {
+		size_t operator()(const Coord& c) const {
+			return static_cast<size_t>(c.x)
+			+ static_cast<size_t>(c.y);
+		}
+	};
+}
+\end{lstlisting}
+
+This provides a specialization for the default hash class used by the std::unordered\_map class. It must be in the std namespace.
+
+\item 
+We'll also write a print function to print a Coordmap object:
+
+\begin{lstlisting}[style=styleCXX]
+void print_Coordmap(const Coordmap& m) {
+	for (const auto& [key, value] : m) {
+		cout << format("{{ ({}, {}): {} }} ",
+		key.x, key.y, value);
+	}
+	cout << '\n';
+}
+\end{lstlisting}
+
+This uses the C++20 format() function to print the x/y key and the value.
+Notice the use of the double braces, \{\{ and \}\}, to print single braces.
+
+\item 
+Now that we have all our support functions, we can write the main() function.
+
+\begin{lstlisting}[style=styleCXX]
+int main() {
+	Coordmap m {
+		{ {0, 0}, 1 },
+		{ {0, 1}, 2 },
+		{ {2, 1}, 3 }
+	};
+	print_Coordmap(m);
+}
+\end{lstlisting}
+
+Output:
+
+\begin{tcblisting}{commandshell={}}
+{ (2, 1): 3 } { (0, 1): 2 } { (0, 0): 1 }
+\end{tcblisting}
+
+At this point, we've defined a Coordmap object that accepts Coord objects for the keys and maps them to arbitrary values.
+
+\item 
+We can also access individual members based on the Coord keys:
+
+\begin{lstlisting}[style=styleCXX]
+Coord k{ 0, 1 };
+cout << format("{{ ({}, {}): {} }}\n", k.x, k.y,
+m.at(k));
+\end{lstlisting}
+
+Output:
+
+\begin{tcblisting}{commandshell={}}
+{ (0, 1): 2 }
+\end{tcblisting}
+
+Here we define a Coord object named k, and we use that with the at() function to retrieve a value from the unordered\_map.
+
+\end{itemize}
 
 \subsubsection{How it works…}
+
+The unordered\_map class relies on a hash class to lookup elements from the key.
+We normally instantiate an object like this:
+
+\begin{lstlisting}[style=styleCXX]
+std::unordered_map<key_type, value_type> my_map;
+\end{lstlisting}
+
+What's not obvious here is that, because we haven't one, it's using a default hash class. The full template type definition of the unordered\_map class looks like this:
+
+\begin{lstlisting}[style=styleCXX]
+template<
+	class Key,
+	class T,
+	class Hash = std::hash<Key>,
+	class KeyEqual = std::equal_to<Key>,
+	class Allocator = std::allocator< std::pair<const Key,
+		T> >
+> class unordered_map;
+\end{lstlisting}
+
+The template provides default values for Hash, KeyEqual, and Allocator, so we don't normally include them in our definitions. In our example, we've provided a specialization for the default std::hash class.
+
+The STL contains specializations of std::hash for most of the standard types, like string, int, and so on. For it to work with our class, it needs a specialization.
+
+We could have passed a function to the template parameter, like this:
+
+\begin{lstlisting}[style=styleCXX]
+std::unordered_map<coord, value_type, my_hash_type> my_map;
+\end{lstlisting}
+
+That certainly would work. In my view, the specialization is more general.
+
+
+
 
 

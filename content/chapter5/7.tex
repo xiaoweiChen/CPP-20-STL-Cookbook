@@ -1,7 +1,92 @@
 
+This example wraps a lambda in a function to create a custom conjunction for use with an algorithm predicate.
 
 \subsubsection{How to do it…}
 
+The copy\_if() algorithm requires a predicate that takes one parameter. In this recipe, we will create a predicate lambda from three other lambdas:
+
+\begin{itemize}
+\item 
+First, we'll write the combine() function. This function returns a lambda for use with the copy\_if() algorithm:
+
+\begin{lstlisting}[style=styleCXX]
+template <typename F, typename A, typename B>
+auto combine(F binary_func, A a, B b) {
+	return [=](auto param) {
+		return binary_func(a(param), b(param));
+	};
+}
+\end{lstlisting}
+
+The combine() function takes three function parameters – a binary conjunction and two predicates – and returns a lambda that calls the conjunction with the two predicates.
+
+\item 
+In the main() function, we create the lambdas for use with combine():
+
+\begin{lstlisting}[style=styleCXX]
+int main() {
+	auto begins_with = [](const string &s){
+		return s.find("a") == 0;
+	};
+	auto ends_with = [](const string &s){
+		return s.rfind("b") == s.length() - 1;
+	};
+	auto bool_and = [](const auto& l, const auto& r){
+		return l && r;
+	};
+\end{lstlisting}
+
+The begins\_with and ends\_with lambdas are simple filter predicates to find strings that begin with 'a' and end with 'b', respectively. The bool\_and lambda is the conjunction.
+
+\item 
+Now we can call the copy\_if algorithm with combine():
+
+\begin{lstlisting}[style=styleCXX]
+std::copy_if(istream_iterator<string>{cin}, {},
+			ostream_iterator<string>{cout, " "},
+			combine(bool_and, begins_with,
+				ends_with));
+cout << '\n';
+\end{lstlisting}
+
+The combine() function returns a lambda that combines the two predicates with the conjunction.
+
+The output looks like the following:
+
+\begin{tcblisting}{commandshell={}}
+$ echo aabb bbaa foo bar abazb | ./conjunction
+aabb abazb
+\end{tcblisting}
+\end{itemize}
 
 \subsubsection{How it works…}
+
+The std::copy\_if() algorithm requires a predicate function that takes one parameter, but our conjunction requires two parameters, each of which require one parameter. We resolve this with a function that returns a lambda specifically for this context:
+
+\begin{lstlisting}[style=styleCXX]
+template <typename F, typename A, typename B>
+auto combine(F binary_func, A a, B b) {
+	return [=](auto param) {
+		return binary_func(a(param), b(param));
+	};
+}
+\end{lstlisting}
+
+The combine() function creates a lambda from three parameters, each of which is a function. The returned lambda takes the one parameter that's required of the predicate function. Now we can call copy\_if() with the combine() function:
+
+\begin{lstlisting}[style=styleCXX]
+std::copy_if(istream_iterator<string>{cin}, {},
+			ostream_iterator<string>{cout, " "},
+			combine(bool_and, begins_with, ends_with));
+\end{lstlisting}
+
+This passes the combined lambda to the algorithm so it can operate within that context.
+
+
+
+
+
+
+
+
 

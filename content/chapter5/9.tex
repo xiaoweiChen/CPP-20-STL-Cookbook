@@ -1,5 +1,105 @@
+
+A jump table is a useful pattern when you want to select an action from a user or other input. Jump tables are often implemented in if/else or switch structures. In this recipe, we'll build a concise jump table using only an STL map and anonymous lambdas.
+
+
 \subsubsection{How to do it…}
+
+It's easy to build a simple jump table from a map and lambdas. The map provides simple indexed navigation and the lambda can be stored as payload. Here's how to do it:
+
+\begin{itemize}
+\item 
+First, we'll create a simple prompt() function to get input from the console:
+
+\begin{lstlisting}[style=styleCXX]
+const char prompt(const char * p) {
+	std::string r;
+	cout << format("{} > ", p);
+	std::getline(cin, r, '\n');
+	
+	if(r.size() < 1) return '\0';
+	if(r.size() > 1) {
+		cout << "Response too long\n";
+		return '\0';
+	}
+	return toupper(r[0]);
+}
+\end{lstlisting}
+
+The C-string parameter is used as a prompt. std::getline() is called to get input from the user. The response is stored in r, checked for length, then if it's one character in length, it's converted to uppercase and returned.
+
+\item 
+In the main() function, we declare and initialize a map of lambdas:
+
+\begin{lstlisting}[style=styleCXX]
+using jumpfunc = void(*)();
+map<const char, jumpfunc> jumpmap {
+	{ 'A', []{ cout << "func A\n"; } },
+	{ 'B', []{ cout << "func B\n"; } },
+	{ 'C', []{ cout << "func C\n"; } },
+	{ 'D', []{ cout << "func D\n"; } },
+	{ 'X', []{ cout << "Bye!\n"; } }
+};
+\end{lstlisting}
+
+The map container is loaded with anonymous lambdas for the jump table.
+These lambdas could easily call other functions or perform simple tasks.
+
+The using alias is for convenience. We're using the function pointer type void(*) () for the lambda payload. If you prefer, you could use std::function() if you need more flexibility or if you just find it more readable. It has very little overhead:
+
+\begin{lstlisting}[style=styleCXX]
+using jumpfunc = std::function<void()>;
+\end{lstlisting}
+
+\item 
+Now we can prompt for user input and select an action from the map:
+
+\begin{lstlisting}[style=styleCXX]
+char select{};
+while(select != 'X') {
+	if((select = prompt("select A/B/C/D/X"))) {
+		auto it = jumpmap.find(select);
+		if(it != jumpmap.end()) it->second();
+		else cout << "Invalid response\n";
+	}
+}
+\end{lstlisting}
+
+This is how we use the map-based jump table. We loop until 'X' is selected for exit. We call prompt() with a prompt string, call find() on the map object, then call the lambda with it->second().
+\end{itemize}
 
 
 \subsubsection{How it works…}
+
+The map container makes an excellent jump table. It's concise and easy to navigate:
+
+\begin{lstlisting}[style=styleCXX]
+using jumpfunc = void(*)();
+map<const char, jumpfunc> jumpmap {
+	{ 'A', []{ cout << "func A\n"; } },
+	{ 'B', []{ cout << "func B\n"; } },
+	{ 'C', []{ cout << "func C\n"; } },
+	{ 'D', []{ cout << "func D\n"; } },
+	{ 'X', []{ cout << "Bye!\n"; } }
+};
+\end{lstlisting}
+
+Anonymous lambdas are stored as payload in the map container. The keys are the character responses from the menu of actions.
+
+You can test the validity of a key and select a lambda in one action:
+
+\begin{lstlisting}[style=styleCXX]
+auto it = jumpmap.find(select);
+if(it != jumpmap.end()) it->second();
+else cout << "Invalid response\n";
+\end{lstlisting}
+
+This is a simple, elegant solution, where we would have otherwise used awkward branching code.
+
+
+
+
+
+
+
+
 

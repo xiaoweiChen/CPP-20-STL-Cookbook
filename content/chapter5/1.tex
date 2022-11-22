@@ -1,7 +1,115 @@
 
+A lambda is essentially an anonymous function as a literal expression:
 
+\begin{lstlisting}[style=styleCXX]
+auto la = []{ return "Hello\n"; };
+\end{lstlisting}
+
+The variable la may now be used as if it were a function:
+
+\begin{lstlisting}[style=styleCXX]
+cout << la();
+\end{lstlisting}
+
+It can be passed to another function:
+
+\begin{lstlisting}[style=styleCXX]
+f(la);
+\end{lstlisting}
+
+It can be passed to another lambda:
+
+\begin{lstlisting}[style=styleCXX]
+const auto la = []{ return "Hello\n"; };
+const auto lb = [](auto a){ return a(); };
+cout << lb(la);
+\end{lstlisting}
+
+Output:
+
+\begin{tcblisting}{commandshell={}}
+Hello
+\end{tcblisting}
+
+Or it can be passed anonymously (as a literal):
+
+\begin{lstlisting}[style=styleCXX]
+const auto lb = [](auto a){ return a(); };
+cout << lb([]{ return "Hello\n"; });
+\end{lstlisting}
 
 \subsubsection{Closures}
+
+The term closure is often applied to any anonymous function. Strictly speaking, a closure is a function that allows the use of symbols outside its own lexical scope.
+
+You may have noticed the square brackets in the definition of a lambda:
+
+\begin{lstlisting}[style=styleCXX]
+auto la = []{ return "Hello\n"; };
+\end{lstlisting}
+
+The square brackets are used to specify a list of captures. Captures are outside variables that are accessible from within the scope of the lambda body. If I try to use an outside variable without listing it as a capture, I'll get a compilation error:
+
+\begin{lstlisting}[style=styleCXX]
+const char * greeting{ "Hello\n" };
+const auto la = []{ return greeting; };
+cout << la();
+\end{lstlisting}
+
+When I try to compile this with GCC, I get the following error:
+
+\begin{tcblisting}{commandshell={}}
+In lambda function:
+error: 'greeting' is not captured
+\end{tcblisting}
+
+This is because the body of the lambda has its own lexical scope and the greeting variable is outside of that scope.
+
+I can specify the greeting variable in a capture. This allows the variable into the scope of the lambda:
+
+\begin{lstlisting}[style=styleCXX]
+const char * greeting{ "Hello\n" };
+const auto la = [greeting]{ return greeting; };
+cout << la();
+\end{lstlisting}
+
+Now it compiles and runs as expected:
+
+\begin{tcblisting}{commandshell={}}
+$ ./working
+Hello
+\end{tcblisting}
+
+This ability to capture variables outside its own scope is what makes a lambda a closure.
+People use the term in different ways, and that's fine, so long as we can understand each other. Still, it's good to know what the term means.
+
+Lambda expressions allow us to write good, clean generic code. They allow the use of functional programming patterns, where we can use lambdas as functional parameters to algorithms and even other lambdas.
+
+In this chapter, we will cover the use of lambdas with the STL, in the following recipes:
+
+\begin{itemize}
+\item 
+Use lambdas for scoped reusable code
+
+\item 
+Use lambdas as predicates with the algorithm library
+
+\item 
+Use std::function as a polymorphic wrapper
+
+\item 
+Concatenate lambdas with recursion
+
+\item 
+Combine predicates with logical conjunction
+
+\item 
+Call multiple lambdas with the same input
+
+\item 
+Use mapped lambdas for a jump table
+\end{itemize}
+
 
 
 

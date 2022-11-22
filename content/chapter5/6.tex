@@ -1,9 +1,79 @@
 
+You can stack lambdas so that the output of one is the input of the next, using a simple recursive function. This creates a simple way to build one function upon another.
 
 \subsubsection{How to do it…}
 
+This is a short and simple recipe that uses one recursive function to do most of the work:
+
+\begin{itemize}
+\item 
+We'll start by defining the concatenation function concat():
+
+\begin{lstlisting}[style=styleCXX]
+template <typename T, typename ...Ts>
+auto concat(T t, Ts ...ts) {
+	if constexpr (sizeof...(ts) > 0) {
+		return [&](auto ...parameters) {
+			return t(concat(ts...)(parameters...));
+		};
+	} else {
+		return t;
+	}
+}
+\end{lstlisting}
+
+This function returns an anonymous lambda, which in turn calls the function again, until the parameter pack is exhausted.
+
+\item 
+In the main() function, we create a couple of lambdas and call the concat() function with them:
+
+\begin{lstlisting}[style=styleCXX]
+int main() {
+	auto twice = [](auto i) { return i * 2; };
+	auto thrice = [](auto i) { return i * 3; };
+	auto combined = concat(thrice, twice,
+		std::plus<int>{});
+	std::cout << format("{}\n", combined(2, 3));
+}
+\end{lstlisting}
+
+The concat() function is called with three parameters: two lambdas, and the std::plus() function.
+
+As the recursion unravels, the functions are called right-to-left, starting with plus(). The plus() function takes two arguments and returns the sum. The return value from plus() is passed to twice(), and its return value is passed to thrice().
+
+The result is then printed to the console with format():
+
+\begin{tcblisting}{commandshell={}}
+30
+\end{tcblisting}
+
+\end{itemize}
 
 \subsubsection{How it works…}
+
+The concat() function is simple, but may be confusing due to the recursion and the indirection of the returned lambda:
+
+\begin{lstlisting}[style=styleCXX]
+template <typename T, typename ...Ts>
+auto concat(T t, Ts ...ts) {
+	if constexpr (sizeof...(ts) > 0) {
+		return [&](auto ...parameters) {
+			return t(concat(ts...)(parameters...));
+		};
+	} else {
+		return t;
+	}
+}
+\end{lstlisting}
+
+The concat() function is called with a parameter pack. With ellipses, the sizeof... operator returns the number of elements in the parameter pack. This is used to test for the end of the recursion.
+
+The concat() function returns a lambda. The lambda recursively calls the concat() function. Because the first argument of concat() is not part of the parameter pack, each recursive call peels off the first element of the pack.
+
+The outer return statement returns the lambda. The inner return is from the lambda. The lambda calls the function that was passed to concat() and returns its value.
+
+Feel free to take this apart and study it. There's value in this technique.
+
 
 
 

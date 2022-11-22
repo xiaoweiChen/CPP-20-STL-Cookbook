@@ -1,4 +1,282 @@
+
+This recipe is an example of a full-featured contiguous/random-access iterator. This is the most complete type of iterator for a container. A random-access iterator includes all the features of all the other types of container iterators, along with its random-access capabilities.
+
+While I felt it important to include a complete iterator in this chapter, with over 700 lines of code this example is somewhat larger than the other examples in this book. I'll cover the essential components of the code here. Please see the full source at \url{https://github.com/PacktPublishing/CPP-20-STL-Cookbook/blob/main/ chap04/container-iterator.cpp}.
+
+
 \subsubsection{How to do it…}
 
+We need a container for our iterator. We'll use a simple array for this, and we'll call it Container. The iterator class is nested within the Container class.
+
+All of this is designed to be consistent with the STL container interfaces.
+
+\begin{itemize}
+\item 
+Container is defined as a template class. Its private section has only two elements:
+
+\begin{lstlisting}[style=styleCXX]
+template<typename T>
+class Container {
+	std::unique_ptr<T[]> c_{};
+	size_t n_elements_{};
+\end{lstlisting}
+
+We use a unique\_pointer for the data. We let the smart pointer manage its own memory. This mitigates the need for a ~Container() destructor. The n\_elements\_ variable keeps the size of our container.
+
+\item 
+In the public section, we have our constructors:
+
+\begin{lstlisting}[style=styleCXX]
+Container(initializer_list<T> l) : n_elements_{l.size()}
+{
+	c_ = std::make_unique<T[]>(n_elements_);
+	size_t index{0};
+	for(T e : l) {
+		c_[index++] = e;
+	}
+}
+\end{lstlisting}
+
+The first constructor uses an initializer\_list to pass elements for the container. We call make\_unique to allocate space and populate the container with a range-based for loop.
+
+\item 
+We also have a constructor that allocates space without populating the elements:
+
+\begin{lstlisting}[style=styleCXX]
+Container(size_t sz) : n_elements_{sz} {
+	c_ = std::make_unique<T[]>(n_elements_);
+}
+\end{lstlisting}
+
+The make\_unique() function constructs empty objects for element.
+
+\item 
+The size() function returns the number of elements:
+
+\begin{lstlisting}[style=styleCXX]
+size_t size() const {
+	return n_elements_;
+}
+\end{lstlisting}
+
+\item 
+The operator[]() function returns an indexed element:
+
+\begin{lstlisting}[style=styleCXX]
+const T& operator[](const size_t index) const {
+	return c_[index];
+}
+\end{lstlisting}
+
+\item 
+The at() function returns an indexed element with bounds checking:
+
+\begin{lstlisting}[style=styleCXX]
+T& at(const size_t index) const {
+	if(index > n_elements_ - 1) {
+		throw std::out_of_range(
+			"Container::at(): index out of range"
+		);
+	}
+	return c_[index];
+}
+\end{lstlisting}
+
+This is consistent with STL usage. The at() function is the preferred method.
+
+\item 
+The begin() and end() functions call the iterator constructor with the address of the container data.
+
+\begin{lstlisting}[style=styleCXX]
+iterator begin() const { return iterator(c_.get()); }
+iterator end() const {
+	return iterator(c_.get() + n_elements_);
+}
+\end{lstlisting}
+
+The unique\_ptr::get() function returns the address from the smart pointer.
+
+\item 
+The iterator class is nested within the Container class as a public member.
+
+\begin{lstlisting}[style=styleCXX]
+class iterator {
+	T* ptr_;
+\end{lstlisting}
+
+The iterator class has one private member, a pointer that's initialized in the begin() and end() methods of the Container class.
+
+\item 
+The iterator constructor takes a pointer to the container data.
+
+\begin{lstlisting}[style=styleCXX]
+iterator(T* ptr = nullptr) : ptr_{ptr} {}
+\end{lstlisting}
+
+We provide a default value because the standard requires a default constructor.
+\end{itemize}
+
+\noindent
+\textbf{Operator overloads}
+
+This iterator provides operator overloads for the following operators: ++, postfix ++, --, postfix --, [], default comparison <=> (C++20), ==, *, ->, +, non-member +, numeric -, object -, +=, and -=. We'll cover a few notable overloads here. See the source code for all of them.
+
+\begin{itemize}
+\item 
+The C++20 default comparison operator <=> provides the functionality of the full suite of comparison operators, except the equality == operator:
+
+\begin{lstlisting}[style=styleCXX]
+const auto operator<=>(const iterator& o) const {
+	return ptr_ <=> o.ptr_;
+}
+\end{lstlisting}
+
+This is a C++20 feature, so it requires a compliant compiler and library.
+
+\item 
+There are two + operator overloads. These support it + n and n + it operations.
+
+\begin{lstlisting}[style=styleCXX]
+iterator operator+(const size_t n) const {
+	return iterator(ptr_ + n);
+}
+// non-member operator (n + it)
+friend const iterator operator+(
+		const size_t n, const iterator& o) {
+	return iterator(o.ptr_ + n);
+}
+\end{lstlisting}
+
+The friend declaration is a special case. When used in a template class member function, it's the equivalent of a non-member function. This allows a non-member function to be defined in the class context.
+
+\item 
+The - operator also has two overloads. We need to support both a numeric operand and an iterator operand.
+
+\begin{lstlisting}[style=styleCXX]
+const iterator operator-(const size_t n) {
+	return iterator(ptr_ - n);
+}
+const size_t operator-(const iterator& o) {
+	return ptr_ - o.ptr_;
+}
+\end{lstlisting}
+
+This allows both it – n and it – it operations. There's no need for a non-member function, as n – it is not a valid operation.
+
+\end{itemize}
+
+
+\noindent
+\textbf{Validation code}
+
+The C++20 specification §23.3.4.13 requires a specific set of operations and results for a valid random-access iterator. I've included a unit\_tests() function in the source code to validate those requirements.
+
+The main() function creates a Container object and performs some simple validation functions.
+
+\begin{itemize}
+\item 
+First, we create a Container<string> object x with ten values.
+
+\begin{lstlisting}[style=styleCXX]
+Container<string> x{"one", "two", "three", "four",
+	"five",
+		"six", "seven", "eight", "nine", "ten" };
+cout << format("Container x size: {}\n", x.size());
+\end{lstlisting}
+
+The output gives the number of elements:
+
+\begin{tcblisting}{commandshell={}}
+Container x size: 10
+\end{tcblisting}
+
+\item 
+We display the elements of the container with a range-based for loop:
+
+\begin{lstlisting}[style=styleCXX]
+puts("Container x:");
+for(auto e : x) {
+	cout << format("{} ", e);
+}
+cout << '\n';
+\end{lstlisting}
+
+Output:
+
+\begin{tcblisting}{commandshell={}}
+Container x:
+one two three four five six seven eight nine ten
+\end{tcblisting}
+
+\item 
+Next, we test several direct access methods:
+
+\begin{lstlisting}[style=styleCXX]
+puts("direct access elements:");
+cout << format("element at(5): {}\n", x.at(5));
+cout << format("element [5]: {}\n", x[5]);
+cout << format("element begin + 5: {}\n",
+	*(x.begin() + 5));
+cout << format("element 5 + begin: {}\n",
+	*(5 + x.begin()));
+cout << format("element begin += 5: {}\n",
+	*(x.begin() += 5));
+\end{lstlisting}
+
+Output:
+
+\begin{tcblisting}{commandshell={}}
+direct access elements:
+element at(5): six
+element [5]: six
+element begin + 5: six
+element 5 + begin: six
+element begin += 5: six
+\end{tcblisting}
+
+\item 
+We test the container with a ranges::views pipe and views::reverse:
+
+\begin{lstlisting}[style=styleCXX]
+puts("views pipe reverse:");
+auto result = x | views::reverse;
+for(auto v : result) cout << format("{} ", v);
+cout << '\n';
+\end{lstlisting}
+
+Output:
+
+\begin{tcblisting}{commandshell={}}
+views pipe reverse:
+ten nine eight seven six five four three two one
+\end{tcblisting}
+
+\item 
+Finally, we create a Container object y with 10 uninitialized elements:
+
+\begin{lstlisting}[style=styleCXX]
+Container<string> y(x.size());
+cout << format("Container y size: {}\n", y.size());
+for(auto e : y) {
+	cout << format("[{}] ", e);
+}
+cout << '\n';
+\end{lstlisting}
+
+Output:
+
+\begin{tcblisting}{commandshell={}}
+Container y size: 10
+[] [] [] [] [] [] [] [] [] []
+\end{tcblisting}
+
+\end{itemize}
 
 \subsubsection{How it works…}
+
+Although it's a lot of code, this iterator is no more complicated than a smaller iterator. Most of the code is in the operator overloads, which are mostly one or two lines of code each.
+
+The container itself is managed by a smart pointer. This is simplified by the fact that it's a flat array and doesn't require expansion or compression.
+
+Of course, the STL provides a flat std::array class, as well as other more complex data structures. Still, you may find it valuable to demystify the workings of a complete iterator class.
+

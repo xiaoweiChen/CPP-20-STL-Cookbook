@@ -1,10 +1,197 @@
 
-
+The copy algorithms are generally used to copy from and to containers, but in fact, they work with iterators, which is far more flexible.
 
 
 \subsubsection{How to do it…}
 
+In this recipe, we will experiment with std::copy and std::copy\_n to get a good understanding of how they work:
+
+\begin{itemize}
+\item 
+Let's start with a function to print a container:
+
+\begin{lstlisting}[style=styleCXX]
+void printc(auto& c, string_view s = "") {
+	if(s.size()) cout << format("{}: ", s);
+	for(auto e : c) cout << format("[{}] ", e);
+	cout << '\n';
+}
+\end{lstlisting}
+
+\item 
+In main(), we define a vector and print it with printc():
+
+\begin{lstlisting}[style=styleCXX]
+int main() {
+	vector<string> v1
+	{ "alpha", "beta", "gamma", "delta",
+		"epsilon" };
+	printc(v1);
+}
+\end{lstlisting}
+
+We get this output:
+
+\begin{tcblisting}{commandshell={}}
+v1: [alpha] [beta] [gamma] [delta] [epsilon]
+\end{tcblisting}
+
+\item 
+Now, let's create a second vector with enough space to copy the first vector:
+
+\begin{lstlisting}[style=styleCXX]
+vector<string> v2(v1.size());
+\end{lstlisting}
+
+\item 
+We can copy v1 to v2 using the std::copy() algorithm:
+
+\begin{lstlisting}[style=styleCXX]
+std::copy(v1.begin(), v1.end(), v2.begin());
+printc(v2);
+\end{lstlisting}
+
+The std::copy() algorithm takes two iterators for the range of the copy source, and one iterator for the destination. In this case, we give it the begin() and end() iterators of v1 to copy the entire vector. The begin() iterator of v2 serves as the destination for the copy.
+
+Our output is now:
+
+\begin{tcblisting}{commandshell={}}
+v1: [alpha] [beta] [gamma] [delta] [epsilon]
+v2: [alpha] [beta] [gamma] [delta] [epsilon]
+\end{tcblisting}
+
+\item 
+The copy() algorithm does not allocate space for the destination. So, v2 must already have the space for the copy. Alternately, you can use the back\_inserter() iterator adapter to insert the elements at the back of the vector:
+
+\begin{lstlisting}[style=styleCXX]
+vector<string> v2{};
+std::copy(v1.begin(), v1.end(), back_inserter(v2))
+\end{lstlisting}
+
+\item 
+We can also use the ranges::copy() algorithm to copy an entire range.
+A container object serves as a range so we can use v1 as the source. We still use an iterator for the destination:
+
+\begin{lstlisting}[style=styleCXX]
+vector<string> v2(v1.size());
+ranges::copy(v1, v2.begin());
+\end{lstlisting}
+
+This also works with back\_inserter():
+
+\begin{lstlisting}[style=styleCXX]
+vector<string> v2{};
+ranges::copy(v1, back_inserter(v2));
+\end{lstlisting}
+
+Output:
+
+\begin{tcblisting}{commandshell={}}
+v2: [alpha] [beta] [gamma] [delta] [epsilon]
+\end{tcblisting}
+
+\item 
+You can copy a certain number of elements using copy\_n():
+
+\begin{lstlisting}[style=styleCXX]
+vector<string> v3{};
+std::copy_n(v1.begin(), 3, back_inserter(v3));
+printc(v3, "v3");
+\end{lstlisting}
+
+In the second argument, the copy\_n() algorithm is a count for the number of elements to copy. The output is:
+
+\begin{tcblisting}{commandshell={}}
+v3: [alpha] [beta] [gamma]
+\end{tcblisting}
+
+\item 
+There's also a copy\_if() algorithm that uses a Boolean predicate function to determine which elements to copy:
+
+\begin{lstlisting}[style=styleCXX]
+vector<string> v4{};
+std::copy_if(v1.begin(), v1.end(), back_inserter(v4),
+	[](string& s){ return s.size() > 4; });
+printc(v4, "v4");
+\end{lstlisting}
+
+There's also a ranges version of copy\_if():
+
+\begin{lstlisting}[style=styleCXX]
+vector<string> v4{};
+ranges::copy_if(v1, back_inserter(v4),
+	[](string& s){ return s.size() > 4; });
+printc(v4, "v4");
+\end{lstlisting}
+
+The output includes only strings longer than 4 characters:
+
+\begin{tcblisting}{commandshell={}}
+v4: [alpha] [gamma] [delta] [epsilon]
+\end{tcblisting}
+
+Notice that the value beta is excluded.
+
+\item 
+You can use any of these algorithms to copy to or from any sequence, including a stream iterator:
+
+\begin{lstlisting}[style=styleCXX]
+ostream_iterator<string> out_it(cout, " ");
+ranges::copy(v1, out_it)
+cout << '\n';
+\end{lstlisting}
+
+Output:
+
+\begin{tcblisting}{commandshell={}}
+alpha beta gamma delta epsilon
+\end{tcblisting}
+\end{itemize}
 
 \subsubsection{How it works…}
+
+The std::copy() algorithm is very simple. An equivalent function would look like this:
+
+\begin{lstlisting}[style=styleCXX]
+template<typename Input_it, typename Output_it>
+Output_it bw_copy(Input_it begin_it, Input_it end_it,
+				  Output_it dest_it) {
+	while (begin_it != end_it) {
+		*dest_it++ = *begin_it++;
+	}
+	return dest_it;
+}
+\end{lstlisting}
+
+The copy() function uses the destination iterator's assignment operator to copy from the input iterator to the output iterator until it reaches the end of the input range.
+
+There is also a version of this algorithm called std::move(), which moves elements instead of copying them:
+
+\begin{lstlisting}[style=styleCXX]
+std::move(v1.begin(), v1.end(), v2.begin());
+printc(v1, "after move: v1");
+printc(v2, "after move: v2");
+\end{lstlisting}
+
+This performs a move instead of copy assignment. After the move operation, the elements in v1 will be empty, and the elements that were in v1 are now in v2. The output looks like this:
+
+\begin{tcblisting}{commandshell={}}
+after move1: v1: [] [] [] [] []
+after move1: v2: [alpha] [beta] [gamma] [delta] [epsilon]
+\end{tcblisting}
+
+There is also a ranges version of the move() algorithm that performs the same operation:
+
+\begin{lstlisting}[style=styleCXX]
+ranges::move(v1, v2.begin());
+\end{lstlisting}
+
+The power of these algorithms lies in their simplicity. By letting the iterators manage the data, these simple, elegant functions allow you to seamlessly copy or move between any of the STL containers that support the required iterators.
+
+
+
+
+
+
 
 

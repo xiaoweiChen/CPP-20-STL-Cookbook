@@ -1,8 +1,90 @@
 
+You can easily create multiple instances of a lambda with different capture values by wrapping the lambda in a function. This allows you to call different versions of a lambda with the same input.
 
 \subsubsection{How to do it…}
 
+This is a simple example of a lambda that wraps a value in different types of braces:
+
+\begin{itemize}
+\item 
+We'll start by creating the wrapper function braces():
+
+\begin{lstlisting}[style=styleCXX]
+auto braces (const char a, const char b) {
+	return [a, b](const char v) {
+		cout << format("{}{}{} ", a, v, b);
+	};
+}
+\end{lstlisting}
+
+The braces() function wraps a lambda that returns a three-value string, where the first and last values are characters passed to the lambda as captures, and the middle value is passed as a parameter.
+
+\item 
+In the main() function, we use braces() to create four lambdas, using four different sets of braces:
+
+\begin{lstlisting}[style=styleCXX]
+auto a = braces('(', ')');
+auto b = braces('[', ']');
+auto c = braces('{', '}');
+auto d = braces('|', '|');
+\end{lstlisting}
+
+\item 
+Now we can call our lambdas from a simple for() loop:
+
+\begin{lstlisting}[style=styleCXX]
+for( int i : { 1, 2, 3, 4, 5 } ) {
+	for( auto x : { a, b, c, d } ) x(i);
+	cout << '\n';
+}
+\end{lstlisting}
+
+This is two nested for() loops. The outer loop simply counts from 1 to 5, passing an integer to the inner loop. The inner loop calls the lambdas with the braces.
+
+Both loops use an initializer list as the container in a range-based for() loop. This is a convenient technique for looping through a small set of values.
+
+\item 
+The output from our program looks like this:
+
+\begin{tcblisting}{commandshell={}}
+(1) [1] {1} |1|
+(2) [2] {2} |2|
+(3) [3] {3} |3|
+(4) [4] {4} |4|
+(5) [5] {5} |5|
+\end{tcblisting}
+
+The output shows each of the integers, in each combination of braces.
+\end{itemize}
 
 \subsubsection{How it works…}
+
+This is a simple example of how to use a wrapper for a lambda. The braces() function constructs a lambda using the braces passed to it:
+
+\begin{lstlisting}[style=styleCXX]
+auto braces (const char a, const char b) {
+	return [a, b](const auto v) {
+		cout << format("{}{}{} ", a, v, b);
+	};
+}
+\end{lstlisting}
+
+By passing the braces() function parameters to the lambda, it can return a lambda with that context. So, each of the assignments in the main function carries those parameters with it:
+
+\begin{lstlisting}[style=styleCXX]
+auto a = braces('(', ')');
+auto b = braces('[', ']');
+auto c = braces('{', '}');
+auto d = braces('|', '|');
+\end{lstlisting}
+
+When these lambdas are called with a digit, they will return a string with that digit in the corresponding braces.
+
+
+
+
+
+
+
 
 

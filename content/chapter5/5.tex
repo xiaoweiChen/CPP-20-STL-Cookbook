@@ -1,8 +1,178 @@
 
+The class template std::function is a thin polymorphic wrapper for functions. It can store, copy, and invoke any function, lambda expression, or other function objects. It can be useful in places where you would like to store a reference to a function or lambda. Using std::function allows you to store functions and lambdas with different signatures in the same container, and it maintains the context of lambda captures.
 
 \subsubsection{How to do it…}
 
+This recipe uses the std::function class to store different specializations of a lambda in a vector:
+
+\begin{itemize}
+\item 
+This recipe is contained in the main() function, where we start by declaring three containers of different types:
+
+\begin{lstlisting}[style=styleCXX]
+int main() {
+	deque<int> d;
+	list<int> l;
+	vector<int> v;
+\end{lstlisting}
+
+These containers, deque, list, and vector, will be referenced by a template lambda.
+
+\item 
+We'll declare a simple print\_c lambda function for printing out the containers:
+
+\begin{lstlisting}[style=styleCXX]
+auto print_c = [](auto& c) {
+	for(auto i : c) cout << format("{} ", i);
+	cout << '\n';
+};
+\end{lstlisting}
+
+\item 
+Now we declare a lambda that returns an anonymous lambda:
+
+\begin{lstlisting}[style=styleCXX]
+auto push_c = [](auto& container) {
+	return [&container](auto value) {
+		container.push_back(value);
+	};
+};
+\end{lstlisting}
+
+The push\_c lambda takes a reference to a container, which is captured by the anonymous lambda. The anonymous lambda calls the push\_back() member on the captured container. The return value from push\_c is the anonymous lambda.
+
+\item 
+Now we declare a vector of std::function elements, and populate it with three instances of push\_c():
+
+\begin{lstlisting}[style=styleCXX]
+const vector<std::function<void(int)>>
+	consumers { push_c(d), push_c(l), push_c(v) };
+\end{lstlisting}
+
+Each of the elements in the initializer list is a function call to the push\_c lambda. push\_c returns an instance of the anonymous lambda, which gets stored in the vector via the function wrapper. The push\_c lambda is called with the three containers, d, l, and v. The containers are passed as captures with the anonymous lambda.
+
+\item 
+Now we loop through the consumers vector, and call each of the lambda elements 10 times, populating the three containers with integers 0–9 in each container:
+
+\begin{lstlisting}[style=styleCXX]
+for(auto &consume : consumers) {
+	for (int i{0}; i < 10; ++i) {
+		consume(i);
+	}
+}
+\end{lstlisting}
+
+\item 
+Now our three containers, the deque, list, and vector, should all be populated with integers. Let's print them out:
+
+\begin{lstlisting}[style=styleCXX]
+print_c(d);
+print_c(l);
+print_c(v);
+\end{lstlisting}
+
+Our output should be:
+\begin{tcblisting}{commandshell={}}
+0 1 2 3 4 5 6 7 8 9
+0 1 2 3 4 5 6 7 8 9
+0 1 2 3 4 5 6 7 8 9
+\end{tcblisting}
+\end{itemize}
 
 \subsubsection{How it works…}
+
+Lambdas are often used with indirection and this recipe is a good example of such. For example, the push\_c lambda returns an anonymous lambda:
+
+\begin{lstlisting}[style=styleCXX]
+auto push_c = [](auto& container) {
+	return [&container](auto value) {
+		container.push_back(value);
+	};
+};
+\end{lstlisting}
+
+This anonymous lambda is the one that's stored in the vector:
+
+\begin{lstlisting}[style=styleCXX]
+const vector<std::function<void(int)>>
+	consumers { push_c(d), push_c(l), push_c(v) };
+\end{lstlisting}
+
+This is the definition of the consumers container. It is initialized with three elements, where each element is initialized with a call to push\_c, which returns an anonymous lambda. It's the anonymous lambda that gets stored in the vector, not the push\_c lambda.
+
+The vector definition uses the std::function class as the type of the elements. The function constructor takes any callable object and stores its reference as the function target:
+
+\begin{lstlisting}[style=styleCXX]
+template< class F >
+function( F&& f );
+\end{lstlisting}
+
+When its function call () operator is invoked, the function object calls the target function with the intended parameters:
+
+\begin{lstlisting}[style=styleCXX]
+for(auto &c : consumers) {
+	for (int i{0}; i < 10; ++i) {
+		c(i);
+	}
+}
+\end{lstlisting}
+
+This calls each anonymous lambda, as stored in the consumers container, 10 times, thus populating the d, l, and v containers.
+
+\subsubsection{There's more…}
+
+The nature of the std::function class makes it useful for many purposes. You can think of it as a polymorphic function container. It can store a standalone function:
+
+\begin{lstlisting}[style=styleCXX]
+void hello() {
+	cout << "hello\n";
+}
+int main() {
+	function<void(void)> h = hello;
+	h();
+}
+\end{lstlisting}
+
+It can store a member function, using std::bind to bind function parameters:
+
+\begin{lstlisting}[style=styleCXX]
+struct hello {
+	void greeting() const { cout << "Hello Bob\n"; }
+};
+int main() {
+	hello bob{};
+	const function<void(void)> h =
+		std::bind(&hello::greeting, &bob);
+	h();
+}
+\end{lstlisting}
+
+Or it can store any executable object:
+
+\begin{lstlisting}[style=styleCXX]
+struct hello {
+	void operator()() const { cout << "Hello Bob\n"; }
+};
+int main() {
+	const function<void(void)> h = hello();
+	h();
+}
+\end{lstlisting}
+
+The output is as follows:
+
+\begin{tcblisting}{commandshell={}}
+Hello Bob
+\end{tcblisting}
+
+
+
+
+
+
+
+
+
+
 
 

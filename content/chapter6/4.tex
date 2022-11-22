@@ -1,10 +1,250 @@
 
+The problem of how to efficiently sort comparable elements is essentially solved. For most applications, there's no reason to re-invent this wheel. The STL provides an excellent sorting solution via the std::sort() algorithm. While the standard does not specify a sorting algorithm, it does specify a worst-case complexity of O(n log n), when applied to a range of n elements.
 
+Just a few decades ago, the quicksort algorithm was considered a good compromise for most uses and was generally faster than other comparable algorithms. Today we have hybrid algorithms that choose between different approaches according to the circumstances, often switching algorithms on the fly. Most current C++ libraries use a hybrid approach with some combination of introsort and an insertion sort. std::sort() provides exceptional performance under most common circumstances.
 
 \subsubsection{How to do it…}
 
+In this recipe, we'll examine the std::sort() algorithm. The sort() algorithm works with any container with random-access iterators. Here, we will use a vector of int:
+
+\begin{itemize}
+\item 
+We'll start with a function to test if a container is sorted:
+
+\begin{lstlisting}[style=styleCXX]
+void check_sorted(auto &c) {
+	if(!is_sorted(c.begin(), c.end())) cout << "un";
+	cout << "sorted: ";
+}
+\end{lstlisting}
+
+This uses the std::is\_sorted() algorithm and prints either "sorted:" or "unsorted:" according to the result.
+
+\item 
+We'll need a function to print our vector:
+
+\begin{lstlisting}[style=styleCXX]
+void printc(const auto &c) {
+	check_sorted(c);
+	for(auto& e : c) cout << e << ' ';
+	cout << '\n';
+}
+\end{lstlisting}
+
+This function calls check\_sorted() to display the status of the container before the value.
+
+\item 
+Now we can define and print a vector of int in the main() function:
+
+\begin{lstlisting}[style=styleCXX]
+int main() {
+	vector<int> v{ 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
+	printc(v);
+	…
+}
+\end{lstlisting}
+
+The output looks like this:
+
+\begin{tcblisting}{commandshell={}}
+sorted: 1 2 3 4 5 6 7 8 9 10
+\end{tcblisting}
+
+\item 
+In order to test the std::sort() algorithm, we need an unsorted vector. Here's a simple function to randomize our container:
+
+\begin{lstlisting}[style=styleCXX]
+void randomize(auto& c) {
+	static std::random_device rd;
+	static std::default_random_engine rng(rd());
+	std::shuffle(c.begin(), c.end(), rng);
+}
+\end{lstlisting}
+
+The std::random\_device class uses your system's hardware entropy source. Most modern systems have one, otherwise the library will simulate it. The std::default\_random\_engine() function generates random numbers from the entropy source. This is used by std::shuffle() to randomize the container.
+
+We can now call randomize() with our container and print the result:
+
+\begin{lstlisting}[style=styleCXX]
+randomize(v);
+printc(v);
+\end{lstlisting}
+
+Output:
+
+\begin{tcblisting}{commandshell={}}
+unsorted: 6 3 4 8 10 1 2 5 9 7
+\end{tcblisting}
+
+Of course, your output will be different because it's randomized. In fact, I get a different result every time I run it:
+
+\begin{lstlisting}[style=styleCXX]
+for(int i{3}; i; --i) {
+	randomize(v);
+	printc(v);
+}
+\end{lstlisting}
+
+Output:
+
+\begin{tcblisting}{commandshell={}}
+unsorted: 3 1 8 5 10 2 7 9 6 4
+unsorted: 7 6 5 1 3 9 10 2 4 8
+unsorted: 4 2 3 10 1 9 5 6 8 7
+\end{tcblisting}
+
+\item 
+To sort the vector, we simply call std::sort():
+
+\begin{lstlisting}[style=styleCXX]
+std::sort(v.begin(), v.end());
+printc(v);
+\end{lstlisting}
+
+Output:
+
+\begin{tcblisting}{commandshell={}}
+sorted: 1 2 3 4 5 6 7 8 9 10
+\end{tcblisting}
+
+By default, the sort() algorithm uses the < operator to sort the elements in the range specified by the supplied iterators.
+
+\item 
+The partial\_sort() algorithm will sort part of the container:
+
+\begin{lstlisting}[style=styleCXX]
+cout << "partial_sort:\n";
+randomize(v);
+auto middle{ v.begin() + (v.size() / 2) };
+std::partial_sort(v.begin(), middle, v.end());
+printc(v);
+\end{lstlisting}
+
+partial\_sort() takes three iterators: beginning, middle, and end. It sorts the container such that the elements before the middle are sorted. The elements after the middle are not guaranteed to be in the original order. Here's the output:
+
+\begin{tcblisting}{commandshell={}}
+unsorted: 1 2 3 4 5 10 7 6 8 9
+\end{tcblisting}
+
+Notice that the first five elements are sorted, and the rest are not.
+
+\item 
+The partition() algorithm does not sort anything. It rearranges the container so that certain elements appear at the front of the container:
+
+\begin{lstlisting}[style=styleCXX]
+coutrandomize(v);
+printc(v);
+partition(v.begin(), v.end(), [](int i)
+	{ return i > 5; });
+printc(v);
+\end{lstlisting}
+
+The third argument is a predicate lambda that determines which elements will be moved to the front.
+
+Output:
+
+\begin{tcblisting}{commandshell={}}
+unsorted: 4 6 8 1 9 5 2 7 3 10
+unsorted: 10 6 8 7 9 5 2 1 3 4
+\end{tcblisting}
+
+Notice that the values >5 are moved to the front of the container.
+
+\item 
+The sort() algorithms support an optional comparison function that may be used for non-standard comparisons. For example, given a class called things:
+
+\begin{lstlisting}[style=styleCXX]
+struct things {
+	string s_;
+	int i_;
+	string str() const {
+		return format("({}, {})", s_, i_);
+	}
+};
+\end{lstlisting}
+
+We can create a vector of things:
+
+\begin{lstlisting}[style=styleCXX]
+vector<things> vthings{ {"button", 40},
+	{"hamburger", 20}, {"blog", 1000},
+	{"page", 100}, {"science", 60} };
+\end{lstlisting}
+
+We'll need a function to print them out:
+
+\begin{lstlisting}[style=styleCXX]
+void print_things(const auto& c) {
+	for (auto& v : c) cout << v.str() << ' ';
+	cout << '\n';
+}
+\end{lstlisting}
+
+\item 
+Now we can sort and print the vector of things:
+
+\begin{lstlisting}[style=styleCXX]
+std::sort(vthings.begin(), vthings.end(),
+		[](const things &lhs, const things &rhs) {
+	return lhs.i_ < rhs.i_;
+});
+print_things(vthings);
+\end{lstlisting}
+
+Output:
+
+\begin{tcblisting}{commandshell={}}
+(hamburger, 20) (button, 40) (science, 60) (page, 100)
+(blog, 1000)
+\end{tcblisting}
+
+Notice the comparison function sorts on the i\_ member, so the result is sorted by i\_. We could instead sort on the s\_ member:
+
+\begin{lstlisting}[style=styleCXX]
+std::sort(vthings.begin(), vthings.end(),
+		[](const things &lhs, const things &rhs) {
+	return lhs.s_ < rhs.s_;
+});
+print_things(vthings);
+\end{lstlisting}
+
+Now we get this output:
+
+\begin{tcblisting}{commandshell={}}
+(blog, 1000) (button, 40) (hamburger, 20) (page, 100)
+(science, 60)
+\end{tcblisting}
+
+\end{itemize}
 
 \subsubsection{How it works…}
+
+The sort() functions work by applying a sorting algorithm to a range of elements indicated by two iterators, for the beginning and end of the range.
+
+By default, these algorithms use the < operator to compare elements. Optionally, they may use a comparison function, often provided as a lambda:
+
+\begin{lstlisting}[style=styleCXX]
+std::sort(vthings.begin(), vthings.end(),
+[](const things& lhs, const things& rhs) {
+	return lhs.i_ < rhs.i_;
+});
+\end{lstlisting}
+
+The comparison function takes two arguments and returns a bool. It has a signature equivalent to this:
+
+\begin{lstlisting}[style=styleCXX]
+bool cmp(const Type1& a, const Type2& b);
+\end{lstlisting}
+
+The sort() functions use std::swap() to move elements. This is efficient in both compute cycles and memory usage, as it relieves the need to allocate space for reading and writing the objects being sorted. This is also why the partial\_sort() and partition() functions cannot guarantee the order of unsorted elements.
+
+
+
+
+
+
+
+
 
 
 

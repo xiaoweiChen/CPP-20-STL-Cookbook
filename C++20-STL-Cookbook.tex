@@ -309,6 +309,9 @@
 }}
 
 \usepackage{tikz}
+\usetikzlibrary{chains,scopes,positioning,backgrounds,shapes,fit,shadows,calc,arrows.meta,decorations.pathreplacing,calligraphy}
+
+\newcommand{\mybrace}[4]{ \draw[#4, decoration={brace, amplitude=6}, decorate] ([yshift=3mm]#1)--([yshift=3mm]#2) node[midway, above=2mm]{#3}; }
 
 % URL 正确换行
 % https://liam.page/2017/05/17/help-the-url-command-from-hyperref-to-break-at-line-wrapping-point/

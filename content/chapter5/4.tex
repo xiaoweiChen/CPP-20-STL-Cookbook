@@ -1,5 +1,151 @@
+
+Some functions in the algorithm library require the use of a predicate function. A predicate is a function (or functor or lambda) that tests a condition and returns a Boolean true/false response.
+
 \subsubsection{How to do it…}
 
+For this recipe, we will experiment with the count\_if() algorithm using different types of predicates:
+
+\begin{itemize}
+\item 
+First, let's create a function for use as a predicate. A predicate takes a certain number of arguments and returns a bool. A predicate for count\_if() takes one argument:
+
+\begin{lstlisting}[style=styleCXX]
+bool is_div4(int i) {
+	return i % 4 == 0;
+}
+\end{lstlisting}
+
+This predicate checks whether an int value is divisible by 4.
+
+\item 
+In main(), we'll define a vector of int values, and use it to test our predicate function with count\_if():
+
+\begin{lstlisting}[style=styleCXX]
+int main() {
+	const vector<int> v{ 1, 7, 4, 9, 4, 8, 12, 10, 20 };
+	int count = count_if(v.begin(), v.end(), is_div4);
+	cout << format("numbers divisible by 4: {}\n",
+		count);
+}
+\end{lstlisting}
+
+The output is as follows:
+
+\begin{tcblisting}{commandshell={}}
+numbers divisible by 4: 5
+\end{tcblisting}
+
+(The 5 divisible numbers are: 4, 4, 8, 12, and 20.) 
+
+The count\_if() algorithm uses the predicate function to determine which elements of the sequence to count. It calls the predicate with each element as a parameter, and only counts the element if the predicate returns true.
+
+In this case, we used a function as a predicate.
+
+\item 
+We could also use a functor as a predicate:
+
+\begin{lstlisting}[style=styleCXX]
+struct is_div4 {
+	bool operator()(int i) {
+		return i % 4 == 0;
+	}
+};
+\end{lstlisting}
+
+The only change here is that we need to use an instance of the class as the predicate:
+
+\begin{lstlisting}[style=styleCXX]
+int count = count_if(v.begin(), v.end(), is_div4());
+\end{lstlisting}
+
+The advantage of a functor is that it can carry context and access class and instance variables. This was the common way to use predicates before C++11 introduced lambda expressions.
+
+\item 
+With a lambda expression, we have the best of both worlds: the simplicity of a function and the power of a functor. We can use a lambda as a variable:
+
+\begin{lstlisting}[style=styleCXX]
+auto is_div4 = [](int i){ return i % 4 == 0; };
+int count = count_if(v.begin(), v.end(), is_div4);
+\end{lstlisting}
+
+Or we can use an anonymous lambda:
+
+\begin{lstlisting}[style=styleCXX]
+int count = count_if(v.begin(), v.end(),
+	[](int i){ return i % 4 == 0; });
+\end{lstlisting}
+
+\item 
+We can take advantage of the lambda capture by wrapping the lambda in a function, and using that function context to produce the same lambda with different parameters:
+
+\begin{lstlisting}[style=styleCXX]
+auto is_div_by(int divisor) {
+	return [divisor](int i){ return i % divisor == 0; };
+}
+\end{lstlisting}
+
+This function returns a predicate lambda with the divisor from the capture context.
+
+We can then use that predicate with count\_if()
+
+\begin{lstlisting}[style=styleCXX]
+for( int i : { 3, 4, 5 } ) {
+	auto pred = is_div_by(i);
+	int count = count_if(v.begin(), v.end(), pred);
+	cout << format("numbers divisible by {}: {}\n", i,
+		count);
+}
+\end{lstlisting}
+
+Each call to is\_div\_by() returns a predicate with a different divisor from i.
+
+Now we get this output:
+
+\begin{tcblisting}{commandshell={}}
+numbers divisible by 3: 2
+numbers divisible by 4: 5
+numbers divisible by 5: 2
+\end{tcblisting}
+\end{itemize}
 
 \subsubsection{How it works…}
+
+The type of a function pointer is represented as a pointer followed by the function call () operator:
+
+\begin{lstlisting}[style=styleCXX]
+void (*)()
+\end{lstlisting}
+
+You can declare a function pointer and initialize it with the name of an existing function:
+
+\begin{lstlisting}[style=styleCXX]
+void (*fp)() = func;
+\end{lstlisting}
+
+Once declared, a function pointer may be dereferenced and used as if it were the function itself:
+
+\begin{lstlisting}[style=styleCXX]
+func(); // do the func thing
+\end{lstlisting}
+
+A lambda expression has the same type as a function pointer:
+
+\begin{lstlisting}[style=styleCXX]
+void (*fp)() = []{ cout << "foo\n"; };
+\end{lstlisting}
+
+This means that wherever you use a function pointer with a certain signature, you may also use a lambda with the same signature. This allows function pointers, functors, and lambdas to work interchangeably:
+
+\begin{lstlisting}[style=styleCXX]
+bool (*fp)(int) = is_div4;
+bool (*fp)(int) = [](int i){ return i % 4 == 0; };
+\end{lstlisting}
+
+Because of this interchangeability, an algorithm such as count\_if() accepts a function, functor, or lambda where it expects a predicate with a particular function signature.
+
+This applies to any algorithm that uses a predicate.
+
+
+
+
 

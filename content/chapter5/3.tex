@@ -1,5 +1,294 @@
+
+Lambda expressions can be defined and stored for later use. They can be passed as parameters, stored in data structures, and called in different contexts with different parameters. They are as flexible as functions, but with the mobility of data.
+
 \subsubsection{How to do it…}
 
+Let's start with a simple program that we'll use to test various configurations of lambda expressions:
+
+\begin{itemize}
+\item 
+We'll first define a main() function and use it to experiment with lambdas:
+
+\begin{lstlisting}[style=styleCXX]
+int main() {
+	... // code goes here
+}
+\end{lstlisting}
+
+\item 
+Inside the main() function, we'll declare a couple of lambdas. The basic definition of a lambda requires a pair of square brackets and a block of code in curly brackets:
+
+\begin{lstlisting}[style=styleCXX]
+auto one = [](){ return "one"; };
+auto two = []{ return "two"; }
+\end{lstlisting}
+
+Notice that the first example one includes parentheses after the square brackets, and the second example two does not. The empty parameter parentheses are commonly included, but are not always required. The return type is inferred by the compiler.
+
+\item 
+I can call these functions with cout, or with format, or in any context that will take a C-string:
+
+\begin{lstlisting}[style=styleCXX]
+cout << one() << '\n';
+cout << format("{}\n", two());
+\end{lstlisting}
+
+\item 
+In many cases, the compiler can determine the return type from automatic type deduction. Otherwise, you can specify the return type with the -> operator:
+
+\begin{lstlisting}[style=styleCXX]
+auto one = []() -> const char * { return "one"; };
+auto two = []() -> auto { return "two"; };
+\end{lstlisting}
+
+Lambdas use the trailing return type syntax. This consists of the -> operator followed by the type specification. If the return type is not specified, it is considered auto. If you use a trailing return type, the parameter parentheses are required.
+
+\item 
+Let's define a lambda to print out the values from our other lambdas:
+
+\begin{lstlisting}[style=styleCXX]
+auto p = [](auto v) { cout << v() << '\n'; };
+\end{lstlisting}
+
+The p() lambda expects a lambda (or function) as its parameter v, and calls it in its function body.
+
+The auto type parameter makes this lambda an abbreviated template. Before C++20, this was the only way to template a lambda. Beginning with C++20, you may specify template parameters (without the template keyword) after the capture brackets. This is the equivalent with template parameters:
+
+\begin{lstlisting}[style=styleCXX]
+auto p = []<template T>(T v) { cout << v() << '\n'; };
+\end{lstlisting}
+
+The abbreviated auto version is simpler and more common. It works well for most purposes.
+
+\item 
+Now we can pass an anonymous lambda in the function call:
+
+\begin{lstlisting}[style=styleCXX]
+p([]{ return "lambda call lambda"; });
+\end{lstlisting}
+
+The output is:
+
+\begin{tcblisting}{commandshell={}}
+lambda call lambda
+\end{tcblisting}
+
+\item 
+If we need to pass parameters to an anonymous lambda, we can put them in parentheses after the lambda expression:
+
+\begin{lstlisting}[style=styleCXX]
+<< [](auto l, auto r){ return l + r; }(47, 73)
+	<< '\n';
+\end{lstlisting}
+
+The function parameters, 47 and 73, are passed to the anonymous lambda in the parentheses after the function body.
+
+\item 
+You can access variables from the outside scope of the lambda by including them as captures in the square brackets:
+
+\begin{lstlisting}[style=styleCXX]
+int num{1};
+p([num]{ return num; });
+\end{lstlisting}
+
+\item 
+Or you can capture them by reference:
+
+\begin{lstlisting}[style=styleCXX]
+int num{0};
+auto inc = [&num]{ num++; };
+for (size_t i{0}; i < 5; ++i) {
+	inc();
+}
+cout << num << '\n';
+\end{lstlisting}
+
+The output is as follows:
+
+\begin{tcblisting}{commandshell={}}
+5
+\end{tcblisting}
+
+This allows you to modify a captured variable.
+
+
+\item 
+
+You can also define a local capture variable that maintains its state:
+
+\begin{lstlisting}[style=styleCXX]
+auto counter = [n = 0]() mutable { return ++n; };
+for (size_t i{0}; i < 5; ++i) {
+	cout << format("{}, ", counter());
+}
+cout << '\n';
+\end{lstlisting}
+
+Output:
+
+\begin{tcblisting}{commandshell={}}
+1, 2, 3, 4, 5,
+\end{tcblisting}
+
+The mutable specifier allows the lambda to modify its captures. Lambdas default to const-qualified.
+
+As with the trailing return type, any specifier requires the parameter parentheses.
+
+\item 
+The lambda supports two types of default capture:
+
+\begin{lstlisting}[style=styleCXX]
+int a = 47;
+int b = 73;
+auto l1 = []{ return a + b; };
+\end{lstlisting}
+
+If I try to compile this code, I get an error that includes:
+
+\begin{tcblisting}{commandshell={}}
+note: the lambda has no capture-default
+\end{tcblisting}
+
+One type of default capture is indicated by an equal sign:
+
+\begin{lstlisting}[style=styleCXX]
+auto l1 = [=]{ return a + b; };
+\end{lstlisting}
+
+This will capture all the symbols in the lambda's scope. The equal sign performs capture by copy. It will capture a copy of the objects as if they were copied with an assignment operator.
+
+The other default capture uses an ampersand for capture by reference:
+
+\begin{lstlisting}[style=styleCXX]
+auto l1 = [&]{ return a + b; };
+\end{lstlisting}
+
+This is a default capture that captures by reference.
+
+The default captures only use symbols when they are referenced, so they're not as messy as they may look. That said, I recommend explicit captures where possible as they generally improve readability.
+
+\end{itemize}
 
 \subsubsection{How it works…}
+
+The syntax of a lambda expression is as follows:
+
+\begin{lstlisting}[style=styleCXX]
+// Syntax of the lambda expression
+[capture-list] (parameters)
+	mutable   (optional)
+	constexpr (optional)
+	exception attr (optional)
+	-> return type (optional)
+{ body }
+\end{lstlisting}
+
+The only required parts of a lambda expression are the capture list and the body, which may be empty:
+
+\begin{lstlisting}[style=styleCXX]
+[]{}
+\end{lstlisting}
+
+This is the minimal lambda expression. It captures nothing and does nothing.
+
+Let's consider each of the parts.
+
+\noindent
+\textbf{Capture-list}
+
+The capture-list specifies what we capture, if anything. It cannot be omitted, but it may be empty. We can use [=] to capture all variables by copy or [\&] to capture all variables by reference, within the scope of the lambda.
+
+You may capture individual variables by listing them in the brackets:
+
+\begin{lstlisting}[style=styleCXX]
+[a, b]{ return a + b; }
+\end{lstlisting}
+
+The specified captures default to copy. You may capture by reference with the reference operator:
+
+\begin{lstlisting}[style=styleCXX]
+[&a, &b]{ return a + b; }
+\end{lstlisting}
+
+When you capture by reference, you may modify the referenced variable.
+
+\begin{tcolorbox}[colback=webgreen!5!white,colframe=webgreen!75!black,title=Note]
+You cannot capture object members directly. You may capture this or *this to dereference class members.
+\end{tcolorbox}
+
+\noindent
+\textbf{Parameters}
+
+As with a function, parameters are specified in parentheses:
+
+\begin{lstlisting}[style=styleCXX]
+[](int a, int b){ return a + b };
+\end{lstlisting}
+
+If there are no parameters, specifiers, or trailing return type, the parentheses are optional. A specifier or trailing return type makes the parentheses required:
+
+\begin{lstlisting}[style=styleCXX]
+[]() -> int { return 47 + 73 };
+\end{lstlisting}
+
+\noindent
+\textbf{The mutable modifier (optional)}
+
+A lambda expression defaults to const-qualified unless you specify the mutable modifier. This allows it to be used in const context, but it also means that it cannot modify any of its captured-by-copy variables. For example:
+
+\begin{lstlisting}[style=styleCXX]
+[a]{ return ++a; };
+\end{lstlisting}
+
+This will fail to compile with an error message like this:
+
+\begin{tcblisting}{commandshell={}}
+In lambda function:
+error: increment of read-only variable 'a'
+\end{tcblisting}
+
+With the mutable modifier, the lambda is no longer const-qualified and the captured variable may be changed:
+
+\begin{lstlisting}[style=styleCXX]
+[a]() mutable { return ++a; };
+\end{lstlisting}
+
+
+\noindent
+\textbf{The constexpr specifier (optional)}
+
+You may use constexpr to explicitly specify that you want your lambda to be considered a constant expression. This means that it may be evaluated at compile time. If the lambda meets the requirements, it may be considered constexpr even without the specifier.
+
+\noindent
+\textbf{The exception attribute (optional)}
+
+You can use the noexcept specifier to declare that your lambda does not throw any exceptions.
+
+\noindent
+\textbf{The trailing return type (optional)}
+
+By default, the lambda return type is deduced from the return statement, as if it were an auto return type. You may optionally specify a trailing return type with the -> operator:
+
+\begin{lstlisting}[style=styleCXX]
+[](int a, int b) -> long { return a + b; };
+\end{lstlisting}
+
+The parameter parentheses are required if you use any of the optional specifiers or the trailing return type.
+
+\begin{tcolorbox}[colback=webgreen!5!white,colframe=webgreen!75!black,title=Note]
+Some compilers, including GCC, allow empty parameter parentheses to be omitted even when there's a specifier or trailing return type. This is not correct. According to the specification, the parameters, specifiers, and trailing return type are all part of the lambda-declarator and the parentheses are required when any part of it is included. This may change in a future version of C++.
+\end{tcolorbox}
+
+
+
+
+
+
+
+
+
+
+
+
+
 

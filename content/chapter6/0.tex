@@ -1,0 +1,73 @@
+Much of the power of the STL is in the standardization of container interfaces. If a container has a particular capability, there's a good chance that the interface for that capability is standardized across container types. This standardization makes possible a library of algorithms that operate seamlessly across containers and sequences sharing a common interface.
+
+For example, if we want to sum all the elements in a vector of int, we could use a loop:
+
+\begin{lstlisting}[style=styleCXX]
+vector<int> x { 1, 2, 3, 4, 5 };
+long sum{};
+for( int i : x ) sum += i; // sum is 15
+\end{lstlisting}
+
+Or we could use an algorithm:
+
+\begin{lstlisting}[style=styleCXX]
+vector<int> x { 1, 2, 3, 4, 5 };
+auto sum = accumulate(x.begin(), x.end(), 0); // sum is 15
+\end{lstlisting}
+
+This same syntax works with other containers:
+
+\begin{lstlisting}[style=styleCXX]
+deque<int> x { 1, 2, 3, 4, 5 };
+auto sum = accumulate(x.begin(), x.end(), 0); // sum is 15
+\end{lstlisting}
+
+The algorithm version is not necessarily shorter, but it is easier to read and easier to maintain. And an algorithm is often more efficient than the equivalent loop.
+
+Beginning with C++20, the ranges library provides a set of alternative algorithms that operate with ranges and views. This book will demonstrate those alternatives where appropriate. For more information on ranges and views, refer to the recipe Create views into containers with ranges in Chapter 1, New C++20 Features, of this book.
+
+Most of the algorithms are in the algorithm header. Some numeric algorithms, notably accumulate(), are in the numeric header, and some memory-related algorithms are in the memory header.
+
+We will cover STL algorithms in the following recipes:
+
+\begin{itemize}
+\item 
+Copy from one iterator to another
+
+\item 
+Join container elements into a string
+
+\item 
+Sort containers with std::sort
+
+\item 
+Modify containers with std::transform
+
+\item 
+Find items in a container
+
+\item 
+Limit the values of a container to a range with std::clamp
+
+\item 
+Sample data sets with std::sample
+
+\item 
+Generate permutations of data sequences
+
+\item 
+Merge sorted containers
+\end{itemize}
+
+
+
+
+
+
+
+
+
+
+
+
+

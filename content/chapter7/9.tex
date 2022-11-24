@@ -1,8 +1,43 @@
 
+By default, the basic\_istream class reads one word at a time. We can take advantage of this property to use an istream\_iterator to count words.
 
 \subsubsection{How to do it…}
 
+This is a simple recipe to count words using an istream\_iterator:
+
+\begin{itemize}
+\item 
+We'll start with a simple function to count words using an istream\_iterator object:
+
+\begin{lstlisting}[style=styleCXX]
+size_t wordcount(auto& is) {
+	using it_t = istream_iterator<string>;
+	return distance(it_t{is}, it_t{});
+}
+\end{lstlisting}
+
+The distance() function takes two iterators and returns the number of steps between them. The using statement creates an alias it\_t for the istream\_iterator class with a string specialization. We then call distance() with an iterator, initialized with the input stream it\_t\{is\}, and another with the default constructor, which gives us an end-of-stream sentinel.
+
+\item 
+We call wordcount() from main():
+
+\begin{lstlisting}[style=styleCXX]
+int main() {
+	const char * fn{ "the-raven.txt" };
+	std::ifstream infile{fn, std::ios_base::in};
+	size_t wc{ wordcount(infile) };
+	cout << format("There are {} words in the
+		file.\n", wc);
+}
+\end{lstlisting}
+
+This calls wordcount() with our fstream object and prints the number of words in the file. When I call it with the text of Edgar Allan Poe's The Raven, we get this output:
+
+\begin{tcblisting}{commandshell={}}
+There are 1068 words in the file.
+\end{tcblisting}
+\end{itemize}
 
 \subsubsection{How it works…}
 
-
+Because basic\_istream defaults to word-by-word input, the number of steps in a file will be the number of words. The distance() function will measure the number of steps between two iterators, so calling it with the beginning and the sentinel of a compatible object will count the number of words in the file.

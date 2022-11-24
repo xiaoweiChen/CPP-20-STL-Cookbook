@@ -1,8 +1,165 @@
 
+The std::sample() algorithm takes a random sample of a sequence of values and populates a destination container with the sample. It is useful for analyzing a larger set of data, where the random sample is taken to be representative of the whole.
+
+A sample set allows us to approximate the characteristics of a large set of data, without analyzing the full set. This provides efficiency in exchange for accuracy, a fair trade-off in many circumstances.
 
 \subsubsection{How to do it…}
 
+In this recipe, we'll use an array of 200,000 random integers, with standard normal distribution. We'll sample a few hundred values to create a histogram of the frequency of each value.
+
+\begin{itemize}
+\item 
+We'll start with a simple function to return a rounded int from a double. The standard library lacks such a function and we'll need it later:
+
+\begin{lstlisting}[style=styleCXX]
+int iround(const double& d) {
+	return static_cast<int>(std::round(d));
+}
+\end{lstlisting}
+
+The standard library provides several versions of std::round(), including one that returns a long int. But we need an int, and this is a simple solution that avoids compiler warnings about narrowing conversion while hiding away the unsightly static\_cast.
+
+\item 
+In the main() function, we'll start with some useful constants:
+
+\begin{lstlisting}[style=styleCXX]
+int main() {
+	constexpr size_t n_data{ 200000 };
+	constexpr size_t n_samples{ 500 };
+	constexpr int mean{ 0 };
+	constexpr size_t dev{ 3 };
+	...
+}
+\end{lstlisting}
+
+We have values for n\_data and n\_samples, used for the size of the data and sample containers, respectively. We also have values for mean and dev, the mean and standard deviation parameters for the normal distribution of random values.
+
+\item 
+We now set up our random number generator and distribution objects. These are used to initialize the source data set:
+
+\begin{lstlisting}[style=styleCXX]
+std::random_device rd;
+std::mt19937 rng(rd());
+std::normal_distribution<> dist{ mean, dev };
+\end{lstlisting}
+
+The random\_device object provides access to the hardware random number generator. The mt19937 class is an implementation of the Mersenne Twister random number algorithm, a high-quality algorithm that will perform well on most systems with a data set of the size we're using. The normal\_distribution class provides a distribution of random numbers around the mean with the standard deviation provided.
+
+\item 
+Now we populate an array with an n\_data number of random int values:
+
+\begin{lstlisting}[style=styleCXX]
+array<int, n_data> v{};
+for(auto& e : v) e = iround(dist(rng));
+\end{lstlisting}
+
+The array container is fixed in size, so the template parameters include a size\_t value for the number of elements to allocate. We use a for() loop to populate the array.
+
+The rng object is the hardware random number generator. This is passed to dist(), our normal\_distribution object, and then to iround(), our integer rounding function.
+
+\item 
+At this point, we have an array with 200,000 data points. That's a lot to analyze, so we'll use the sample() algorithm to take a sample of 500 values:
+
+\begin{lstlisting}[style=styleCXX]
+array<int, n_samples> samples{};
+sample(data.begin(), data.end(), samples.begin(),
+	n_samples, rng);
+\end{lstlisting}
+
+We define another array object to hold the samples. This one is n\_samples in size. Then we use the sample() algorithm to populate the array with n\_samples random data points.
+
+\item 
+We create a histogram to analyze the samples. A map structure is perfect for this as we can easily map the frequency of each value:
+
+\begin{lstlisting}[style=styleCXX]
+std::map<int, size_t> hist{};
+for (const int i : samples) ++hist[i];
+\end{lstlisting}
+
+The for() loop takes each value from the samples container and uses it as a key in the map. The increment expression ++hist[i] counts the number of occurrences of each value in the sample set.
+
+\item 
+We print out the histogram using the C++20 format() function:
+
+\begin{lstlisting}[style=styleCXX]
+constexpr size_t scale{ 3 };
+cout << format("{:>3} {:>5} {:<}/{}\n",
+	"n", "count", "graph", scale);
+for (const auto& [value, count] : hist) {
+	cout << format("{:>3} ({:>3}) {}\n",
+		value, count, string(count / scale, '*'));
+}
+\end{lstlisting}
+
+The format() specifiers that look like \{:>3\} make space for a certain number of characters. The angle bracket specifies alignment, right or left.
+
+The string(count, char) constructor creates a string with a character repeated the number of times specified, in this case, n asterisk characters *, where n is count/scale, the frequency of a value in the histogram, divided by the scale constant.
+
+The output looks like this:
+
+\begin{tcblisting}{commandshell={}}
+$ ./sample
+n count graph/3
+-9 ( 2)
+-7 ( 5) *
+-6 ( 9) ***
+-5 ( 22) *******
+-4 ( 24) ********
+-3 ( 46) ***************
+-2 ( 54) ******************
+-1 ( 59) *******************
+ 0 ( 73) ************************
+ 1 ( 66) **********************
+ 2 ( 44) **************
+ 3 ( 34) ***********
+ 4 ( 26) ********
+ 5 ( 18) ******
+ 6 ( 9) ***
+ 7 ( 5) *
+ 8 ( 3) *
+ 9 ( 1)
+\end{tcblisting}
+
+This is a nice graphical representation of the histogram. The first number is the value, the second number is the frequency of the value, and the asterisks are a visual representation of the frequency, where each asterisk represents scale (3) occurrences in the sample set.
+
+Your output will differ each time you run the code.
+\end{itemize}
 
 \subsubsection{How it works…}
 
-\subsubsection{There's more…}
+The std::sample() function selects a specific number of elements from random locations in the source container and copies them to the destination container.
+
+The signature of sample() looks like this:
+
+\begin{lstlisting}[style=styleCXX]
+OutIter sample(SourceIter, SourceIter, OutIter,
+	SampleSize, RandNumGen&&);
+\end{lstlisting}
+
+The first two arguments are begin() and end() iterators on a container with the full data set. The third argument is an iterator for the destination of the samples. The fourth argument is the sample size, and the final argument is a random number generator function.
+
+The sample() algorithm uses uniform distribution, so each data point has the same chance of being sampled.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

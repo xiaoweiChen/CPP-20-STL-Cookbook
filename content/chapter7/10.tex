@@ -1,10 +1,192 @@
 
+One strength of the input stream is its ability to parse different types of data from a text file and convert them to their corresponding fundamental types. Here's a simple technique for importing data into a container of structures using an input stream.
 
 \subsubsection{How to do it…}
 
+In this recipe, we'll take a data file and import its disparate fields into a vector of struct objects. The data file represents cities with their populations and map coordinates:
+
+\begin{itemize}
+\item 
+This is cities.txt, the data file we'll read:
+
+\begin{tcblisting}{commandshell={}}
+Las Vegas
+661903 36.1699 -115.1398
+New York City
+8850000 40.7128 -74.0060
+Berlin
+3571000 52.5200 13.4050
+Mexico City
+21900000 19.4326 -99.1332
+Sydney
+5312000 -33.8688 151.2093
+\end{tcblisting}
+
+The city name is on a line by itself. The second line is population, followed by longitude and latitude. This pattern repeats for each of the five cities.
+
+\item 
+We'll define our filename in a constant so that we can open it later:
+
+\begin{lstlisting}[style=styleCXX]
+constexpr const char * fn{ "cities.txt" };
+\end{lstlisting}
+
+\item 
+Here's a City struct to hold the data:
+
+\begin{lstlisting}[style=styleCXX]
+struct City {
+	string name;
+	unsigned long population;
+	double latitude;
+	double longitude;
+};
+\end{lstlisting}
+
+\item 
+We would like to read the file and populate a vector of City objects:
+
+\begin{lstlisting}[style=styleCXX]
+vector<City> cities;
+\end{lstlisting}
+
+\item 
+Here's where the input stream makes this easy. We can simply specialize operator>{}> for our City class like this:
+
+\begin{lstlisting}[style=styleCXX]
+std::istream& operator>>(std::istream& in, City& c) {
+	in >> std::ws;
+	std::getline(in, c.name);
+	in >> c.population >> c.latitude >> c.longitude;
+	return in;
+}
+\end{lstlisting}
+
+The std::ws input manipulator discards leading whitespace from the input stream.
+
+We use getline() to read the city name, as it could be one or more words.
+
+This leverages the >{}> operator for the population (unsigned long), and latitude and longitude (both double) elements to populate the correct type.
+
+\item 
+Now, we can open the file and use the >{}> operator to read the file directly into the vector of City objects:
+
+\begin{lstlisting}[style=styleCXX]
+ifstream infile(fn, std::ios_base::in);
+if(!infile.is_open()) {
+	cout << format("failed to open file {}\n", fn);
+	return 1;
+}
+for(City c{}; infile >> c;) cities.emplace_back(c);
+\end{lstlisting}
+
+\item 
+We can display the vector using format():
+
+\begin{lstlisting}[style=styleCXX]
+for (const auto& [name, pop, lat, lon] : cities) {
+	cout << format("{:.<15} pop {:<10} coords {}, {}\n",
+	name, make_commas(pop), lat, lon);
+}
+\end{lstlisting}
+
+Output:
+
+\begin{tcblisting}{commandshell={}}
+$ ./initialize_container < cities.txt
+Las Vegas...... pop 661,903 coords 36.1699, -115.1398
+New York City.. pop 8,850,000 coords 40.7128, -74.006
+Berlin......... pop 3,571,000 coords 52.52, 13.405
+Mexico City.... pop 21,900,000 coords 19.4326, -99.1332
+Sydney......... pop 5,312,000 coords -33.8688, 151.2093
+\end{tcblisting}
+
+\item 
+The make\_commas() function was also used in the Use structured binding to return multiple values recipe in Chapter 2, General STL Features. It takes a numeric value and returns a string object, with commas added for readability:
+
+\begin{lstlisting}[style=styleCXX]
+string make_commas(const unsigned long num) {
+	string s{ std::to_string(num) };
+	for(int l = s.length() - 3; l > 0; l -= 3) {
+		s.insert(l, ",");
+	}
+	return s;
+}
+\end{lstlisting}
+\end{itemize}
 
 \subsubsection{How it works…}
 
+The heart of this recipe is the istream class operator>{}> overload:
+
+\begin{lstlisting}[style=styleCXX]
+std::istream& operator>>(std::istream& in, City& c) {
+	in >> std::ws;
+	std::getline(in, c.name);
+	in >> c.population >> c.latitude >> c.longitude;
+	return in;
+}
+\end{lstlisting}
+
+By specifying our City class in the function header, this function will be called every time a City object appears on the right-hand side of an input stream >{}> operator:
+
+\begin{lstlisting}[style=styleCXX]
+City c{};
+infile >> c;
+\end{lstlisting}
+
+This allows us to specify exactly how the input stream reads data into a City object.
 
 \subsubsection{There's more…}
+
+When you run this code on a Windows system, you'll notice that the first word of the first line gets corrupted. That's because Windows always includes a Byte Order Mark (BOM) at the head of any UTF-8 file. So, when you read a file on Windows, the BOM will be included in the first object you read. The BOM is anachronistic, but at the time of writing, there is no way to stop Windows from employing it.
+
+The solution is to call a function that checks the first three bytes of a file for the BOM. The BOM for UTF-8 is EF BB BF. Here's a function that searches for, and skips, a UTF-8 BOM:
+
+\begin{lstlisting}[style=styleCXX]
+// skip BOM for UTF-8 on Windows
+void skip_bom(auto& fs) {
+	const unsigned char boms[]{ 0xef, 0xbb, 0xbf };
+	bool have_bom{ true };
+	for(const auto& c : boms) {
+		if((unsigned char)fs.get() != c) have_bom = false;
+	}
+	if(!have_bom) fs.seekg(0);
+	return;
+}
+\end{lstlisting}
+
+This reads the first three bytes of the file and checks them for the UTF-8 BOM signature. If any of the three bytes do not match, it resets the input stream to the beginning of the file. If the file has no BOM, there's no harm done.
+
+You simply call this function before you begin reading from a file:
+
+\begin{lstlisting}[style=styleCXX]
+int main() {
+	...
+	ifstream infile(fn, std::ios_base::in);
+	if(!infile.is_open()) {
+		cout << format("failed to open file {}\n", fn);
+		return 1;
+	}
+	skip_bom(infile);
+	for(City c{}; infile >> c;) cities.emplace_back(c);
+	...
+}
+\end{lstlisting}
+
+This will ensure that the BOM is not included in the first string of the file.
+
+\begin{tcolorbox}[colback=webgreen!5!white,colframe=webgreen!75!black,title=Note]
+Because the cin input stream is not seekable, the skip\_bom() function will not work on the cin stream. It will only work with a seekable text file.
+\end{tcolorbox}
+
+
+
+
+
+
+
+
+
+
 

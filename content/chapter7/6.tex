@@ -1,9 +1,367 @@
 
+C++20 introduces the new format() function, which returns a formatted representation of its arguments in a string. format() uses a Python-style formatting string, with concise syntax, type safety, and excellent performance.
+
+The format() function takes a format string and a template, parameter pack, for its arguments:
+
+\begin{lstlisting}[style=styleCXX]
+template< class... Args >
+string format(const string_view fmt, Args&&... args );
+\end{lstlisting}
+
+The format string uses curly braces \{\} as a placeholder for the formatted arguments:
+
+\begin{lstlisting}[style=styleCXX]
+const int a{47};
+format("a is {}\n", a);
+\end{lstlisting}
+
+Output:
+
+\begin{tcblisting}{commandshell={}}
+a is 47
+\end{tcblisting}
+
+It also uses the braces for format specifiers, for example:
+
+\begin{lstlisting}[style=styleCXX]
+	format("Hex: {:x} Octal: {:o} Decimal {:d} \n", a, a, a);
+\end{lstlisting}
+
+Output:
+
+\begin{tcblisting}{commandshell={}}
+Hex: 2f Octal: 57 Decimal 47
+\end{tcblisting}
+
+This recipe will show you how to use the format() function for some common string formatting solutions.
+
+\begin{tcolorbox}[colback=webgreen!5!white,colframe=webgreen!75!black,title=Note]
+This chapter was developed using a preview release of the Microsoft Visual C++ compiler on Windows 10. At the time of writing, this is the only compiler that fully supports the C++20 <format> library. Final implementations may differ in some details.
+\end{tcolorbox}
 
 \subsubsection{How to do it…}
 
+Let's consider some common formatting solutions using the format() function:
+
+\begin{itemize}
+\item 
+We'll start with some variables to format:
+
+\begin{lstlisting}[style=styleCXX]
+const int inta{ 47 };
+const char * human{ "earthlings" };
+const string_view alien{ "vulcans" };
+const double df_pi{ pi };
+\end{lstlisting}
+
+The pi constant is in the <numbers> header and the std::numbers namespace.
+
+\item 
+We can display the variables using cout:
+
+\begin{lstlisting}[style=styleCXX]
+cout << "inta is " << inta << '\n'
+<< "hello, " << human << '\n'
+<< "All " << alien << " are welcome here\n"
+<< "π is " << df_pi << '\n';
+\end{lstlisting}
+
+We get this output:
+
+\begin{tcblisting}{commandshell={}}
+a is 47
+hello, earthlings
+All vulcans are welcome here
+π is 3.14159
+\end{tcblisting}
+
+\item 
+Now, let's look at each of these with format(), starting with the C-string, human:
+
+\begin{lstlisting}[style=styleCXX]
+cout << format("Hello {}\n", human);
+\end{lstlisting}
+
+This is the simplest form of the format() function. The format string has one placeholder \{\} and one corresponding variable, human. The output is:
+
+\begin{tcblisting}{commandshell={}}
+Hello earthlings
+\end{tcblisting}
+
+\item 
+The format() function returns a string, and we use cout << to display the string.
+
+The original proposal for the format() library included a print() function, using the same parameters as format(). That would allow us to print our formatted strings in one step:
+
+\begin{lstlisting}[style=styleCXX]
+print("Hello {}\n", cstr);
+\end{lstlisting}
+
+Unfortunately, print() didn't make it into the C++20 standard, although it is expected to be included in C++23.
+
+We can provide the same functionality with a simple function, using vformat():
+
+\begin{lstlisting}[style=styleCXX]
+template<typename... Args>
+constexpr void print(const string_view str_fmt,
+Args&&... args) {
+	fputs(std::vformat(str_fmt,
+	std::make_format_args(args...)).c_str(),
+	stdout);
+}
+\end{lstlisting}
+
+This simple one-line function gives us a serviceable print() function. We can use it in place of the cout <{}< format() combination:
+
+\begin{lstlisting}[style=styleCXX]
+print("Hello {}\n", human);
+\end{lstlisting}
+
+Output:
+
+\begin{tcblisting}{commandshell={}}
+Hello earthlings
+\end{tcblisting}
+
+A more complete version of this function may be found in the include directory of the example files.
+
+\item 
+The format string also provides positional options:
+
+\begin{lstlisting}[style=styleCXX]
+print("Hello {} we are {}\n", human, alien);
+\end{lstlisting}
+
+Output:
+
+\begin{tcblisting}{commandshell={}}
+Hello earthlings we are vulcans
+\end{tcblisting}
+
+We can change the order of the arguments by using positional options in the format string:
+
+\begin{lstlisting}[style=styleCXX]
+print("Hello {1} we are {0}\n", human, alien);
+\end{lstlisting}
+
+Now, we get this output:
+
+\begin{tcblisting}{commandshell={}}
+Hello vulcans we are earthlings
+\end{tcblisting}
+
+Notice that the arguments remain the same. Only the positional values in the braces have changed. The positional indices are zero-based, just like the [] operator.
+
+This feature can be useful for internationalization, as different languages use different orders for parts of speech in a sentence.
+
+\item 
+There are many formatting options for numbers:
+
+\begin{lstlisting}[style=styleCXX]
+print("π is {}\n", df_pi);
+\end{lstlisting}
+
+Output:
+
+\begin{tcblisting}{commandshell={}}
+π is 3.141592653589793
+\end{tcblisting}
+
+We can specify the number of digits of precision:
+
+\begin{lstlisting}[style=styleCXX]
+print("π is {:.5}\n", df_pi);
+\end{lstlisting}
+
+Output:
+
+\begin{tcblisting}{commandshell={}}
+π is 3.1416
+\end{tcblisting}
+
+The colon character : is used to separate positional indices from formatting arguments:
+
+\begin{lstlisting}[style=styleCXX]
+print("inta is {1:}, π is {0:.5}\n", df_pi, inta);
+\end{lstlisting}
+
+Output:
+
+\begin{tcblisting}{commandshell={}}
+inta is 47, π is 3.1416
+\end{tcblisting}
+
+\item 
+If we want a value to take up a certain amount of space, we can specify the number of characters like this:
+
+\begin{lstlisting}[style=styleCXX]
+print("inta is [{:10}]\n", inta);
+\end{lstlisting}
+
+Output:
+
+\begin{tcblisting}{commandshell={}}
+inta is [    47]
+\end{tcblisting}
+
+We can align it left or right:
+
+\begin{lstlisting}[style=styleCXX]
+print("inta is [{:<10}]\n", inta);
+print("inta is [{:>10}]\n", inta);
+\end{lstlisting}
+
+Output:
+
+\begin{tcblisting}{commandshell={}}
+inta is [47     ]
+inta is [     47]
+\end{tcblisting}
+
+By default, it fills with space characters, but we can change that:
+
+\begin{lstlisting}[style=styleCXX]
+print("inta is [{:*<10}]\n", inta);
+print("inta is [{:0>10}]\n", inta);
+\end{lstlisting}
+
+Output:
+
+\begin{tcblisting}{commandshell={}}
+inta is [47********]
+inta is [0000000047]
+\end{tcblisting}
+
+We can also center a value:
+
+\begin{lstlisting}[style=styleCXX]
+print("inta is [{:^10}]\n", inta);
+print("inta is [{:_^10}]\n", inta);
+\end{lstlisting}
+
+Output:
+
+\begin{tcblisting}{commandshell={}}
+inta is [    47    ]
+inta is [____47____]
+\end{tcblisting}
+
+\item 
+We can format integer numbers as hexadecimal, octal, or the default decimal representation:
+
+\begin{lstlisting}[style=styleCXX]
+print("{:>8}: [{:04x}]\n", "Hex", inta);
+print("{:>8}: [{:4o}]\n", "Octal", inta);
+print("{:>8}: [{:4d}]\n", "Decimal", inta);
+\end{lstlisting}
+
+Output:
+
+\begin{tcblisting}{commandshell={}}
+    Hex: [002f]
+  Octal: [  57]
+Decimal: [  47]
+\end{tcblisting}
+
+Notice that I used right alignment to line up the labels.
+
+Use a capital X for uppercase hexadecimal:
+
+\begin{lstlisting}[style=styleCXX]
+print("{:>8}: [{:04X}]\n", "Hex", inta);
+\end{lstlisting}
+
+Output:
+
+\begin{tcblisting}{commandshell={}}
+    Hex: [002f]
+\end{tcblisting}
+
+\begin{tcolorbox}[colback=gray!5!white,colframe=gray!75!black,title=Tip]
+By default, Windows uses uncommon character encodings. Recent versions may default to UTF-16 or UTF-8 BOM. Older versions may default to "code page" 1252, a superset of the ISO 8859-1 ASCII standard. No Windows system defaults to the more common UTF-8 (no BOM).
+
+By default, Windows will not display the standard UTF-8 π character. To make Windows compatible with UTF-8 encoding (and the rest of the world), use the compiler switch /utf-8 and issue the command chcp 65001 on the command line when testing. Now, you can have your π and eat it too.
+\end{tcolorbox}
+	
+\end{itemize}
 
 \subsubsection{How it works…}
+
+The <format> library uses a template parameter pack to pass arguments to the formatter. This allows the arguments to be individually inspected for class and type. The library function, make\_format\_args() takes a parameter pack and returns a format\_args object, which provides a type erased list of arguments to be formatted.
+
+We can see this in action in our print() function:
+
+\begin{lstlisting}[style=styleCXX]
+template<typename... Args>
+constexpr void print(const string_view str_fmt, Args&&... args)
+{
+	fputs(vformat(str_fmt,
+	make_format_args(args...)).c_str(),
+	stdout);
+}
+\end{lstlisting}
+
+The make\_format\_args() function takes a parameter pack and returns a format\_args object. The vformat() function takes a format string and the format\_args object, and returns a std::string. We use the c\_str() method to get a C-string for use with fputs().
+
+\subsubsection{There's more…}
+
+It's common practice to overload the ostream <{}< operator for custom classes. For example, given a class Frac that holds the values of a fraction:
+
+\begin{lstlisting}[style=styleCXX]
+template<typename T>
+struct Frac {
+	T n;
+	T d;
+};
+...
+Frac<long> n{ 3, 5 };
+cout << "Frac: " << n << '\n';
+\end{lstlisting}
+
+We want to print the object as a fraction like 3/5. So, we would write a simple operator<{}< specialization like this:
+
+\begin{lstlisting}[style=styleCXX]
+template <typename T>
+std::ostream& operator<<(std::ostream& os, const Frac<T>& f) {
+	os << f.n << '/' << f.d;
+	return os;
+}
+\end{lstlisting}
+
+Now our output is:
+
+\begin{tcblisting}{commandshell={}}
+Frac: 3/5
+\end{tcblisting}
+
+To provide format() support for our custom class, we need to create a formatter object specialization, like this:
+
+\begin{lstlisting}[style=styleCXX]
+template <typename T>
+struct std::formatter<Frac<T>> : std::formatter<unsigned> {
+	template <typename Context>
+	auto format(const Frac<T>& f, Context& ctx) const {
+		return format_to(ctx.out(), "{}/{}", f.n, f.d);
+	}
+};
+\end{lstlisting}
+
+The specialization of the std::formatter class overloads its format() method. We inherit from the formatter<unsigned> specialization for simplicity. The format() method is called with a Context object, which provides the output context for the formatted string. For the return value, we use the format\_to() function with ctx.out, a normal format string, and parameters.
+
+Now, we can now use our print() function with the Frac class:
+
+\begin{lstlisting}[style=styleCXX]
+print("Frac: {}\n", n);
+\end{lstlisting}
+
+The formatter now recognizes our class and provides our desired output:
+
+\begin{tcblisting}{commandshell={}}
+Frac: 3/5
+\end{tcblisting}
+
+
+
 
 
 

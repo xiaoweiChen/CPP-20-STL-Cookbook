@@ -1,0 +1,44 @@
+The STL string class is a powerful, full-featured tool for storing, manipulating, and displaying character-based data. It has much of the convenience you would find in a high-level scripting language, yet remains as quick and agile as you would expect from C++.
+
+The string class is based on basic\_string, a contiguous container class that may be instantiated with any character type. Its class signature looks like this:
+
+\begin{lstlisting}[style=styleCXX]
+template<
+	typename CharT,
+	typename Traits = std::char_traits<CharT>,
+	typename Allocator = std::allocator<CharT>
+> class basic_string;
+\end{lstlisting}
+
+The Traits and Allocator template parameters are usually left to their default values.
+
+The underlying storage of basic\_string is a contiguous sequence of CharT, and can be accessed with the data() member function:
+
+\begin{lstlisting}[style=styleCXX]
+const std::basic_string<char> s{"hello"};
+const char * sdata = s.data();
+for(size_t i{0}; i < s.size(); ++i) {
+	cout << sdata[i] << ' ';
+}
+cout << '\n';
+\end{lstlisting}
+
+Output:
+
+\begin{tcblisting}{commandshell={}}
+h e l l o
+\end{tcblisting}
+
+The data() member function returns a CharT* that points to the underlying array of characters. Since C++11, the array returned by data() is null-terminated, making data() equivalent to c\_str().
+
+The basic\_string class includes many of the methods you would find in other contiguous-storage classes, including insert(), erase(), push\_back(), pop\_back(), and others. These methods operate on the underlying array of CharT.
+
+std::string is a type alias for std::basic\_string<char>:
+
+\begin{lstlisting}[style=styleCXX]
+using std::string = std::basic_string<char>;
+\end{lstlisting}
+
+For most purposes, you'll use std::string.
+
+

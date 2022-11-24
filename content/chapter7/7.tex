@@ -1,7 +1,84 @@
 
+It is common for input from users to include extraneous whitespace at one or both ends of a string. This can be problematic, so we often need to remove it. In this recipe, we'll use the string class methods, find\_first\_not\_of() and find\_last\_not\_of(), to trim whitespace from the ends of a string.
 
 \subsubsection{How to do it…}
 
+The string class includes methods for finding elements that are, or are not, included in a list of characters. We'll use these methods to trim string:
+
+\begin{itemize}
+\item 
+We start by defining string with input from a hypothetical ten-thumbed user:
+
+\begin{lstlisting}[style=styleCXX]
+int main() {
+	string s{" \t ten-thumbed input \t \n \t "};
+	cout << format("[{}]\n", s);
+	...
+\end{lstlisting}
+
+Our input has a few extra tab \verb|\|t and newline \verb|\|n characters before and after the content. We print it with surrounding brackets to show the whitespace:
+
+\begin{lstlisting}[style=styleCXX]
+[           ten-thumbed input
+       ]
+\end{lstlisting}
+
+\item 
+Here's a trimstr() function to remove all the whitespace characters from both ends of string:
+
+\begin{lstlisting}[style=styleCXX]
+string trimstr(const string& s) {
+	constexpr const char * whitespace{ " \t\r\n\v\f" };
+	if(s.empty()) return s;
+	const auto first{ s.find_first_not_of(whitespace) };
+	if(first == string::npos) return {};
+	const auto last{ s.find_last_not_of(whitespace) };
+	return s.substr(first, (last - first + 1));
+}
+\end{lstlisting}
+
+We defined our set of whitespace characters as space, tab, return, newline, vertical tab, and form feed. Some of these are more common than others, but that's the canonical set.
+
+This function uses the find\_first\_not\_of() and find\_last\_not\_of() methods of the string class to find the first/last elements that are not a member of the set.
+
+\item 
+Now, we can call the function to get rid of all that unsolicited whitespace:
+
+\begin{lstlisting}[style=styleCXX]
+cout << format("[{}]\n", trimstr(s));
+\end{lstlisting}
+
+Output:
+
+\begin{tcblisting}{commandshell={}}
+[ten-thumbed input]
+\end{tcblisting}
+\end{itemize}
+
 
 \subsubsection{How it works…}
+
+The string class's various find...() member functions return a position as a size\_t value:
+
+\begin{lstlisting}[style=styleCXX]
+size_t find_first_not_of( const CharT* s, size_type pos = 0 );
+size_t find_last_not_of( const CharT* s, size_type pos = 0 );
+\end{lstlisting}
+
+The return value is the zero-based position of the first matching character (not in the s list of characters) or the special value, string::npos, if not found. npos is a static member constant that represents an invalid position.
+
+We test for (first == string::npos) and return an empty string \{\} if there is no match. Otherwise, we use the first and last positions with the s.substr() method to return the string without whitespace.
+
+
+
+
+
+
+
+
+
+
+
+
+
 

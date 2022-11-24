@@ -1,10 +1,299 @@
 
-
+There are several ways to concatenate strings in C++. In this recipe, we will look at the three most common: the string class operator+(), the string class append() function, and the ostringstream class operator<{}<(). New in C++20, we also have the format() function. Each of these has its advantages, disadvantages, and use cases.
 
 \subsubsection{How to do it…}
 
+In this recipe, we will examine ways to concatenate strings. We will then perform some benchmarks and consider the different use cases.
+
+\begin{itemize}
+\item 
+We'll start with a couple of std::string objects:
+
+\begin{lstlisting}[style=styleCXX]
+string a{ "a" };
+string b{ "b" };
+\end{lstlisting}
+
+The string objects are constructed from literal C-strings.
+
+The C-string constructor makes a copy of the literal string and uses the local copy as the underlying data for the string object.
+
+\item 
+Now, let's construct a new empty string object and concatenate a and b with a separator and a newline:
+
+\begin{lstlisting}[style=styleCXX]
+string x{};
+x += a + ", " + b + "\n";
+cout << x;
+\end{lstlisting}
+
+Here, we used the string object's += and + operators to concatenate the a and b strings, along with literal strings ", " and "\verb|\|n". The resulting string has the elements concatenated together:
+
+\begin{tcblisting}{commandshell={}}
+a, b
+\end{tcblisting}
+
+\item 
+We could instead use the string object's append() member function:
+
+\begin{lstlisting}[style=styleCXX]
+string x{};
+x.append(a);
+x.append(", ");
+x.append(b);
+x.append("\n");
+cout << x;
+\end{lstlisting}
+
+This gives us the same result:
+
+\begin{tcblisting}{commandshell={}}
+a, b
+\end{tcblisting}
+
+\item 
+Or, we could construct an ostringstream object, which uses the stream interface:
+
+\begin{lstlisting}[style=styleCXX]
+ostringstream x{};
+x << a << ", " << b << "\n";
+cout << x.str();
+\end{lstlisting}
+
+We get the same result:
+
+\begin{tcblisting}{commandshell={}}
+a, b
+\end{tcblisting}
+
+\item 
+We could also use the C++20 format() function:
+
+\begin{lstlisting}[style=styleCXX]
+string x{};
+x = format("{}, {}\n", a, b);
+cout << x;
+\end{lstlisting}
+
+We get the same result:
+
+\begin{tcblisting}{commandshell={}}
+a, b
+\end{tcblisting}
+
+\end{itemize}
 
 \subsubsection{How it works…}
 
+The string object has two distinct methods for concatenating a string, the + operator and the append() member function.
 
+The append() member function adds data to the end of the string object's data. It must allocate and manage memory to accomplish this.
 
+The + operator uses the operator+() overload to construct a new string object with the old and new data, and returns the new object.
+
+The ostringstream object works like an ostream but stores its output for use as a string.
+
+The C++20 format() function uses a format string with variadic arguments and returns a newly constructed string object.
+
+\subsubsection{There's more…}
+
+How do you decide which concatenation strategy is right for your code? We can start with some benchmarks.
+
+\noindent
+\textbf{Benchmarks}
+
+I performed these tests using GCC 11 on Debian Linux:
+
+\begin{itemize}
+\item 
+First, we'll create a timer function using the <chrono> library:
+
+\begin{lstlisting}[style=styleCXX]
+using std::chrono::high_resolution_clock;
+using std::chrono::duration;
+
+void timer(string(*f)()) {
+	auto t1 = high_resolution_clock::now();
+	string s{ f() };
+	auto t2 = high_resolution_clock::now();
+	duration<double, std::milli> ms = t2 - t1;
+	cout << s;
+	cout << format("duration: {} ms\n", ms.count());
+}
+\end{lstlisting}
+
+The timer function calls the function passed to it, marking the time before and after the function call. It then displays the duration using cout.
+
+\item 
+Now, we create a function that concatenates strings, using the append() member function:
+
+\begin{lstlisting}[style=styleCXX]
+string append_string() {
+	cout << "append_string\n";
+	string a{ "a" };
+	string b{ "b" };
+	long n{0};
+	while(++n) {
+		string x{};
+		x.append(a);
+		x.append(", ");
+		x.append(b);
+		x.append("\n");
+		if(n >= 10000000) return x;
+	}
+	return "error\n";
+}
+\end{lstlisting}
+
+For benchmarking purposes, this function repeats the concatenation 10 million times. We call this function from main() with timer():
+
+\begin{lstlisting}[style=styleCXX]
+int main() {
+	timer(append_string);
+}
+\end{lstlisting}
+
+We get this output:
+
+\begin{tcblisting}{commandshell={}}
+append_string
+a, b
+duration: 425.361643 ms
+\end{tcblisting}
+
+So, on this system, our concatenation ran 10 million iterations in about 425 milliseconds.
+
+\item 
+Now, let's create the same function with the + operator overload:
+
+\begin{lstlisting}[style=styleCXX]
+string concat_string() {
+	cout << "concat_string\n";
+	string a{ "a" };
+	string b{ "b" };
+	long n{0};
+	while(++n) {
+		string x{};
+		x += a + ", " + b + "\n";
+		if(n >= 10000000) return x;
+	}
+	return "error\n";
+}
+\end{lstlisting}
+
+Our benchmark output:
+
+\begin{tcblisting}{commandshell={}}
+concat_string
+a, b
+duration: 659.957702 ms
+\end{tcblisting}
+
+This version performed 10 million iterations in about 660 milliseconds.
+
+\item 
+Now, let's try it with ostringstream:
+
+\begin{lstlisting}[style=styleCXX]
+string concat_ostringstream() {
+	cout << "ostringstream\n";
+	string a { "a" };
+	string b { "b" };
+	long n{0};
+	while(++n) {
+		ostringstream x{};
+		x << a << ", " << b << "\n";
+		if(n >= 10000000) return x.str();
+	}
+	return "error\n";
+}
+\end{lstlisting}
+
+Our benchmark output:
+
+\begin{tcblisting}{commandshell={}}
+ostringstream
+a, b
+duration: 3462.020587 ms
+\end{tcblisting}
+
+This version ran 10 million iterations in about 3.5 seconds.
+
+\item 
+Here's the format() version:
+
+\begin{lstlisting}[style=styleCXX]
+string concat_format() {
+	cout << "append_format\n";
+	string a{ "a" };
+	string b{ "b" };
+	long n{0};
+	while(++n) {
+		string x{};
+		x = format("{}, {}\n", a, b);
+		if(n >= 10000000) return x;
+	}
+	return "error\n";
+}
+\end{lstlisting}
+
+Our benchmark output:
+
+\begin{tcblisting}{commandshell={}}
+append_format
+a, b
+duration: 782.800547 ms
+\end{tcblisting}
+
+The format() version ran 10 million iterations in about 783 milliseconds.
+
+\item 
+Summary of the results:
+
+% Please add the following required packages to your document preamble:
+% \usepackage[table,xcdraw]{xcolor}
+% If you use beamer only pass "xcolor=table" option, i.e. \documentclass[xcolor=table]{beamer}
+\begin{table}[H]
+\centering
+\begin{tabular}{|c|c|}
+	\hline
+	\rowcolor[HTML]{9B9B9B} 
+	{\color[HTML]{FFFFFF} Concatenation method} & {\color[HTML]{FFFFFF} Benchmark in millisecond} \\ \hline
+	append()      & 425 ms   \\ \hline
+	operator+()   & 660 ms   \\ \hline
+	format()      & 783 ms   \\ \hline
+	ostringstream & 3,462 ms \\ \hline
+\end{tabular}
+
+\hspace*{\fill} \\ %插入空行
+A comparison of concatenation performance
+\end{table}
+
+\end{itemize}
+
+\noindent
+\textbf{Why the performance discrepancies?}
+
+We can see from these benchmarks that the ostringstream version takes many times longer than the string-based versions.
+
+The append() method is slightly faster than the + operator. It needs to allocate memory but does not construct new objects. Some optimizations may be possible due to repetition.
+
+The + operator overload probably calls the append() method. The extra function call could make it incrementally slower than the append() method.
+
+The format() version creates one new string object but without the overhead of the iostream system.
+
+The ostringstream operator <{}< overload creates a new ostream object for each operation. Given the complexity of the stream object, along with managing the stream state, this makes it much slower than either of the string-based versions.
+
+\subsubsection{Why would I choose one over another?}
+
+Some measure of personal preference will be involved. The operator overloads (+ or <{}<) can be convenient. Performance may or may not be an issue for you.
+
+The ostringstream class has one distinct advantage over the string methods: it specializes the << operator for each different type, so it's able to operate in circumstances where you may have different types calling the same code.
+
+The format() function offers the same type-safety and customization options and is significantly faster than the ostringstream class.
+
+The string object's + operator overload is fast, easy to use, and easy to read but is incrementally slower than append().
+
+The append() version is fastest but requires a separate function call for each item.
+
+For my purposes, I like the format() function or the string object's + operator for most circumstances. I'll use append() if every bit of speed matters. I'll use ostringstream where I need its unique features and performance is not an issue.

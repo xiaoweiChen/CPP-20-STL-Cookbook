@@ -1,8 +1,146 @@
 
+The std::transform() function is remarkably powerful and flexible. One of the more commonly deployed algorithms in the library, it applies a function or lambda to each element in a container, storing the results in another container while leaving the original in place.
+
+Given its power, it's deceptively simple to use.
 
 \subsubsection{How to do it…}
 
+In this recipe, we will explore a few applications for the std::transform() function:
+
+\begin{itemize}
+\item 
+We'll start with a simple function that prints the contents of a container:
+
+\begin{lstlisting}[style=styleCXX]
+void printc(auto& c, string_view s = "") {
+	if(s.size()) cout << format("{}: ", s);
+	for(auto e : c) cout << format("{} ", e);
+	cout << '\n';
+}
+\end{lstlisting}
+
+We'll use this to view the results of our transformations.
+
+\item 
+In the main() function, let's declare a couple of vectors:
+
+\begin{lstlisting}[style=styleCXX]
+int main() {
+	vector<int> v1{ 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
+	vector<int> v2;
+	printc(v1, "v1");
+	...
+}
+\end{lstlisting}
+
+This prints out the contents of v1:
+
+\begin{tcblisting}{commandshell={}}
+v1: 1 2 3 4 5 6 7 8 9 10
+\end{tcblisting}
+
+\item 
+Now we can use the transform() function to insert the square of each value into v2:
+
+\begin{lstlisting}[style=styleCXX]
+cout << "squares:\n";
+transform(v1.begin(), v1.end(), back_inserter(v2),
+	[](int x){ return x * x; });
+printc(v2, "v2");
+\end{lstlisting}
+
+The transform() function takes four arguments. The first two are the begin() and end() iterators for the source range. The third argument is the begin() iterator for the destination range. In this case, we're using the back\_inserter() algorithm to insert the results in v2. The fourth argument is the transformation function. In this case, we're using a simple lambda to square the value.
+
+Output:
+
+\begin{tcblisting}{commandshell={}}
+squares:
+v2: 1 4 9 16 25 36 49 64 81 100
+\end{tcblisting}
+
+\item 
+Of course, we can use transform() with any type. Here's an example that converts a vector of string objects to lowercase. First, we need a function to return the lowercase value of a string:
+
+\begin{lstlisting}[style=styleCXX]
+string str_lower(const string& s) {
+	string outstr{};
+	for(const char& c : s) {
+		outstr += tolower(c);
+	}
+	return outstr;
+}
+\end{lstlisting}
+
+Now we can use the str\_lower() function with transform:
+
+\begin{lstlisting}[style=styleCXX]
+vector<string> vstr1{ "Mercury", "Venus", "Earth",
+	"Mars", "Jupiter", "Saturn", "Uranus", "Neptune",
+	"Pluto" };
+vector<string> vstr2;
+printc(vstr1, "vstr1");
+cout << "str_lower:\n";
+transform(vstr1.begin(), vstr1.end(),
+	back_inserter(vstr2),
+	[](string& x){ return str_lower(x); });
+printc(vstr2, "vstr2");
+\end{lstlisting}
+
+This calls str\_lower() for every element in vstr1 and inserts the results into vstr2. The result is:
+
+\begin{tcblisting}{commandshell={}}
+vstr: Mercury Venus Earth Mars Jupiter Saturn Uranus
+Neptune Pluto
+str_lower:
+vstr: mercury venus earth mars jupiter saturn uranus
+neptune pluto
+\end{tcblisting}
+
+(Yes, Pluto will always be a planet to me.)
+
+\item 
+There's also a ranges version of transform:
+
+\begin{lstlisting}[style=styleCXX]
+cout << "ranges squares:\n";
+auto view1 = views::transform(v1, [](int x){
+	return x * x; });
+printc(view1, "view1");
+\end{lstlisting}
+
+The ranges version has a more succinct syntax and returns a view object, rather than populating another container.
+\end{itemize}
 
 \subsubsection{How it works…}
+
+The std::transform() function works very much like std::copy(), with the addition of the user-provided function. Each element in the input range is passed to the function, and the return value from the function is copy-assigned to the destination iterator. This makes transform() a singularly useful and powerful algorithm.
+
+It's worth noting that transform() does not guarantee the elements will be processed in order. If you need to ensure the order of the transformation, you will want to use a for loop instead:
+
+\begin{lstlisting}[style=styleCXX]
+v2.clear(); // reset vector v2 to empty state
+for(auto e : v1) v2.push_back(e * e);
+printc(v2, "v2");
+\end{lstlisting}
+
+Output:
+
+\begin{tcblisting}{commandshell={}}
+v2: 1 4 9 16 25 36 49 64 81 100
+\end{tcblisting}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 

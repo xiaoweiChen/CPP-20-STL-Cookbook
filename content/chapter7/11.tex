@@ -1,6 +1,240 @@
+
+The string class is an alias of the basic\_string class, with the signature:
+
+\begin{lstlisting}[style=styleCXX]
+class basic_string<char, std::char_traits<char>>;
+\end{lstlisting}
+
+The first template parameter provides the type of character. The second template parameter provides a character traits class, which provides basic character and string operations for the specified character type. We normally use the default char\_traits<char> class.
+
+We can modify the behavior of a string by providing our own custom character traits class.
+
 \subsubsection{How to do it…}
 
+In this recipe, we will create a character traits class for use with basic\_string that will ignore casing for comparison purposes:
+
+\begin{itemize}
+\item 
+First, we'll need a function to convert characters to a common case. We'll use lowercase here, but it's an arbitrary choice. Uppercase would work just as well:
+
+\begin{lstlisting}[style=styleCXX]
+constexpr char char_lower(const char& c) {
+	if(c >= 'A' && c <= 'Z') return c + ('a' - 'A');
+	else return c;
+}
+\end{lstlisting}
+
+This function must be constexpr (for C++20 and later), so the existing std::tolower() function won't work here. Fortunately, it's a simple solution to a simple problem.
+
+\item 
+Our traits class is called ci\_traits (ci stands for case-independent). It inherits from std::char\_traits<char>:
+
+\begin{lstlisting}[style=styleCXX]
+class ci_traits : public std::char_traits<char> {
+	public:
+	...
+};
+\end{lstlisting}
+
+The inheritance allows us to override only the functions that we need.
+
+\item 
+The comparison functions are called lt() for less than and eq() for equal to:
+
+\begin{lstlisting}[style=styleCXX]
+static constexpr bool lt(char_type a, char_type b)
+noexcept {
+	return char_lower(a) < char_lower(b);
+}
+static constexpr bool eq(char_type a, char_type b)
+noexcept {
+	return char_lower(a) == char_lower(b);
+}
+\end{lstlisting}
+
+Notice that we compare the lowercase versions of characters.
+
+\item 
+There's also a compare() function, which compares two C-strings. It returns +1 for greater than, -1 for less than, and 0 for equal to. We can use the spaceship <=> operator for this:
+
+\begin{lstlisting}[style=styleCXX]
+static constexpr int compare(const char_type* s1,
+const char_type* s2, size_t count) {
+	for(size_t i{0}; i < count; ++i) {
+		auto diff{ char_lower(s1[i]) <=>
+			char_lower(s2[i]) };
+		if(diff > 0) return 1;
+		if(diff < 0) return -1;
+	}
+	return 0;
+}
+\end{lstlisting}
+
+\item 
+Finally, we need to implement a find() function. This returns a pointer to the first instance of a found character, or nullptr if not found:
+
+\begin{lstlisting}[style=styleCXX]
+static constexpr const char_type* find(const char_type*
+p, size_t count, const char_type& ch) {
+	const char_type find_c{ char_lower(ch) };
+	for(size_t i{0}; i < count; ++i) {
+		if(find_c == char_lower(p[i])) return p + i;
+	}
+	return nullptr;
+}
+\end{lstlisting}
+
+\item 
+Now that we have a ci\_traits class, we can define an alias for our string class:
+
+\begin{lstlisting}[style=styleCXX]
+using ci_string = std::basic_string<char, ci_traits>;
+\end{lstlisting}
+
+\item 
+In our main() function, we define a string and a ci\_string:
+
+\begin{lstlisting}[style=styleCXX]
+int main() {
+	string s{"Foo Bar Baz"};
+	ci_string ci_s{"Foo Bar Baz"};
+	...
+\end{lstlisting}
+
+\item 
+We want to print them using cout, but this won't work:
+
+\begin{lstlisting}[style=styleCXX]
+cout << "string: " << s << '\n';
+cout << "ci_string: " << ci_s << '\n';
+\end{lstlisting}
+
+First, we need an operator overload for the operator<{}<:
+
+\begin{lstlisting}[style=styleCXX]
+std::ostream& operator<<(std::ostream& os,
+const ci_string& str) {
+	return os << str.c_str();
+}
+\end{lstlisting}
+
+Now, we get this output:
+
+\begin{tcblisting}{commandshell={}}
+string: Foo Bar Baz
+ci_string: Foo Bar Baz
+\end{tcblisting}
+
+\item 
+Let's compare two ci\_string objects with different cases:
+
+\begin{lstlisting}[style=styleCXX]
+ci_string compare1{"CoMpArE StRiNg"};
+ci_string compare2{"compare string"};
+if (compare1 == compare2) {
+	cout << format("Match! {} == {}\n", compare1,
+	compare2);
+} else {
+	cout << format("no match {} != {}\n", compare1,
+	compare2);
+}
+\end{lstlisting}
+
+Output:
+
+\begin{tcblisting}{commandshell={}}
+Match! CoMpArE StRiNg == compare string
+\end{tcblisting}
+
+The comparison works as expected.
+
+\item 
+Using the find() function on the ci\_s object, we search for a lowercase b and find an uppercase B:
+
+\begin{lstlisting}[style=styleCXX]
+size_t found = ci_s.find('b');
+cout << format("found: pos {} char {}\n", found,
+ci_s[found]);
+\end{lstlisting}
+
+Output:
+
+\begin{tcblisting}{commandshell={}}
+found: pos 4 char B
+\end{tcblisting}
+\end{itemize}
+
+\begin{tcolorbox}[colback=webgreen!5!white,colframe=webgreen!75!black,title=Note]
+Notice that the format() function doesn't require a specialization. This was tested with the fmt.dev reference implementation. It did not work with the preview release of MSVC's format(), even with a specialization. Hopefully, this will be fixed in a future release.
+\end{tcolorbox}
 
 \subsubsection{How it works…}
 
+
+This recipe works by replacing the std::char\_traits class in the template specialization of the string class with a ci\_traits class of our own. The basic\_string class uses the traits class for its fundamental character-specific functions, such as comparisons and searching. When we replace it with our own class, we can change these fundamental behaviors.
+
 \subsubsection{There's more…}
+
+We can also override the assign() and copy() member functions to create a class that stores lowercase characters:
+
+\begin{lstlisting}[style=styleCXX]
+class lc_traits : public std::char_traits<char> {
+	public:
+	static constexpr void assign( char_type& r, const
+	char_type& a )
+	noexcept {
+		r = char_lower(a);
+	}
+	static constexpr char_type* assign( char_type* p,
+	std::size_t count, char_type a ) {
+		for(size_t i{}; i < count; ++i) p[i] =
+		char_lower(a);
+		return p;
+	}
+	static constexpr char_type* copy(char_type* dest,
+		const char_type* src, size_t count) {
+		for(size_t i{0}; i < count; ++i) {
+			dest[i] = char_lower(src[i]);
+		}
+		return dest;
+	}
+};
+\end{lstlisting}
+
+Now, we can create an lc\_string alias, and the object stores lowercase characters:
+
+\begin{lstlisting}[style=styleCXX]
+using lc_string = std::basic_string<char, lc_traits>;
+...
+lc_string lc_s{"Foo Bar Baz"};
+cout << "lc_string: " << lc_s << '\n';
+\end{lstlisting}
+
+Output:
+
+\begin{tcblisting}{commandshell={}}
+lc_string: foo bar baz
+\end{tcblisting}
+
+\begin{tcolorbox}[colback=webgreen!5!white,colframe=webgreen!75!black,title=Note]
+These techniques work as expected on GCC and Clang but not on the preview release of MSVC. I expect that this will be fixed in a future release.
+\end{tcolorbox}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

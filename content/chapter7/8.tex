@@ -1,8 +1,196 @@
 
+The STL provides character-based input from the standard input stream using the std::cin object. The cin object is a global singleton that reads input from the console as an istream input stream.
+
+By default, cin reads one word at a time until it reaches the end of the stream:
+
+\begin{lstlisting}[style=styleCXX]
+string word{};
+cout << "Enter words: ";
+while(cin >> word) {
+	cout << format("[{}] ", word);
+}
+cout << '\n';
+\end{lstlisting}
+
+Output:
+
+\begin{tcblisting}{commandshell={}}
+$ ./working
+Enter words: big light in sky
+[big] [light] [in] [sky]
+\end{tcblisting}
+
+This is of limited usefulness, and it may lead some to dismiss cin as minimally functional.
+
+While cin certainly has its quirks, it can be easily wrangled into providing line-oriented input.
 
 \subsubsection{How to do it…}
 
+To get basic line-oriented functionality from cin, there are two significant behaviors that need to be understood. One is the ability to get a line at a time, instead of a word at a time. The other is the ability to reset the stream after an error condition. Let's look at these in some detail:
+
+\begin{itemize}
+\item 
+First, we need to prompt the user for input. Here's a simple prompt function:
+
+\begin{lstlisting}[style=styleCXX]
+bool prompt(const string_view s, const string_view s2 = "") {
+	if(s2.size()) cout << format("{} ({}): ", s, s2);
+	else cout << format("{}: ", s);
+	cout.flush();
+	return true;
+}
+\end{lstlisting}
+
+The cout.flush() function call ensures that the output is displayed immediately. Sometimes, when the output doesn't include a newline, the output stream may not flush automatically.
+
+\item 
+The cin class has a getline() method that gets a line of text from the input stream and puts it in a C-string array:
+
+\begin{lstlisting}[style=styleCXX]
+constexpr size_t MAXLINE{1024 * 10};
+char s[MAXLINE]{};
+const char * p1{ "Words here" };
+prompt(p1);
+cin.getline(s, MAXLINE, '\n');
+cout << s << '\n';
+\end{lstlisting}
+
+Output:
+
+\begin{tcblisting}{commandshell={}}
+Words here: big light in sky
+big light in sky
+\end{tcblisting}
+
+The cin.getline() method takes three arguments:
+
+\begin{lstlisting}[style=styleCXX]
+getline(char* s, size_t count, char delim );
+\end{lstlisting}
+
+The first argument is a C-string array for the destination. The second is the size of the array. The third is the delimiter for the end of the line.
+
+The function will not put more than count-1 characters in the array, leaving room for a null terminator.
+
+The delimiter defaults to the newline '\verb|\|n' character.
+
+\item 
+The STL also provides a stand-alone getline() function that works with an STL string object:
+
+\begin{lstlisting}[style=styleCXX]
+string line{};
+const char * p1a{ "More words here" };
+prompt(p1a, "p1a");
+getline(cin, line, '\n');
+cout << line << '\n';
+\end{lstlisting}
+
+Output:
+
+\begin{tcblisting}{commandshell={}}
+$ ./working
+More words here (p1a): slated to appear in east
+slated to appear in east
+\end{tcblisting}
+
+The stand-alone std::getline() function takes three arguments:
+
+\begin{lstlisting}[style=styleCXX]
+getline(basic_istream&& in, string& str, char delim );
+\end{lstlisting}
+
+The first argument is the output stream, second is a reference to a string object, and the third is the end-of-line delimiter.
+
+If not specified, the delimiter defaults to the newline '\verb|\|n' character.
+
+I find the standalone getline() more convenient than the cin.getline() method.
+
+\item 
+We can use cin to get a specific type from the input stream. To do this, we must be able to handle an error condition.
+
+When cin encounters an error, it sets the stream to an error condition and stops accepting input. To retry input after an error, we must reset the state of the stream. Here's a function that resets the input stream after an error:
+
+\begin{lstlisting}[style=styleCXX]
+void clearistream() {
+	string s{};
+	cin.clear();
+	getline(cin, s);
+}
+\end{lstlisting}
+
+The cin.clear() function resets the error flags on the input stream but leaves text in the buffer. We then clear the buffer by reading a line and discarding it.
+
+\item 
+We can accept numeric input by using cin with numeric type variables:
+
+\begin{lstlisting}[style=styleCXX]
+double a{};
+double b{};
+const char * p2{ "Please enter two numbers" };
+for(prompt(p2); !(cin >> a >> b); prompt(p2)) {
+	cout << "not numeric\n";
+	clearistream();
+}
+cout << format("You entered {} and {}\n", a, b);
+\end{lstlisting}
+
+Output:
+
+\begin{tcblisting}{commandshell={}}
+$ ./working
+Please enter two numbers: a b
+not numeric
+Please enter two numbers: 47 73
+You entered 47 and 73
+\end{tcblisting}
+
+The cin >{}> a >{}> b expression accepts input from the console and attempts to convert the first two words to types compatible with a and b (double). If it fails, we call clearistream() and try again.
+
+\item 
+We can use the getline() separator parameter to get comma-separated input:
+
+\begin{lstlisting}[style=styleCXX]
+line.clear();
+prompt(p3);
+while(line.empty()) getline(cin, line);
+stringstream ss(line);
+while(getline(ss, word, ',')) {
+	if(word.empty()) continue;
+	cout << format("word: [{}]\n", trimstr(word));
+}
+\end{lstlisting}
+
+Output:
+
+\begin{tcblisting}{commandshell={}}
+$ ./working
+Comma-separated words: this, that, other
+word: [this]
+word: [that]
+word: [other]
+\end{tcblisting}
+
+Because this code runs after the numbers code, and because cin is messy, there may still be a line ending in the buffer. The while(line.empty()) loop will optionally eat any empty lines.
+
+We use a stringstream object to process the words, so we don't have to do it with cin. This allows us to use getline() to get one line without waiting for the end-of-file state.
+
+Then, we call getline() on the stringstream object to parse out words separated by commas. This gives us words but with leading whitespace. We use the trimstr() function from the Trim whitespace from strings recipe in this chapter to trim the whitespace.
+\end{itemize}
 
 \subsubsection{How it works…}
+
+
+The std::cin object is more useful than it may appear, but it can be a challenge to use. It tends to leave line endings on the stream, and in the case of errors, it can end up ignoring input.
+
+The solution is to use getline() and, when necessary, put the line into a stringstream for convenient parsing.
+
+
+
+
+
+
+
+
+
 
 

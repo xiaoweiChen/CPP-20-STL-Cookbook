@@ -1,5 +1,7 @@
 
+Introduced with C++17, the std::optional class holds an optional value.
 
+Consider the case where you have a function that may or may not return a value – for example, a function that checks if a number is prime but returns the first factor if there is one. This function should return either a value or a bool status. We could create a struct that carries both value and status:
 
 
 \subsubsection{How to do it…}

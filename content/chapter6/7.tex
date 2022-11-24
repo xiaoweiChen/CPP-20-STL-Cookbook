@@ -1,7 +1,135 @@
 
+Introduced with C++17, the std::clamp() function can be used to limit the range of a numeric scalar to within minimum and maximum values. The function is optimized to use move semantics, where possible, for maximum speed and efficiency.
 
 \subsubsection{How to do it…}
 
+We can use clamp() to constrain the values of a container by using it in a loop, or with the transform() algorithm. Let's look at some examples.
+
+\begin{itemize}
+\item 
+We'll start with a simple function for printing out the values of a container:
+
+\begin{lstlisting}[style=styleCXX]
+void printc(auto& c, string_view s = "") {
+	if(s.size()) cout << format("{}: ", s);
+	for(auto e : c) cout << format("{:>5} ", e);
+	cout << '\n';
+}
+\end{lstlisting}
+
+Notice the format string "\{:>5\} ". This right-aligns each value to 5 spaces, for a tabular view.
+
+\item 
+In the main() function, we'll define an initializer list for use with our container.
+This allows us to use the same values more than once:
+
+\begin{lstlisting}[style=styleCXX]
+int main() {
+	auto il = { 0, -12, 2001, 4, 5, -14, 100, 200,
+		30000 };
+	...
+}
+\end{lstlisting}
+
+That's a nice range of values to work with clamp().
+
+\item 
+Let's also define some constants for use as our limits:
+
+\begin{lstlisting}[style=styleCXX]
+constexpr int ilow{0};
+constexpr int ihigh{500};
+\end{lstlisting}
+
+We'll use these values in our calls to clamp().
+
+\item 
+Now we can define a container in our main() function. We'll use a vector of int:
+
+\begin{lstlisting}[style=styleCXX]
+vector<int> voi{ il };
+cout << "vector voi before:\n";
+printc(voi);
+\end{lstlisting}
+
+Using the values from our initializer list, the output is:
+
+\begin{tcblisting}{commandshell={}}
+vector voi before:
+0 -12 2001 4 5 -14 100 200 30000
+\end{tcblisting}
+
+\item 
+Now we can use a for loop with clamp() to limit the values to between 0 and 500:
+
+\begin{lstlisting}[style=styleCXX]
+cout << "vector voi after:\n";
+for(auto& e : voi) e = clamp(e, ilow, ihigh);
+printc(voi);
+\end{lstlisting}
+
+This applies the clamp() function to each value in the container, using 0 and 500 for the low and high limits, respectively. Now, the output is:
+
+\begin{tcblisting}{commandshell={}}
+vector voi before:
+0 -12 2001 4 5 -14 100 200 30000
+vector voi after:
+0 0 500 4 5 0 100 200 500
+\end{tcblisting}
+
+After the clamp() operation, the negative values are 0 and the values greater than 500 are 500.
+
+\item 
+We can do the same thing with the transform() algorithm, using clamp() in a lambda. This time we'll use a list container:
+
+\begin{lstlisting}[style=styleCXX]
+cout << "list loi before:\n";
+list<int> loi{ il };
+printc(loi);
+transform(loi.begin(), loi.end(), loi.begin(),
+	[=](auto e){ return clamp(e, ilow, ihigh); });
+cout << "list loi after:\n";
+printc(loi);
+\end{lstlisting}
+
+The output is the same as in the version with a for loop:
+
+\begin{tcblisting}{commandshell={}}
+list loi before:
+0 -12 2001 4 5 -14 100 200 30000
+list loi after:
+0 0 500 4 5 0 100 200 500
+\end{tcblisting}
+\end{itemize}
 
 \subsubsection{How it works…}
 
+The clamp() algorithm is a simple function that looks something like this:
+
+\begin{lstlisting}[style=styleCXX]
+template<class T>
+constexpr const T& clamp( const T& v, const T& lo,
+		const T& hi ) {
+	return less(v, lo) ? lo : less(hi, v) ? hi : v;
+}
+\end{lstlisting}
+
+If the value of v is less than lo, it returns lo. If hi is less than v, it returns hi.
+The function is fast and efficient.
+
+In our examples, we used a for loop to apply clamp() to a container:
+
+\begin{lstlisting}[style=styleCXX]
+for(auto& v : voi) v = clamp(v, ilow, ihigh);
+\end{lstlisting}
+
+We also used the transform() algorithm with clamp() in a lambda:
+
+\begin{lstlisting}[style=styleCXX]
+transform(loi.begin(), loi.end(), loi.begin(),
+	[=](auto v){ return clamp(v, ilow, ihigh); });
+\end{lstlisting}
+
+In my experiments, both versions gave the same results, and both produced similar code from the GCC compiler. There was a slight difference in compiled size (the version with the for loop was smaller, as expected) and a negligible difference in performance.
+
+In general, I prefer the for loop, but the transform() version may be more flexible in other applications.

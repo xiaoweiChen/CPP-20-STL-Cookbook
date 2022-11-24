@@ -1,11 +1,182 @@
 
+The string\_view class provides a lightweight alternative to the string class. Instead of maintaining its own data store, string\_view operates on a view of a C-string. This makes string\_view smaller and more efficient than std::string. It's useful in cases where you need a string object but don't need the more memory- and computation-intensive features of std::string.
 
 \subsubsection{How to do it…}
 
+The string\_view class looks deceptively similar to the STL string class, but it works a bit differently. Let's consider some examples:
+
+\begin{itemize}
+\item 
+Here's an STL string initialized from a C-string (array of char):
+
+\begin{lstlisting}[style=styleCXX]
+char text[]{ "hello" };
+string greeting{ text };
+text[0] = 'J';
+cout << text << ' ' << greeting << '\n';
+\end{lstlisting}
+
+Output:
+
+\begin{tcblisting}{commandshell={}}
+Jello hello
+\end{tcblisting}
+
+Notice that the string does not change when we modify the array. This is because the string constructor creates its own copy of the underlying data.
+
+\item 
+When we do the same with a string\_view, we get a different result:
+
+\begin{lstlisting}[style=styleCXX]
+char text[]{ "hello" };
+string_view greeting{ text };
+text[0] = 'J';
+cout << text << ' ' << greeting << '\n';
+\end{lstlisting}
+
+Output:
+
+\begin{tcblisting}{commandshell={}}
+Jello Jello
+\end{tcblisting}
+
+The string\_view constructor creates a view of the underlying data. It does not make its own copy. This results in significant efficiencies but also allows for side effects.
+
+\item 
+Because string\_view doesn't copy the underlying data, the source data must remain in scope for the duration of the string\_view object. So, this does not work:
+
+\begin{lstlisting}[style=styleCXX]
+string_view sv() {
+	const char text[]{ "hello" }; // temporary storage
+	string_view greeting{ text };
+	return greeting;
+}
+int main() {
+	string_view greeting = sv(); // data out of scope
+	cout << greeting << '\n'; // output undefined
+}
+\end{lstlisting}
+
+Because the underlying data goes out of scope after the sv() function returns, the greeting object in main() is no longer valid by the time we use it.
+
+\item 
+The string\_view class has constructors that make sense for the underlying data. This includes character arrays (const char*), contiguous ranges (including std::string), and other string\_view objects. This example uses the ranges constructor:
+
+\begin{lstlisting}[style=styleCXX]
+string str{ "hello" };
+string_view greeting{ str };
+cout << greeting << '\n';
+\end{lstlisting}
+
+Output:
+
+\begin{tcblisting}{commandshell={}}
+hello
+\end{tcblisting}
+
+\item 
+There is also a stringview literal operator sv, defined in the std::literals namespace:
+
+\begin{lstlisting}[style=styleCXX]
+using namespace std::literals;
+cout << "hello"sv.substr(1, 4) << '\n';
+\end{lstlisting}
+
+This constructs a constexpr string\_view object and calls its method substr() to get the 4 values starting at index 1.
+
+Output:
+
+\begin{tcblisting}{commandshell={}}
+ello
+\end{tcblisting}
+\end{itemize}
 
 \subsubsection{How it works…}
 
-\subsubsection{There's more…}
+The string\_view class is effectively an iterator adapter on a contiguous sequence of characters. The implementation typically has two members: a const CharT * and a size\_t. It works by wrapping a contiguous\_iterator around the source data.
 
+This means that you can use it like std::string for many purposes, with a few important distinctions:
 
-\subsubsection{Why would I choose one over another?}
+\begin{itemize}
+\item 
+The copy constructor does not copy the data. This means that when you make a copy of a string\_view, each copy operates on the same underlying data:
+
+\begin{lstlisting}[style=styleCXX]
+char text[]{ "hello" };
+string_view sv1{ text };
+string_view sv2{ sv1 };
+string_view sv3{ sv2 };
+string_view sv4{ sv3 };
+cout << format("{} {} {} {}\n", sv1, sv2, sv3, sv4);
+text[0] = 'J';
+cout << format("{} {} {} {}\n", sv1, sv2, sv3, sv4);
+\end{lstlisting}
+
+Output:
+
+\begin{tcblisting}{commandshell={}}
+hello hello hello hello
+Jello Jello Jello Jello
+\end{tcblisting}
+
+\item 
+Keep in mind that when you pass a string\_view to a function, it uses the copy constructor:
+
+\begin{lstlisting}[style=styleCXX]
+void f(string_view sv) {
+	if(sv.size()) {
+		char* x = (char*)sv.data(); // dangerous
+		x[0] = 'J'; // modifies the source
+	}
+	cout << format("f(sv): {} {}\n", (void*)sv.data(),
+		sv);
+}
+int main() {
+	char text[]{ "hello" };
+	string_view sv1{ text };
+	cout << format("sv1: {} {}\n", (void*)sv1.data(),
+		sv1);
+	f(sv1);
+	cout << format("sv1: {} {}\n", (void*)sv1.data(),
+		sv1);
+}
+\end{lstlisting}
+
+Output:
+
+\begin{tcblisting}{commandshell={}}
+sv1: 0x7ffd80fa7b2a hello
+f(sv): 0x7ffd80fa7b2a Jello
+sv1: 0x7ffd80fa7b2a Jello
+\end{tcblisting}
+
+Notice that the address of the underlying data (returned by the data() member function) is the same for all instances of the string\_view. That's because the copy constructor does not make a copy of the underlying data. Even though the string\_view member pointer is const-qualified, it's still possible to cast away the const qualifier, though it's not recommended because it could cause unintended side effects. But it is worth noting that the data is never copied.
+
+\item 
+The string\_view class lacks methods that directly operate on the underlying string. Methods such as append(), operator+(), push\_back(), pop\_back(), replace(), and resize(), which are supported in string, are not supported in string\_view.
+
+If you need to concatenate strings with the + operator, you'll need a std::string. For example, this does not work with string\_view:
+
+\begin{lstlisting}[style=styleCXX]
+sv1 = sv2 + sv3 + sv4; // does not work
+\end{lstlisting}
+
+You'll need to use string instead:
+
+\begin{lstlisting}[style=styleCXX]
+string str1{ text };
+string str2{ str1 };
+string str3{ str2 };
+string str4{ str3 };
+
+str1 = str2 + str3 + str4; // works
+cout << str1 << '\n';
+\end{lstlisting}
+
+Output:
+
+\begin{tcblisting}{commandshell={}}
+JelloJelloJello
+\end{tcblisting}
+\end{itemize}
+

@@ -1,7 +1,287 @@
 
+Smart pointers are an excellent tool for managing allocated heap memory.
+
+Heap memory is managed at the lowest level by the C functions, malloc() and free(). malloc() allocates a block of memory from the heap, and free() returns it to the heap. These functions do not perform initialization and do not call constructors or destructors. If you fail to return allocated memory to the heap with a call to free(), the behavior is undefined and often leads to memory leaks and security vulnerabilities.
+
+C++ provides the new and delete operators to allocate and free heap memory, in place of malloc() and free(). The new and delete operators call object constructors and destructors but still do not manage memory. If you allocate memory with new and fail to free it with delete, you will leak memory.
+
+Introduced with C++14, smart pointers comply with the Resource Acquisition Is Initialization (RAII) idiom. This means that when memory is allocated for an object, that object's constructor is called. And when the object's destructor is called, the memory is automatically returned to the heap.
+
+For example, when we create a new smart pointer with make\_unique():
+
+\begin{lstlisting}[style=styleCXX]
+{ // beginning of scope
+	auto p = make_unique<Thing>(); // memory alloc’d,
+	// ctor called
+	process_thing(p); // p is unique_ptr<Thing>
+} // end of scope, dtor called, memory freed
+\end{lstlisting}
+
+make\_unique() allocates memory for a Thing object, calls the Thing default constructor, constructs a unique\_ptr<Thing> object, and returns the unique\_ptr. When p goes out of scope, the Thing destructor is called, and the memory is automatically returned to the heap.
+
+Aside from the memory management, a smart pointer works very much like a primitive pointer:
+
+\begin{lstlisting}[style=styleCXX]
+auto x = *p; // *p derefs the pointer, returns Thing object
+auto y = p->thname; // p-> derefs the pointer, returns member
+\end{lstlisting}
+
+unique\_ptr is a smart pointer that allows only one instance of the pointer. It may be moved, but it may not be copied. Let's take a closer look at how to use unique\_ptr.
 
 \subsubsection{How to do it…}
 
+In this recipe, we examine std::unique\_ptr with a demonstration class that prints when its constructors and destructor are called:
+
+\begin{itemize}
+\item 
+First, we'll create a simple demonstration class:
+
+\begin{lstlisting}[style=styleCXX]
+struct Thing {
+	string_view thname{ "unk" };
+	Thing() {
+		cout << format("default ctor: {}\n", thname);
+	}
+	Thing(const string_view& n) : thname(n) {
+		cout << format("param ctor: {}\n", thname);
+	}
+	~Thing() {
+		cout << format("dtor: {}\n", thname);
+	}
+};
+\end{lstlisting}
+
+This class has a default constructor, a parameterized constructor, and a destructor. Each of these has a simple print statement to tell us what was called.
+
+\item 
+When we just construct a unique\_ptr, it does not allocate memory or construct a managed object:
+
+\begin{lstlisting}[style=styleCXX]
+int main() {
+	unique_ptr<Thing> p1;
+	cout << "end of main()\n";
+}
+\end{lstlisting}
+
+Output:
+
+\begin{tcblisting}{commandshell={}}
+end of main()
+\end{tcblisting}
+
+
+\item 
+When we use the new operator, it allocates memory and constructs a Thing object:
+
+\begin{lstlisting}[style=styleCXX]
+int main() {
+	unique_ptr<Thing> p1{ new Thing };
+	cout << "end of main()\n";
+}
+\end{lstlisting}
+
+Output:
+
+\begin{tcblisting}{commandshell={}}
+default ctor: unk
+end of main()
+dtor: unk
+\end{tcblisting}
+
+The new operator constructs a Thing object by calling the default constructor. The unique\_ptr<Thing> destructor calls the Thing destructor when the smart pointer reaches the end of its scope.
+
+The Thing default constructor does not initialize the thname string, leaving its default value, "unk".
+
+\item 
+We can use make\_unique() to get the same result:
+
+\begin{lstlisting}[style=styleCXX]
+int main() {
+	auto p1 = make_unique<Thing>();
+	cout << "end of main()\n";
+}
+\end{lstlisting}
+
+Output:
+
+\begin{tcblisting}{commandshell={}}
+default ctor: unk
+end of main()
+dtor: unk
+\end{tcblisting}
+
+The make\_unique() helper function takes care of the memory allocation and returns a unique\_ptr object. This is the recommended way to construct a unique\_ptr.
+
+\item 
+Any arguments you pass to make\_unique() are used in constructing the target object:
+
+\begin{lstlisting}[style=styleCXX]
+int main() {
+	auto p1 = make_unique<Thing>("Thing 1") };
+	cout << "end of main()\n";
+}
+\end{lstlisting}
+
+Output:
+
+\begin{tcblisting}{commandshell={}}
+param ctor: Thing 1
+end of main()
+dtor: Thing 1
+\end{tcblisting}
+
+The parameterized constructor assigns a value to thname, so our Thing object is now "Thing 1".
+
+\item 
+Let's write a function that takes a unique\_ptr<Thing> argument:
+
+\begin{lstlisting}[style=styleCXX]
+void process_thing(unique_ptr<Thing> p) {
+	if(p) cout << format("processing: {}\n",
+		p->thname);
+	else cout << "invalid pointer\n";
+}
+\end{lstlisting}
+
+If we try to pass a unique\_ptr to this function, we get a compiler error:
+
+\begin{lstlisting}[style=styleCXX]
+process_thing(p1);
+\end{lstlisting}
+
+Compiler error:
+
+\begin{tcblisting}{commandshell={}}
+error: use of deleted function...
+\end{tcblisting}
+
+This is because the function call tries to make a copy of the unique\_ptr object, but the unique\_ptr copy constructor is deleted to prevent copying. The solution is to have the function take a const\& reference:
+
+\begin{lstlisting}[style=styleCXX]
+void process_thing(const unique_ptr<Thing>& p) {
+	if(p) cout << format("processing: {}\n",
+		p->thname);
+	else cout << "invalid pointer\n";
+}
+\end{lstlisting}
+
+Output:
+
+\begin{tcblisting}{commandshell={}}
+param ctor: Thing 1
+processing: Thing 1
+end of main()
+dtor: Thing 1
+\end{tcblisting}
+
+\item 
+We can call process\_thing() with a temporary object, which is immediately destroyed at the end of the function scope:
+
+\begin{lstlisting}[style=styleCXX]
+int main() {
+	auto p1{ make_unique<Thing>("Thing 1") };
+	process_thing(p1);
+	process_thing(make_unique<Thing>("Thing 2"));
+	cout << "end of main()\n";
+}
+\end{lstlisting}
+
+Output:
+
+\begin{tcblisting}{commandshell={}}
+param ctor: Thing 1
+processing: Thing 1
+param ctor: Thing 2
+processing: Thing 2
+dtor: Thing 2
+end of main()
+dtor: Thing 1
+\end{tcblisting}
+
+\end{itemize}
 
 \subsubsection{How it works…}
+
+A smart pointer is simply an object that presents a pointer interface while owning and managing the resources of another object.
+
+The unique\_ptr class is distinguished by its deleted copy constructor and copy assignment operator, which prevents the smart pointer from being copied.
+
+You may not copy a unique\_ptr:
+
+\begin{lstlisting}[style=styleCXX]
+auto p2 = p1;
+\end{lstlisting}
+
+Compiler error:
+
+\begin{tcblisting}{commandshell={}}
+error: use of deleted function...
+\end{tcblisting}
+
+But you can move a unique\_ptr:
+
+\begin{lstlisting}[style=styleCXX]
+auto p2 = std::move(p1);
+process_thing(p1);
+process_thing(p2);
+\end{lstlisting}
+
+After the move, p1 is invalid and p2 is "Thing 1".
+
+Output:
+
+\begin{tcblisting}{commandshell={}}
+invalid pointer
+processing: Thing 1
+end of main()
+dtor: Thing 1
+\end{tcblisting}
+
+The unique\_ptr interface has a method to reset a pointer:
+
+\begin{lstlisting}[style=styleCXX]
+p1.reset(); // pointer is now invalid
+process_thing(p1);
+\end{lstlisting}
+
+Output:
+
+\begin{tcblisting}{commandshell={}}
+dtor: Thing 1
+invalid pointer
+\end{tcblisting}
+
+The reset() method may also be used to replace the managed object with another of the same type:
+
+\begin{lstlisting}[style=styleCXX]
+p1.reset(new Thing("Thing 3"));
+process_thing(p1);
+\end{lstlisting}
+
+Output:
+
+\begin{tcblisting}{commandshell={}}
+param ctor: Thing 3
+dtor: Thing 1
+processing: Thing 3
+\end{tcblisting}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 

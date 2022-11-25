@@ -1,12 +1,265 @@
 
+Introduced with C++17, the std::variant class may hold different values, one at a time, where each value must fit in the same allocated memory space. It's useful for holding alternative types for use in a single context.
 
 \subsubsection{Differences from the primitive union structure}
 
+The variant class is a tagged union. It differs from the primitive union structure in that only one type may be in effect at a time.
+
+The primitive union type, inherited from C, is a structure where the same datum may be accessed as different types. For example:
+
+\begin{lstlisting}[style=styleCXX]
+union ipv4 {
+	struct {
+		uint8_t a; uint8_t b; uint8_t c; uint8_t d;
+	}quad;
+	uint32_t int32;
+} addr;
+addr.int32 = 0x2A05A8C0;
+cout << format("ip addr dotted quad: {}.{}.{}.{}\n",
+	addr.quad.a, addr.quad.b, addr.quad.c, addr.quad.d);
+cout << format("ip addr int32 (LE): {:08X}\n", addr.int32);
+\end{lstlisting}
+
+Output:
+
+\begin{tcblisting}{commandshell={}}
+ip addr dotted quad: 192.168.5.42
+ip addr int32 (LE): 2A05A8C0
+\end{tcblisting}
+
+In this example, the union has two members, types struct and uint32\_t, where struct has four uint8\_t members. This gives us two different perspectives of the same 32-bit memory space. We can view the same ipv4 address as either a 32-bit unsigned integer (Little Endian or LE) or four 8-bit unsigned integers in the common dotted quad notation. This provides a bitwise polymorphy that can be useful at the systems level.
+
+variant doesn't work like that. The variant class is a tagged union, where each datum is tagged with its type. If we store a value as uint32\_t, we may only access it as uint32\_t. This makes variant type safe but not a replacement for union.
+
 \subsubsection{How to do it…}
 
+In this recipe, we demonstrate the use of std::variant with a small catalogue of household pets of various species.
+
+\begin{itemize}
+\item 
+We'll start with a simple class to hold an Animal:
+
+\begin{lstlisting}[style=styleCXX]
+class Animal {
+	string_view _name{};
+	string_view _sound{};
+	Animal();
+public:
+	Animal(string_view n, string_view s)
+	: _name{ n }, _sound{ s } {}
+	void speak() const {
+		cout << format("{} says {}\n", _name, _sound);
+	}
+	void sound(string_view s) {
+		_sound = s;
+	}
+}
+\end{lstlisting}
+
+The name of the animal and the sound that the animal makes are passed in the constructor.
+
+\item 
+Individual species classes inherit from Animal:
+
+\begin{lstlisting}[style=styleCXX]
+class Cat : public Animal {
+	public:
+	Cat(string_view n) : Animal(n, "meow") {}
+};
+class Dog : public Animal {
+	public:
+	Dog(string_view n) : Animal(n, "arf!") {}
+};
+class Wookie : public Animal {
+	public:
+	Wookie(string_view n) : Animal(n, "grrraarrgghh!") {}
+};
+\end{lstlisting}
+
+Each of these classes set the sound for their specific species by calling the parent constructor.
+
+\item 
+Now, we can define our variant type in an alias:
+
+\begin{lstlisting}[style=styleCXX]
+using v_animal = std::variant<Cat, Dog, Wookie>;
+\end{lstlisting}
+
+This variant can hold any of the types, Cat, Dog, or Wookie.
+
+\item 
+In main(), we create a list using our v\_animal alias as the type:
+
+\begin{lstlisting}[style=styleCXX]
+int main() {
+	list<v_animal> pets{
+		Cat{"Hobbes"}, Dog{"Fido"}, Cat{"Max"},
+		Wookie{"Chewie"}
+	};
+	...
+\end{lstlisting}
+
+Each element in the list is of a type included in the variant definition.
+
+\item 
+The variant class provides several different ways to access elements. First, we'll look at the visit() function.
+
+visit() calls a functor with the object currently contained in the variant. First, let's define a functor that accepts any of our pets:
+
+\begin{lstlisting}[style=styleCXX]
+struct animal_speaks {
+	void operator()(const Dog& d) const { d.speak(); }
+	void operator()(const Cat& c) const { c.speak(); }
+	void operator()(const Wookie& w) const {
+		w.speak(); }
+};
+\end{lstlisting}
+
+This is a simple functor class with overloads for each of the Animal sub-classes. We call it with visit(), with each of our list elements:
+
+\begin{lstlisting}[style=styleCXX]
+for (const v_animal& a : pets) {
+	visit(animal_speaks{}, a);
+}
+\end{lstlisting}
+
+We get this output:
+
+\begin{tcblisting}{commandshell={}}
+Hobbes says meow
+Fido says arf!
+Max says meow
+Chewie says grrraarrgghh!
+\end{tcblisting}
+
+\item 
+The variant class also provides an index() method:
+
+\begin{lstlisting}[style=styleCXX]
+for(const v_animal &a : pets) {
+	auto idx{ a.index() };
+	if(idx == 0) get<Cat>(a).speak();
+	if(idx == 1) get<Dog>(a).speak();
+	if(idx == 2) get<Wookie>(a).speak();
+}
+\end{lstlisting}
+
+We get this output:
+
+\begin{tcblisting}{commandshell={}}
+Hobbes says meow
+Fido says arf!
+Max says meow
+Chewie says grrraarrgghh!
+\end{tcblisting}
+
+Each variant object is indexed, based on the order in which the types were declared in the template arguments. Our v\_animal type was defined with std::variant<Cat, Dog, Wookie>, and these types are indexed as 0 – 2, in that order.
+
+\item 
+The get\_if<T>() function tests a given element against a type:
+
+\begin{lstlisting}[style=styleCXX]
+for (const v_animal& a : pets) {
+	if(const auto c{ get_if<Cat>(&a) }; c) {
+		c->speak();
+	} else if(const auto d{ get_if<Dog>(&a) }; d) {
+		d->speak();
+	} else if(const auto w{ get_if<Wookie>(&a) }; w) {
+		w->speak();
+	}
+}
+\end{lstlisting}
+
+Output:
+
+\begin{tcblisting}{commandshell={}}
+Hobbes says meow
+Fido says arf!
+Max says meow
+Chewie says grrraarrgghh!
+\end{tcblisting}
+
+The get\_if<T>() function returns a pointer if the type of the element matches T; otherwise, it returns nullptr.
+
+\item 
+Finally, the holds\_alternative<T>() function returns true or false. We can use this to test a type against an element, without returning the element:
+
+\begin{lstlisting}[style=styleCXX]
+size_t n_cats{}, n_dogs{}, n_wookies{};
+for(const v_animal& a : pets) {
+	if(holds_alternative<Cat>(a)) ++n_cats;
+	if(holds_alternative<Dog>(a)) ++n_dogs;
+	if(holds_alternative<Wookie>(a)) ++n_wookies;
+}
+cout << format("there are {} cat(s), "
+				"{} dog(s), "
+				"and {} wookie(s)\n",
+				n_cats, n_dogs, n_wookies);
+\end{lstlisting}
+
+Output:
+
+\begin{tcblisting}{commandshell={}}
+there are 2 cat(s), 1 dog(s), and 1 wookie(s)
+\end{tcblisting}
+\end{itemize}
 
 \subsubsection{How it works…}
 
+The std::variant class is a single-object container. An instance of variant<X, Y, Z> must hold exactly one object of type X, Y, or Z. It holds both the value and the type of its current object.
 
+The index() method tells us the type of the current object:
+
+\begin{lstlisting}[style=styleCXX]
+if(v.index() == 0) // if variant is type X
+\end{lstlisting}
+
+The holds\_alternative<T>() non-member function returns true if T is the type of the current object:
+
+\begin{lstlisting}[style=styleCXX]
+if(holds_alternative<X>(v)) // if current variant obj is type X
+\end{lstlisting}
+
+We can retrieve the current object with the get() non-member function:
+
+\begin{lstlisting}[style=styleCXX]
+auto o{ get<X>(v) }; // current variant obj must be type X
+\end{lstlisting}
+
+We can combine the test for type and retrieval with the get\_if() non-member function:
+
+\begin{lstlisting}[style=styleCXX]
+auto* p{ get_if<X>(v) }; // nullptr if current obj not type X
+\end{lstlisting}
+
+The visit() non-member function invokes a callable object with the current variant object as its single parameter:
+
+\begin{lstlisting}[style=styleCXX]
+visit(f, v); // calls f(v) with current variant obj
+\end{lstlisting}
+
+The visit() function is the only way to retrieve an object without testing its type. In combination with a functor that can handle each type, this can be very flexible:
+
+\begin{lstlisting}[style=styleCXX]
+struct animal_speaks {
+	void operator()(const Dog& d) const { d.speak(); }
+	void operator()(const Cat& c) const { c.speak(); }
+	void operator()(const Wookie& v) const { v.speak(); }
+};
+main() {
+	for (const v_animal& a : pets) {
+		visit(animal_speaks{}, a);
+	}
+}
+\end{lstlisting}
+
+Output:
+
+\begin{tcblisting}{commandshell={}}
+Hobbes says meow
+Fido says arf!
+Max says meow
+Chewie says grrraarrgghh!
+\end{tcblisting}
 
 

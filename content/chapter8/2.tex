@@ -3,12 +3,220 @@ Introduced with C++17, the std::optional class holds an optional value.
 
 Consider the case where you have a function that may or may not return a value – for example, a function that checks if a number is prime but returns the first factor if there is one. This function should return either a value or a bool status. We could create a struct that carries both value and status:
 
+\begin{lstlisting}[style=styleCXX]
+struct factor_t {
+	bool is_prime;
+	long factor;
+};
+factor_t factor(long n) {
+	factor_t r{};
+	for(long i = 2; i <= n / 2; ++i) {
+		if (n % i == 0) {
+			r.is_prime = false;
+			r.factor = i;
+			return r;
+		}
+	}
+	r.is_prime = true;
+	return r;
+}
+\end{lstlisting}
+
+It's a clumsy solution but it works, and it's not uncommon.
+
+It could be made a lot simpler with the optional class:
+
+\begin{lstlisting}[style=styleCXX]
+optional<long> factor(long n) {
+	for (long i = 2; i <= n / 2; ++i) {
+		if (n % i == 0) return {i};
+	}
+	return {};
+}
+\end{lstlisting}
+
+With optional, we can return a value or a non-value.
+
+We can call it, like this:
+
+\begin{lstlisting}[style=styleCXX]
+long a{ 42 };
+long b{ 73 };
+auto x = factor(a);
+auto y = factor(b);
+if(x) cout << format("lowest factor of {} is {}\n", a, *x);
+else cout << format("{} is prime\n", a);
+if(y) cout << format("lowest factor of {} is {}\n", b, *y);
+else cout << format("{} is prime\n", b);
+\end{lstlisting}
+
+Our output is:
+
+\begin{tcblisting}{commandshell={}}
+lowest factor of 42 is 2
+73 is prime
+\end{tcblisting}
+
+The optional class allows us to easily return the optional value and easily test for a value.
 
 \subsubsection{How to do it…}
+
+In this recipe, we'll look at some examples of how to use the optional class:
+
+\begin{itemize}
+\item 
+The optional class is quite simple. We construct an optional value using standard template notation:
+
+\begin{lstlisting}[style=styleCXX]
+optional<int> a{ 42 };
+cout << *a << '\n';
+\end{lstlisting}
+
+We access the value of the optional with the * pointer dereference operator.
+
+Output:
+
+\begin{tcblisting}{commandshell={}}
+42
+\end{tcblisting}
+
+\item 
+We test if the optional has a value using its bool operator:
+
+\begin{lstlisting}[style=styleCXX]
+if(a) cout << *a << '\n';
+else cout << "no value\n";
+\end{lstlisting}
+
+If a were constructed without a value:
+
+\begin{lstlisting}[style=styleCXX]
+optional<int> a{};
+\end{lstlisting}
+
+The output would reflect the else condition:
+
+\begin{tcblisting}{commandshell={}}
+no value
+\end{tcblisting}
+
+\item 
+We can further simplify this by declaring a type alias:
+
+\begin{lstlisting}[style=styleCXX]
+using oint = std::optional<int>;
+oint a{ 42 };
+oint b{ 73 };
+\end{lstlisting}
+
+\item 
+If we want to operate on oint objects, with oint objects as the result, we can provide operator overloads:
+
+\begin{lstlisting}[style=styleCXX]
+oint operator+(const oint& a, const oint& b) {
+	if(a && b) return *a + *b;
+	else return {};
+}
+oint operator+(const oint& a, const int b) {
+	if(a) return *a + b;
+	else return {};
+}
+\end{lstlisting}
+
+Now, we can operate on the oint objects directly:
+
+\begin{lstlisting}[style=styleCXX]
+auto sum{ a + b };
+if(sum) {
+	cout << format("{} + {} = {}\n", *a, *b, *sum);
+} else {
+	cout << "NAN\n";
+}
+\end{lstlisting}
+
+Output:
+
+\begin{lstlisting}[style=styleCXX]
+42 + 73 = 115
+\end{lstlisting}
+
+\item 
+Suppose we declare b with the default constructor:
+
+\begin{lstlisting}[style=styleCXX]
+oint b{};
+\end{lstlisting}
+
+Now, we get the else branch output:
+
+\begin{lstlisting}[style=styleCXX]
+NAN
+\end{lstlisting}
+\end{itemize}
 
 
 \subsubsection{How it works…}
 
+The std::optional class is made for simplicity. It provides operator overloads for many common functions. It also includes member functions for further flexibility.
+
+The optional class provides an operator bool overload for determining if the object has a value:
+
+\begin{lstlisting}[style=styleCXX]
+optional<int> n{ 42 };
+if(n) ... // has a value
+\end{lstlisting}
+
+Or, you may use the has\_value() member function:
+
+\begin{lstlisting}[style=styleCXX]
+if(n.has_value()) ... // has a value
+\end{lstlisting}
+
+To access the value, you may use the operator* overload:
+
+\begin{lstlisting}[style=styleCXX]
+x = *n; // * retruns the value
+\end{lstlisting}
+
+Or, you may use the value() member function:
+
+\begin{lstlisting}[style=styleCXX]
+x = n.value(); // * retruns the value
+\end{lstlisting}
+
+The reset() member function destroys the value and resets the state of the optional object:
+
+\begin{lstlisting}[style=styleCXX]
+n.reset(); // no longer has a value
+\end{lstlisting}
+
+
 \subsubsection{There's more…}
+
+The optional class provides exception support with the value() method:
+
+\begin{lstlisting}[style=styleCXX]
+b.reset();
+try {
+	cout << b.value() << '\n';
+} catch(const std::bad_optional_access& e) {
+	cout << format("b.value(): {}\n", e.what());
+}
+\end{lstlisting}
+
+Output:
+
+\begin{tcblisting}{commandshell={}}
+b.value(): bad optional access
+\end{tcblisting}
+
+\begin{tcolorbox}[colback=webgreen!5!white,colframe=webgreen!75!black,title=Note]
+Only the value() method throws an exception. The behavior of the * operator is undefined for an invalid value.
+\end{tcolorbox}
+
+
+
+
+
 
 

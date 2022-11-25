@@ -1,12 +1,72 @@
 
+The <thread> header provides two functions for putting a thread to sleep, sleep\_for() and sleep\_until(). Both functions are in the std::this\_thread namespace.
 
-
+This recipe explores the use of these functions, as we will be using them later in this chapter.
 
 \subsubsection{How to do it…}
 
+Let's look at how to use the sleep\_for() and sleep\_until() functions:
+
+\begin{itemize}
+\item 
+The sleep-related functions are in the std::this\_thread namespace. Because it has just a few symbols, we'll go ahead and issue using directives for std::this\_thread and std::chrono\_literals:
+
+\begin{lstlisting}[style=styleCXX]
+using namespace std::this_thread;
+using namespace std::chrono_literals;
+\end{lstlisting}
+
+The chrono\_literals namespace has symbols for representing durations, such as 1s for one second, or 100ms for 100 milliseconds.
+
+\item 
+In main(), we'll mark a point in time with steady\_clock::now(), so we can time our test:
+
+\begin{lstlisting}[style=styleCXX]
+int main() {
+	auto t1 = steady_clock::now();
+	cout << "sleep for 1.3 seconds\n";
+	sleep_for(1s + 300ms);
+	cout << "sleep for 2 seconds\n";
+	sleep_until(steady_clock::now() + 2s);
+	duration<double> dur1 = steady_clock::now() - t1;
+	cout << format("total duration: {:.5}s\n",
+		dur1.count());
+}
+\end{lstlisting}
+
+The sleep\_for() function takes a duration object to specify the amount of time to sleep. The argument (1s + 300ms) uses chrono\_literal operators to return a duration object representing 1.3 seconds.
+
+The sleep\_until() function takes a time\_point object to specify a specific time to resume from sleep. In this case, the chrono\_literal operators are used to modify the time\_point object returned from steady\_clock::now().
+
+This is our output:
+
+\begin{tcblisting}{commandshell={}}
+sleep for 1.3 seconds
+sleep for 2 seconds
+total duration: 3.3005s
+\end{tcblisting}
+
+\end{itemize}
 
 \subsubsection{How it works…}
 
+The sleep\_for(duration) and sleep\_until(time\_point) functions suspend execution of the current thread for the specified duration, or until the time\_point is reached. The sleep\_for() function will use the steady\_clock implementation, if supported.
+
+Otherwise, the duration may be subject to time adjustments. Both functions may block for longer due to scheduling or resource delays.
+
 \subsubsection{There's more…}
+
+Some systems support a POSIX function, sleep(), which suspends execution for the number of seconds specified:
+
+\begin{lstlisting}[style=styleCXX]
+unsigned int sleep(unsigned int seconds);
+\end{lstlisting}
+
+The sleep() function is part of the POSIX standard and is not part of the C++ standard.
+
+
+
+
+
 
 

@@ -1,8 +1,312 @@
 
+The std::chrono library provides tools for measuring and reporting time and intervals.
+
+Many of these classes and functions were introduced with C++11. There have been significant changes and updates for C++20, but at the time of writing, many of those updates are not yet implemented on the systems I've tested.
+
+Using the chrono library, this recipe explores techniques for timing events.
 
 \subsubsection{How to do it…}
 
+The system\_clock class is used for reporting the current date and time. The steady\_clock and high\_resolution\_clock classes are used for timing events. Let's look at the differences between these clocks:
+
+\begin{itemize}
+\item 
+Because these names can be long and unwieldy, we'll use some type aliases throughout this recipe:
+
+\begin{lstlisting}[style=styleCXX]
+using std::chrono::system_clock;
+using std::chrono::steady_clock;
+using std::chrono::high_resolution_clock;
+using std::chrono::duration;
+using seconds = duration<double>;
+using milliseconds = duration<double, std::milli>;
+using microseconds = duration<double, std::micro>;
+using fps24 = duration<unsigned long, std::ratio<1, 24>>;
+\end{lstlisting}
+
+The duration class represents an interval between two points in time. These aliases are convenient for using different intervals.
+
+\item 
+We can get the current time and date by using the system\_clock class:
+
+\begin{lstlisting}[style=styleCXX]
+auto t = system_clock::now();
+cout << format("system_clock::now is {:%F %T}\n", t);
+\end{lstlisting}
+
+The system\_clock::now() function returns a time\_point object. The <chrono> library includes a format() specialization for time\_point that uses strftime() format specifiers.
+
+The output is:
+
+\begin{tcblisting}{commandshell={}}
+system_clock::now is 2022-02-05 13:52:15
+\end{tcblisting}
+
+The <iomanip> header includes put\_time(), which works like strftime() for ostream:
+
+\begin{lstlisting}[style=styleCXX]
+std::time_t now_t = system_clock::to_time_t(t);
+cout << "system_clock::now is "
+	<< std::put_time(std::localtime(&now_t), "%F %T")
+	<< '\n';
+\end{lstlisting}
+
+put\_time() takes a pointer to a C-style time\_t* value. system\_clock::to\_time\_t converts a time\_point object to time\_t.
+
+This gives the same output as our format() example:
+
+\begin{tcblisting}{commandshell={}}
+system_clock::now is 2022-02-05 13:52:15
+\end{tcblisting}
+
+\item 
+We can also use system\_clock to time an event. First, we need something to time. Here's a function that counts prime numbers:
+
+\begin{lstlisting}[style=styleCXX]
+constexpr uint64_t MAX_PRIME{ 0x1FFFF }
+uint64_t count_primes() {
+	constexpr auto is_prime = [](const uint64_t n) {
+		for(uint64_t i{ 2 }; i < n / 2; ++i) {
+			if(n % i == 0) return false;
+		}
+		return true;
+	};
+	uint64_t count{ 0 };
+	uint64_t start{ 2 };
+	uint64_t end{ MAX_PRIME };
+	for(uint64_t i{ start }; i <= end ; ++i) {
+		if(is_prime(i)) ++count;
+	}
+	return count;
+}
+\end{lstlisting}
+
+This function counts the prime numbers between 2 and 0x1FFFF (131,071), which should take a few seconds on most modern systems.
+
+\item 
+Now, we write a timer function to time our count\_primes():
+
+\begin{lstlisting}[style=styleCXX]
+seconds timer(uint64_t(*f)()) {
+	auto t1{ system_clock::now() };
+	uint64_t count{ f() };
+	auto t2{ system_clock::now() };
+	seconds secs{ t2 - t1 };
+	cout << format("there are {} primes in range\n",
+		count);
+	return secs;
+}
+\end{lstlisting}
+
+This function takes an function f and returns duration<double>. We use system\_clock::now() to mark the time before and after the call to f(). We take the difference between the two times and return it in a duration object.
+
+\item 
+We can call our timer() from main(), like this:
+
+\begin{lstlisting}[style=styleCXX]
+int main() {
+	auto secs{ timer(count_primes) };
+	cout << format("time elapsed: {:.3f} seconds\n",
+	secs.count());
+	...
+\end{lstlisting}
+
+This passes the count\_primes() function to timer() and stores the duration object in secs.
+
+Output:
+
+\begin{tcblisting}{commandshell={}}
+there are 12252 primes in range
+time elapsed: 3.573 seconds
+\end{tcblisting}
+
+The count() method on the duration object returns the duration in the specified units – in this case, double, representing seconds of duration.
+
+This was run on a VM running Debian with GCC. The exact time will vary on different systems.
+
+\item 
+The system\_clock class is designed to provide the current wall clock time. While its resolution may support timing purposes, it is not guaranteed to be monotonic. In other words, it may not always provide consistent ticks (timing intervals).
+
+The chrono library provides a more suitable clock in steady\_clock. It has the same interface as system\_clock but provides more reliable ticks for timing purposes:
+
+\begin{lstlisting}[style=styleCXX]
+seconds timer(uint64_t(*f)()) {
+	auto t1{ steady_clock::now() };
+	uint64_t count{ f() };
+	auto t2{ steady_clock::now() };
+	seconds secs{ t2 - t1 };
+	cout << format("there are {} primes in range\n",
+		count);
+	return secs;
+}
+\end{lstlisting}
+
+steady\_clock is designed to provide reliably consistent monotonic ticks, suitable for timing events. It uses a relative time reference, so it's not useful for wall clock time. While system\_clock measures by beginning from a fixed point in time (1 January 1970, 00:00 UTC), steady\_clock uses a relative time.
+
+Another option is high\_resolution\_clock, which provides the shortest tick period available on a given system but is not implemented consistently across different implementations. It may be an alias for system\_clock or steady\_clock, and it may or may not be monotonic. high\_resolution\_clock is not recommended for general-purpose use.
+
+\item 
+Our timer() function returns seconds, which is an alias for duration<double>:
+
+\begin{lstlisting}[style=styleCXX]
+using seconds = duration<double>;
+\end{lstlisting}
+
+The duration class takes an optional second template parameter, a std::ratio class:
+
+\begin{lstlisting}[style=styleCXX]
+template<class Rep, class Period = std::ratio<1>>
+class duration;
+\end{lstlisting}
+
+The <chrono> header provides convenience types for many decimal ratios, including milli and micro:
+
+\begin{lstlisting}[style=styleCXX]
+using milliseconds = duration<double, std::milli>;
+using microseconds = duration<double, std::micro>;
+\end{lstlisting}
+
+If we require something else, we may provide our own:
+
+\begin{lstlisting}[style=styleCXX]
+using fps24 = duration<unsigned long, std::ratio<1, 24>>;
+\end{lstlisting}
+
+fps24 represents the number of frames of film shot at the standard 24 frames per second. The ratio is 1/24 of a second.
+
+This allows us to easily convert between different ranges of duration:
+
+\begin{lstlisting}[style=styleCXX]
+cout << format("time elapsed: {:.3f} sec\n", secs.
+count());
+cout << format("time elapsed: {:.3f} ms\n",
+	milliseconds(secs).count());
+cout << format("time elapsed: {:.3e} μs\n",
+	microseconds(secs).count());
+cout << format("time elapsed: {} frames at 24 fps\n",
+	floor<fps24>(secs).count());
+\end{lstlisting}
+
+Output:
+
+\begin{tcblisting}{commandshell={}}
+time elapsed: 3.573 sec
+time elapsed: 3573.077 ms
+time elapsed: 3.573e+06 μs
+time elapsed: 85 frames at 24 fps
+\end{tcblisting}
+
+Because the fps24 alias uses unsigned long instead of double, a type conversion is required. The floor function provides this by discarding the fractional part. round() and ceil() are also available in this context.
+
+\item 
+For convenience, the chrono library provides format() specializations for the standard duration ratios:
+
+\begin{lstlisting}[style=styleCXX]
+cout << format("time elapsed: {:.3}\n", secs);
+cout << format("time elapsed: {:.3}\n",
+milliseconds(secs));
+cout << format("time elapsed: {:.3}\n",
+microseconds(secs));
+\end{lstlisting}
+
+Output:
+
+\begin{tcblisting}{commandshell={}}
+time elapsed: 3.573s
+time elapsed: 3573.077ms
+time elapsed: 3573076.564μs
+\end{tcblisting}
+
+These results will vary on different implementations.
+\end{itemize}
 
 \subsubsection{How it works…}
+
+There are two major pieces to the chrono library, the clock classes and the duration class.
+
+\noindent
+\textbf{The clock classes}
+
+The clock classes include:
+
+\begin{itemize}
+\item 
+system\_clock – provides wall clock time.
+
+\item 
+steady\_clock – provides guaranteed monotonic ticks for duration measurements.
+
+\item 
+high\_resolution\_clock – provides the shortest available tick period. It may be an alias of system\_clock or steady\_clock on some systems.
+
+\end{itemize}
+
+We use system\_clock to display the current time and date. We use steady\_clock to measure intervals.
+
+Each of the clock classes has a now() method that returns time\_point, representing the current value of the clock. now() is a static member function, so it's called on the class without instantiating an object:
+
+\begin{lstlisting}[style=styleCXX]
+auto t1{ steady_clock::now() };
+\end{lstlisting}
+
+\noindent
+\textbf{The std::duration class}
+
+The duration class is used to hold a time interval – that is, the difference between two time\_point objects. It is generally constructed with a time\_point object's subtraction (-) operator.
+
+\begin{lstlisting}[style=styleCXX]
+duration<double> secs{ t2 - t1 };
+\end{lstlisting}
+
+The time\_point subtraction operator doubles as a constructor for duration:
+
+\begin{lstlisting}[style=styleCXX]
+template<class C, class D1, class D2>
+constexpr duration<D1,D2>
+operator-( const time_point<C,D1>& pt_lhs,
+	const time_point<C,D2>& pt_rhs );
+\end{lstlisting}
+
+The duration class has template parameters for type representation and a ratio object:
+
+\begin{lstlisting}[style=styleCXX]
+template<class Rep, class Period = std::ratio<1>>
+class duration;
+\end{lstlisting}
+
+The Period template parameter defaults to a ratio of 1:1, which is seconds.
+
+The library provides ratio aliases (such as micro and milli) for powers-of-10 from atto (1/1,000,000,000,000,000,000) through exa (1,000,000,000,000,000,000/1). This allows us to create standard durations, as we did in our example:
+
+\begin{lstlisting}[style=styleCXX]
+using milliseconds = duration<double, std::milli>;
+using microseconds = duration<double, std::micro>;
+\end{lstlisting}
+
+The count() method gives us the duration in the Rep type:
+
+\begin{lstlisting}[style=styleCXX]
+constexpr Rep count() const;
+\end{lstlisting}
+
+This allows us to easily access the duration for display or other purposes:
+
+\begin{lstlisting}[style=styleCXX]
+cout << format("duration: {}\n", secs.count());
+\end{lstlisting}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 

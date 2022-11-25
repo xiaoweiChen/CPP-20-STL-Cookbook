@@ -1,11 +1,211 @@
 
+The std::tuple class is essentially a more complex, and less convenient, struct. The interface for tuple is cumbersome, although class template argument deduction and structured binding have made it somewhat easier.
+
+I tend to use struct before tuple for most applications, with one significant exception: the one real advantage of tuple is that it can be used with fold expressions in a variadic context.
 
 \subsubsection{Fold expressions}
 
+Designed to make it easier to expand a variadic parameter pack, fold expressions are a new feature with C++17. Prior to fold expressions, expanding a parameter pack required a recursive function:
+
+\begin{lstlisting}[style=styleCXX]
+template<typename T>
+void f(T final) {
+	cout << final << '\n';
+}
+template<typename T, typename... Args>
+void f(T first, Args... args) {
+	cout << first;
+	f(args...);
+}
+int main() {
+	f("hello", ' ', 47, ' ', "world");
+}
+\end{lstlisting}
+
+Output:
+
+\begin{tcblisting}{commandshell={}}
+hello 47 world
+\end{tcblisting}
+
+Using a fold expression, this is much simpler:
+
+\begin{lstlisting}[style=styleCXX]
+template<typename... Args>
+void f(Args... args) {
+	(cout << ... << args);
+	cout << '\n';
+}
+\end{lstlisting}
+
+Output:
+
+\begin{tcblisting}{commandshell={}}
+hello 47 world
+\end{tcblisting}
+
+There are four types of fold expressions:
+
+\begin{itemize}
+\item 
+Unary right fold: (args op ...)
+
+\item 
+Unary left fold: (... op args)
+
+\item 
+Binary right fold: (args op ... op init)
+
+\item 
+Binary left fold: (init op ... op args)
+\end{itemize}
+
+The expression in the example above is a binary left fold:
+
+\begin{lstlisting}[style=styleCXX]
+(cout << ... << args);
+\end{lstlisting}
+
+This expands to:
+
+\begin{lstlisting}[style=styleCXX]
+cout << "hello" << ' ' << 47 << ' ' << "world";
+\end{lstlisting}
+
+Fold expressions are a great convenience for many purposes. Let's look at how we can use them with tuples.
+
 \subsubsection{How to do it…}
+
+In this recipe, we'll create a template function that operates on a tuple with varying numbers and types of elements:
+
+\begin{itemize}
+\item 
+The heart of this recipe is a function that takes a tuple of unknown size and type and prints each element with format():
+
+\begin{lstlisting}[style=styleCXX]
+template<typename... T>
+constexpr void print_t(const tuple<T...>& tup) {
+	auto lpt =
+	[&tup] <size_t... I>
+	(std::index_sequence<I...>)
+	constexpr {
+		(..., ( cout <<
+			format((I? ", {}" : "{}"),
+				get<I>(tup))
+		));
+		cout << '\n';
+	};
+	lpt(std::make_index_sequence<sizeof...(T)>());
+}
+\end{lstlisting}
+
+The heart of this function is in the lambda expression. It uses the index\_sequence object to generate a parameter pack of index values. We then use a fold expression to call get<I> with each index value. The templated lambda requires C++20.
+
+You could use a separate function in place of the lambda, but I like keeping it in a single scope.
+
+\item 
+We can now call this from main() with a variety of tuples:
+
+\begin{lstlisting}[style=styleCXX]
+int main() {
+	tuple lables{ "ID", "Name", "Scale" };
+	tuple employee{ 123456, "John Doe", 3.7 };
+	tuple nums{ 1, 7, "forty-two", 47, 73L, -111.11 };
+	
+	print_t(lables);
+	print_t(employee);
+	print_t(nums);
+}
+\end{lstlisting}
+
+Output:
+
+\begin{tcblisting}{commandshell={}}
+ID, Name, Scale
+123456, John Doe, 3.7
+1, 7, forty-two, 47, 73, -111.11
+\end{tcblisting}
+\end{itemize}
 
 
 \subsubsection{How it works…}
 
+The challenge with tuple is its restrictive interface. You can retrieve elements with std::tie(), with structured bindings, or the std::get<> function. None of these techniques are useful if you don't know the number and type of elements in the tuple.
+
+We get around this limitation by using the index\_sequence class. index\_sequence is a specialization of integer\_sequence that provides a parameter pack of the size\_t elements, which we can use to index our tuple. We call our lambda function with make\_index\_sequence to set up a parameter pack in the lambda:
+
+\begin{lstlisting}[style=styleCXX]
+lpt(std::make_index_sequence<sizeof...(T)>());
+\end{lstlisting}
+
+The templated lambda is constructed with a parameter pack of size\_t indexes for the get() function:
+
+\begin{lstlisting}[style=styleCXX]
+[&tup] <size_t... I> (std::index_sequence<I...>) constexpr {
+	...
+};
+\end{lstlisting}
+
+The get() function takes the index value as a template parameter. We use a unary left fold expression to call get<I>():
+
+\begin{lstlisting}[style=styleCXX]
+(..., ( cout << format("{} ", std::get<I>(tup))));
+\end{lstlisting}
+
+The fold expression takes each element of the function's parameter pack and applies the comma operator. The right-hand side of the comma has a format() function that prints each element of the tuple.
+
+This makes it possible to deduce the number of elements in the tuple, which makes it useable in a variadic context. Keep in mind that, as with template functions in general, the compiler will generate a separate specialization of this function for each combination of tuple parameters.
+
 
 \subsubsection{There's more…}
+
+We can use this technique for other tasks. For example, here's a function that returns the sum of all the int values in a tuple of unknown size:
+
+\begin{lstlisting}[style=styleCXX]
+template<typename... T>
+constexpr int sum_t(const tuple<T...>& tup) {
+	int accum{};
+	auto lpt =
+	[&tup, &accum] <size_t... I>
+		(std::index_sequence<I...>)
+	constexpr {
+		(..., (
+			accum += get<I>(tup)
+		));
+	};
+	lpt(std::make_index_sequence<sizeof...(T)>());
+	return accum;
+}
+\end{lstlisting}
+
+We can call this with several tuple objects of varying numbers of int values:
+
+\begin{lstlisting}[style=styleCXX]
+tuple ti1{ 1, 2, 3, 4, 5 };
+tuple ti2{ 9, 10, 11, 12, 13, 14, 15 };
+tuple ti3{ 47, 73, 42 };
+auto sum1{ sum_t(ti1) };
+auto sum2{ sum_t(ti2) };
+auto sum3{ sum_t(ti3) };
+cout << format("sum of ti1: {}\n", sum1);
+cout << format("sum of ti2: {}\n", sum2);
+cout << format("sum of ti3: {}\n", sum3);
+\end{lstlisting}
+
+Output:
+
+\begin{tcblisting}{commandshell={}}
+sum of ti1: 15
+sum of ti2: 84
+sum of ti3: 162
+\end{tcblisting}
+
+
+
+
+
+
+
+
+
+

@@ -1,8 +1,216 @@
 
+The std::shared\_ptr class is a smart pointer that owns its managed object and maintains a use counter to keep track of copies. This recipe explores the use of shared\_ptr to manage memory while sharing copies of the pointer.
+
+\begin{tcolorbox}[colback=webgreen!5!white,colframe=webgreen!75!black,title=Note]
+For more detail about smart pointers, see the introduction to the Manage allocated memory with std::unique\_ptr recipe earlier in this chapter.
+\end{tcolorbox}
 
 \subsubsection{How to do it…}
 
+In this recipe, we examine std::shared\_ptr with a demonstration class that prints when its constructors and destructor are called:
+
+\begin{itemize}
+\item 
+First, we create a simple demonstration class:
+
+\begin{lstlisting}[style=styleCXX]
+struct Thing {
+	string_view thname{ "unk" };
+	Thing() {
+		cout << format("default ctor: {}\n", thname);
+	}
+	Thing(const string_view& n) : thname(n) {
+		cout << format("param ctor: {}\n", thname);
+	}
+	~Thing() {
+		cout << format("dtor: {}\n", thname);
+	}
+};
+\end{lstlisting}
+
+This class has a default constructor, a parameterized constructor, and a destructor. Each of these has a simple print statement to tell us what was called.
+
+\item 
+The shared\_ptr class works very much like other smart pointers, in that it may be constructed with the new operator or with its helper, the make\_shared() function:
+
+\begin{lstlisting}[style=styleCXX]
+int main() {
+	shared_ptr<Thing> p1{ new Thing("Thing 1") };
+	auto p2 = make_shared<Thing>("Thing 2");
+	cout << "end of main()\n";
+}
+\end{lstlisting}
+
+Output:
+
+\begin{tcblisting}{commandshell={}}
+param ctor: Thing 1
+param ctor: Thing 2
+end of main()
+dtor: Thing 2
+dtor: Thing 1
+\end{tcblisting}
+
+The make\_shared() function is recommended, as it manages the construction process and is less prone to error.
+
+As with the other smart pointers, the managed object is destroyed, and its memory is returned to the heap when the pointer goes out of scope.
+
+\item 
+Here's a function to check the use count of a shared\_ptr object:
+
+\begin{lstlisting}[style=styleCXX]
+void check_thing_ptr(const shared_ptr<Thing>& p) {
+	if(p) cout << format("{} use count: {}\n",
+	p->thname, p.use_count());
+	else cout << "invalid pointer\n";
+}
+\end{lstlisting}
+
+thname is a member of the Thing class, so we access it through the pointer with the p-> member dereference operator. The use\_count() function is a member of the shared\_ptr class, so we access it with the p. object member operator.
+
+Let's call this with our pointers:
+
+\begin{lstlisting}[style=styleCXX]
+check_thing_ptr(p1);
+check_thing_ptr(p2);
+\end{lstlisting}
+
+Output:
+
+\begin{tcblisting}{commandshell={}}
+Thing 1 use count: 1
+Thing 2 use count: 1
+\end{tcblisting}
+
+
+\item 
+When we make copies of our pointers, the use count increases, but no new objects are constructed:
+
+\begin{lstlisting}[style=styleCXX]
+cout << "make 4 copies of p1:\n";
+auto pa = p1;
+auto pb = p1;
+auto pc = p1;
+auto pd = p1;
+check_thing_ptr(p1);
+\end{lstlisting}
+
+Output:
+
+\begin{tcblisting}{commandshell={}}
+make 4 copies of p1:
+Thing 1 use count: 5
+\end{tcblisting}
+
+\item 
+When we check any of the other copies, we get the same result:
+
+\begin{lstlisting}[style=styleCXX]
+check_thing_ptr(pa);
+check_thing_ptr(pb);
+check_thing_ptr(pc);
+check_thing_ptr(pd);
+\end{lstlisting}
+
+Output:
+
+\begin{tcblisting}{commandshell={}}
+Thing 1 use count: 5
+Thing 1 use count: 5
+Thing 1 use count: 5
+Thing 1 use count: 5
+\end{tcblisting}
+
+Each pointer reports the same use count
+
+\item 
+When the copies go out of scope, they are destroyed, and the use count is decremented:
+
+\begin{lstlisting}[style=styleCXX]
+{ // new scope
+	cout << "make 4 copies of p1:\n";
+	auto pa = p1;
+	auto pb = p1;
+	auto pc = p1;
+	auto pd = p1;
+	check_thing_ptr(p1);
+} // end of scope
+check_thing_ptr(p1);
+\end{lstlisting}
+
+Output:
+
+\begin{tcblisting}{commandshell={}}
+make 4 copies of p1:
+Thing 1 use count: 5
+Thing 1 use count: 1
+\end{tcblisting}
+
+\item 
+Destroying a copy reduces the use count but does not destroy the managed object. The object is destroyed when the final copy goes out of scope and the use count reaches zero:
+
+\begin{lstlisting}[style=styleCXX]
+{
+	cout << "make 4 copies of p1:\n";
+	auto pa = p1;
+	auto pb = p1;
+	auto pc = p1;
+	auto pd = p1;
+	check_thing_ptr(p1);
+	pb.reset();
+	p1.reset();
+	check_thing_ptr(pd);
+} // end of scope
+\end{lstlisting}
+
+Output:
+
+\begin{tcblisting}{commandshell={}}
+make 4 copies of p1:
+Thing 1 use count: 5
+Thing 1 use count: 3
+dtor: Thing 1
+\end{tcblisting}
+
+Destroying pb (a copy) and p1 (the original) leaves three copies of the pointer (pa, bc, and pd), so the managed object remains.
+
+The remaining three pointer copies are destroyed at the end of the scope in which they were created. Then the object is destroyed and its memory returned to the heap.
+
+\end{itemize}
 
 \subsubsection{How it works…}
+
+The shared\_ptr class is distinguished by its management of multiple pointers to the same managed object.
+
+The shared\_ptr object's copy constructor and copy assignment operator increment a use counter. The destructor decrements the use counter until it reaches zero, then destroys the managed object, and returns its memory to the heap. 
+
+The shared\_ptr class manages both the managed object and a heap-allocated control block. The control block contains the use counter, along with other housekeeping objects. The control block is managed and shared between copies along with the managed object. This allows the original shared\_ptr object to cede control to its copies, so that the last remaining shared\_ptr may manage the object and its memory.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 

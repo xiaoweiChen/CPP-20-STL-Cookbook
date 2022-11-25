@@ -1,9 +1,210 @@
 
+Strictly speaking, std::weak\_ptr is not a smart pointer. Rather, it's an observer that operates in cooperation with shared\_ptr. A weak\_ptr object does not hold a pointer on its own.
+
+There are circumstances where shared\_ptr objects may create dangling pointers or race conditions, which could lead to memory leaks or other problems. The solution is to use weak\_ptr objects with shared\_ptr.
 
 \subsubsection{How to do it…}
+
+In this recipe, we examine the use of std::weak\_ptr with std::shared\_ptr, using a demonstration class that prints when its constructors and destructor are called.
+
+\begin{itemize}
+\item 
+We start with the same class we've used to demonstrate shared\_ptr and unique\_ptr:
+
+\begin{lstlisting}[style=styleCXX]
+struct Thing {
+	string_view thname{ "unk" };
+	Thing() {
+		cout << format("default ctor: {}\n", thname);
+	}
+	Thing(const string_view& n) : thname(n) {
+		cout << format("param ctor: {}\n", thname);
+	}
+	~Thing() {
+		cout << format("dtor: {}\n", thname);
+	}
+};
+\end{lstlisting}
+
+This class has a default constructor, a parameterized constructor, and a destructor. Each of these has a simple print statement to tell us what was called.
+
+\item 
+We also need a function to examine a weak\_ptr object:
+
+\begin{lstlisting}[style=styleCXX]
+void get_weak_thing(const weak_ptr<Thing>& p) {
+	if(auto sp = p.lock()) cout <<
+		format("{}: count {}\n", sp->thname,
+			p.use_count());
+	else cout << "no shared object\n";
+}
+\end{lstlisting}
+
+A weak\_ptr does not operate as a pointer on its own; it requires the use of a shared\_ptr. The lock() function returns a shared\_ptr object, which can then be used to access the managed object.
+
+\item 
+Because weak\_ptr requires an associated shared\_ptr, we'll start main() by creating a shared\_ptr<Thing> object. When we create a weak\_ptr object without assigning the shared\_ptr, the expired flag is initially set:
+
+\begin{lstlisting}[style=styleCXX]
+int main() {
+	auto thing1 = make_shared<Thing>("Thing 1");
+	weak_ptr<Thing> wp1;
+	cout << format("expired: {}\n", wp1.expired());
+	get_weak_thing(wp1);
+}
+\end{lstlisting}
+
+Output:
+
+\begin{tcblisting}{commandshell={}}
+param ctor: Thing 1
+expired: true
+no shared object
+\end{tcblisting}
+
+The make\_shared() function allocates memory and constructs a Thing object.
+
+The weak\_ptr<Thing> declaration constructs a weak\_ptr object without assigning a shared\_ptr. So, when we check the expired flag, it's true, indicating that there is no associated shared\_ptr.
+
+The get\_weak\_thing() function is not able to obtain a lock because there is no shared\_ptr available.
+
+\item 
+When we assign the shared\_ptr to the weak\_ptr, we can use the weak\_ptr to access the managed object:
+
+\begin{lstlisting}[style=styleCXX]
+wp1 = thing1;
+get_weak_thing(wp1);
+\end{lstlisting}
+
+Output:
+
+\begin{tcblisting}{commandshell={}}
+Thing 1: count 2
+\end{tcblisting}
+
+The get\_weak\_thing() function is now able to obtain a lock and access the managed object. The lock() method returns a shared\_ptr, and the use\_count() reflects the fact that there is now a second shared\_ptr managing the Thing object.
+
+The new shared\_ptr is destroyed at the end of the get\_weak\_thing() scope.
+
+\item 
+The weak\_ptr class has a constructor that takes a shared\_ptr for one-step construction:
+
+\begin{lstlisting}[style=styleCXX]
+weak_ptr<Thing> wp2(thing1);
+get_weak_thing(wp2);
+\end{lstlisting}
+
+Output:
+
+\begin{tcblisting}{commandshell={}}
+Thing 1: count 2
+\end{tcblisting}
+
+The use\_count() is 2 again. Remember that the previous shared\_ptr was destroyed when its enclosing get\_weak\_thing() scope ended.
+
+\item 
+When we reset shared\_ptr, its associated weak\_ptr objects are expired:
+
+\begin{lstlisting}[style=styleCXX]
+thing1.reset();
+get_weak_thing(wp1);
+get_weak_thing(wp2);
+\end{lstlisting}
+
+Output:
+
+\begin{tcblisting}{commandshell={}}
+dtor: Thing 1
+no shared object
+no shared object
+\end{tcblisting}
+
+After the reset(), the use count reaches zero, and the managed object is destroyed and the memory released.
+\end{itemize}
 
 
 \subsubsection{How it works…}
 
+A weak\_ptr object is an observer that holds a non-owning reference to a shared\_ptr object. The weak\_ptr observes the shared\_ptr so that it knows when the managed object is, and is not, available. This allows use of a shared\_ptr in circumstances where you may not always know if the managed object is active.
+
+The weak\_ptr class has a use\_count() function that returns the use count of shared\_ptr, or 0 if the managed object has been deleted:
+
+\begin{lstlisting}[style=styleCXX]
+long use_count() const noexcept;
+\end{lstlisting}
+
+weak\_ptr also has an expired() function that reports if the managed object has been deleted:
+
+\begin{lstlisting}[style=styleCXX]
+bool expired() const noexcept;
+\end{lstlisting}
+
+The lock() function is the preferred way to access the shared pointer. It checks expired() to see if the managed object is available. If so, it returns a new shared\_ptr that shares ownership with the managed object. Otherwise, it returns an empty shared\_ptr. It does all that as one atomic operation:
+
+\begin{lstlisting}[style=styleCXX]
+std::shared_ptr<T> lock() const noexcept;
+\end{lstlisting}
+
 
 \subsubsection{There's more…}
+
+One important use case for weak\_ptr is when there's a possibility of circular references to shared\_ptr objects. For example, consider the case of two classes that link to each other (perhaps in a hierarchy):
+
+\begin{lstlisting}[style=styleCXX]
+struct circB;
+struct circA {
+	shared_ptr<circB> p;
+	~circA() { cout << "dtor A\n"; }
+};
+struct circB {
+	shared_ptr<circA> p;
+	~circB() { cout << "dtor B\n"; }
+};
+\end{lstlisting}
+
+We have print statements in the destructors, so we can see when the objects are destroyed. We can now create two objects that point at each other with shared\_ptr:
+
+\begin{lstlisting}[style=styleCXX]
+int main() {
+	auto a{ make_shared<circA>() };
+	auto b{ make_shared<circB>() };
+	a->p = b;
+	b->p = a;
+	cout << "end of main()\n";
+}
+\end{lstlisting}
+
+When we run this, notice that the destructors are never called:
+
+\begin{tcblisting}{commandshell={}}
+end of main()
+\end{tcblisting}
+
+Because the objects maintain shared pointers that refer to each other, the use counts never reach zero, and the managed objects are never destroyed.
+
+We can resolve this problem by changing one of the classes to use a weak\_ptr:
+
+\begin{lstlisting}[style=styleCXX]
+struct circB {
+	weak_ptr<circA> p;
+	~circB() { cout << "dtor B\n"; }
+};
+\end{lstlisting}
+
+The code in main() remains the same, and we get this output:
+
+\begin{tcblisting}{commandshell={}}
+end of main()
+dtor A
+dtor B
+\end{tcblisting}
+
+By changing one shared\_ptr to a weak\_ptr, we have resolved the circular reference, and the objects are now properly destroyed at the end of their scope.
+
+
+
+
+
+
+
+

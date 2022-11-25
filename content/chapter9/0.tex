@@ -1,0 +1,41 @@
+Concurrency and parallelism refer to the ability to run code in separate threads of execution.
+
+More specifically, concurrency is the ability to run threads in the background, and parallelism is the ability to run threads simultaneously in separate cores of a processor.
+
+The run-time library, along with the host operating system, will choose between concurrent and parallel execution models for a given thread on a given hardware environment.
+
+In a modern multi-tasking operating system, the main() function already represents a thread of execution. When a new thread is started, it's said to be spawned by an existing thread. A group of threads may be called a swarm.
+
+In the C++ standard library, the std::thread class provides the basic unit of threaded execution. Other classes build upon thread to provide locks, mutexes, and other concurrency patterns. Depending on system architecture, execution threads may run concurrently on one processor, or in parallel on separate cores.
+
+
+In this chapter, we will cover these tools and more in the following recipes:
+
+\begin{itemize}
+\item 
+Sleep for a specific amount of time
+
+\item 
+Use std::thread for concurrency
+
+\item 
+Use std::async for concurrency
+
+\item 
+Run STL algorithms in parallel with execution policies
+
+\item 
+Share data safely with mutex and locks
+
+\item 
+Share flags and values with std::atomic
+
+\item 
+Initialize threads with std::call\_once
+
+\item 
+Use std::condition\_variable to resolve the producer-consumer problem
+
+\item 
+Implement multiple producers and consumers
+\end{itemize}

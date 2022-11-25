@@ -1,8 +1,131 @@
 
+The std::shared\_ptr class provides an aliasing constructor to share a pointer managed by another unrelated pointer:
+
+\begin{lstlisting}[style=styleCXX]
+shared_ptr( shared_ptr<Y>&& ref, element_type* ptr ) noexcept;
+\end{lstlisting}
+
+This returns an aliased shared\_ptr object that uses the resources of ref but returns a pointer to ptr. The use\_count is shared with ref. The deleter is shared with ref. But get() returns ptr. This allows us to share a member of a managed object without sharing the entire object, and without allowing the entire object to be deleted while we're still using the member.
 
 \subsubsection{How to do it…}
 
+In this recipe, we create a managed object and share members of that object:
+
+\begin{itemize}
+\item 
+We start with a class for the managed object:
+
+\begin{lstlisting}[style=styleCXX]
+struct animal {
+	string name{};
+	string sound{};
+	animal(const string& n, const string& a)
+	: name{n}, sound{a} {
+		cout << format("ctor: {}\n", name);
+	}
+	~animal() {
+		cout << format("dtor: {}\n", name);
+	}
+};
+\end{lstlisting}
+
+This class has two members, string types for name and sound of the animal object. We also have print statements for the constructor and the destructor.
+
+\item 
+Now, we need a function to create an animal but only share its name and sound:
+
+\begin{lstlisting}[style=styleCXX]
+auto make_animal(const string& n, const string& s) {
+	auto ap = make_shared<animal>(n, s);
+	auto np = shared_ptr<string>(ap, &ap->name);
+	auto sp = shared_ptr<string>(ap, &ap->sound);
+	return tuple(np, sp);
+}
+\end{lstlisting}
+
+This function creates shared\_ptr with an animal object, constructed with a name and a sound. We then create aliased shared\_ptr objects for the name and sound. When we return the name and sound pointers, the animal pointer goes out of scope. It is not deleted because the aliased pointers keep the use count from reaching zero.
+
+\item 
+In our main() function, we call make\_animal() and inspect the results:
+
+\begin{lstlisting}[style=styleCXX]
+int main() {
+	auto [name, sound] =
+		make_animal("Velociraptor", "Grrrr!");
+	cout << format("The {} says {}\n", *name, *sound);
+	cout << format("Use count: name {}, sound {}\n",
+		name.use_count(), sound.use_count());
+}
+\end{lstlisting}
+
+Output:
+
+\begin{tcblisting}{commandshell={}}
+ctor: Velociraptor
+The Velociraptor says Grrrr!
+Use count: name 2, sound 2
+dtor: Velociraptor
+\end{tcblisting}
+
+We can see that the aliased pointers each show a use\_count of 2. When the make\_animal() function creates the aliased pointers, they each increase the use count of the animal pointer. When the function ends, the animal pointer goes out of scope, leaving its use count at 2, which is reflected in the aliased pointers. The aliased pointers go out of scope at the end of main(), which allows the animal pointer to be destroyed.
+
+\end{itemize}
 
 \subsubsection{How it works…}
+
+The aliased shared pointer seems a bit abstract, but it's simpler than it appears.
+
+A shared pointer uses a control block to manage its resources. One control block is associated with one managed object and is shared among the pointers that share that object. The control block generally contains:
+
+\begin{itemize}
+\item 
+A pointer to the managed object
+
+\item 
+The deleter
+
+\item 
+The allocator
+
+\item 
+The number of shared\_ptr objects that own the managed object (this is the use count)
+
+\item 
+The number of weak\_ptr objects that refer to the managed object
+\end{itemize}
+
+In the case of an aliased shared pointer, the control block includes the pointer to the aliased object. Everything else remains the same.
+
+Aliased shared pointers participate in the use count, just like non-aliased shared pointers, preventing the managed object from being destroyed until the use count reaches zero. The deleter is not changed, so it destroys the managed object.
+
+\begin{tcolorbox}[colback=webgreen!5!white,colframe=webgreen!75!black,title=Important Note]
+It is possible to use any pointer to construct an aliased shared pointer. Usually, the pointer refers to a member within the aliased object. If the aliased pointer does not refer to an element of the managed object, you will need to manage its construction and destruction separately.
+\end{tcolorbox}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 

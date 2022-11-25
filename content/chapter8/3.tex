@@ -1,7 +1,193 @@
 
+Introduced with C++17, the std::any class provides a type-safe container for a single object of any type.
+
+For example, this is a default-constructed any object:
+
+\begin{lstlisting}[style=styleCXX]
+any x{};
+\end{lstlisting}
+
+This object has no value. We can test that with the has\_value() method:
+
+\begin{lstlisting}[style=styleCXX]
+if(x.has_value()) cout << "have value\n";
+else cout << "no value\n";
+\end{lstlisting}
+
+Output:
+
+\begin{tcblisting}{commandshell={}}
+no value
+\end{tcblisting}
+
+We assign a value to the any object with the assignment operator:
+
+\begin{lstlisting}[style=styleCXX]
+x = 42;
+\end{lstlisting}
+
+Now, the any object has a value, and a type:
+
+\begin{lstlisting}[style=styleCXX]
+if(x.has_value()) {
+	cout << format("x has type: {}\n", x.type().name());
+	cout << format("x has value: {}\n", any_cast<int>(x));
+} else {
+	cout << "no value\n";
+}
+\end{lstlisting}
+
+Output:
+
+\begin{tcblisting}{commandshell={}}
+x has type: i
+x has value: 42
+\end{tcblisting}
+
+The type() method returns a type\_info object. The type\_info::name() method returns an implementation-defined name for the type in a C-string. In this case, for GCC, the i means int.
+
+We use the any\_cast<type>() non-member function to cast the value for use.
+
+We can re-assign the any object with different values of different types:
+
+\begin{lstlisting}[style=styleCXX]
+x = "abc"s;
+cout << format("x is type {} with value {}\n",
+	x.type().name(), any_cast<string>(x))
+\end{lstlisting}
+
+Output:
+
+\begin{tcblisting}{commandshell={}}
+x is type NSt7__cxx1112basic_string... with value abc
+\end{tcblisting}
+
+I've abbreviated the long type name from GCC but you get the idea. The same any object that once held an int now contains an STL string object.
+
+The main usefulness of the any class is in creating a polymorphic function. Let's examine how to do that in this recipe:
 
 \subsubsection{How to do it…}
 
+In this recipe, we'll build a polymorphic function using the any class. A polymorphic function is one that can take objects of different types in its parameters:
+
+\begin{itemize}
+\item 
+Our polymorphic function takes an any object and prints its type and value:
+
+\begin{lstlisting}[style=styleCXX]
+void p_any(const any& a) {
+	if (!a.has_value()) {
+		cout << "None.\n";
+	} else if (a.type() == typeid(int)) {
+		cout << format("int: {}\n", any_cast<int>(a));
+	} else if (a.type() == typeid(string)) {
+		cout << format("string: \"{}\"\n",
+		any_cast<const string&>(a));
+	} else if (a.type() == typeid(list<int>)) {
+		cout << "list<int>: ";
+		for(auto& i : any_cast<const list<int>&>(a))
+			cout << format("{} ", i);
+		cout << '\n';
+	} else {
+		cout << format("something else: {}\n",
+		a.type().name());
+	}
+}
+\end{lstlisting}
+
+The p\_any() function first tests to see if the object has a value. It then tests the type() method against various types and takes appropriate action for each type.
+
+Before the any class, we would have had to write four different specializations for this function, and we still wouldn't be able to easily handle the default case.
+
+\item 
+We call this function from main(), like this:
+
+\begin{lstlisting}[style=styleCXX]
+p_any({});
+p_any(47);
+p_any("abc"s);
+p_any(any(list{ 1, 2, 3 }));
+p_any(any(vector{ 1, 2, 3 }));
+\end{lstlisting}
+
+Output:
+
+\begin{tcblisting}{commandshell={}}
+one.
+int: 47
+string: "abc"
+list<int>: 1 2 3
+something else: St6vectorIiSaIiEE
+\end{tcblisting}
+
+\end{itemize}
+
+Our polymorphic function handles the various types with a minimum of code.
 
 \subsubsection{How it works…}
+
+The std::any copy constructor and assignment operator use direct initialization to make a non-const copy of the target object as the contained object. The type of the contained object is stored separately as a typeid object.
+
+Once initialized, the any object has the following methods:
+
+\begin{itemize}
+\item 
+emplace() replaces the contained object, constructing the new object in place.
+
+\item 
+reset() destroys the contained object.
+
+\item 
+has\_value() returns true if there is a contained object.
+
+\item 
+type() returns a typeid object, representing the type of the contained object.
+
+\item 
+operator=() replaces the contained object by a copy or move operation.
+\end{itemize}
+
+The any class also supports the following non-member functions:
+
+\begin{itemize}
+\item 
+any\_cast<T>(), a template function, provides type-safe access to the contained object.
+
+Keep in mind that the any\_cast<T>() function returns a copy of the contained object. You may use any\_cast<T\&>() to return a reference.
+
+\item 
+std::swap() specializes the std::swap algorithm.
+\end{itemize}
+
+If you try to cast an any object with the wrong type, it throws a bad\_any\_cast exception:
+
+\begin{lstlisting}[style=styleCXX]
+try {
+	cout << any_cast<int>(x) << '\n';
+} catch(std::bad_any_cast& e) {
+	cout << format("any: {}\n", e.what());
+}
+\end{lstlisting}
+
+Output:
+
+\begin{tcblisting}{commandshell={}}
+any: bad any_cast
+\end{tcblisting}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 

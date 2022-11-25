@@ -1,6 +1,271 @@
 
+std::async() runs a target function asynchronously and returns a std::future object to carry the target function's return value. In this way, async() operates much like std::thread but allows return values.
+
+Let's consider the use of std::async() with a few examples.
 
 \subsubsection{How to do it…}
 
+In its simplest forms, the std::async() function performs much the same task as std::thread, without the need to call join() or detach() and while also allowing return values via a std::future object.
+
+In this recipe, we'll use a function that counts the number of primes in a range. We'll use chrono::steady\_clock to time the execution of each thread.
+
+\begin{itemize}
+\item 
+We'll start with a couple of convenience aliases:
+
+\begin{lstlisting}[style=styleCXX]
+using launch = std::launch;
+using secs = std::chrono::duration<double>;
+\end{lstlisting}
+
+std::launch has launch policy constants, for use with the async() call. The secs alias is a duration class, for timing our prime number calculations.
+
+\item 
+Our target function counts prime numbers in a range. This is essentially a way to understand the execution policies by eating some clock cycles:
+
+\begin{lstlisting}[style=styleCXX]
+struct prime_time {
+	secs dur{};
+	uint64_t count{};
+};
+prime_time count_primes(const uint64_t& max) {
+	prime_time ret{};
+	constexpr auto isprime = [](const uint64_t& n) {
+		for(uint64_t i{ 2 }; i < n / 2; ++i) {
+			if(n % i == 0) return false;
+		}
+		return true;
+	};
+	uint64_t start{ 2 };
+	uint64_t end{ max };
+	auto t1 = steady_clock::now();
+	for(uint64_t i{ start }; i <= end ; ++i) {
+		if(isprime(i)) ++ret.count;
+	}
+	ret.dur = steady_clock::now() - t1;
+	return ret;
+}
+\end{lstlisting}
+
+The prime\_time structure is for the return value, with elements for duration and count. This allows us to time the loop itself. The isprime lambda returns true if a value is prime. We use steady\_clock to calculate the duration of the loop that counts primes.
+
+\item 
+In main(), we call our function and report its timing:
+
+\begin{lstlisting}[style=styleCXX]
+int main() {
+	constexpr uint64_t MAX_PRIME{ 0x1FFFF };
+	auto pt = count_primes(MAX_PRIME);
+	cout << format("primes: {} {:.3}\n", pt.count,
+		pt.dur);
+}
+\end{lstlisting}
+
+Output:
+
+\begin{tcblisting}{commandshell={}}
+primes: 12252 1.88008s
+\end{tcblisting}
+
+\item 
+Now, we can run count\_primes() asynchronously with std::async():
+
+\begin{lstlisting}[style=styleCXX]
+int main() {
+	constexpr uint64_t MAX_PRIME{ 0x1FFFF };
+	auto primes1 = async(count_primes, MAX_PRIME);
+	auto pt = primes1.get();
+	cout << format("primes: {} {:.3}\n", pt.count,
+		pt.dur);
+}
+\end{lstlisting}
+
+Here, we call async() with our count\_primes function and the MAX\_PRIME parameter. This runs count\_primes() in the background.
+
+async() returns a std::future object, which carries the return value of an asynchronous operation. The future object's get() method blocks until the asynchronous function has completed and then returns the return object from the function.
+
+This runs with almost the same timing as we got without async():
+
+\begin{tcblisting}{commandshell={}}
+primes: 12252 1.97245s
+\end{tcblisting}
+
+\item 
+The async() function optionally takes execution policy flags as its first parameter:
+
+\begin{tcblisting}{commandshell={}}
+auto primes1 = async(launch::async, count_primes, MAX_
+PRIME);
+\end{tcblisting}
+
+The choices are async or deferred. These flags are in the std::launch namespace.
+
+The async flag enables asynchronous operation, and the deferred flag enables lazy evaluation. These flags are bitmapped and may be combined with the bitwise or | operator.
+
+The default is for both bits to be set, as if async | deferred was specified.
+
+\item 
+We can run several instances of our function simultaneously with async():
+
+\begin{lstlisting}[style=styleCXX]
+int main() {
+	constexpr uint64_t MAX_PRIME{ 0x1FFFF };
+	list<std::future<prime_time>> swarm;
+	cout << "start parallel primes\n";
+	auto t1{ steady_clock::now() };
+	for(size_t i{}; i < 15; ++i) {
+		swarm.emplace_back(
+		async(launch::async, count_primes,
+		MAX_PRIME)
+		);
+	}
+	for(auto& f : swarm) {
+		static size_t i{};
+		auto pt = f.get();
+		cout << format("primes({:02}): {} {:.5}\n",
+		++i, pt.count, pt.dur);
+	}
+	secs dur_total{ steady_clock::now() - t1 };
+	cout << format("total duration: {:.5}s\n",
+		dur_total.count());
+}
+\end{lstlisting}
+
+We know that async returns a future object. So, we can run 15 threads by storing the future objects in a container. Here's our output on a 6-core i7 running Windows:
+
+\begin{tcblisting}{commandshell={}}
+start parallel primes
+primes(01): 12252 4.1696s
+primes(02): 12252 3.7754s
+primes(03): 12252 3.78089s
+primes(04): 12252 3.72149s
+primes(05): 12252 3.72006s
+primes(06): 12252 4.1306s
+primes(07): 12252 4.26015s
+primes(08): 12252 3.77283s
+primes(09): 12252 3.77176s
+primes(10): 12252 3.72038s
+primes(11): 12252 3.72416s
+primes(12): 12252 4.18738s
+primes(13): 12252 4.07128s
+primes(14): 12252 2.1967s
+primes(15): 12252 2.22414s
+total duration: 5.9461s
+\end{tcblisting}
+
+Even though the 6-core i7 is not able to run all the processes in separate cores, it still completes 15 instances in under 6 seconds.
+
+It looks like it finishes the first 13 threads in about 4 seconds, and then takes another 2 seconds to finish the last 2 threads. It appears to take advantage of Intel's Hyper-Threading technology that allows 2 threads to run in one core under some circumstances.
+
+When we run the same code on a 12-core Xeon, we get this result:
+
+\begin{tcblisting}{commandshell={}}
+start parallel primes
+primes(01): 12252 0.96221s
+primes(02): 12252 0.97346s
+primes(03): 12252 0.92189s
+primes(04): 12252 0.97499s
+primes(05): 12252 0.98135s
+primes(06): 12252 0.93426s
+primes(07): 12252 0.90294s
+primes(08): 12252 0.96307s
+primes(09): 12252 0.95015s
+primes(10): 12252 0.94255s
+primes(11): 12252 0.94971s
+primes(12): 12252 0.95639s
+primes(13): 12252 0.95938s
+primes(14): 12252 0.92115s
+primes(15): 12252 0.94122s
+total duration: 0.98166s
+\end{tcblisting}
+
+The 12-core Xeon gets through all 15 processes in under a second.
+
+\end{itemize}
 
 \subsubsection{How it works…}
+
+The key to understanding std::async is in its use of std::promise and std::future.
+
+The promise class allows a thread to store an object that may later be retrieved asynchronously by a future object.
+
+For example, let's say we have a function like this:
+
+\begin{lstlisting}[style=styleCXX]
+void f() {
+	cout << "this is f()\n";
+}
+\end{lstlisting}
+
+We can run it with std::thread, like this:
+
+\begin{lstlisting}[style=styleCXX]
+int main() {
+	std::thread t1(f);
+	t1.join();
+	cout << "end of main()\n";
+}
+\end{lstlisting}
+
+That works fine for a simple function with no return value. When we want to return a value from f(), we can use promise and future.
+
+We set up the promise and future objects in the main() thread:
+
+\begin{lstlisting}[style=styleCXX]
+int main() {
+	std::promise<int> value_promise;
+	std::future<int> value_future =
+		value_promise.get_future();
+	std::thread t1(f, std::move(value_promise));
+	t1.detach();
+	cout << format("value is {}\n", value_future.get());
+	cout << "end of main()\n";
+}
+\end{lstlisting}
+
+And we pass the promise object to our function:
+
+\begin{lstlisting}[style=styleCXX]
+void f(std::promise<int> value) {
+	cout << "this is f()\n";
+	value.set_value(47);
+}
+\end{lstlisting}
+
+Note that a promise object cannot be copied, so we need to use std::move to pass it to the function.
+
+The promise object serves as a bridge to a future object, which allows us to retrieve the value when it becomes available.
+
+std::async() is just a helper function to simplify the creation of the promise and future objects. With async(), we can do all of that like this:
+
+\begin{lstlisting}[style=styleCXX]
+int f() {
+	cout << "this is f()\n";
+	return 47;
+}
+
+int main() {
+	auto value_future = std::async(f);
+	cout << format("value is {}\n", value_future.get());
+	cout << "end of main()\n";
+}
+\end{lstlisting}
+
+That's the value of async(). For many purposes, it makes the use of promise and future much easier.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

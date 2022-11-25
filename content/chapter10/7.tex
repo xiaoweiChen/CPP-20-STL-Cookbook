@@ -1,7 +1,255 @@
 
+This is a simple utility that totals the size of every file in a directory and its sub-directories. It runs on both POSIX/Unix and Windows file systems.
 
 \subsubsection{How to do it…}
 
+This recipe is a utility to report the size of every file in a directory and its sub-directories, along with a total. We'll re-use some of the functions we've used elsewhere in this chapter:
+
+\begin{itemize}
+\item 
+We start with a few convenience aliases:
+
+\begin{lstlisting}[style=styleCXX]
+namespace fs = std::filesystem;
+using dit = fs::directory_iterator;
+using de = fs::directory_entry;
+\end{lstlisting}
+
+\item 
+We also use our format specialization for fs::path objects:
+
+\begin{lstlisting}[style=styleCXX]
+template<>
+struct std::formatter<fs::path>:
+std::formatter<std::string> {
+	template<typename FormatContext>
+	auto format(const fs::path& p, FormatContext& ctx) {
+		return format_to(ctx.out(), "{}", p.string());
+	}
+};
+\end{lstlisting}
+
+\item 
+For reporting the size of the directory, we'll use this make\_commas() function:
+
+\begin{lstlisting}[style=styleCXX]
+string make_commas(const uintmax_t& num) {
+	string s{ std::to_string(num) };
+	for(long l = s.length() - 3; l > 0; l -= 3) {
+		s.insert(l, ",");
+	}
+	return s;
+}
+\end{lstlisting}
+
+We've used this before. It inserts a comma before every third character from the end.
+
+\item 
+To sort our directory, we'll need a lowercase string function:
+
+\begin{lstlisting}[style=styleCXX]
+string strlower(string s) {
+	auto char_lower = [](const char& c) -> char {
+		if(c >= 'A' && c <= 'Z') return c + ('a' –
+			'A');
+		else return c;
+	};
+	std::transform(s.begin(), s.end(), s.begin(),
+		char_lower);
+	return s;
+}
+\end{lstlisting}
+
+\item 
+We need a comparison predicate for sorting directory\_entry objects by the lowercase of the path name:
+
+\begin{lstlisting}[style=styleCXX]
+bool dircmp_lc(const de& lhs, const de& rhs) {
+	const auto lhstr{ lhs.path().string() };
+	const auto rhstr{ rhs.path().string() };
+	return strlower(lhstr) < strlower(rhstr);
+}
+\end{lstlisting}
+
+\item 
+size\_string() returns abbreviated values for reporting file size in gigabytes, megabytes, kilobytes, or bytes:
+
+\begin{lstlisting}[style=styleCXX]
+string size_string(const uintmax_t fsize) {
+	constexpr const uintmax_t kilo{ 1024 };
+	constexpr const uintmax_t mega{ kilo * kilo };
+	constexpr const uintmax_t giga{ mega * kilo };
+	
+	if(fsize >= giga ) return format("{}{}",
+		(fsize + giga / 2) / giga, 'G');
+	else if (fsize >= mega) return format("{}{}",
+		(fsize + mega / 2) / mega, 'M');
+	else if (fsize >= kilo) return format("{}{}",
+		(fsize + kilo / 2) / kilo, 'K');
+	else return format("{}B", fsize);
+}
+\end{lstlisting}
+
+\item 
+entry\_size() returns the size of a file or, if it's a directory, the recursive size of the directory:
+
+\begin{lstlisting}[style=styleCXX]
+uintmax_t entry_size(const fs::path& p) {
+	if(fs::is_regular_file(p)) return
+		fs::file_size(p);
+	uintmax_t accum{};
+	if(fs::is_directory(p) && ! fs::is_symlink(p)) {
+		for(auto& e : dit{ p }) {
+			accum += entry_size(e.path());
+		}
+	}
+	return accum;
+}
+\end{lstlisting}
+
+\item 
+In main(), we start with declarations and test if we have a valid directory to search:
+
+\begin{lstlisting}[style=styleCXX]
+int main(const int argc, const char** argv) {
+	auto dir{ argc > 1 ?
+		fs::path(argv[1]) : fs::current_path() };
+	vector<de> entries{};
+	uintmax_t accum{};
+	if (!exists(dir)) {
+		cout << format("path {} does not exist\n",
+		dir);
+		return 1;
+	}
+	if(!is_directory(dir)) {
+		cout << format("{} is not a directory\n",
+		dir);
+		return 1;
+	}
+	cout << format("{}:\n", absolute(dir));
+\end{lstlisting}
+
+For our directory path, dir, we use argv[1] if we have an argument; otherwise, we use current\_path() for the current directory. Then we set up an environment for our usage counter:
+
+\begin{itemize}
+\item 
+The vector of directory\_entry objects is used for sorting our response.
+
+\item 
+accum is used to accumulate values for our final size total.
+
+\item 
+We make sure dir exists and is a directory before proceeding to examine the directory.
+\end{itemize}
+
+\item 
+Next, a simple loop to populate the vector. Once populated, we sort entries using our dircmp\_lc() function as a comparison predicate:
+
+\begin{lstlisting}[style=styleCXX]
+for (const auto& e : dit{ dir }) {
+	entries.emplace_back(e.path());
+}
+std::sort(entries.begin(), entries.end(), dircmp_lc);
+\end{lstlisting}
+
+\item 
+Now that everything is set up, we can accumulate results from the sorted vector of directory\_entry objects:
+
+\begin{lstlisting}[style=styleCXX]
+for (const auto& e : entries) {
+	fs::path p{ e };
+	uintmax_t esize{ entry_size(p) };
+	string dir_flag{};
+	accum += esize;
+	if(is_directory(p) && !is_symlink(p)) dir_flag =
+	" *";
+	cout << format("{:>5} {}{}\n",
+	size_string(esize), p.filename(), dir_flag);
+}
+cout << format("{:->25}\n", "");
+cout << format("total bytes: {} ({})\n",
+	make_commas(accum), size_string(accum));
+\end{lstlisting}
+
+The call to entry\_size() returns the size of the file or directory represented in the directory\_entry object.
+
+If the current entry is a directory (and not a symbolic link), we add a symbol to indicate it's a directory. I chose an inverted triangle. You may use anything here.
+
+After the loop is complete, we display the accumulated size in both bytes with commas, and the abbreviated notation from size\_string().
+
+Our output:
+
+\begin{tcblisting}{commandshell={}}
+/home/billw/working/cpp-stl-wkbk/chap10:
+327K bwgrep
+  3K bwgrep.cpp
+199K dir
+  4K dir.cpp
+176K formatter
+905B formatter.cpp
+  0B include
+  1K Makefile
+181K path-ops
+  1K path-ops.cpp
+327K rerename
+  2K rerename.cpp
+ 11K testdir *
+ 11K testdir-backup *
+203K working
+  3K working.cpp
+-------------------------
+total bytes: 1,484,398 (1M)
+\end{tcblisting}
+
+\item 
+
+\end{itemize}
 
 \subsubsection{How it works…}
+
+The fs::file\_size() function returns a uintmax\_t value that represents the size of the file as the largest natural unsigned integer on a given platform. While this is normally a 64-bit integer on most 64-bit systems, a notable exception is Windows, which uses a 32-bit integer. This means that while size\_t may work for this value on some systems, it fails to compile on Windows because it may try to promote a 64-bit value to a 32-bit value.
+
+The entry\_size() function takes a path object and returns a uintmax\_t value:
+
+\begin{lstlisting}[style=styleCXX]
+uintmax_t entry_size(const fs::path& p) {
+	if(fs::is_regular_file(p)) return fs::file_size(p);
+	uintmax_t accum{};
+	if(fs::is_directory(p) && !fs::is_symlink(p)) {
+		for(auto& e : dit{ p }) {
+			accum += entry_size(e.path());
+		}
+	}
+	return accum;
+}
+\end{lstlisting}
+
+The function checks for a regular file and returns the size of the file. Otherwise, it checks for a directory that is not also a symbolic link. We just want the size of the files in a directory, so we don't want to follow symbolic links. (Symbolic links may also cause reference loops, leading to a runaway condition.) 
+
+If we find a directory, we loop through it, calling entry\_size() for each file we encounter. This is a recursive loop, so we eventually end up with the size of the directory.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 

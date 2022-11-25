@@ -1,8 +1,266 @@
 
+A thread is a unit of concurrency. The main() function may be thought of as the main thread of execution. Within the context of the operating system, the main thread runs concurrently with other threads owned by other processes.
+
+The std::thread class is the root of concurrency in the STL. All other concurrency features are built on the foundation of the thread class.
+
+In this recipe, we will examine the basics of std::thread and how join() and detach() determine its execution context.
 
 \subsubsection{How to do it…}
 
+In this recipe, we create some std::thread objects and experiment with their execution options.
+
+\begin{itemize}
+\item 
+We start with a convenience function for sleeping a thread, in milliseconds:
+
+\begin{lstlisting}[style=styleCXX]
+void sleepms(const unsigned ms) {
+	using std::chrono::milliseconds;
+	std::this_thread::sleep_for(milliseconds(ms));
+}
+\end{lstlisting}
+
+The sleep\_for() function takes a duration object and blocks execution of the current thread for the specified duration. This sleepms() function serves as a convenience wrapper that takes an unsigned value for the number of milliseconds to sleep.
+
+\item 
+Now, we need a function for our thread. This function sleeps for a variable number of milliseconds, based on an integer parameter:
+
+\begin{lstlisting}[style=styleCXX]
+void fthread(const int n) {
+	cout << format("This is t{}\n", n);
+	for(size_t i{}; i < 5; ++i) {
+		sleepms(100 * n);
+		cout << format("t{}: {}\n", n, i + 1);
+	}
+	cout << format("Finishing t{}\n", n);
+}
+\end{lstlisting}
+
+fthread() calls sleepms() five times, sleeping each time for 100 * n milliseconds.
+
+\item 
+We can run this in a separate thread with std::thread from main():
+
+\begin{lstlisting}[style=styleCXX]
+int main() {
+	thread t1(fthread, 1);
+	cout << "end of main()\n";
+}
+\end{lstlisting}
+
+It compiles but we get this error when we run it:
+
+\begin{tcblisting}{commandshell={}}
+terminate called without an active exception Aborted
+\end{tcblisting}
+
+(Your error message will vary. This is the error message on Debian with GCC.) 
+
+The problem is that the operating system doesn't know what to do with the thread object when it goes out of scope. We must specify if the caller waits for the thread, or if it's detached and runs independently.
+
+\item 
+We use the join() method to indicate that the caller will wait for the thread to finish:
+
+\begin{lstlisting}[style=styleCXX]
+int main() {
+	thread t1(fthread, 1);
+	t1.join();
+	cout << "end of main()\n";
+}
+\end{lstlisting}
+
+Output:
+
+\begin{tcblisting}{commandshell={}}
+This is t1
+t1: 1
+t1: 2
+t1: 3
+t1: 4
+t1: 5
+Finishing t1
+end of main()
+\end{tcblisting}
+
+Now, main() waits for the thread to finish.
+
+\item 
+If we call detach() instead of join(), then main() doesn't wait, and the program ends before the thread can run:
+
+\begin{lstlisting}[style=styleCXX]
+thread t1(fthread, 1);
+t1.detach();
+\end{lstlisting}
+
+Output:
+
+\begin{tcblisting}{commandshell={}}
+end of main()
+\end{tcblisting}
+
+\item 
+When the thread is detached, we need to give it time to run:
+
+\begin{lstlisting}[style=styleCXX]
+thread t1(fthread, 1);
+t1.detach();
+cout << "main() sleep 2 sec\n";
+sleepms(2000);
+\end{lstlisting}
+
+Output:
+
+\begin{tcblisting}{commandshell={}}
+main() sleep 2 sec
+This is t1
+t1: 1
+t1: 2
+t1: 3
+t1: 4
+t1: 5
+Finishing t1
+end of main()
+\end{tcblisting}
+
+\item 
+Let's start and detach a second thread and see what happens:
+
+\begin{lstlisting}[style=styleCXX]
+int main() {
+	thread t1(fthread, 1);
+	thread t2(fthread, 2);
+	t1.detach();
+	t2.detach();
+	cout << "main() sleep 2 sec\n";
+	sleepms(2000);
+	cout << "end of main()\n";
+}
+\end{lstlisting}
+
+Output:
+
+\begin{tcblisting}{commandshell={}}
+main() sleep 2 sec
+This is t1
+This is t2
+t1: 1
+t2: 1
+t1: 2
+t1: 3
+t2: 2
+t1: 4
+t1: 5
+Finishing t1
+t2: 3
+t2: 4
+t2: 5
+Finishing t2
+end of main()
+\end{tcblisting}
+
+Because our fthread() function uses its parameter as a multiplier for sleepms(), the second thread runs a bit slower than the first. We can see the timers interlaced in the output.
+
+\item 
+If we do this with join() instead of detatch(), we get a similar result:
+
+\begin{lstlisting}[style=styleCXX]
+int main() {
+	thread t1(fthread, 1);
+	thread t2(fthread, 2);
+	t1.join();
+	t2.join();
+	cout << "end of main()\n";
+}
+\end{lstlisting}
+
+Output:
+
+\begin{tcblisting}{commandshell={}}
+This is t1
+This is t2
+t1: 1
+t2: 1
+t1: 2
+t1: 3
+t2: 2
+t1: 4
+t1: 5
+Finishing t1
+t2: 3
+t2: 4
+t2: 5
+Finishing t2
+end of main()
+\end{tcblisting}
+
+Because join() waits for the thread to finish, we no longer need the 2-second sleepms() in main() to wait for the threads to finish.
+\end{itemize}
 
 \subsubsection{How it works…}
 
+A std::thread object represents a thread of execution. There is a one-to-one relationship between object and thread. One thread object represents one thread, and one thread is represented by one thread object. A thread object cannot be copied or assigned, but it can be moved.
+
+The thread constructor looks like this:
+
+\begin{lstlisting}[style=styleCXX]
+explicit thread( Function&& f, Args&&… args );
+\end{lstlisting}
+
+A thread is constructed with a function pointer and zero or more arguments. The function is called immediately with the arguments provided:
+
+\begin{lstlisting}[style=styleCXX]
+thread t1(fthread, 1);
+\end{lstlisting}
+
+This creates the object t1 and immediately calls the function fthread(int) with the literal value 1 as the argument.
+
+After creating the thread, we must use either join() or detach() on the thread:
+
+\begin{lstlisting}[style=styleCXX]
+t1.join();
+\end{lstlisting}
+
+The join() method blocks execution of the calling thread until the t1 thread has completed:
+
+\begin{lstlisting}[style=styleCXX]
+t1.detach();
+\end{lstlisting}
+
+The detach() method allows the calling thread to continue independently of the t1 thread.
+
 \subsubsection{There's more…}
+
+C++20 provides std::jthread, which automatically joins the caller at the end of its scope:
+
+\begin{lstlisting}[style=styleCXX]
+int main() {
+	std::jthread t1(fthread, 1);
+	cout "< "end of main("\n";
+}
+\end{lstlisting}
+
+Output:
+
+\begin{tcblisting}{commandshell={}}
+end of main()
+This is t1
+t1: 1
+t1: 2
+t1: 3
+t1: 4
+t1: 5
+Finishing t1
+\end{tcblisting}
+
+This allows the t1 thread to execute independently and then automatically join the main() thread at the end of its scope.
+
+
+
+
+
+
+
+
+
+
+

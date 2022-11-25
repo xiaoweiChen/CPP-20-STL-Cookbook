@@ -1,9 +1,431 @@
 
+Over the course of my career, I've used a lot of programming languages. When learning a new language, I like to have a project to work on that exposes me to the nuances of the language. The numwords class is one of my favorite exercises for this purpose. I have written it in dozens of languages over the years, including several times in C and C++.
+
+numwords is a class that spells out a number in words. It can be useful for banking and accounting applications. It looks like this in use:
+
+\begin{lstlisting}[style=styleCXX]
+int main() {
+	bw::numword nw{};
+	uint64_t n;
+	nw = 3; bw::print("n is {}, {}\n", nw.getnum(), nw);
+	nw = 47; bw::print("n is {}, {}\n", nw.getnum(), nw);
+	n = 100073; bw::print("n is {}, {}\n", n,
+		bw::numword{n});
+	n = 1000000001; bw::print("n is {}, {}\n", n,
+		bw::numword{n});
+	n = 123000000000; bw::print("n is {}, {}\n", n,
+		bw::numword{n});
+	n = 1474142398007; bw::print("n is {}, {}\n", n,
+		nw.words(n));
+	n = 999999999999999999; bw::print("n is {}, {}\n", n,
+		nw.words(n));
+	n = 1000000000000000000; bw::print("n is {}, {}\n", n,
+		nw.words(n));
+}
+\end{lstlisting}
+
+Output:
+
+\begin{tcblisting}{commandshell={}}
+n is 3, three
+n is 47, forty-seven
+n is 100073, one hundred thousand seventy-three
+n is 1000000001, one billion one
+n is 123000000000, one hundred twenty-three billion
+n is 1474142398007, one trillion four hundred seventy-four
+billion one hundred forty-two million three hundred ninetyeight thousand seven
+n is 999999999999999999, nine hundred ninety-nine quadrillion
+nine hundred ninety-nine trillion nine hundred ninety-nine
+billion nine hundred ninety-nine million nine hundred ninetynine thousand nine hundred ninety-nine
+n is 1000000000000000000, error
+\end{tcblisting}
 
 \subsubsection{How to do it…}
 
+This recipe originated as an exercise in creating production-ready code. For that reason, it's in three different files:
+
+\begin{itemize}
+\item 
+numword.h is the header/interface file for the numwords class.
+
+\item 
+numword.cpp is the implementation file for the numwords class.
+
+\item 
+numword-test.cpp is the application file for testing the numword class.
+\end{itemize}
+
+The class itself is about 180 lines of code so we'll just cover the highlights here. You can find the full source code at \url{https://github.com/PacktPublishing/CPP-20STL-Cookbook/tree/main/chap11/numword}.
+
+\begin{itemize}
+\item 
+In the numword.h file, we put the class in the bw namespace and start with some using statements:
+
+\begin{lstlisting}[style=styleCXX]
+namespace bw {
+	using std::string;
+	using std::string_view;
+	using numnum = uint64_t;
+	using bufstr = std::unique_ptr<string>;
+\end{lstlisting}
+
+We use string and string\_view objects throughout the code.
+
+uint64\_t is our primary integer type because it will hold very large numbers. Because the class is called numword, I like numnum for the integer type.
+
+\_bufstr is the main output buffer. It's a string wrapped in a unique\_ptr, which handles the memory management for automatic RAII compliance.
+
+\item 
+We also have a few constants for various purposes:
+
+\begin{lstlisting}[style=styleCXX]
+constexpr numnum maxnum = 999'999'999'999'999'999;
+constexpr int zero_i{ 0 };
+constexpr int five_i{ 5 };
+constexpr numnum zero{ 0 };
+constexpr numnum ten{ 10 };
+constexpr numnum twenty{ 20 };
+constexpr numnum hundred{ 100 };
+constexpr numnum thousand{ 1000 };
+\end{lstlisting}
+
+The maxnum constant translates to "nine hundred ninety-nine quadrillion nine hundred ninety-nine trillion nine hundred ninety-nine billion nine hundred ninetynine million nine hundred ninety-nine thousand nine hundred ninety-nine," which should be sufficient for most purposes.
+
+The rest of the numnum constants are used to avoid literals in the code.
+
+\item 
+The main data structures are constexpr arrays of string\_view objects, representing the words used in the output. The string\_view class is perfect for these constants, as it provides encapsulation with minimum overhead:
+
+\begin{lstlisting}[style=styleCXX]
+constexpr string_view errnum{ "error" };
+constexpr string_view _singles[] {
+	"zero", "one", "two", "three", "four", "five",
+	"six", "seven", "eight", "nine"
+};
+constexpr string_view _teens[] {
+	"ten", "eleven", "twelve", "thirteen", "fourteen",
+	"fifteen", "sixteen", "seventeen", "eighteen",
+	"nineteen"
+};
+constexpr string_view _tens[] {
+	errnum, errnum, "twenty", "thirty", "forty",
+	"fifty", "sixty", "seventy", "eighty", "ninety",
+};
+constexpr string_view _hundred_string = "hundred";
+constexpr string_view _powers[] {
+	errnum, "thousand", "million", "billion",
+	"trillion", "quadrillion"
+};
+\end{lstlisting}
+
+The words are grouped into sections, useful in translating numbers to words. Many languages use a similar breakdown so this structure should translate easily to those languages.
+
+\item 
+The numword class has a few private members:
+
+\begin{lstlisting}[style=styleCXX]
+class numword {
+	bufstr _buf{ std::make_unique<string>(string{}) };
+	numnum _num{};
+	bool _hyphen_flag{ false };
+\end{lstlisting}
+
+\begin{itemize}
+\item 
+\_buf is the output string buffer. Its memory is managed by a unique\_ptr.
+
+\item 
+\_num holds the current numeric value.
+
+\item 
+\_hyphen\_flag is used during the translation process to insert a hyphen between words, rather than a space character.
+\end{itemize}
+
+\item 
+These private methods are used to manipulate the output buffer.
+
+\begin{lstlisting}[style=styleCXX]
+void clearbuf();
+size_t bufsize();
+void appendbuf(const string& s);
+void appendbuf(const string_view& s);
+void appendbuf(const char c);
+void appendspace();
+\end{lstlisting}
+
+There is also a pow\_i() private method used to calculate $x^y$ with numnum types:
+
+\begin{lstlisting}[style=styleCXX]
+numnum pow_i(const numnum n, const numnum p);
+\end{lstlisting}
+
+pow\_i() is used to discriminate parts of the numeric value for word output.
+
+\item 
+The public interface includes constructors and various ways to call the words() method, which does the work of translating a numnum to a string of words:
+
+\begin{lstlisting}[style=styleCXX]
+numword(const numnum& num = 0) : _num(num) {}
+numword(const numword& nw) : _num(nw.getnum()) {}
+const char * version() const { return _version; }
+void setnum(const numnum& num) { _num = num; }
+numnum getnum() const { return _num; }
+numnum operator= (const numnum& num);
+const string& words();
+const string& words(const numnum& num);
+const string& operator() (const numnum& num) {
+	return words(num); };
+\end{lstlisting}
+
+\item 
+In the implementation file, numword.cpp, the bulk of the work is handled in the words() member function:
+
+\begin{lstlisting}[style=styleCXX]
+const string& numword::words( const numnum& num ) {
+	numnum n{ num };
+	clearbuf();
+	if(n > maxnum) {
+		appendbuf(errnum);
+		return *_buf;
+	}
+	if (n == 0) {
+		appendbuf(_singles[n]);
+		return *_buf;
+	}
+	// powers of 1000
+	if (n >= thousand) {
+		for(int i{ five_i }; i > zero_i; --i) {
+			numnum power{ pow_i(thousand, i) };
+			numnum _n{ ( n - ( n % power ) ) / power };
+			if (_n) {
+				int index = i;
+				numword _nw{ _n };
+				appendbuf(_nw.words());
+				appendbuf(_powers[index]);
+				n -= _n * power;
+			}
+		}
+	}
+	// hundreds
+	if (n >= hundred && n < thousand) {
+		numnum _n{ ( n - ( n % hundred ) ) / hundred };
+		numword _nw{ _n };
+		appendbuf(_nw.words());
+		appendbuf(_hundred_string);
+		n -= _n * hundred;
+	}
+	// tens
+	if (n >= twenty && n < hundred) {
+		numnum _n{ ( n - ( n % ten ) ) / ten };
+		appendbuf(_tens[_n]);
+		n -= _n * ten;
+		_hyphen_flag = true;
+	}
+	// teens
+	if (n >= ten && n < twenty) {
+		appendbuf(_teens[n - ten]);
+		n = zero;
+	}
+	// singles
+	if (n > zero && n < ten) {
+		appendbuf(_singles[n]);
+	}
+	return *_buf;
+}
+\end{lstlisting}
+
+Each part of the function peels off part of the number with a modulus of a power of ten, recursively in the case of the thousands, and appends strings from the string\_view constant arrays.
+
+\item 
+There are three overloads of appendbuf(). One appends a string:
+
+\begin{lstlisting}[style=styleCXX]
+void numword::appendbuf(const string& s) {
+	appendspace();
+	_buf->append(s);
+}
+\end{lstlisting}
+
+Another appends a string\_view:
+
+\begin{lstlisting}[style=styleCXX]
+void numword::appendbuf(const string_view& s) {
+	appendspace();
+	_buf->append(s.data());
+}
+\end{lstlisting}
+
+And the third appends a single character:
+
+\begin{lstlisting}[style=styleCXX]
+void numword::appendbuf(const char c) {
+	_buf->append(1, c);
+}
+\end{lstlisting}
+
+The appendspace() method appends a space character or a hyphen, depending on the context:
+
+\begin{lstlisting}[style=styleCXX]
+void numword::appendspace() {
+	if(bufsize()) {
+		appendbuf( _hyphen_flag ? _hyphen : _space);
+		_hyphen_flag = false;
+	}
+}
+\end{lstlisting}
+
+\item 
+The numword-test.cpp file is the testing environment for bw::numword. It includes a formatter specialization:
+
+\begin{lstlisting}[style=styleCXX]
+template<>
+struct std::formatter<bw::numword>:
+std::formatter<unsigned> {
+	template<typename FormatContext>
+	auto format(const bw::numword& nw,
+	FormatContext& ctx) {
+		bw::numword _nw{nw};
+		return format_to(ctx.out(), "{}",
+		nw.words());
+	}
+};
+\end{lstlisting}
+
+This allows us to pass a bw::numword object directly to format().
+
+\item 
+There's also a print() function that sends formatter output directly to stdout, bypassing cout and the iostream library entirely:
+
+\begin{lstlisting}[style=styleCXX]
+namespace bw {
+	template<typename... Args> constexpr void print(
+	const std::string_view str_fmt, Args&&...
+	args) {
+		fputs(std::vformat(str_fmt,
+		std::make_format_args(args...)).c_str(),
+		stdout);
+	}
+};
+\end{lstlisting}
+
+This allows us to use print("\{\}\verb|\|n", nw) instead of piping format() through cout. A function like this will be included in the C++23 standard. It's simple enough to include it like this for now.
+
+\item 
+In main(), we declare a bw::numword object and a uint64\_t for use in testing:
+
+\begin{lstlisting}[style=styleCXX]
+int main() {
+	bw::numword nw{};
+	uint64_t n{};
+	
+	bw::print("n is {}, {}\n", nw.getnum(), nw);
+	...
+\end{lstlisting}
+
+The numword object is initialized to zero, giving us this output from our print() statement:
+
+\begin{tcblisting}{commandshell={}}
+n is 0, zero
+\end{tcblisting}
+
+\item 
+We test a variety of ways to call numword:
+
+\begin{lstlisting}[style=styleCXX]
+nw = 3; bw::print("n is {}, {}\n", nw.getnum(), nw);
+nw = 47; bw::print("n is {}, {}\n", nw.getnum(), nw);
+...
+n = 100073; bw::print("n is {}, {}\n", n,
+bw::numword{n});
+n = 1000000001; bw::print("n is {}, {}\n", n,
+bw::numword{n});
+...
+n = 474142398123; bw::print("n is {}, {}\n", n, nw(n));
+n = 1474142398007; bw::print("n is {}, {}\n", n, nw(n));
+...
+n = 999999999999999999; bw::print("n is {}, {}\n", n,
+nw(n));
+n = 1000000000000000000; bw::print("n is {}, {}\n", n,
+nw(n));
+\end{lstlisting}
+
+Output:
+
+\begin{tcblisting}{commandshell={}}
+n is 3, three
+n is 47, forty-seven
+...
+n is 100073, one hundred thousand seventy-three
+n is 1000000001, one billion one
+...
+n is 474142398123, four hundred seventy-four billion
+one hundred forty-two million three hundred ninety-eight
+thousand one hundred twenty-three
+n is 1474142398007, one trillion four hundred seventyfour billion one hundred forty-two million three hundred
+ninety-eight thousand seven
+...
+n is 999999999999999999, nine hundred ninety-nine
+quadrillion nine hundred ninety-nine trillion nine
+hundred ninety-nine billion nine hundred ninety-nine
+million nine hundred ninety-nine thousand nine hundred
+ninety-nine
+n is 1000000000000000000, error
+\end{tcblisting}
+\end{itemize}
 
 \subsubsection{How it works…}
 
+This class is significantly driven by the data structures. By organizing string\_view objects into arrays, we can easily translate scalar values into corresponding words:
+
+\begin{lstlisting}[style=styleCXX]
+appendbuf(_tens[_n]); // e.g., _tens[5] = "fifty"
+\end{lstlisting}
+
+The rest of it is mostly the math:
+
+\begin{lstlisting}[style=styleCXX]
+numnum power{ pow_i(thousand, i) };
+numnum _n{ ( n - ( n % power ) ) / power };
+if (_n) {
+	int index = i;
+	numword _nw{ _n };
+	appendbuf(_nw.words());
+	appendbuf(_powers[index]);
+	n -= _n * power;
+}
+\end{lstlisting}
 
 \subsubsection{There's more…}
+
+I also have a utility that uses the numwords class to tell time in words. Its output looks like this:
+
+\begin{tcblisting}{commandshell={}}
+$ ./saytime
+three past five
+\end{tcblisting}
+
+In test mode, it gives this output:
+
+\begin{tcblisting}{commandshell={}}
+$ ./saytime test
+00:00 midnight
+00:01 one past midnight
+11:00 eleven o'clock
+12:00 noon
+13:00 one o'clock
+12:29 twenty-nine past noon
+12:30 half past noon
+12:31 twenty-nine til one
+12:15 quarter past noon
+12:30 half past noon
+12:45 quarter til one
+11:59 one til noon
+23:15 quarter past eleven
+23:59 one til midnight
+12:59 one til one
+13:59 one til two
+01:60 OOR
+24:00 OOR
+\end{tcblisting}
+
+I leave its implementation as an exercise for the reader.

@@ -1,8 +1,233 @@
 
+The STL has a rich algorithm library. Yet, on occasion you may find it missing something you need. One common need is a split function.
+
+A split function splits a string on a character separator. For example, here's a Unix /etc/passwd file from a standard Debian installation:
+
+\begin{tcblisting}{commandshell={}}
+root:x:0:0:root:/root:/bin/bash
+daemon:x:1:1:daemon:/usr/sbin:/usr/sbin/nologin
+bin:x:2:2:bin:/bin:/usr/sbin/nologin
+sys:x:3:3:sys:/dev:/usr/sbin/nologin
+sync:x:4:65534:sync:/bin:/bin/sync
+\end{tcblisting}
+
+Each field is separated by a colon : character, where the fields are:
+
+
+\begin{enumerate}
+\item 
+Login name
+
+\item 
+Optional encrypted password
+
+\item 
+User ID
+
+\item 
+Group ID
+
+\item 
+Username or comment
+
+\item 
+Home directory
+
+\item 
+Optional command interpreter
+\end{enumerate}
+
+This is a standard file in POSIX-based operating systems, and there are others like it. Most scripting languages include a built-in function for splitting a string on a separator. There are simple ways to do this in C++. Still, std::string is just another container in the STL, and a generic algorithm that splits a container on a separator could be a useful addition to the toolbox. So, let's build one.
 
 \subsubsection{How to do it…}
 
+In this recipe, we build a generic algorithm that splits a container on a separator and puts the results in a target container.
+
+\begin{itemize}
+\item 
+Our algorithm is in the bw namespace, to avoid collisions with std:
+
+\begin{lstlisting}[style=styleCXX]
+namespace bw {
+	template<typename It, typename Oc, typename V,
+	typename Pred>
+	It split(It it, It end_it, Oc& dest,
+	const V& sep, Pred& f) {
+		using SliceContainer = typename
+		Oc::value_type;
+		while(it != end_it) {
+			SliceContainer dest_elm{};
+			auto slice{ it };
+			while(slice != end_it) {
+				if(f(*slice, sep)) break;
+				dest_elm.push_back(*slice++);
+			}
+			dest.push_back(dest_elm);
+			if(slice == end_it) return end_it;
+			it = ++slice;
+		}
+		return it;
+	}
+};
+\end{lstlisting}
+
+The split() algorithm searches a container for separators and collects the separated slices into a new output container, where each slice is a container within the output container.
+
+We want the split() algorithm to be as generic as possible, just like those in the algorithm library. This means that all the parameters are templated, and the code will work with a comprehensive variety of parameter types.
+
+First, let's look at the template parameters:
+
+\begin{itemize}
+\item 
+It is the input iterator type for the source container.
+
+\item 
+Oc is the output container type. This is a container of containers.
+
+\item 
+V is the separator type.
+
+\item 
+Pred is for the predicate functor.
+\end{itemize}
+
+Our output type is a container of containers. It needs to hold containers of slices. It could be vector<string>, where the string values are slices, or vector<vector<int>{}>, where the inner vector<int> contains the slices. This means we need to derive the type of the inner container from the output container type. We do that with the using declaration in the body of the function.
+
+\begin{lstlisting}[style=styleCXX]
+using SliceContainer = typename Oc::value_type;
+\end{lstlisting}
+
+This is also why we cannot use an output iterator for the output parameter. By definition, an output iterator cannot determine the type of its contents and its value\_type is set to void.
+
+We use SliceContainer to define a temporary container that is added to the output container with the statement:
+
+\begin{lstlisting}[style=styleCXX]
+dest.push_back(dest_elm);
+\end{lstlisting}
+
+\item 
+The predicate is a binary operator that compares an input element with the separator. We include a default equality operator in the bw namespace:
+
+\begin{lstlisting}[style=styleCXX]
+constexpr auto eq = [](const auto& el, const auto& sep) {
+	return el == sep;
+};
+\end{lstlisting}
+
+\item 
+We also include a specialization of split() that uses the eq operator by default:
+
+\begin{lstlisting}[style=styleCXX]
+template<typename It, typename Oc, typename V>
+It split(It it, const It end_it, Oc& dest, const V& sep)
+{
+	return split(it, end_it, dest, sep, eq);
+}
+\end{lstlisting}
+
+\item 
+Because splitting string objects is a common use case for this algorithm, we include a helper function for that specific purpose:
+
+\begin{lstlisting}[style=styleCXX]
+template<typename Cin, typename Cout, typename V>
+Cout& strsplit(const Cin& str, Cout& dest, const V& sep)
+{
+	split(str.begin(), str.end(), dest, sep, eq);
+	return dest;
+}
+\end{lstlisting}
+
+\item 
+We test our split algorithm main(), starting with a string object:
+
+\begin{lstlisting}[style=styleCXX]
+int main() {
+	constexpr char strsep{ ':' };
+	const string str
+		{ "sync:x:4:65534:sync:/bin:/bin/sync" };
+	vector<string> dest_vs{};
+	bw::split(str.begin(), str.end(), dest_vs, strsep,
+		bw::eq);
+	for(const auto& e : dest_vs) cout <<
+		format("[{}] ", e);
+	cout << '\n';
+}
+\end{lstlisting}
+
+We use a string from the /etc/passwd file to test our algorithm, with this result:
+
+\begin{tcblisting}{commandshell={}}
+[sync] [x] [4] [65534] [sync] [/bin] [/bin/sync]
+\end{tcblisting}
+
+\item 
+It's even simpler using our strsplit() helper function:
+
+\begin{lstlisting}[style=styleCXX]
+vector<string> dest_vs2{};
+bw::strsplit(str, dest_vs2, strsep);
+for(const auto& e : dest_vs2) cout << format("[{}] ", e);
+cout << '\n';
+\end{lstlisting}
+
+Output:
+
+\begin{tcblisting}{commandshell={}}
+[sync] [x] [4] [65534] [sync] [/bin] [/bin/sync]
+\end{tcblisting}
+
+This would make it easy to parse the /etc/passwd file.
+
+\item 
+Of course, we can use the same algorithm with any container:
+
+\begin{lstlisting}[style=styleCXX]
+constexpr int intsep{ -1 };
+vector<int> vi{ 1, 2, 3, 4, intsep, 5, 6, 7, 8, intsep,
+	9, 10, 11, 12 };
+vector<vector<int>> dest_vi{};
+bw::split(vi.begin(), vi.end(), dest_vi, intsep);
+for(const auto& v : dest_vi) {
+	string s;
+	for(const auto& e : v) s += format("{}", e);
+	cout << format("[{}] ", s);
+}
+cout << '\n';
+\end{lstlisting}
+
+Output:
+
+\begin{tcblisting}{commandshell={}}
+[1234] [5678] [9101112]
+\end{tcblisting}
+\end{itemize}
 
 \subsubsection{How it works…}
+
+The split algorithm itself is relatively simple. The magic in this recipe is in the use of templates to make it as generic as possible.
+
+The derived type in the using declaration allows us to create a container for use with the output container:
+
+\begin{lstlisting}[style=styleCXX]
+using SliceContainer = typename Oc::value_type;
+\end{lstlisting}
+
+This gives us a SliceContainer type that we can use to create a container for the slices:
+
+\begin{lstlisting}[style=styleCXX]
+SliceContainer dest_elm{};
+\end{lstlisting}
+
+This is a temporary container that is added to the output container for each slice:
+
+\begin{lstlisting}[style=styleCXX]
+dest.push_back(dest_elm);
+\end{lstlisting}
+
+
+
+
+
+
 
 

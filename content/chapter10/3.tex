@@ -1,7 +1,204 @@
 
+The filesystem library includes functions for manipulating the contents of path objects. In this recipe, we will consider a few of these tools.
 
 \subsubsection{How to do it…}
 
+In this recipe, we examine some functions that manipulate the contents of path objects:
+
+\begin{itemize}
+\item 
+We start with the namespace directive and our formatter specialization. We do this in every recipe in this chapter:
+
+\begin{lstlisting}[style=styleCXX]
+namespace fs = std::filesystem;
+template<>
+struct std::formatter<fs::path>:
+std::formatter<std::string> {
+	template<typename FormatContext>
+	auto format(const fs::path& p, FormatContext& ctx) {
+		return format_to(ctx.out(), "{}", p.string());
+	}
+};
+\end{lstlisting}
+
+\item 
+We can get the current working directory with the current\_path() function, which returns a path object:
+
+\begin{lstlisting}[style=styleCXX]
+cout << format("current_path: {}\n", fs::current_path());
+\end{lstlisting}
+
+Output:
+
+\begin{tcblisting}{commandshell={}}
+current_path: /home/billw/chap10
+\end{tcblisting}
+
+\item 
+The absolute() function returns an absolute path from a relative path:
+
+\begin{lstlisting}[style=styleCXX]
+cout << format("absolute(p): {}\n", fs::absolute(p));
+\end{lstlisting}
+
+Output:
+
+\begin{tcblisting}{commandshell={}}
+absolute(p): /home/billw/chap10/testdir/foo.txt
+\end{tcblisting}
+
+absolute() will also dereference symbolic links.
+
+\item 
+The /= operator appends a string to the end of the path string and returns a new path object:
+
+\begin{lstlisting}[style=styleCXX]
+cout << format("append: {}\n",
+	fs::path{ "testdir" } /= "foo.txt");
+\end{lstlisting}
+
+Output:
+
+\begin{tcblisting}{commandshell={}}
+append: testdir/foo.txt
+\end{tcblisting}
+
+\item 
+The canonical() function returns the full canonical directory path:
+
+\begin{lstlisting}[style=styleCXX]
+cout << format("canonical: {}\n",
+	fs::canonical(fs::path{ "." } /= "testdir"));
+\end{lstlisting}
+
+Output:
+
+\begin{tcblisting}{commandshell={}}
+canonical: /home/billw/chap
+\end{tcblisting}
+
+\item 
+The equivalent() function tests if two relative paths resolve to the same file system entity:
+
+\begin{lstlisting}[style=styleCXX]
+cout << format("equivalent: {}\n",
+	fs::equivalent("testdir/foo.txt",
+		"testdir/../testdir/foo.txt"));
+\end{lstlisting}
+
+Output:
+
+\begin{tcblisting}{commandshell={}}
+equivalent: true
+\end{tcblisting}
+
+\item 
+The filesystem library includes the filesystem\_error class for exception handling:
+
+\begin{lstlisting}[style=styleCXX]
+try {
+	fs::path p{ fp };
+	cout << format("p: {}\n", p);
+	...
+	cout << format("equivalent: {}\n",
+	fs::equivalent("testdir/foo.txt",
+	"testdir/../testdir/foo.txt"));
+} catch (const fs::filesystem_error& e) {
+	cout << format("{}\n", e.what());
+	cout << format("path1: {}\n", e.path1());
+	cout << format("path2: {}\n", e.path2());
+}
+\end{lstlisting}
+
+The filesystem\_error class includes methods for displaying the error message and for getting the path(s) involved in the error.
+
+If we introduce an error into the equivalent() call, we can see the results of the fileystem\_error class:
+
+\begin{lstlisting}[style=styleCXX]
+cout << format("equivalent: {}\n",
+	fs::equivalent("testdir/foo.txt/x",
+		"testdir/../testdir/foo.txt/y"));
+\end{lstlisting}
+
+Output:
+
+\begin{tcblisting}{commandshell={}}
+filesystem error: cannot check file equivalence: No
+such file or directory [testdir/foo.txt/x] [testdir/../
+testdir/foo.txt/y]
+path1: testdir/foo.txt/x
+path2: testdir/../testdir/foo.txt/y
+\end{tcblisting}
+
+This is the output on Debian with GCC.
+
+The filesystem\_error class provides additional detail through its path1() and path2() methods. These methods return path objects.
+
+\item 
+You can also use std::error\_code with some of the filesystem functions:
+
+\begin{lstlisting}[style=styleCXX]
+fs::path p{ fp };
+std::error_code e;
+cout << format("canonical: {}\n",
+	fs::canonical(p /= "foo", e));
+cout << format("error: {}\n", e.message());
+\end{lstlisting}
+
+Output:
+
+\begin{tcblisting}{commandshell={}}
+canonical:
+error: Not a directory
+\end{tcblisting}
+
+\item 
+Even though Windows uses a very different file system, this code still works as expected, using Windows file naming conventions:
+
+\begin{tcblisting}{commandshell={}}
+p: testdir/foo.txt
+current_path: C:\Users\billw\chap10
+absolute(p): C:\Users\billw\chap10\testdir\foo.txt
+concatenate: testdirfoo.txt
+append: testdir\foo.txt
+canonical: C:\Users\billw\chap10\testdir
+equivalent: true
+\end{tcblisting}
+\end{itemize}
 
 \subsubsection{How it works…}
+
+Most of these functions take a path object, an optional std::error\_code object, and return a path object:
+
+\begin{lstlisting}[style=styleCXX]
+path absolute(const path& p);
+path absolute(const path& p, std::error_code& ec);
+\end{lstlisting}
+
+The equivalent() function takes two path objects and returns a bool:
+
+\begin{lstlisting}[style=styleCXX]
+bool equivalent( const path& p1, const path& p2 );
+bool equivalent( const path& p1, const path& p2,
+	std::error_code& ec );
+\end{lstlisting}
+
+The path class has operators for concatenate and append. Both operators are destructive. They modify the path on the left-hand side of the operator:
+
+\begin{lstlisting}[style=styleCXX]
+p1 += source; // concatenate
+p1 /= source; // append
+\end{lstlisting}
+
+For the right-hand side, these operators take either a path object, a string, a string\_view, a C-string, or a pair of iterators.
+
+The concatenate operator adds the string from the right-hand side of the operator to the end of the p1 path string.
+
+The append operator adds a separator (e.g., / or \verb|\|), followed by the string from the right-hand side of the operator to the end of the p1 path string.
+
+
+
+
+
+
 

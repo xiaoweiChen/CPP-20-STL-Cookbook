@@ -1,8 +1,165 @@
 
+Beginning with C++17, many of the standard STL algorithms can run with parallel execution. This feature allows an algorithm to split its work into sub-tasks to run simultaneously on multiple cores. These algorithms accept an execution policy object that specifies the kind of parallelism applied to the algorithm. This feature requires hardware support.
 
 \subsubsection{How to do it…}
 
+Execution policies are defined in the <execution> header and in the std::execution namespace. In this recipe, we will test the available policies using the std::transform() algorithm:
+
+\begin{itemize}
+\item 
+For timing purposes, we'll use the duration object with the std::milli ratio so that we can measure in milliseconds:
+
+\begin{lstlisting}[style=styleCXX]
+using dur_t = duration<double, std::milli>;
+\end{lstlisting}
+
+\item 
+For demonstration purposes, we'll start with a vector of int with 10 million random values:
+
+\begin{lstlisting}[style=styleCXX]
+int main() {
+	std::vector<unsigned> v(10 * 1000 * 1000);
+	std::random_device rng;
+	for(auto &i : v) i = rng() % 0xFFFF;
+	...
+\end{lstlisting}
+
+\item 
+Now, we apply a simple transformation:
+
+\begin{lstlisting}[style=styleCXX]
+auto mul2 = [](int n){ return n * 2; };
+auto t1 = steady_clock::now();
+std::transform(v.begin(), v.end(), v.begin(), mul2);
+dur_t dur1 = steady_clock::now() - t1;
+cout << format("no policy: {:.3}ms\n", dur1.count());
+\end{lstlisting}
+
+The mul2 lambda simply multiplies a value by 2. The transform() algorithm applies mul2 to every member of the vector.
+
+This transformation does not specify an execution policy.
+
+Output:
+
+\begin{tcblisting}{commandshell={}}
+no policy: 4.71ms
+\end{tcblisting}
+
+\item 
+We can specify an execution policy in the first argument of the algorithm:
+
+\begin{lstlisting}[style=styleCXX]
+std::transform(execution::seq,
+	v.begin(), v.end(), v.begin(), mul2);
+\end{lstlisting}
+
+The seq policy means that the algorithm shall not be parallelized. This is the same as no execution policy.
+
+Output:
+
+\begin{tcblisting}{commandshell={}}
+execution::seq: 4.91ms
+\end{tcblisting}
+
+Notice that the duration is roughly the same as without a policy. It will never be exact because it varies each time it's run.
+
+\item 
+The execution::par policy allows the algorithm to parallelize its workload:
+
+\begin{lstlisting}[style=styleCXX]
+std::transform(execution::par,
+	v.begin(), v.end(), v.begin(), mul2);
+\end{lstlisting}
+
+Output:
+
+\begin{tcblisting}{commandshell={}}
+execution::par: 3.22ms
+\end{tcblisting}
+
+Notice that the algorithm runs somewhat faster with the parallel execution policy.
+
+\item 
+The execution::par\_unseq policy allows unsequenced parallel execution of the workload:
+
+\begin{lstlisting}[style=styleCXX]
+std::transform(execution::par_unseq,
+	v.begin(), v.end(), v.begin(), mul2);
+\end{lstlisting}
+
+Output:
+
+\begin{tcblisting}{commandshell={}}
+execution::par_unseq: 2.93ms
+\end{tcblisting}
+
+Here, we notice another increase in performance with this policy.
+
+The execution::par\_unseq policy has tighter requirements of the algorithm. The algorithm must not perform operations that require concurrent or sequential operation.
+\end{itemize}
 
 \subsubsection{How it works…}
+
+The execution policies interface doesn't specify how the algorithm workloads are parallelized. It's designed to work with a diverse set of hardware and processors under varying loads and circumstances. It may be implemented entirely in the library or rely on compiler or hardware support.
+
+Parallelization will show the most improvement on algorithms that do more than O(n) work. For example, sort() shows a dramatic improvement. Here's a sort() with no parallelization:
+
+\begin{lstlisting}[style=styleCXX]
+auto t0 = steady_clock::now();
+std::sort(v.begin(), v.end());
+dur_t dur0 = steady_clock::now() - t0;
+cout << format("sort: {:.3}ms\n", dur0.count());
+\end{lstlisting}
+
+Output:
+
+\begin{tcblisting}{commandshell={}}
+sort: 751ms
+\end{tcblisting}
+
+With execution::par, we see significant performance gains:
+
+\begin{lstlisting}[style=styleCXX]
+std::sort(execution::par, v.begin(), v.end());
+\end{lstlisting}
+
+Output:
+
+\begin{tcblisting}{commandshell={}}
+sort: 163ms
+\end{tcblisting}
+
+The improvement with execution::par\_unseq is better still:
+
+\begin{lstlisting}[style=styleCXX]
+std::sort(execution::par_unseq, v.begin(), v.end());
+\end{lstlisting}
+
+Output:
+
+\begin{tcblisting}{commandshell={}}
+sort: 152ms
+\end{tcblisting}
+
+It's a good idea to do a lot of testing when using the parallelized algorithms. If your algorithm or predicates do not lend themselves well to parallelization, you may end up with minimal performance gains or unintended side effects.
+
+\begin{tcolorbox}[colback=webgreen!5!white,colframe=webgreen!75!black,title=Note]
+At the time of writing, execution policies are poorly supported in GCC and not yet supported by LLVM/Clang. This recipe was tested on a 6-core i7 running Windows 10 and a preview release of Visual C++.
+\end{tcolorbox}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 

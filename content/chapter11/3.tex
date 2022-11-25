@@ -1,8 +1,169 @@
 
+Given two similar vectors that differ only by quantization or resolution, we can use the inner\_product() algorithm to calculate an error sum, defined as:
+
+\begin{equation*}
+e=\sum_{n}^{i=1}(a_i-b_i)^2
+\end{equation*}
+
+\begin{center}
+Figure 11.2 – Error sum definition
+\end{center}
+
+Where e is the error sum, the sum of the square of the difference between a series of points in two vectors.
+
+We can use the inner\_product() algorithm, from the <numeric> header, to calculate the error sum between two vectors.
 
 \subsubsection{How to do it…}
 
+In this recipe we define two vectors, each with a sine wave. One vector has values of type double and the other has type int. This gives us vectors that differ in quantization, because the int type cannot represent fractional values. We then use inner\_product() to calculate the error sum between the two vectors:
+
+\begin{itemize}
+\item 
+In our main() function we define our vectors and a handy index variable:
+
+\begin{lstlisting}[style=styleCXX]
+int main() {
+	constexpr size_t vlen{ 100 };
+	vector<double> ds(vlen);
+	vector<int> is(vlen);
+	size_t index{};
+	...
+\end{lstlisting}
+
+ds is the vector of double sine waves and is is the vector of int sine waves. Each vector has 100 elements to hold a sine wave. The index variable is used to initialize the vector objects.
+
+\item We generate the sine wave in the vector of double, using a loop and a lambda:
+
+\begin{lstlisting}[style=styleCXX]
+auto sin_gen = [&index]{
+	return 5.0 * sin(index++ * 2 * pi / 100);
+};
+for(auto& v : ds) v = sin_gen();
+\end{lstlisting}
+
+The lambda captures a reference to the index variable so it can be incremented.
+
+The pi constant is from the std::numbers library.
+
+\item 
+We now have a double sine wave and we can use it to derive the int version:
+
+\begin{lstlisting}[style=styleCXX]
+index = 0;
+for(auto& v : is) {
+	v = static_cast<int>(round(ds.at(index++)));
+}
+\end{lstlisting}
+
+This takes each point from ds, rounds it, casts it to an int, and updates it in position in the is container.
+
+\item 
+We display our sine waves with a simple loop:
+
+\begin{lstlisting}[style=styleCXX]
+for(const auto& v : ds) cout << format("{:-5.2f} ", v);
+cout << "\n\n";
+for(const auto& v : is) cout << format("{:-3d} ", v);
+cout << "\n\n";
+\end{lstlisting}
+
+Our output is the sine waves as data points in the two containers:
+
+\begin{tcblisting}{commandshell={}}
+0.00 0.31 0.63 0.94 1.24 1.55 1.84 2.13 2.41
+2.68 2.94 3.19 3.42 3.64 3.85 4.05 4.22 4.38
+4.52 4.65 4.76 4.84 4.91 4.96 4.99 5.00 4.99
+4.96 4.91 4.84 4.76 4.65 4.52 4.38 4.22 4.05
+3.85 3.64 3.42 3.19 2.94 2.68 2.41 2.13 1.84
+1.55 1.24 0.94 0.63 0.31 0.00 -0.31 -0.63 -0.94
+-1.24 -1.55 -1.84 -2.13 -2.41 -2.68 -2.94 -3.19 -3.42
+-3.64 -3.85 -4.05 -4.22 -4.38 -4.52 -4.65 -4.76 -4.84
+-4.91 -4.96 -4.99 -5.00 -4.99 -4.96 -4.91 -4.84 -4.76
+-4.65 -4.52 -4.38 -4.22 -4.05 -3.85 -3.64 -3.42 -3.19
+-2.94 -2.68 -2.41 -2.13 -1.84 -1.55 -1.24 -0.94 -0.63
+-0.31
+0 0 1 1 1 2 2 2 2 3 3 3 3 4 4
+4 4 4 5 5 5 5 5 5 5 5 5 5 5 5
+5 5 5 4 4 4 4 4 3 3 3 3 2 2 2
+2 1 1 1 0 0 0 -1 -1 -1 -2 -2 -2 -2 -3
+-3 -3 -3 -4 -4 -4 -4 -4 -5 -5 -5 -5 -5 -5
+-5 -5 -5 -5 -5 -5 -5 -5 -5 -4 -4 -4 -4 -4
+-3 -3 -3 -3 -2 -2 -2 -2 -1 -1 -1 0
+\end{tcblisting}
+
+\item 
+Now we calculate the error sum using inner\_product():
+
+\begin{lstlisting}[style=styleCXX]
+double errsum = inner_product(ds.begin(), ds.end(),
+	is.begin(), 0.0, std::plus<double>(),
+	[](double a, double b){ return pow(a - b, 2); });
+cout << format("error sum: {:.3f}\n\n", errsum);
+\end{lstlisting}
+
+The lambda expression returns the (ai – bi)2 part of the formula. The std::plus() algorithm performs the sum operation.
+
+Output:
+
+\begin{tcblisting}{commandshell={}}
+error sum: 7.304
+\end{tcblisting}
+\end{itemize}
 
 \subsubsection{How it works…}
 
+The inner\_product() algorithm computes a sum of products on the first input range. Its signature is:
+
+\begin{lstlisting}[style=styleCXX]
+T inner_product(InputIt1 first1, InputIt1 last1,
+	InputIt2 first2, T init, BinaryOperator1 op1,
+	BinaryOperator2 op2)
+\end{lstlisting}
+
+The function takes two binary operator functors, op1 and op2. The first op1 is for the sum and the second op2 is for the product. We use std::plus() as the sum operator, and a lambda as the product operator.
+
+The init parameter can be used as a starting value or bias. We pass it the literal value, 0.0.
+
+The return value is the accumulated sum of the products.
+
 \subsubsection{There's more…}
+
+We can calculate an accumulated error sum by putting inner\_product() in a loop:
+
+\begin{lstlisting}[style=styleCXX]
+cout << "accumulated error:\n";
+for (auto it{ds.begin()}; it != ds.end(); ++it) {
+	double accumsum = inner_product(ds.begin(), it,
+		is.begin(), 0.0, std::plus<double>(),
+		[](double a, double b){ return pow(a - b, 2); });
+	cout << format("{:-5.2f} ", accumsum);
+}
+cout << '\n';
+\end{lstlisting}
+
+Output:
+
+\begin{tcblisting}{commandshell={}}
+accumulated error:
+0.00 0.00 0.10 0.24 0.24 0.30 0.51 0.53 0.55 0.72
+0.82 0.82 0.86 1.04 1.16 1.19 1.19 1.24 1.38 1.61
+1.73 1.79 1.82 1.82 1.83 1.83 1.83 1.83 1.83 1.84
+1.86 1.92 2.04 2.27 2.42 2.46 2.47 2.49 2.61 2.79
+2.83 2.83 2.93 3.10 3.12 3.14 3.35 3.41 3.41 3.55
+3.65 3.65 3.75 3.89 3.89 3.95 4.16 4.19 4.20 4.37
+4.47 4.48 4.51 4.69 4.82 4.84 4.84 4.89 5.03 5.26
+5.38 5.44 5.47 5.48 5.48 5.48 5.48 5.48 5.48 5.49
+5.51 5.57 5.70 5.92 6.07 6.12 6.12 6.14 6.27 6.45
+6.48 6.48 6.59 6.75 6.77 6.80 7.00 7.06 7.07 7.21
+\end{tcblisting}
+
+This may be useful in some statistical applications.
+
+
+
+
+
+
+
+
+

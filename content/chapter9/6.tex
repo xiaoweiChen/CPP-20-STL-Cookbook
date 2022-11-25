@@ -1,11 +1,383 @@
 
+The term mutex refers to mutually exclusive access to shared resources. A mutex is commonly used to avoid data corruption and race conditions, due to multiple threads of execution attempting to access the same data. A mutex will typically use locks to restrict access to one thread at a time.
 
+The STL provides mutex and lock classes in the <mutex> header.
 
 
 \subsubsection{How to do it…}
 
+In this recipe, we will use a simple Animal class to experiment with locking and unlocking a mutex:
+
+\begin{itemize}
+\item 
+We start by creating a mutex object:
+
+\begin{lstlisting}[style=styleCXX]
+std::mutex animal_mutex;
+\end{lstlisting}
+
+The mutex is declared in the global scope, so it's accessible to all the relevant objects.
+
+\item 
+Our Animal class has a name and a list of friends:
+
+\begin{lstlisting}[style=styleCXX]
+class Animal {
+	using friend_t = list<Animal>;
+	string_view s_name{ "unk" };
+	friend_t l_friends{};
+public:
+	Animal() = delete;
+	Animal(const string_view n) : s_name{n} {}
+	...
+}
+\end{lstlisting}
+
+Adding and deleting friends will be a useful test case for our mutex.
+
+\item 
+The equality operator is the only operator we'll need:
+
+\begin{lstlisting}[style=styleCXX]
+bool operator==(const Animal& o) const {
+	return s_name.data() == o.s_name.data();
+}
+\end{lstlisting}
+
+The s\_name member is a string\_view object, so we can test the address of its data store for equality.
+
+\item 
+The is\_friend() method tests if another Animal is in the l\_friends list:
+
+\begin{lstlisting}[style=styleCXX]
+bool is_friend(const Animal& o) const {
+	for(const auto& a : l_friends) {
+		if(a == o) return true;
+	}
+	return false;
+}
+\end{lstlisting}
+
+\item 
+The find\_friend() method returns an optional, with an iterator to the Animal if found:
+
+\begin{lstlisting}[style=styleCXX]
+optional<friend_t::iterator>
+find_friend(const Animal& o) noexcept {
+	for(auto it{l_friends.begin()};
+	it != l_friends.end(); ++it) {
+		if(*it == o) return it;
+	}
+	return {};
+}
+\end{lstlisting}
+
+\item 
+The print() method prints s\_name along with names of each of the Animal objects in the l\_friends list:
+
+\begin{lstlisting}[style=styleCXX]
+void print() const noexcept {
+	auto n_animals{ l_friends.size() };
+	cout << format("Animal: {}, friends: ", s_name);
+	if(!n_animals) cout << "none";
+	else {
+		for(auto n : l_friends) {
+			cout << n.s_name;
+			if(--n_animals) cout << ", ";
+		}
+	}
+	cout << '\n';
+}
+\end{lstlisting}
+
+\item 
+The add\_friend() method adds an Animal object to the l\_friends list:
+
+\begin{lstlisting}[style=styleCXX]
+bool add_friend(Animal& o) noexcept {
+	cout << format("add_friend {} -> {}\n", s_name,
+		o.s_name);
+	if(*this == o) return false;
+	std::lock_guard<std::mutex> l(animal_mutex);
+	if(!is_friend(o)) l_friends.emplace_back(o);
+	if(!o.is_friend(*this))
+		o.l_friends.emplace_back(*this);
+	return true;
+}
+\end{lstlisting}
+
+\item 
+The delete\_friend() method removes an Animal object from the l\_friends list:
+
+\begin{lstlisting}[style=styleCXX]
+bool delete_friend(Animal& o) noexcept {
+	cout << format("delete_friend {} -> {}\n",
+		s_name, o.s_name);
+	if(*this == o) return false;
+	if(auto it = find_friend(o))
+		l_friends.erase(it.value());
+	if(auto it = o.find_friend(*this))
+		o.l_friends.erase(it.value());
+	return true;
+}
+\end{lstlisting}
+
+\item 
+In the main() function, we create some Animal objects:
+
+\begin{lstlisting}[style=styleCXX]
+int main() {
+	auto cat1 = std::make_unique<Animal>("Felix");
+	auto tiger1 = std::make_unique<Animal>("Hobbes");
+	auto dog1 = std::make_unique<Animal>("Astro");
+	auto rabbit1 = std::make_unique<Animal>("Bugs");
+	...
+\end{lstlisting}
+
+\item 
+We call add\_friends() on our objects with async(), to run them in separate threads:
+
+\begin{lstlisting}[style=styleCXX]
+auto a1 = std::async([&]{ cat1->add_friend(*tiger1); });
+auto a2 = std::async([&]{ cat1->add_friend(*rabbit1); });
+auto a3 = std::async([&]{ rabbit1->add_friend(*dog1); });
+auto a4 = std::async([&]{ rabbit1->add_friend(*cat1); });
+a1.wait();
+a2.wait();
+a3.wait();
+a4.wait();
+\end{lstlisting}
+
+We call wait() to allow our threads to complete before continuing.
+
+\item 
+We call print() to see our Animals and their relationships:
+
+\begin{lstlisting}[style=styleCXX]
+auto p1 = std::async([&]{ cat1->print(); });
+auto p2 = std::async([&]{ tiger1->print(); });
+auto p3 = std::async([&]{ dog1->print(); });
+auto p4 = std::async([&]{ rabbit1->print(); });
+p1.wait();
+p2.wait();
+p3.wait();
+p4.wait();
+\end{lstlisting}
+
+\item 
+And finally, we call delete\_friend() to remove one of our relationships:
+
+\begin{lstlisting}[style=styleCXX]
+auto a5 = std::async([&]{ cat1->delete_friend(*rabbit1);
+});
+a5.wait();
+auto p5 = std::async([&]{ cat1->print(); });
+auto p6 = std::async([&]{ rabbit1->print(); });
+\end{lstlisting}
+
+\item 
+At this point, our output looks like this:
+
+\begin{tcblisting}{commandshell={}}
+add_friend Bugs -> Felix
+add_friend Felix -> Hobbes
+add_friend Felix -> Bugs
+add_friend Bugs -> Astro
+Animal: Felix, friends: Bugs, Hobbes
+Animal: Hobbes, friends: Animal: Bugs, friends:
+FelixAnimal: Astro, friends: Felix
+, Astro
+Bugs
+delete_friend Felix -> Bugs
+Animal: Felix, friends: Hobbes
+Animal: Bugs, friends: Astro
+\end{tcblisting}
+
+This output is somewhat scrambled. It will be different each time you run it. It may be fine sometimes, but don't let that fool you. We need to add some mutex locks to control access to the data.
+
+\item 
+One way to use mutex is with its lock() and unlock() methods. Let's add them to the add\_friend() function:
+
+\begin{lstlisting}[style=styleCXX]
+bool add_friend(Animal& o) noexcept {
+	cout << format("add_friend {} -> {}\n", s_name, o.s_
+	name);
+	if(*this == o) return false;
+	animal_mutex.lock();
+	if(!is_friend(o)) l_friends.emplace_back(o);
+	if(!o.is_friend(*this)) o.l_friends.emplace_
+	back(*this);
+	animal_mutex.unlock();
+	return true;
+}
+\end{lstlisting}
+
+The lock() method attempts to acquire a lock on the mutex. If the mutex is already locked, it will wait (block execution) until the mutex is unlocked.
+
+\item 
+We also need to add a lock to delete\_friend():
+
+\begin{lstlisting}[style=styleCXX]
+bool delete_friend(Animal& o) noexcept {
+	cout << format("delete_friend {} -> {}\n",
+		s_name, o.s_name);
+	if(*this == o) return false;
+	animal_mutex.lock();
+	if(auto it = find_friend(o))
+		l_friends.erase(it.value());
+	if(auto it = o.find_friend(*this))
+		o.l_friends.erase(it.value());
+	animal_mutex.unlock();
+	return true;
+}
+\end{lstlisting}
+
+\item 
+Now, we need to add a lock to print() so that data is not changed while printing:
+
+\begin{lstlisting}[style=styleCXX]
+void print() const noexcept {
+	animal_mutex.lock();
+	auto n_animals{ l_friends.size() };
+	cout << format("Animal: {}, friends: ", s_name);
+	if(!n_animals) cout << "none";
+	else {
+		for(auto n : l_friends) {
+			cout << n.s_name;
+			if(--n_animals) cout << ", ";
+		}
+	}
+	cout << '\n';
+	animal_mutex.unlock();
+}
+\end{lstlisting}
+
+Now, our output is sensible:
+
+\begin{tcblisting}{commandshell={}}
+add_friend Bugs -> Felix
+add_friend Bugs -> Astro
+add_friend Felix -> Hobbes
+add_friend Felix -> Bugs
+Animal: Felix, friends: Bugs, Hobbes
+Animal: Hobbes, friends: Felix
+Animal: Astro, friends: Bugs
+Animal: Bugs, friends: Felix, Astro
+delete_friend Felix -> Bugs
+Animal: Felix, friends: Hobbes
+Animal: Bugs, friends: Astro
+\end{tcblisting}
+
+Your output may have the lines in a different order due to asynchronous operation.
+
+\item 
+The lock() and unlock() methods are rarely called directly. The std::lock\_guard class manages locks with a proper Resource Acquisition Is Initialization (RAII) pattern that automatically releases the lock upon destruction. Here's the add\_friend() method with lock\_guard:
+
+\begin{lstlisting}[style=styleCXX]
+bool add_friend(Animal& o) noexcept {
+	cout << format("add_friend {} -> {}\n", s_name, o.s_
+		name);
+	if(*this == o) return false;
+	std::lock_guard<std::mutex> l(animal_mutex);
+	if(!is_friend(o)) l_friends.emplace_back(o);
+	if(!o.is_friend(*this))
+		o.l_friends.emplace_back(*this);
+	return true;
+}
+\end{lstlisting}
+
+The lock\_guard object is created and holds a lock until it is destroyed. Like the lock() method, lock\_guard also blocks until a lock is available.
+
+\item 
+
+
+Let's apply lock\_guard to the delete\_friend() and print() methods.
+
+Here is delete\_friend():
+
+\begin{lstlisting}[style=styleCXX]
+bool delete_friend(Animal& o) noexcept {
+	cout << format("delete_friend {} -> {}\n",
+		s_name, o.s_name);
+	if(*this == o) return false;
+	std::lock_guard<std::mutex> l(animal_mutex);
+	if(auto it = find_friend(o))
+		l_friends.erase(it.value());
+	if(auto it = o.find_friend(*this))
+		o.l_friends.erase(it.value());
+	return true;
+}
+\end{lstlisting}
+
+And here is print():
+
+\begin{lstlisting}[style=styleCXX]
+void print() const noexcept {
+	std::lock_guard<std::mutex> l(animal_mutex);
+	auto n_animals{ l_friends.size() };
+	cout << format("Animal: {}, friends: ", s_name);
+	if(!n_animals) cout << "none";
+	else {
+		for(auto n : l_friends) {
+			cout << n.s_name;
+			if(--n_animals) cout << ", ";
+		}
+	}
+	cout << '\n';
+}
+\end{lstlisting}
+
+Our output remains coherent:
+
+\begin{tcblisting}{commandshell={}}
+add_friend Felix -> Hobbes
+add_friend Bugs -> Astro
+add_friend Felix -> Bugs
+add_friend Bugs -> Felix
+Animal: Felix, friends: Bugs, Hobbes
+Animal: Astro, friends: Bugs
+Animal: Hobbes, friends: Felix
+Animal: Bugs, friends: Astro, Felix
+delete_friend Felix -> Bugs
+Animal: Felix, friends: Hobbes
+Animal: Bugs, friends: Astro
+\end{tcblisting}
+
+As before, your output may have the lines in a different order due to asynchronous operation.
+
+\end{itemize}
 
 \subsubsection{How it works…}
+
+It's important to understand that a mutex does not lock data; it blocks execution. As shown in this recipe, when a mutex is applied in object methods, it can be used to enforce mutually exclusive access to data.
+
+When one thread locks a mutex, with either lock() or lock\_guard, that thread is said to own the mutex. Any other thread that tries to lock the same mutex will be blocked until it's unlocked by the owner.
+
+The mutex object must not be destroyed while it's owned by any thread. Likewise, a thread must not be destroyed while it owns a mutex. An RAII-compliant wrapper, such as lock\_ guard, will help ensure this doesn't happen.
+
+\subsubsection{There's more…}
+
+While std::mutex provides an exclusive mutex suitable for many purposes, the STL does provide a few other choices:
+
+\begin{itemize}
+\item 
+shared\_mutex allows more than one thread to simultaneously own a mutex.
+
+\item 
+recursive\_mutex allows one thread to stack multiple locks on a single mutex.
+
+\item 
+timed\_mutex provides a timeout for mutex blocks. Both shared\_mutex and recursive\_mutex also have timed versions available.
+\end{itemize}
+
+
+
+
+
+
+
+
+
 
 
 

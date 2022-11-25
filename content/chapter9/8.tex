@@ -1,8 +1,101 @@
 
+You may need to run the same code in many threads but must initialize that code only once.
+
+One solution would be to call the initialization code before running the threads. This approach can work but has some drawbacks. By separating the initialization, it may be called when unnecessary, or it may be missed when necessary.
+
+The std::call\_once function provides a more robust solution. call\_once is in the <mutex> header.
 
 \subsubsection{How to do it…}
 
+In this recipe, we use a print function for the initialization, so we can clearly see when it's called:
+
+\begin{itemize}
+\item 
+We'll use a constant for the number of threads to spawn:
+
+\begin{lstlisting}[style=styleCXX]
+constexpr size_t max_threads{ 25 };
+\end{lstlisting}
+
+We also need a std::once\_flag to synchronize the std::call\_once function:
+
+\begin{lstlisting}[style=styleCXX]
+std::once_flag init_flag;
+\end{lstlisting}
+
+\item 
+Our initialization function simply prints a string to let us know it's been called:
+
+\begin{lstlisting}[style=styleCXX]
+void do_init(size_t id) {
+	cout << format("do_init ({}): ", id);
+}
+\end{lstlisting}
+
+\item 
+Our worker function, do\_print(), uses std::call\_once to call the initialization function then prints its own id:
+
+\begin{lstlisting}[style=styleCXX]
+void do_print(size_t id) {
+	std::call_once(init_flag, do_init, id);
+	cout << format("{} ", id);
+}
+\end{lstlisting}
+
+\item 
+In main(), we use a list container to manage the thread objects:
+
+\begin{lstlisting}[style=styleCXX]
+int main() {
+	list<thread> spawn;
+	for (size_t id{}; id < max_threads; ++id) {
+		spawn.emplace_back(do_print, id);
+	}
+	for (auto& t : spawn) t.join();
+	cout << '\n';
+}
+\end{lstlisting}
+
+Our output shows the initialization happens first, and only once:
+
+\begin{tcblisting}{commandshell={}}
+do_init (8): 12 0 2 1 9 6 13 10 11 5 16 3 4 17 7 15 8 14
+18 19 20 21 22 23 24
+\end{tcblisting}
+
+Notice that it's not always the first spawned thread (0) that ends up calling the initialization function, but it is always called first. If you run this repeatedly, you'll see thread 0 gets the initialization often, but not every time. You'll see thread 0 in the initialization more often on a system with fewer cores.
+\end{itemize}
 
 \subsubsection{How it works…}
+
+std::call\_once is a template function that takes a flag, a callable (function or functor), and a parameter pack of arguments:
+
+\begin{lstlisting}[style=styleCXX]
+template<class Callable, class... Args>
+void call_once(once_flag& flag, Callable&& f, Args&&... args);
+\end{lstlisting}
+
+The callable f is called exactly one time. Even if call\_once is called concurrently from several threads, f is still called once and only once.
+
+This requires a std::once\_flag object for coordination. The once\_flag constructor sets its state to indicate that the callable has not yet been called.
+
+When call\_once invokes the callable, any other calls on the same once\_flag are blocked until the callable returns. After the callable returns, the once\_flag is set, and any subsequent calls to call\_once return without invoking f.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 

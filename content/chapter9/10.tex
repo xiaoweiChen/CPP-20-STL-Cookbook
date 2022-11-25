@@ -1,8 +1,227 @@
 
+The producer-consumer problem is really a set of problems. Solutions will differ if the buffer is bounded or unbounded, or if there are multiple producers, multiple consumers, or both.
+
+Let's consider a case with multiple producers, multiple consumers, and a bounded (limited capacity) buffer. This is a common condition.
 
 \subsubsection{How to do it…}
 
+In this recipe, we'll look at a case with multiple producers and consumers and a bounded buffer, using a variety of techniques we've covered in this chapter:
+
+\begin{itemize}
+\item 
+We'll start with some constants for convenience and reliability:
+
+\begin{lstlisting}[style=styleCXX]
+constexpr auto delay_time{ 50ms };
+constexpr auto consumer_wait{ 100ms };
+constexpr size_t queue_limit{ 5 };
+constexpr size_t num_items{ 15 };
+constexpr size_t num_producers{ 3 };
+constexpr size_t num_consumers{ 5 };
+\end{lstlisting}
+
+\begin{itemize}
+\item
+delay\_time is a duration object, used with sleep\_for().
+
+\item 
+consumer\_wait is a duration object, used with the consumer condition variable.
+
+\item 
+queue\_limt is the buffer limit – the maximum number of items in the deque.
+
+\item 
+num\_items is the maximum number of items produced per producer.
+
+\item 
+num\_producers is the number of spawned consumers.
+\end{itemize}
+
+\item 
+Now, we need some objects to control the process:
+
+\begin{lstlisting}[style=styleCXX]
+deque<string> qs{};
+mutex q_mutex{};
+condition_variable cv_producer{};
+condition_variable cv_consumer{};
+bool production_complete{};
+\end{lstlisting}
+
+\begin{itemize}
+\item 
+qs is a deque of string that holds the produced objects.
+
+\item 
+q\_mutex controls access to deque.
+
+\item 
+queue\_limt is the buffer limit – the maximum number of items in the deque.
+
+\item 
+cv\_producer is a condition variable that coordinates producers.
+
+\item 
+cv\_consumer is a condition variable that coordinates consumers.
+
+\item 
+production\_complete is set true when all producer threads have finished.
+\end{itemize}
+
+\item 
+The producer() threads run this function:
+
+\begin{lstlisting}[style=styleCXX]
+void producer(const size_t id) {
+	for(size_t i{}; i < num_items; ++i) {
+		this_thread::sleep_for(delay_time * id);
+		unique_lock<mutex> lock(q_mutex);
+		cv_producer.wait(lock,
+			[&]{ return qs.size() < queue_limit; });
+		qs.push_back(format("pid {}, qs {},
+			item {:02}\n", id, qs.size(), i + 1));
+		cv_consumer.notify_all();
+	}
+}
+\end{lstlisting}
+
+The passed value id is a sequential number used to identify the producer.
+
+The main for loop repeats num\_item times. The sleep\_for() function is used to simulate some work required to produce an item.
+
+Then we obtain a unique\_lock from q\_mutex and invoke wait() on cv\_producer, using a lambda that checks the size of the deque against the queue\_limit constant. If the deque has reached maximum size, the producer waits for consumer threads to reduce the size of the deque. This represents the bounded buffer limit on the producer.
+
+Once the condition is satisfied, we push an item onto the deque. The item is a formatted string with the producer's id, the size of qs, and an item number (i + 1) from the loop control variable.
+
+Finally, we notify the consumers that new data is available, with notify\_all() on the cv\_consumer condition variable.
+
+\item 
+The consumer() threads run this function:
+
+\begin{lstlisting}[style=styleCXX]
+void consumer(const size_t id) {
+	while(!production_complete) {
+		unique_lock<mutex> lock(q_mutex);
+		cv_consumer.wait_for(lock, consumer_wait,
+			[&]{ return !qs.empty(); });
+		if(!qs.empty()){
+			cout << format("cid {}: {}", id,
+				qs.front());
+			qs.pop_front();
+		}
+		cv_producer.notify_all();
+	}
+}
+\end{lstlisting}
+
+The passed id value is a sequential number used to identify the consumer.
+
+The main while() loop continues until production\_complete is set.
+
+We obtain unique\_lock from q\_mutex and invoke wait\_for() on cv\_consumer, with a timeout and a lambda that tests if the deque is empty. We need the timeout because it's possible for the producer threads to finish while some of the consumer threads are still running, leaving the deque empty.
+
+Once we have a non-empty deque, we can print (consume) an item and pop it off the deque.
+
+\item 
+In main(), we use async() to spawn the producer and consumer threads. async() conforms to the RAII pattern, so I'll usually prefer it over thread, where possible. async() returns a future object, so we'll keep a list of future<void> objects for process management:
+
+\begin{lstlisting}[style=styleCXX]
+int main() {
+	list<future<void>> producers;
+	list<future<void>> consumers;
+	for(size_t i{}; i < num_producers; ++i) {
+		producers.emplace_back(async(producer, i));
+	}
+	for(size_t i{}; i < num_consumers; ++i) {
+		consumers.emplace_back(async(consumer, i));
+	}
+	...
+\end{lstlisting}
+
+We use for loops to create producer and consumer threads.
+
+\item 
+Finally, we use list of future objects to determine when our producer and consumer threads are complete:
+
+\begin{lstlisting}[style=styleCXX]
+for(auto& f : producers) f.wait();
+production_complete = true;
+cout << "producers done.\n";
+
+for(auto& f : consumers) f.wait();
+cout << "consumers done.\n";
+\end{lstlisting}
+
+We loop through our producers container, calling wait() to allow the producer threads to complete. Then, we can set the production\_complete flag. We likewise loop through the consumers container, calling wait() to allow the consumer threads to complete. We could perform any final analysis or completion processes here.
+
+\item 
+The output is a bit long to show in its entirety:
+
+\begin{tcblisting}{commandshell={}}
+cid 0: pid 0, qs 0, item 01
+cid 0: pid 0, qs 1, item 02
+cid 0: pid 0, qs 2, item 03
+cid 0: pid 0, qs 3, item 04
+cid 0: pid 0, qs 4, item 05
+...
+cid 4: pid 2, qs 0, item 12
+cid 4: pid 2, qs 0, item 13
+cid 3: pid 2, qs 0, item 14
+cid 0: pid 2, qs 0, item 15
+producers done.
+consumers done.
+\end{tcblisting}
+
+\end{itemize}
+
 
 \subsubsection{How it works…}
+
+The heart of this recipe is in the use of two condition\_variable objects to control the producer and consumer threads asynchronously:
+
+\begin{lstlisting}[style=styleCXX]
+condition_variable cv_producer{};
+condition_variable cv_consumer{};
+\end{lstlisting}
+
+In the producer() function, the cv\_producer object obtains a unique\_lock, waits for the deque to be available, and notifies the cv\_consumer object when an item has been produced:
+
+\begin{lstlisting}[style=styleCXX]
+void producer(const size_t id) {
+	for(size_t i{}; i < num_items; ++i) {
+		this_thread::sleep_for(delay_time * id);
+		unique_lock<mutex> lock(q_mutex);
+		cv_producer.wait(lock,
+			[&]{ return qs.size() < queue_limit; });
+		qs.push_back(format("pid {}, qs {}, item {:02}\n",
+			id, qs.size(), i + 1));
+		cv_consumer.notify_all();
+	}
+}
+\end{lstlisting}
+
+Conversely, in the consumer() function, the cv\_consumer object obtains a unique\_lock, waits for the deque to have items, and notifies the cv\_producer object when an item has been consumed:
+
+\begin{lstlisting}[style=styleCXX]
+void consumer(const size_t id) {
+	while(!production_complete) {
+		unique_lock<mutex> lock(q_mutex);
+		cv_consumer.wait_for(lock, consumer_wait,
+			[&]{ return !qs.empty(); });
+		if(!qs.empty()) {
+			cout << format("cid {}: {}", id, qs.front());
+			qs.pop_front();
+		}
+		cv_producer.notify_all();
+	}
+}
+\end{lstlisting}
+
+These complementary locks, waits, and notifications constitute the balance of coordination between multiple producers and consumers.
+
+
+
+
+
 
 

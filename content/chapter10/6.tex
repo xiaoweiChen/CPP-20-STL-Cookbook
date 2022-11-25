@@ -1,11 +1,228 @@
 
 
-
+This is a simple utility that renames files using regular expressions. It uses directory\_iterator to find the files in a directory and fs::rename() to rename them.
 
 \subsubsection{How to do it…}
 
+In this recipe, we create a file rename utility that uses regular expressions:
+
+\begin{itemize}
+\item 
+We start by defining a few convenience aliases:
+
+\begin{lstlisting}[style=styleCXX]
+namespace fs = std::filesystem;
+using dit = fs::directory_iterator;
+using pat_v = vector<std::pair<regex, string>>;
+\end{lstlisting}
+
+The pat\_v alias is a vector for use with our regular expressions.
+
+\item 
+We also continue to use the formatter specialization for path objects:
+
+\begin{lstlisting}[style=styleCXX]
+template<>
+struct std::formatter<fs::path>:
+std::formatter<std::string> {
+	template<typename FormatContext>
+	auto format(const fs::path& p, FormatContext& ctx) {
+		return format_to(ctx.out(), "{}", p.string());
+	}
+};
+\end{lstlisting}
+
+\item 
+We have a function for applying the regular expression replacement to filename strings:
+
+\begin{lstlisting}[style=styleCXX]
+string replace_str(string s, const pat_v& replacements) {
+	for(const auto& [pattern, repl] : replacements) {
+		s = regex_replace(s, pattern, repl);
+	}
+	return s;
+}
+\end{lstlisting}
+
+Notice that we loop through a vector of pattern/replacement pairs, applying the regular expressions successively. This allows us to stack our replacements.
+
+\item 
+In main(), we first check the command-line arguments:
+
+\begin{lstlisting}[style=styleCXX]
+int main(const int argc, const char** argv) {
+	pat_v patterns{};
+	if(argc < 3 || argc % 2 != 1) {
+		fs::path cmdname{ fs::path{argv[0]}.filename() };
+		cout << format(
+			"usage: {} [regex replacement] ...\n",
+			cmdname);
+		return 1;
+	}
+\end{lstlisting}
+
+The command line accepts one or more pairs of strings. Each pair of strings includes a regex (regular expression) followed by a replacement.
+
+\item 
+Now we populate the vector with regex and string objects:
+
+\begin{lstlisting}[style=styleCXX]
+for(int i{ 1 }; i < argc; i += 2) {
+	patterns.emplace_back(argv[i], argv[i + 1]);
+}
+\end{lstlisting}
+
+The pair constructor constructs the regex and string objects in place, from the C-strings passed on the command line. These are added to the vector with the emplace\_back() method.
+
+\item 
+We search the current directory using a directory\_iterator object:
+
+\begin{lstlisting}[style=styleCXX]
+for(const auto& entry : dit{fs::current_path()}) {
+	fs::path fpath{ entry.path() };
+	string rname{
+		replace_str(fpath.filename().string(),
+		patterns) };
+	if(fpath.filename().string() != rname) {
+		fs::path rpath{ fpath };
+		rpath.replace_filename(rname);
+		if(exists(rpath)) {
+			cout << "Error: cannot rename - destination
+			file exists.\n";
+		} else {
+			fs::rename(fpath, rpath);
+			cout << format(
+			"{} -> {}\n",
+			fpath.filename(),
+			rpath.filename());
+		}
+	}
+}
+\end{lstlisting}
+
+n this for loop, we call replace\_str() to get the replacement filename and then check that the new name is not a duplicate of a file in the directory. We use the replace\_filename() method on a path object to create a path with the new filename and use fs::rename() to rename the file.
+
+\item 
+To test the utility, I've created a directory with a few files in it for renaming:
+
+\begin{tcblisting}{commandshell={}}
+$ ls
+bwfoo.txt bwgrep.cpp chrono.cpp dir.cpp formatter.cpp
+path-ops.cpp working.cpp
+\end{tcblisting}
+
+\item 
+We can do something simple, like change .cpp to .Cpp:
+
+\begin{tcblisting}{commandshell={}}
+$ ../rerename .cpp .Cpp
+dir.cpp -> dir.Cpp
+path-ops.cpp -> path-ops.Cpp
+bwgrep.cpp -> bwgrep.Cpp
+working.cpp -> working.Cpp
+formatter.cpp -> formatter.Cpp
+\end{tcblisting}
+
+Let's change them back again:
+
+\begin{tcblisting}{commandshell={}}
+$ ../rerename .Cpp .cpp
+formatter.Cpp -> formatter.cpp
+bwgrep.Cpp -> bwgrep.cpp
+dir.Cpp -> dir.cpp
+working.Cpp -> working.cpp
+path-ops.Cpp -> path-ops.cpp
+\end{tcblisting}
+
+\item 
+Using standard regular expression syntax, I can add "bw" to the beginning of each of the filenames:
+
+\begin{tcblisting}{commandshell={}}
+$ ../rerename '^' bw
+bwgrep.cpp -> bwbwgrep.cpp
+chrono.cpp -> bwchrono.cpp
+formatter.cpp -> bwformatter.cpp
+bwfoo.txt -> bwbwfoo.txt
+working.cpp -> bwworking.cpp
+\end{tcblisting}
+
+Notice that it even renamed the files that already had "bw" at the beginning. Let's have it not do that. First, we restore the filenames:
+
+\begin{tcblisting}{commandshell={}}
+$ ../rerename '^bw' ''
+bwbwgrep.cpp -> bwgrep.cpp
+bwworking.cpp -> working.cpp
+bwformatter.cpp -> formatter.cpp
+bwchrono.cpp -> chrono.cpp
+bwbwfoo.txt -> bwfoo.txt
+\end{tcblisting}
+
+Now we use a regex that checks if the filename already begins with "bw":
+
+\begin{tcblisting}{commandshell={}}
+$ ../rerename '^(?!bw)' bw
+chrono.cpp -> bwchrono.cpp
+formatter.cpp -> bwformatter.cpp
+working.cpp -> bwworking.cpp
+\end{tcblisting}
+
+Because we use a vector of regex/replacement strings, we can stack several replacements:
+
+\begin{tcblisting}{commandshell={}}
+$ ../rerename foo bar '\.cpp$' '.xpp' grep grok
+bwgrep.cpp -> bwgrok.xpp
+bwworking.cpp -> bwworking.xpp
+bwformatter.cpp -> bwformatter.xpp
+bwchrono.cpp -> bwchrono.xpp
+bwfoo.txt -> bwbar.txt
+\end{tcblisting}
+
+\end{itemize}
 
 \subsubsection{How it works…}
 
+The filesystem part of this recipe uses directory\_iterator to return a directory\_entry object for each file in the current directory:
+
+\begin{lstlisting}[style=styleCXX]
+for(const auto& entry : dit{fs::current_path()}) {
+	fs::path fpath{ entry.path() };
+	...
+}
+\end{lstlisting}
+
+We then construct a path object from the directory\_entry object to process the file.
+
+We use the replace\_filename() method on a path object to create the destination for the rename operation:
+
+\begin{lstlisting}[style=styleCXX]
+fs::path rpath{ fpath };
+rpath.replace_filename(rname);
+\end{lstlisting}
+
+Here, we create a duplicate and change its name, giving us both sides for the rename operation:
+
+\begin{lstlisting}[style=styleCXX]
+fs::rename(fpath, rpath);
+\end{lstlisting}
+
+On the regular expression side of the recipe, we use regex\_replace(), which uses regular expression syntax to perform substitutions in a string:
+
+\begin{lstlisting}[style=styleCXX]
+s = regex_replace(s, pattern, repl);
+\end{lstlisting}
+
+Regular expression syntax is extremely powerful. It even allows replacements to include sections of the search string:
+
+\begin{tcblisting}{commandshell={}}
+$ ../rerename '(bw)(.*\.)(.*)$' '$3$2$1'
+bwgrep.cpp -> cppgrep.bw
+bwfoo.txt -> txtfoo.bw
+\end{tcblisting}
+
+By using parentheses in the search pattern, I can easily rearrange parts of a filename.
 
 \subsubsection{See also…}
+
+For more about regular expressions, see the recipe Parse strings with Regular Expressions in Chapter 7, Strings, Streams, and Formatting.
+
+

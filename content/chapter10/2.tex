@@ -1,11 +1,142 @@
 
+The path class is used throughout the filesystem library to represent a file or directory path. On POSIX-conformant systems, such as macOS and Linux, the path object uses the char type to represent filenames. On Windows, path uses wchar\_t. On Windows, cout and format() will not display primitive strings of wchar\_t characters. This means there is no simple out-of-the-box way to write code that uses the filesystem library and is portable across POSIX and Windows.
 
+We could use preprocessor directives to write specific versions of code for Windows. That may be a reasonable solution for some code bases, but for this book, it's messy and does not serve the purpose of simple, portable, reusable recipes.
+
+The elegant solution is to write a C++20 formatter specialization for the path class. This allows us to display path objects simply and portably.
 
 
 \subsubsection{How to do it…}
 
+In this recipe, we write a formatter specialization for use with the fs::path class:
+
+\begin{itemize}
+\item 
+We start with a namespace alias for convenience. All the filesystem names are in the std::filesystem namespace:
+
+\begin{lstlisting}[style=styleCXX]
+namespace fs = std::filesystem;
+\end{lstlisting}
+
+\item 
+Our formatter specialization for the path class is simple and succinct:
+
+\begin{lstlisting}[style=styleCXX]
+template<>
+struct std::formatter<fs::path>:
+std::formatter<std::string> {
+	template<typename FormatContext>
+	auto format(const fs::path& p, FormatContext& ctx) {
+		return format_to(ctx.out(), "{}", p.string());
+	}
+};
+\end{lstlisting}
+
+Here, we're specializing formatter for the fs::path type, using its string() method to get a printable representation. We cannot use the c\_str() method because it doesn't work with the wchar\_t characters on Windows.
+
+There's a more complete explanation of formatter specialization in Chapter 1, New C++20 Features, of this book.
+
+\item 
+In the main() function, we use the command line to pass a filename or path:
+
+\begin{lstlisting}[style=styleCXX]
+int main(const int argc, const char** argv) {
+	if(argc != 2) {
+		fs::path fn{ argv[0] };
+		cout << format("usage: {} <path>\n",
+		fn.filename());
+		return 0;
+	}
+
+	fs::path dir{ argv[1] };
+	if(!fs::exists(dir)) {
+		cout << format("path: {} does not exist\n",
+		dir);
+		return 1;
+	}
+
+	cout << format("path: {}\n", dir);
+	cout << format("filename: {}\n", dir.filename());
+	cout << format("cannonical: {}\n",
+	fs::canonical(dir));
+}
+\end{lstlisting}
+
+The argc and argv parameters are the standard command-line arguments.
+
+argv[0] is always the full directory path and filename for the executable itself. If we don't have the correct number of arguments, we display the filename part from argv[0] as part of our usage message.
+
+We've used some filesystem functions in this example:
+
+\begin{itemize}
+\item 
+The fs::exists() function checks if a directory or file exists.
+
+\item 
+dir is a path object. We can now pass it directly to format(), using our specialization to display the string representation of the path.
+
+\item 
+The filename() method returns a new path object, which we pass directly to format() using our specialization.
+
+\item 
+The fs::cannonical() function takes a path object and returns a new path object with the canonical absolute directory path. We pass this path object directly to format() and it displays the directory path returned from cannonical().
+\end{itemize}
+
+Output:
+
+\begin{tcblisting}{commandshell={}}
+$ ./formatter ./formatter.cpp
+path: ./formatter.cpp
+filename: formatter.cpp
+cannonical: /home/billw/working/chap10/formatter.cpp
+\end{tcblisting}
+
+\end{itemize}
 
 \subsubsection{How it works…}
+
+The fs::path class is used throughout the filesystem library to represent directory paths and filenames. By providing a formatter specialization, we can easily display path objects consistently across platforms.
+
+The path class provides some useful methods. We can iterate through a path to see its component parts:
+
+\begin{lstlisting}[style=styleCXX]
+fs::path p{ "~/include/bwprint.h" };
+cout << format("{}\n", p);
+for(auto& x : p) cout << format("[{}] ", x);
+cout << '\n';
+\end{lstlisting}
+
+Output:
+
+\begin{tcblisting}{commandshell={}}
+~/include/bwprint.h
+[~] [include] [bwprint.h]
+\end{tcblisting}
+
+The iterator returns a path object for each element of the path.
+
+We can also get different parts of the path:
+
+\begin{lstlisting}[style=styleCXX]
+fs::path p{ "~/include/bwprint.h" };
+cout << format("{}\n", p);
+cout << format("{}\n", p.stem());
+cout << format("{}\n", p.extension());
+cout << format("{}\n", p.filename());
+cout << format("{}\n", p.parent_path());
+\end{lstlisting}
+
+Output:
+
+\begin{tcblisting}{commandshell={}}
+~/include/bwprint.h
+bwprint
+.h
+bwprint.h
+~/include
+\end{tcblisting}
+
+We will continue to use this formatter specialization for the path class throughout this chapter.
 
 
 

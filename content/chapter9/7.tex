@@ -1,8 +1,272 @@
 
+The std::atomic class encapsulates a single object and guarantees it to be atomic.
+
+Writing to the atomic object is controlled by memory-order policies and reads may occur simultaneously. It's typically used to synchronize access among different threads.
+std::atomic defines an atomic type from its template type. The type must be trivial.
+
+A type is trivial if it occupies contiguous memory, has no user-defined constructor, and has no virtual member functions. All primitive types are trivial.
+
+While it is possible to construct a trivial type, std::atomic is most often used with simple primitive types, such as bool, int, long, float, and double.
 
 \subsubsection{How to do it…}
 
+This recipe uses a simple function that loops over a counter to demonstrate sharing atomic objects. We will spawn a swarm of these loops as threads that share atomic values:
+
+\begin{itemize}
+\item 
+Atomic objects are often placed in a global namespace. They must be accessible to all the threads that need to share its value:
+
+\begin{lstlisting}[style=styleCXX]
+std::atomic<bool> ready{};
+std::atomic<uint64_t> g_count{};
+std::atomic_flag winner{};
+\end{lstlisting}
+
+The ready object is a bool type that gets set to true when all the threads are ready to start counting.
+
+The g\_count object is a global counter. It is incremented by each of the threads.
+
+The winner object is a special atomic\_flag type. It is used to indicate which thread finishes first.
+
+\item 
+We use a couple of constants to control the number of threads and the number of loops for each thread:
+
+\begin{lstlisting}[style=styleCXX]
+constexpr int max_count{1000 * 1000};
+constexpr int max_threads{100};
+\end{lstlisting}
+
+I've set it to run 100 threads and count 1,000,000 iterations in each thread.
+
+\item 
+The countem() function is spawned for each thread. It loops max\_count times and increments g\_count for each iteration of the loop. This is where we use our atomic values:
+
+\begin{lstlisting}[style=styleCXX]
+void countem (int id) {
+	while(!ready) std::this_thread::yield();
+	for(int i{}; i < max_count; ++i) ++g_count;
+	if(!winner.test_and_set()) {
+		std::cout << format("thread {:02} won!\n",
+		id);
+	}
+};
+\end{lstlisting}
+
+The ready atomic value is used to synchronize the threads. Each thread will call yield() until the ready value is set true. The yield() function yields execution to other threads.
+
+Each iteration of the for loop increments the g\_count atomic value. The final value should be equal to max\_count * max\_threads.
+
+After the loop is complete, the test\_and\_set() method of the winner object is used to report the winning thread. test\_and\_set() is a method of the atomic\_flag class. It sets the flag and returns the bool value from before it is set.
+
+\item 
+We've used the make\_commas() function before. It displays a number with thousands of separators:
+
+\begin{lstlisting}[style=styleCXX]
+string make_commas(const uint64_t& num) {
+	string s{ std::to_string(num) };
+	for(long l = s.length() - 3; l > 0; l -= 3) {
+		s.insert(l, ",");
+	}
+	return s;
+}
+\end{lstlisting}
+
+\item 
+The main() function spawns the threads and reports the results:
+
+\begin{lstlisting}[style=styleCXX]
+int main() {
+	vector<std::thread> swarm;
+	cout << format("spawn {} threads\n", max_threads);
+	for(int i{}; i < max_threads; ++i) {
+		swarm.emplace_back(countem, i);
+	}
+	ready = true;
+	for(auto& t : swarm) t.join();
+	cout << format("global count: {}\n",
+		make_commas(g_count));
+	return 0;
+}
+\end{lstlisting}
+
+\end{itemize}
+
+Here, we create a vector<std::thread> object to hold the threads.
+
+In the for loop, we use emplace\_back() to create each thread in the vector.
+
+Once the threads have been spawned, we set the ready flag so that the threads may start their loops.
+
+Output:
+
+\begin{tcblisting}{commandshell={}}
+spawn 100 threads
+thread 67 won!
+global count: 100,000,000
+\end{tcblisting}
+
+Every time you run it, a different thread will win.
 
 \subsubsection{How it works…}
 
+The std::atomic class encapsulates an object to synchronize access among multiple threads.
+
+The encapsulated object must be a trivial type, which means it occupies contiguous memory, has no user-defined constructor, and has no virtual member functions.
+All primitive types are trivial.
+
+It is possible to use a simple struct with atomic:
+
+\begin{lstlisting}[style=styleCXX]
+struct Trivial {
+	int a;
+	int b;
+};
+std::atomic<Trivial> triv1;
+\end{lstlisting}
+
+While this usage is possible, it's not practical. Anything beyond setting and retrieving compound values loses the benefits of the atomicity and ends up requiring a mutex. The atomic class is best suited for scalar values.
+
+\noindent
+\textbf{Specializations}
+
+There are specializations of the atomic class for a few different purposes:
+
+\begin{itemize}
+\item 
+Pointers and smart pointers: The std::atomic<U*> specialization includes support for atomic pointer arithmetic operations, including fetch\_add() for addition and fetch\_sub() for subtraction.
+
+\item 
+Floating-point types: When used with the floating-point types float, double, and long double, std::atomic includes support for atomic floating-point arithmetic operations, including fetch\_add() for addition and fetch\_sub() for subtraction.
+
+\item 
+Integral types: When used with one of the integral types, std::atomic provides support for additional atomic operations, including fetch\_add(), fetch\_sub(), fetch\_and(), fetch\_or(), and fetch\_xor().
+
+\end{itemize}
+
+
+\noindent
+\textbf{Standard aliases}
+
+The STL provides type aliases for all the standard scalar integral types. This means that instead of these declarations in our code:
+
+\begin{lstlisting}[style=styleCXX]
+std::atomic<bool> ready{};
+std::atomic<uint64_t> g_count{};
+\end{lstlisting}
+
+We could use:
+
+\begin{lstlisting}[style=styleCXX]
+std::atomic_bool ready{};
+std::atomic_uint64_t g_count{};
+\end{lstlisting}
+
+There are 46 standard aliases, one for each of the standard integral types:
+
+\begin{table}[H]
+\centering
+\begin{tabular}{|l|l|}
+\hline
+atomic\_bool      & atomic\_uint64\_t        \\ \hline
+atomic\_char      & atomic\_int\_least8\_t   \\ \hline
+atomic\_schar     & atomic\_uint\_least8\_t  \\ \hline
+atomic\_uchar     & atomic\_int\_least16\_t  \\ \hline
+atomic\_short     & atomic\_uint\_least16\_t \\ \hline
+atomic\_ushort    & atomic\_int\_least32\_t  \\ \hline
+atomic\_int       & atomic\_uint\_least32\_t \\ \hline
+atomic\_uint      & atomic\_int\_least64\_t  \\ \hline
+atomic\_long      & atomic\_uint\_least64\_t \\ \hline
+atomic\_ulong     & atomic\_int\_fast8\_t    \\ \hline
+atomic\_llong     & atomic\_uint\_fast8\_t   \\ \hline
+atomic\_ullong    & atomic\_int\_fast16\_t   \\ \hline
+atomic\_char8\_t  & atomic\_uint\_fast16\_t  \\ \hline
+atomic\_char16\_t & atomic\_int\_fast32\_t   \\ \hline
+atomic\_char32\_t & atomic\_uint\_fast32\_t  \\ \hline
+atomic\_wchar\_t  & atomic\_int\_fast64\_t   \\ \hline
+atomic\_int8\_t   & atomic\_uint\_fast64\_t  \\ \hline
+atomic\_uint8\_t  & atomic\_intptr\_t        \\ \hline
+atomic\_int16\_t  & atomic\_uintptr\_t       \\ \hline
+atomic\_uint16\_t & atomic\_size\_t          \\ \hline
+atomic\_int32\_t  & atomic\_ptrdiff\_t       \\ \hline
+atomic\_uint32\_t & atomic\_intmax\_t        \\ \hline
+atomic\_int64\_t  & atomice\_uintmax\_t      \\ \hline
+\end{tabular}
+\end{table}
+
+\noindent
+\textbf{Lock-free variations}
+
+Most modern architectures provide atomic CPU instructions for performing atomic operations. std::atomic should use hardware support for atomic instructions where supported by your hardware. Some atomic types may not be supported on some hardware. std::atomic may use a mutex to ensure thread-safe operations for those specializations, causing threads to block while waiting for other threads to complete operations. Specializations that use hardware support are said to be lock-free because they don't require a mutex.
+
+The is\_lock\_free() method checks whether a specialization is lock-free:
+
+\begin{lstlisting}[style=styleCXX]
+cout << format("is g_count lock-free? {}\n",
+	g_count.is_lock_free());
+\end{lstlisting}
+
+Output:
+
+\begin{tcblisting}{commandshell={}}
+is g_count lock-free? true
+\end{tcblisting}
+
+This result will be true for most modern architectures.
+
+There are a few guaranteed lock-free variations of std::atomic available. These specializations guarantee the use of the most efficient hardware atomic operations for each purpose:
+
+\begin{itemize}
+\item 
+std::atomic\_signed\_lock\_free is an alias for the most efficient lock-free specialization of a signed integral type.
+
+\item 
+std::atomic\_unsigned\_lock\_free is an alias for the most efficient lock-free specialization of an unsigned integral type.
+
+\item 
+The std::atomic\_flag class provides a lock-free atomic Boolean type.
+\end{itemize}
+
+\begin{tcolorbox}[colback=webgreen!5!white,colframe=webgreen!75!black,title=Important Note]
+Current Windows systems don't support 64-bit hardware integers, even on 64-bit systems. When testing this code on one of these systems in my lab, replacing std::atomic<uint64\_t> with std::atomic\_unsigned\_lock\_free resulted in a 3x performance improvement. Performance was unchanged on 64-bit Linux and Mac systems.
+\end{tcolorbox}
+
 \subsubsection{There's more…}
+
+When multiple threads read and write variables simultaneously, one thread may observe the changes in a different order than they were written. std::memory\_order specifies how memory accesses are ordered around an atomic operation.
+
+std::atomic provides methods for accessing and changing its managed value. Unlike the associated operators, these access methods provide arguments for memory\_order to be specified. For example:
+
+\begin{lstlisting}[style=styleCXX]
+g_count.fetch_add(1, std::memory_order_seq_cst);
+\end{lstlisting}
+
+In this case, memory\_order\_seq\_cst specifies sequentially consistent ordering. So, this call to fetch\_add() will add 1 to the value of g\_count with sequentially consistent ordering.
+
+The possible memory\_order constants are:
+
+\begin{itemize}
+\item 
+memory\_order\_relaxed: This is a relaxed operation. No synchronization or ordering constraints are imposed; only the operation's atomicity is guaranteed.
+
+\item 
+memory\_order\_consume: This is a consume operation. Access in the current thread that is dependent on the value cannot be reordered before this load. This only affects compiler optimization.
+
+\item 
+memory\_order\_acquire: This is an acquire operation. Access cannot be reordered before this load.
+
+\item 
+memory\_order\_release: This is a store operation. Access in the current thread cannot be reordered after this store.
+
+\item 
+memory\_order\_acq\_rel: This is both acquire and release. Access in the current thread cannot be reordered before or after this store.
+
+\item 
+memory\_order\_seq\_cst: This is sequentially consistent ordering, either acquire or release, depending on the context. A load performs acquire, a store performs release, and a read/write/modify performs both. All threads observe all modifications in the same order.
+
+If no memory\_order is specified, memory\_order\_seq\_cst is the default.
+\end{itemize}
+
+
+
+
+

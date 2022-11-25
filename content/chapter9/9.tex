@@ -1,7 +1,191 @@
 
+The simplest version of the producer-consumer problem is where you have one process that produces data and another that consumes data, using one buffer or container to hold the data. This requires coordination between the producer and consumer to manage the buffer and prevent unwanted side effects.
 
 \subsubsection{How to do it…}
 
+In this recipe, we consider a simple solution to the producer-consumer problem using std::condition\_variable to coordinate the processes:
+
+\begin{itemize}
+\item 
+We begin with some namespace and alias declarations for convenience:
+
+\begin{lstlisting}[style=styleCXX]
+using namespace std::chrono_literals;
+namespace this_thread = std::this_thread;
+using guard_t = std::lock_guard<std::mutex>;
+using lock_t = std::unique_lock<std::mutex>;
+\end{lstlisting}
+
+The lock\_guard and unique\_lock aliases make it easier to use these types without error.
+
+\item 
+We use a couple of constants:
+
+\begin{lstlisting}[style=styleCXX]
+constexpr size_t num_items{ 10 };
+constexpr auto delay_time{ 200ms };
+\end{lstlisting}
+
+Keeping these in one place makes it safer and easier to experiment with different values.
+
+\item 
+We're using these global variables for coordinating the data store:
+
+\begin{lstlisting}[style=styleCXX]
+std::deque<size_t> q{};
+std::mutex mtx{};
+std::condition_variable cond{};
+bool finished{};
+\end{lstlisting}
+
+We're using deque to hold the data as a First-In-First-Out (FIFO) queue.
+
+mutex is used with the condition\_variable to coordinate the movement of data from producer to consumer.
+
+The finished flag indicates that there is no more data.
+
+\item 
+The producer thread will use this function:
+
+\begin{lstlisting}[style=styleCXX]
+void producer() {
+	for(size_t i{}; i < num_items; ++i) {
+		this_thread::sleep_for(delay_time);
+		guard_t x{ mtx };
+		q.push_back(i);
+		cond.notify_all();
+	}
+	guard_t x{ mtx };
+	finished = true;
+	cond.notify_all();
+}
+\end{lstlisting}
+
+The producer() function loops num\_items iterations and pushes a number onto the deque each time through the loop.
+
+We include a sleep\_for() call to simulate a delay in producing each value.
+
+The conditional\_variable requires a mutex lock to operate. We use lock\_guard (via the guard\_t alias) to obtain the lock, then push the value onto the deque, and then call notify\_all() on the conditional\_variable. This tells the consumer thread that there is a new value available.
+
+When the loop completes, we set the finished flag and notify the consumer thread that the producer is completed.
+
+\item 
+The consumer thread waits for each value from the producer, displays it on the console, and waits for the finished flag:
+
+\begin{lstlisting}[style=styleCXX]
+void consumer() {
+	while(!finished) {
+		lock_t lck{ mtx };
+		cond.wait(lck, [] { return !q.empty() ||
+			finished; });
+		while(!q.empty()) {
+			cout << format("Got {} from the queue\n",
+				q.front());
+			q.pop_front();
+		}
+	}
+}
+\end{lstlisting}
+
+The wait() method waits to be notified by the producer. It uses the lambda as a predicate to continue waiting until the deque is not empty or the finished flag is set.
+
+When we get a value, we display it and then pop it from the deque.
+
+\item 
+We run this in main() with simple thread objects:
+
+\begin{lstlisting}[style=styleCXX]
+int main() {
+	thread t1{ producer };
+	thread t2{ consumer };
+	t1.join();
+	t2.join();
+	cout << "finished!\n";
+}
+\end{lstlisting}
+
+Output:
+
+\begin{tcblisting}{commandshell={}}
+Got 0 from the queue
+Got 1 from the queue
+Got 2 from the queue
+Got 3 from the queue
+Got 4 from the queue
+Got 5 from the queue
+Got 6 from the queue
+Got 7 from the queue
+Got 8 from the queue
+Got 9 from the queue
+finished!
+\end{tcblisting}
+
+Notice that there's a 200 ms delay between each line. This tells us that the producerconsumer coordination is working as expected.
+
+\end{itemize}
 
 \subsubsection{How it works…}
+
+The producer-consumer problem requires coordination between writing and reading a buffer or container. In this example, our container is a deque<size\_t>:
+
+\begin{lstlisting}[style=styleCXX]
+std::deque<size_t> q{};
+\end{lstlisting}
+
+The condition\_variable class can block a thread, or multiple threads, while a shared variable is modified. It may then notify other threads that the value is available.
+
+condition\_variable requires a mutex to perform the lock:
+
+\begin{lstlisting}[style=styleCXX]
+std::lock_guard x{ mtx };
+q.push_back(i);
+cond.notify_all();
+\end{lstlisting}
+
+The std::lock\_guard acquires a lock, so we can push a value onto our deque.
+
+The wait() method on condition\_variable is used to block the current thread until it receives a notification:
+
+\begin{lstlisting}[style=styleCXX]
+void wait( std::unique_lock<std::mutex>& lock );
+void wait( std::unique_lock<std::mutex>& lock,
+	Pred stop_waiting );
+\end{lstlisting}
+
+The predicate form of wait() is equivalent to:
+
+\begin{lstlisting}[style=styleCXX]
+while (!stop_waiting()) {
+	wait(lock);
+}
+\end{lstlisting}
+
+The predicate form is used to prevent spurious waking while waiting for a specific condition. We use it with a lambda in our example:
+
+\begin{lstlisting}[style=styleCXX]
+cond.wait(lck, []{ return !q.empty() || finished; });
+\end{lstlisting}
+
+This prevents our consumer from waking until the deque has data or the finished flag is set.
+
+The condition\_variable class has two notification methods:
+
+\begin{itemize}
+\item 
+notify\_one() unblocks one waiting thread
+
+\item 
+notify\_all() unblocks all waiting threads
+\end{itemize}
+
+We used notify\_all() in our example. Because there is only one consumer thread, either notification method would work the same.
+
+\begin{tcolorbox}[colback=webgreen!5!white,colframe=webgreen!75!black,title=Note]
+Note that unique\_lock is the only form of lock that supports the wait() method on a condition\_variable object.
+\end{tcolorbox}
+
+
+
+
+
 

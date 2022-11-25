@@ -1,0 +1,45 @@
+The purpose of the STL filesystem library is to normalize file system operations across platforms. The filesystem library seeks to normalize operations, bridging irregularities between POSIX/Unix, Windows, and other file systems.
+
+The filesystem library was adopted from the corresponding Boost library and incorporated into the STL with C++17. At the time of writing, there are still gaps in its implementation on some systems, but the recipes in this chapter have been tested on Linux, Windows, and macOS file systems, and compiled with the latest available versions of the GCC, MSVC, and Clang compilers, respectively.
+
+The library uses the <filesystem> header, and the std::filesystem namespace is commonly aliased as fs:
+
+\begin{lstlisting}[style=styleCXX]
+namespace fs = std::filesystem;
+\end{lstlisting}
+
+The fs::path class is at the core of the filesystem library. It provides normalized filename and directory path representation across disparate environments. A path object may represent a file, a directory, or any object in a , even a non-existent or impossible object.
+
+
+In the following recipes, we cover tools for working with files and directories using the filesystem library:
+
+\begin{itemize}
+\item 
+Specialize std::formatter for the path class
+
+\item 
+Use manipulation functions with path
+
+\item 
+List files in a directory
+
+\item 
+Search directories and files with a grep utility
+
+\item 
+Rename files with regex and directory\_iterator
+
+\item 
+Create a disk usage counter
+\end{itemize}
+
+
+
+
+
+
+
+
+
+
+

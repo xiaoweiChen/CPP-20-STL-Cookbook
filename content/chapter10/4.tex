@@ -1,9 +1,453 @@
 
 
+The filesystem library provides a directory\_entry class with directory-related information about a given path. We can use this to create useful directory listings.
+
 \subsubsection{How to do it…}
 
+In this recipe, we create a directory listing utility using the information in the directory\_entry class:
+
+\begin{itemize}
+\item 
+We start with our namespace alias and formatter specialization for displaying path objects:
+
+\begin{lstlisting}[style=styleCXX]
+namespace fs = std::filesystem;
+template<>
+struct std::formatter<fs::path>:
+std::formatter<std::string> {
+	template<typename FormatContext>
+	auto format(const fs::path& p, FormatContext& ctx) {
+		return format_to(ctx.out(), "{}", p.string());
+	}
+};
+\end{lstlisting}
+
+\item 
+The directory\_iterator class makes it easy to list a directory:
+
+\begin{lstlisting}[style=styleCXX]
+int main() {
+	constexpr const char* fn{ "." };
+	const fs::path fp{fn};
+	for(const auto& de : fs::directory_iterator{fp}) {
+		cout << format("{} ", de.path().filename());
+	}
+	cout << '\n';
+}
+\end{lstlisting}
+
+Output:
+
+\begin{tcblisting}{commandshell={}}
+chrono Makefile include chrono.cpp working formatter
+testdir formatter.cpp working.cpp
+\end{tcblisting}
+
+\item 
+We can add command-line options to make this work, like Unix ls:
+
+\begin{lstlisting}[style=styleCXX]
+int main(const int argc, const char** argv) {
+	fs::path fp{ argc > 1 ? argv[1] : "." };
+	if(!fs::exists(fp)) {
+		const auto cmdname {
+			fs::path{argv[0]}.filename() };
+		cout << format("{}: {} does not exist\n",
+			cmdname, fp);
+		return 1;
+	}
+	if(is_directory(fp)) {
+		for(const auto& de :
+		fs::directory_iterator{fp}) {
+			cout << format("{} ",
+			de.path().filename());
+		}
+	} else {
+		cout << format("{} ", fp.filename());
+	}
+	cout << '\n';
+}
+\end{lstlisting}
+
+If there is a command-line argument, we use it to create a path object. Otherwise, we use "." for the current directory.
+
+We check if the path exists with if\_exists(). If not, we print an error message and exit. The error message includes cmdname from argv[0].
+
+Next, we check is\_directory(). If we have a directory, we loop through a directory\_iterator for each entry. directory\_iterator iterates over directory\_entry objects. de.path().filename() gets the path and filename from each directory\_entry object.
+
+Output:
+
+\begin{tcblisting}{commandshell={}}
+$ ./working
+chrono Makefile include chrono.cpp working formatter
+testdir formatter.cpp working.cpp
+$ ./working working.cpp
+working.cpp
+$ ./working foo.bar
+working: foo.bar does not exist
+\end{tcblisting}
+
+\item 
+If we want our output sorted, we can store our directory\_entry objects in a sortable container.
+
+Let's create an alias for fs::directory\_entry. We'll be using this a lot. This goes at the top of the file:
+
+\begin{lstlisting}[style=styleCXX]
+using de = fs::directory_entry;
+\end{lstlisting}
+
+At the top of main(), we declare a vector of de objects:
+
+\begin{lstlisting}[style=styleCXX]
+vector<de> entries{};
+\end{lstlisting}
+
+Inside the is\_directory() block, we load the vector, sort it, and then display it:
+
+\begin{lstlisting}[style=styleCXX]
+if(is_directory(fp)) {
+	for(const auto& de : fs::directory_iterator{fp}) {
+		entries.emplace_back(de);
+	}
+	std::sort(entries.begin(), entries.end());
+	for(const auto& e : entries) {
+		cout << format("{} ", e.path().filename());
+	}
+} else { ...
+\end{lstlisting}
+
+Now our output is sorted:
+
+\begin{tcblisting}{commandshell={}}
+Makefile chrono chrono.cpp formatter formatter.cpp
+include testdir working working.cpp
+\end{tcblisting}
+
+Notice that Makefile is sorted first, apparently out of order. This is because capital letters sort before lowercase in ASCII order.
+
+\item 
+If we want a case-insensitive sort, we need a comparison function that ignores case. First, we need a function to return a lowercase string:
+
+\begin{lstlisting}[style=styleCXX]
+string strlower(string s) {
+	auto char_lower = [](const char& c) -> char {
+		if(c >= 'A' && c <= 'Z') return c + ('a' - 'A');
+		else return c;
+	};
+	std::transform(s.begin(), s.end(), s.begin(),
+		char_lower);
+	return s;
+}
+\end{lstlisting}
+
+Now we need a function that compares two directory\_entry objects, using strlower():
+
+\begin{lstlisting}[style=styleCXX]
+bool dircmp_lc(const de& lhs, const de& rhs) {
+	const auto lhstr{ lhs.path().string() };
+	const auto rhstr{ rhs.path().string() };
+	return strlower(lhstr) < strlower(rhstr);
+}
+\end{lstlisting}
+
+Now we can use dircmp\_lc() in our sort:
+
+\begin{lstlisting}[style=styleCXX]
+std::sort(entries.begin(), entries.end(), dircmp_lc);
+\end{lstlisting}
+
+Our output is now sorted ignoring case:
+
+\begin{tcblisting}{commandshell={}}
+chrono chrono.cpp formatter formatter.cpp include
+Makefile testdir working working.cpp
+\end{tcblisting}
+
+\item 
+At this point, we have a simple directory listing utility.
+
+There's a lot more information available from the filesystem library. Let's create a print\_dir() function to gather more information and format it for display in the style of Unix ls:
+
+\begin{lstlisting}[style=styleCXX]
+void print_dir(const de& dir) {
+	using fs::perms;
+	const auto fpath{ dir.path() };
+	const auto fstat{ dir.symlink_status() };
+	const auto fperm{ fstat.permissions() };
+	const uintmax_t fsize{
+		is_regular_file(fstat) ? file_size(fpath) : 0 };
+	const auto fn{ fpath.filename() };
+	
+	string suffix{};
+	if(is_directory(fstat)) suffix = "/";
+	else if((fperm & perms::owner_exec) != perms::none) {
+		suffix = "*";
+	}
+	cout << format("{}{}\n", fn, suffix);
+}
+\end{lstlisting}
+
+The print\_dir() function takes a directory\_entry argument. We then retrieve some useful objects from the directory\_entry object:
+
+\begin{itemize}
+\item 
+dir.path() returns a path object
+
+\item 
+dir.symlink\_status() returns a file\_status object, without following symbolic links.
+
+\item 
+fstat.permissions() returns a perms object.
+
+\item 
+fsize is the size of the file and fn is the filename string. We'll look more closely at each of these as we use them.
+\end{itemize}
+
+Unix ls uses trailing characters, after the filename, to indicate a directory or an executable. We test the fstat object with is\_directory() to see if the file is a directory and add a trailing / to the filename. Likewise, we can test if a file is executable with the fperm object.
+
+We call print\_dir() from main() in the for loop after sort():
+
+\begin{lstlisting}[style=styleCXX]
+std::sort(entries.begin(), entries.end(), dircmp_lc);
+for(const auto& e : entries) {
+	print_dir(e);
+}
+\end{lstlisting}
+
+Our output now looks like this:
+
+\begin{tcblisting}{commandshell={}}
+chrono*
+chrono.cpp
+formatter*
+formatter.cpp
+include*
+Makefile
+testdir/
+working*
+working.cpp
+\end{tcblisting}
+
+\item 
+Notice the include* entry. That's actually a symbolic link. Let's notate that properly by following the link to get the target path:
+
+\begin{lstlisting}[style=styleCXX]
+string suffix{};
+if(is_symlink(fstat)) {
+	suffix = " -> ";
+	suffix += fs::read_symlink(fpath).string();
+}
+else if(is_directory(fstat)) suffix = "/";
+else if((fperm & perms::owner_exec) != perms::none)
+suffix = "*";
+\end{lstlisting}
+
+The read\_symlink() function returns a path object. We take the string() representation of the returned path object and add it to the suffix for this output:
+
+\begin{tcblisting}{commandshell={}}
+chrono*
+chrono.cpp
+formatter*
+formatter.cpp
+include -> /Users/billw/include
+Makefile
+testdir/
+working*
+working.cpp
+\end{tcblisting}
+
+\item 
+The Unix ls command also includes a string of characters to indicate a file's permission bits. It looks something like this: drwxr-xr-x.
+
+The first character indicates the type of the file, for example: d for directory, l for symbolic link, and - for a regular file.
+
+The type\_char() function returns the appropriate character:
+
+\begin{lstlisting}[style=styleCXX]
+char type_char(const fs::file_status& fstat) {
+		 if(is_symlink(fstat)) return 'l';
+	else if(is_directory(fstat)) return 'd';
+	else if(is_character_file(fstat)) return 'c';
+	else if(is_block_file(fstat)) return 'b';
+	else if(is_fifo(fstat)) return 'p';
+	else if(is_socket(fstat)) return 's';
+	else if(is_other(fstat)) return 'o';
+	else if(is_regular_file(fstat)) return '-';
+	return '?';
+}
+\end{lstlisting}
+
+The rest of the string is in three triplets. Each triplet includes positions for the read, write, and execute permission bits, in the form rwx. If a bit is not set, its character is replaced by a -. There are three triplets for three sets of permissions: owner, group, and other, respectively.
+
+\begin{lstlisting}[style=styleCXX]
+string rwx(const fs::perms& p) {
+	using fs::perms;
+	auto bit2char = [&p](perms bit, char c) {
+		return (p & bit) == perms::none ? '-' : c;
+	};
+	return { bit2char(perms::owner_read, 'r'),
+		bit2char(perms::owner_write, 'w'),
+		bit2char(perms::owner_exec, 'x'),
+		bit2char(perms::group_read, 'r'),
+		bit2char(perms::group_write, 'w'),
+		bit2char(perms::group_exec, 'x'),
+		bit2char(perms::others_read, 'r'),
+		bit2char(perms::others_write, 'w'),
+		bit2char(perms::others_exec, 'x') };
+}
+\end{lstlisting}
+
+The perms object represents the POSIX permissions bitmap, but it's not necessarily implemented as bits. Each entry must be compared to the perms::none value.
+Our lambda function fulfills this requirement.
+
+We add this definition to the top of our print\_dir() function:
+
+\begin{lstlisting}[style=styleCXX]
+const auto permstr{ type_char(fstat) + rwx(fperm) };
+\end{lstlisting}
+
+We update our format() string:
+
+\begin{lstlisting}[style=styleCXX]
+cout << format("{} {}{}\n", permstr, fn, suffix);
+\end{lstlisting}
+
+And we get this output:
+
+\begin{tcblisting}{commandshell={}}
+-rwxr-xr-x chrono*
+-rw-r--r-- chrono.cpp
+-rwxr-xr-x formatter*
+-rw-r--r-- formatter.cpp
+lrwxr-xr-x include -> /Users/billw/include
+-rw-r--r-- Makefile
+drwxr-xr-x testdir/
+-rwxr-xr-x working*
+-rw-r--r-- working.cpp
+\end{tcblisting}
+
+\item 
+Now, let's add a size string. The fsize value is from the file\_size() function, which returns a std::uintmax\_t type. This represents the maximum size natural integer on the target system. uintmax\_t is not always the same as size\_t and does not always convert easily. Notably, uintmax\_t is 32 bits on Windows, where size\_t is 64 bits:
+
+\begin{lstlisting}[style=styleCXX]
+string size_string(const uintmax_t fsize) {
+	constexpr const uintmax_t kilo{ 1024 };
+	constexpr const uintmax_t mega{ kilo * kilo };
+	constexpr const uintmax_t giga{ mega * kilo };
+	string s;
+	if(fsize >= giga ) return
+		format("{}{}", (fsize + giga / 2) / giga, 'G');
+	else if (fsize >= mega) return
+		format("{}{}", (fsize + mega / 2) / mega, 'M');
+	else if (fsize >= kilo) return
+		format("{}{}", (fsize + kilo / 2) / kilo, 'K');
+	else return format("{}B", fsize);
+}
+\end{lstlisting}
+
+I chose to use 1,024 as 1K in this function, as that appears to be the default on both Linux and BSD Unix. In production, this could be a command-line option.
+
+We update our format() string in main():
+
+\begin{lstlisting}[style=styleCXX]
+cout << format("{} {:>6} {}{}\n",
+	permstr, size_string(fsize), fn, suffix);
+\end{lstlisting}
+
+Now, we get this output:
+
+\begin{tcblisting}{commandshell={}}
+-rwxr-xr-x 284K chrono*
+-rw-r--r--   2K chrono.cpp
+-rwxr-xr-x 178K formatter*
+-rw-r--r-- 906B formatter.cpp
+lrwxr-xr-x   0B include -> /Users/billw/include
+-rw-r--r-- 642B Makefile
+drwxr-xr-x   0B testdir/
+-rwxr-xr-x 197K working*
+-rw-r--r--   5K working.cpp
+\end{tcblisting}
+
+\begin{tcolorbox}[colback=webgreen!5!white,colframe=webgreen!75!black,title=Note]
+This utility is designed for POSIX systems, such as Linux and macOS. It works on a Windows system, but the Windows permissions system is different from the POSIX system. On Windows, the permissions bits will always appear fully set.
+\end{tcolorbox}
+
+\end{itemize}
 
 \subsubsection{How it works…}
 
+The filesystem library carries a rich set of information through its directory\_entry and related classes. The major classes we used in this recipe include:
+
+\begin{itemize}
+\item 
+The path class represents a file system path, according to the rules of the target system. A path object is constructed from a string or another path. It need not represent an existing path, or even a possible path. The path string is parsed to component parts, including a root name, root directory, and an optional series of filenames and directory separators.
+
+\item 
+The directory\_entry class carries a path object as a member, and may also store additional attributes, including hard link count, status, symbolic link, file size, and last write time.
+
+\item 
+The file\_status class carries information about the type and permissions of a file. A perms object may be a member of file\_status, representing the permissions structure of a file.
+\end{itemize}
+
+There are two functions for retrieving a perms object from file\_status. The status() function and the symlink\_status() function both return a perms object. The difference is in how they handle a symbolic link. The status() function will follow a symbolic link and return the perms from the target file. symlink\_status() will return the perms from the symbolic link itself.
 
 \subsubsection{There's more…}
+
+I had intended to include the last-write time of each file in the directory listing.
+
+The directory\_entry class has a member function, last\_write\_time(), which returns a file\_time\_type object representing the timestamp of the last time the file was written.
+
+Unfortunately, at the time of writing, the available implementations lack a portable way to convert a file\_time\_type object to a standard chrono::sys\_time, suitable for use with cout or format().
+
+For now, here's a solution that works with GCC:
+
+\begin{lstlisting}[style=styleCXX]
+string time_string(const fs::directory_entry& dir) {
+	using std::chrono::file_clock;
+	auto file_time{ dir.last_write_time() };
+	return format("{:%F %T}",
+		file_clock::to_sys(dir.last_write_time()));
+}
+\end{lstlisting}
+
+It's recommended that user code should use std::chrono::clock\_cast instead of file::clock::to\_sys to convert time points between clocks. Unfortunately, none of the currently available implementations have a working std::chrono::clock\_cast specialization for this purpose.
+
+Using this time\_string() function, we can add to print\_dir():
+
+\begin{lstlisting}[style=styleCXX]
+const string timestr{ time_string(dir) };
+\end{lstlisting}
+
+We can then change the format() string:
+
+\begin{lstlisting}[style=styleCXX]
+cout << format("{} {:>6} {} {}{}\n",
+	permstr, sizestr, timestr, fn, suffix);
+\end{lstlisting}
+
+And we get this output:
+
+\begin{tcblisting}{commandshell={}}
+-rwxr-xr-x 248K 2022-03-09 09:39:49 chrono*
+-rw-r--r--   2K 2022-03-09 09:33:56 chrono.cpp
+-rwxr-xr-x 178K 2022-03-09 09:39:49 formatter*
+-rw-r--r-- 906B 2022-03-09 09:33:56 formatter.cpp
+lrwxrwxrwx   0B 2022-02-04 11:39:53 include -> /home/billw/
+include
+-rw-r--r-- 642B 2022-03-09 14:08:37 Makefile
+drwxr-xr-x   0B 2022-03-09 10:38:39 testdir/
+-rwxr-xr-x 197K 2022-03-12 17:13:46 working*
+-rw-r--r--   5K 2022-03-12 17:13:40 working.cpp
+\end{tcblisting}
+
+This works on Debian with GCC-11. Do not expect it to work without modification on any other systems.
+
+
+
+
+
+
+
+
+
+

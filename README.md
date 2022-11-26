@@ -4,7 +4,7 @@
 
 *使用STL的新特性来解决实际问题*
 
-<a href="https://www.packtpub.com/product/c-20-stl-cookbook/9781803248714?utm_source=github&utm_medium=repository&utm_campaign=9781803248714"><img src="https://static.packt-cdn.com/products/9781803248714/cover/smaller" alt="C++20 STL Cookbook" height="256px" align="right"></a>
+<a href=""><img src="cover.png" alt="C++20 STL Cookbook" height="256px" align="right"></a>
 
 * 作者：Bill Weinman 
 * 译者：陈晓伟

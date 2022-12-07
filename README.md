@@ -4,7 +4,7 @@
 
 *使用STL的新特性来解决实际问题*
 
-<a href=""><img src="cover.png" alt="C++20 STL Cookbook" height="256px" align="right"></a>
+<a><img src="cover.png" alt="C++20 STL Cookbook" height="256px" align="right"></a>
 
 * 作者：Bill Weinman 
 * 译者：陈晓伟

@@ -1,11 +1,11 @@
 
-C++ has provided some form of feature test macros for as long as new features have been added. Beginning with C++20, the process is standardized, and all library feature test macros have been added to the <version> header. This will make it much easier to test for a new feature in your code.
+只要添加了新特性，C++就会提供了某种形式的特性测试宏。从C++20开始，这个过程进行了标准化，所有库特性测试宏都会添加到<version>头文件中。这将使测试代码中的新特性变得更加容易。
 
-This is a useful feature and it's very simple to use.
+这是一个非常有用的功能，使用起来非常简单。
 
 \subsubsection{How to do it…}
 
-All feature test macros begin with the prefix \_\_cpp\_. Library features begin with \_\_cpp\_lib\_. Language feature test macros are typically defined by the compiler. Library feature test macros are defined in the new <version> header. Use them as you would any other preprocessor macro:
+所有特性测试宏都以前缀\_\_cpp\_开头。库特性以\_\_cpp\_lib\_开头。语言特性测试宏通常由编译器定义，库特性测试宏定义在新的<version>头文件中。可以像使用其他预处理器宏一样使用:
 
 \begin{lstlisting}[style=styleCXX]
 #include <version>
@@ -16,7 +16,7 @@ All feature test macros begin with the prefix \_\_cpp\_. Library features begin 
 #endif
 \end{lstlisting}
 
-In some cases, you can use the \_\_has\_include preprocessor operator (introduced in C++17) to test for the existence of an include file.
+某些情况下，可以使用\_\_has\_include预处理器操作符(C++17)来测试是否包含了某个文件。
 
 \begin{lstlisting}[style=styleCXX]
 #if __has_include(<compare>)
@@ -26,11 +26,11 @@ In some cases, you can use the \_\_has\_include preprocessor operator (introduce
 #endif
 \end{lstlisting}
 
-You can use \_\_has\_include to test for the existence of any header file. Because it's a preprocessor directive, it doesn't require a header of its own to work.
+因为它是一个预处理器指令，所以可以使用\_\_has\_include来测试头文件是否存在。
 
 \subsubsection{How it works…}
 
-Generally, you can use the feature test macros by testing for a non-zero value using \#ifdef or \#if defined. Each of the feature test macros has a non-zero value that corresponds to the year and month it was accepted by the standards committee. For example, the \_\_cpp\_lib\_three\_way\_comparison macro has a value of 201907. This means that it was accepted in July 2019.
+通常，可以通过使用\#ifdef或\#if定义测试非零值来使用特性测试宏。每个特性测试宏都有一个非零值，对应于标准委员会接受它的年份和月份。例如，\_\_cpp\_lib\_three\_way\_comparison宏的值为2011907，意味着其在2019年7月采纳。
 
 \begin{lstlisting}[style=styleCXX]
 #include <version>
@@ -39,16 +39,16 @@ cout << "value is " << __cpp_lib_three_way_comparison << "\n"
 #endif
 \end{lstlisting}
 
-Output:
+输出：
 
 \begin{tcblisting}{commandshell={}}
 $ ./working
 value is 201907
 \end{tcblisting}
 
-The value of the macro may be useful in some obscure cases where a feature has changed and you're dependent upon the changes. For most purposes, you can safely ignore the value and just test for non-zero with \#ifdef.
+宏的值可能在一些模糊的情况下很有用，比如某个特性发生了变化，而程序会依赖于这些变化。通常，可以安全地忽略该值，只使用\#ifdef测试非零即可。
 
-Several websites maintain a complete list of feature test macros. I tend to use cppreference (\url{https://j.bw.org/cppfeature}) but there are others.
+一些网站维护功能测试宏的完整列表，这里推荐使用cppreference (\url{https://j.bw.org/cppfeature})。
 
 
 

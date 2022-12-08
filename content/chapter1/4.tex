@@ -1,5 +1,5 @@
 
-Comparing different types of integers may not always produce the expected results. For example:
+比较不同类型的整数，可能并不总是生成预期的结果。例如:
 
 \begin{lstlisting}[style=styleCXX]
 int x{ -3 };
@@ -8,17 +8,17 @@ if(x < y) puts("true");
 else puts("false");
 \end{lstlisting}
 
-You may expect this code to print true, and that's understandable. -3 is usually less than 7. But it will print false.
+可能希望此代码输出true，-3通常小于7，但代码也会输出false。
 
-The problem is that x is signed and y is unsigned. The standardized behavior is to convert the signed type to unsigned for the comparison. That seems counterintuitive, doesn't it? Indeed, you cannot reliably convert an unsigned value to a signed value of the same size, because a signed integer uses two's complement representation (which uses the most significant bit as a sign). Given the same sized integer, the maximum signed value is half that of an unsigned value. Using this example, if your integers are 32-bits, -3 (signed) becomes FFFF FFFD (hexadecimal), or 4,294,967,293 (unsigned decimal), which is not less than 7.
+问题是x是有符号的y是无符号的，标准化的行为是将有符号类型转换为无符号类型进行比较。这似乎违反直觉，实际上，不能可靠地将无符号值转换为相同大小的有符号值，因为有符号整数使用2的补数表示(使用最高位作为符号)。给定相同大小的整数，最大有符号值是无符号值的一半。使用这个例子，若整数是32位，-3(有符号)变成FFFF FFFD(十六进制)，或者4,294,967,293(无符号十进制)，所以不小于7。
 
-Some compilers may issue a warning when you try to compare signed with unsigned integer values, but most do not.
+尝试比较有符号整数值和无符号整数值时，一些编译器可能会发出警告，但大多数编译器不会。
 
-The C++20 standard includes a set of integer-safe comparison functions in the <utility> header.
+C++20标准在<utility>头文件中包含了一组整数安全的比较函数。
 
 \subsubsection{How to do it…}
 
-The new integer comparison functions are found in the <utility> header. They each take two arguments, which correspond with the left- and right-hand sides of the operator.
+新的整数比较函数可以在<utility>头文件找到。每个都有两个参数，分别对应于运算符的左边和右边。
 
 \begin{lstlisting}[style=styleCXX]
 #include <utility>
@@ -30,9 +30,9 @@ int main() {
 }
 \end{lstlisting}
 
-The cmp\_less() function gives us the result we expect. -3 is less than 7 and the program now prints true.
+cmp\_less()函数给出了我们所期望的结果。-3小于7，程序现在输出true。
 
-The <utility> header provides a full complement of integer comparison functions. Assuming our values for x and y, we get these comparisons:
+<utility>头文件提供了完整的整数比较函数。假设有x和y值，可以得到这些比较的结果:
 
 \begin{lstlisting}[style=styleCXX]
 cmp_equal(x, y) // x == y is false
@@ -45,7 +45,7 @@ cmp_greater_equal(x, y) // x >= y is false
 
 \subsubsection{How it works…}
 
-Here's the sample implementation of the cmp\_less() function from the C++20 standard, to give you a more complete picture of how it works:
+下面是C++20标准中cmp\_less()函数的示例实现，可以更全面地了解它是如何工作的:
 
 \begin{lstlisting}[style=styleCXX]
 template< class T, class U >
@@ -62,13 +62,13 @@ constexpr bool cmp_less( T t, U u ) noexcept
 }
 \end{lstlisting}
 
-The UT and UU aliases are declared as make\_unsigned\_t, a useful helper type introduced with C++17. This allows safe conversions of signed to unsigned types.
+UT和UU别名声明为make\_unsigned\_t，这是C++17引入的一种辅助类型。其允许有符号类型到无符号类型的安全转换。
 
-The function first tests if both arguments are either signed or unsigned. If so, it returns a simple comparison.
+函数首先测试两个参数是有符号的，还是无符号的。然后，返回一个简单的比较。
 
-It then tests if either side is signed. If that signed value is less than zero, it can return true or false without performing a comparison. Otherwise, it converts the signed value to unsigned and returns the comparison.
+然后，测试两边是否有符号。若该带符号值小于零，则可以返回true或false而不执行比较。否则，将有符号值转换为无符号值进行比较。
 
-Similar logic is applied to each of the other comparison functions.
+相同的逻辑也可应用于其他的比较函数。
 
 
 

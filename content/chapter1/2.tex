@@ -1,33 +1,33 @@
 
-Until now, if you wanted to format text, you could use either the legacy printf functions or the STL iostream library. Both have their strengths and flaws.
+若想格式化文本，可以使用传统的printf函数或STL iostream库，两者各有优缺点。
 
-The printf-based functions are inherited from C and have proven efficient, flexible, and convenient for over 50 years. The formatting syntax can look a bit cryptic, but it's simple enough once you get used to it.
+printf函数继承自C语言，50多年来已经很高效、灵活和方便。就是格式语法看起来有点晦涩，但习惯过后，就觉得还是挺简单的。
 
 \begin{lstlisting}[style=styleCXX]
 printf("Hello, %s\n", c_string);
 \end{lstlisting}
 
-The main weakness in printf is its lack of type safety. The common printf() function (and its relatives) use C's variadic arguments model to pass parameters to a formatter. This works great when it works, but it can cause serious problems when a parameter type doesn't match its corresponding format specifier. Modern compilers do as much type-checking as they can, but the model is inherently flawed and the protection can only go so far.
+printf的弱点主要是弱类型安全。常见的printf()函数(及其相关函数)，使用C的可变参数模型将参数传递给格式化程序。这在正常情况下非常有效，但参数类型与其对应的格式说明符不匹配时，可能会导致严重的问题。现代编译器会尽可能多地进行类型检查，但编程模型本身存在缺陷，保护也只能到此为止。
 
-The STL iostream library brings type safety at the expense of readability and run-time performance. The iostream syntax is unusual, yet familiar. It overloads the bitwise left-shift operator (<<) to allow a chain of objects, operands, and formatting manipulators, which produce the formatted output.
+STL的iostream库以可读性和运行时性能为代价确保了类型安全。iostream语法不常见，但很易懂。其重载按位左移操作符(<<)，以允许产生格式化输出一连串的对象、操作数和格式化操纵符。
 
 \begin{lstlisting}[style=styleCXX]
 cout << "Hello, " << str << endl;
 \end{lstlisting}
 
-The weakness of iostream is its complexity, in both syntax and implementation. Building a formatted string can be verbose and obscure. Many of the formatting manipulators must be reset after use, or they create cascading formatting errors that can be difficult to debug. The library itself is vast and complex, resulting in code significantly larger and slower than its printf equivalent.
+iostream的弱点在于语法和实现方面的复杂性，构建格式化字符串可能会冗长而晦涩。许多格式操纵符在使用后必须重置，否则会产生难以调试的级联格式错误。该库本身庞大而复杂，导致代码比printf等效代码大得多，速度也慢很多。
 
-This dismal situation has left C++ programmers with little option but to choose between two flawed systems, until now.
+这种令人沮丧的情况让C++程序员别无选择，只能在两个有缺陷的方法中选择其中一个。
 
 \subsubsection{How to do it…}
 
-The new format library is in the <format> header. As of this writing, format is implemented only in the MSVC (Microsoft) compiler. By the time you read this, it should be available on more systems. Otherwise, you may use its reference implementation as a third-party library from fmt.dev (j.bw.org/fmt).
+新的格式库位于<format>头文件中。撰写本书时，其仅在MSVC(Microsoft)编译器中实现。当您阅在读本书时，应该可以在更多的编译器上实现了。如若不然，可以使用其参考实现进行理解fmt.dev (j.bw.org/fmt)。
 
-The format library is modeled on the str.format() method from Python 3. Format strings are substantially the same as those in Python and, for most purposes, they should be interchangeable. Let's examine some simple examples:
+格式库基于Python3中的str.format()方法建模。格式字符串基本上与Python中的格式字符串相同，通常是可互换的。来看一些简单的例子:
 
 \begin{itemize}
 \item 
-In its simplest form, the format() function takes a string\_view format string and a variadic parameter pack of arguments. It returns a string. Its function signature looks like this:
+最简单的方式，format()函数可以接受一个string\_view格式的字符串和一个可变参数参数包，并返回一个字符串。其函数签名是这样的:
 
 \begin{lstlisting}[style=styleCXX]
 template<typename... Args>
@@ -35,7 +35,7 @@ string format(string_view fmt, const Args&... args);
 \end{lstlisting}
 
 \item 
-The format() function returns a string representation of virtually any type or value. For example:
+format()函数作用:返回类型或值的字符串表示形式。例如:
 
 \begin{lstlisting}[style=styleCXX]
 string who{ "everyone" };
@@ -47,10 +47,10 @@ format("Integer: {}\n ", ival); // Integer: 42
 format("π: {}\n", pi); // π: 3.141592653589793
 \end{lstlisting}
 
-The format string uses braces \{\} as a placeholder. With no format specifiers, the braces are effectively a type-safe placeholder which will convert a value of any compatible type to a reasonable string representation.
+格式化字符串使用大括号\{\}作为占位符。由于没有格式说明符，大括号实际上是一个类型安全的占位符，可以将任何兼容类型的值转换为合理的字符串表示形式。
 
 \item 
-You can include multiple placeholders in your format string, like this:
+可以在格式字符串中包含多个占位符，像这样:
 
 \begin{lstlisting}[style=styleCXX]
 format("Hello {} {}", ival, who); // Hello 42
@@ -58,7 +58,7 @@ format("Hello {} {}", ival, who); // Hello 42
 \end{lstlisting}
 
 \item 
-You can specify the order of the replacement values. This could be useful for internationalization:
+可以指定替换值的顺序，这对本地化很有用:
 
 \begin{lstlisting}[style=styleCXX]
 format("Hello {1} {0}", ival, who); // Hello everyone 42
@@ -66,7 +66,7 @@ format("Hola {0} {1}", ival, who); // Hola 42 everyone
 \end{lstlisting}
 
 \item 
-You can align values, left (<), right (>), or center (\^), with or without a fill character:
+这也可以进行对齐，左(<)、右(>)或中心(\^{})对齐，可以使用或不使用填充字符:
 
 \begin{lstlisting}[style=styleCXX]
 format("{:.<10}", ival); // 42........
@@ -75,37 +75,37 @@ format("{:.^10}", ival); // ....42....
 \end{lstlisting}
 
 \item 
-You can set the decimal precision of values:
+可以设置十进制数值的精度:
 
 \begin{lstlisting}[style=styleCXX]
 format("π: {:.5}", pi); // π: 3.1416
 \end{lstlisting}
 
 \item 
-And much, much more.
+等等
 \end{itemize}
 
-It's a rich and complete formatting specification that provides the type-safety of iostream with the performance and simplicity of printf, for the best of both worlds.
+这是一个丰富而完整的格式化方式，具有iostream的类型安全，以及printf的性能和简单性，达到了鱼和熊掌兼得的目的。
 
 \subsubsection{How it works…}
 
-The format library does not yet include a print() function, which is planned for C++23. The format() function itself returns a string object. So, if you want to print the string, you'll need to use either iostream or cstdio. (Sad face.) 
+格式库不包括print()函数，这是C++23的计划。format()函数本身返回一个字符串对象。若想打印字符串，需要使用iostream或cstdio。:(
 
-You can print the string using iostream:
+可以使用iostream输出字符串:
 
 \begin{lstlisting}[style=styleCXX]
 cout << format("Hello, {}", who) << "\n";
 \end{lstlisting}
 
-Or you may use cstdio:
+或者使用cstdio:
 
 \begin{lstlisting}[style=styleCXX]
 puts(format("Hello, {}", who).c_str());
 \end{lstlisting}
 
-Neither is ideal, but it's not very hard to write a simple print() function. And we can use this process to understand a bit of the format library's inner workings.
+这两种方法都不理想，但是编写一个简单的print()函数并不难。在这个过程中，来了解一些格式库的工作方式。
 
-Here's a simple implementation of a print() function using the format library:
+下面是print()函数使用格式库的简单实现:
 
 \begin{lstlisting}[style=styleCXX]
 #include <format>
@@ -120,11 +120,11 @@ void print(const string_view fmt_str, Args&&... args) {
 }
 \end{lstlisting}
 
-This uses the same arguments as the format() function. The first argument is a string\_view object for the format string. This is followed by a variadic parameter pack for the arguments.
+使用与format()函数相同的参数。第一个参数是格式字符串的string\_view对象，后面是作为参数的可变参数包。
 
-The make\_format\_args() function takes the parameter pack and returns an object that contains type-erased values suitable for formatting. This object is then passed to vformat(), which returns a string suitable for printing. We use fputs() to print the value to the console because it's far more efficient than cout.
+make\_format\_args()函数的作用是:接受参数包并返回一个对象，该对象包含适合格式化的已擦除类型的值。然后，将该对象传递给vformat()，vformat()再返回适合打印的字符串。我们使用fputs()将值输出到控制台上(它比cout高效得多)。
 
-We can now use this print() function in place of the cout << format() combination:
+现在可以使用print()函数来代替cout << format()的组合:
 
 \begin{lstlisting}[style=styleCXX]
 print("Hello, {}!\n", who);
@@ -134,7 +134,7 @@ print("{:.^10}\n", ival);
 print("{:.5}\n", pi);
 \end{lstlisting}
 
-Output:
+输出:
 
 \begin{tcblisting}{commandshell={}}
 Hello, everyone!
@@ -144,13 +144,13 @@ Hello everyone 42
 3.1416
 \end{tcblisting}
 
-When you eventually get a C++23 complier with print() support, you should be able to simply replace the above print() template function definition with using std::print; and all the print() calls should continue to work.
+当编译器支持C++23的print()时，简单地使用\texttt{std::print;}就能完成所有工作，并且所有print()调用也会正常工作。
 
 \subsubsection{There's more…}
 
-It's nice to have the ability to format strings and primitives, but for the format library to be fully functional, it needs customization to work with your own classes.
+能够格式化字符串和原语非常好，但是要使格式库具有完整的功能，就需要对其进行定制，以便可以与您自己的类一起工作。
 
-For example, here's a simple struct with two members: a numerator and denominator. We would like this to print as a fraction:
+例如，这里有两个成员的简单结构体:分子和分母。将其输出为分数:
 
 \begin{lstlisting}[style=styleCXX]
 struct Frac {
@@ -164,10 +164,9 @@ int main() {
 }
 \end{lstlisting}
 
-When I compile this, it leads to a cascade of errors to the effect of, "No user-defined conversion operator…". Cool. So, let's fix it!
+当我编译它时，它会导致一系列错误，例如：“没有定义的转换运算符…”。让我们来解决它!
 
-When the format system encounters an object for conversion, it looks for a specialization of a formatter object with the corresponding type. Standard specializations are included for common objects such as strings and numbers and such.
-It's quite simple to create a specialization for our Frac type:
+当格式系统遇到要转换的对象时，其会寻找具有相应类型的格式化程序对象的特化。标准的特化对于常见的对象，如字符串和数字等。对Frac类型进行特化非常简单:
 
 \begin{lstlisting}[style=styleCXX]
 template<>
@@ -185,20 +184,19 @@ struct std::formatter<Frac>
 };
 \end{lstlisting}
 
-This formatter specialization is a class with two short template functions:
+格式化器的特化，是具有两个简短模板函数的类:
 
 \begin{itemize}
 \item 
-The parse() function parses the format string from after the colon (or, if there is no colon, after the opening brace) up to but not including the closing brace. (In other words, the part that specifies the type of the object.) It takes a ParseContext object and returns an iterator. For our purposes, we can just return the begin() iterator because we don't need any new syntax for our type. You will rarely need to put anything else here.
+parse()函数解析格式字符串，从冒号之后(若没有冒号，则在开大括号之后)直到但不包括结束大括号(就是指定对象类型的部分)。其接受一个ParseContext对象，并返回一个迭代器。对于我们的目的，可以只返回begin()迭代器。因为我们的类型不需要新语法，所以无需在这里准备任何东西。
 
 \item 
-The format() function takes a Frac object and a FormatContext object.
-It returns an end iterator. The format\_to() function makes this easy. It takes an iterator, a format string, and a parameter pack. In this case, the parameter pack is the two properties of our Frac class, the numerator and denominator.
+format()函数接受一个Frac对象和一个FormatContext对象，返回结束迭代器。format\_to()函数可使这变得很容易，其可以接受一个迭代器、一个格式字符串和一个参数包。本例中，参数包是Frac类的两个属性，分子和分母。
 
-All we need to do here is provide a simple format string "\{0\}/\{1\}" and the numerator and denominator values. (The 0 and 1 indicate the position of the parameters. They're not strictly necessary but they could come in handy later.)
+这里需要做的就是提供一个简单的格式字符串“\{0\}/\{1\}”以及分子和分母的值(0和1表示参数的位置)。
 \end{itemize}
 
-Now that we have a specialization for Frac, we can pass our object to print() to get a readable result:
+现在我们有了Frac的特化，可以将对象传递给print()从而获得一个可读的结果:
 
 \begin{lstlisting}[style=styleCXX]
 int main() {
@@ -207,11 +205,11 @@ int main() {
 }
 \end{lstlisting}
 
-Output:
+输出为：
 
 \begin{tcblisting}{commandshell={}}
 Frac: 5/3
 \end{tcblisting}
 
-The C++20 format library solves a long-standing problem by providing a type-safe text formatting library that is both efficient and convenient.
+C++20通过提供高效、方便的类型安全文本格式库，解决了一个长期存在的问题。
 

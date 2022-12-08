@@ -1,7 +1,7 @@
 
-The three-way comparison operator (<=>), commonly called the spaceship operator because it looks like a flying saucer in profile, is new in C++20. You may wonder, what's wrong with the existing six comparison operators? Nothing at all, and you will continue using them. The purpose of the spaceship is to provide a unified comparison operator for objects.
+三向比较操作符(<=>)，通常称为“宇宙飞船”操作符，因为它看起来像一个飞碟，是C++20添加的新功能。您可能想知道，是因为现有的六个比较操作符有什么问题吗?并不是，可以继续使用它们。宇宙飞船的目的是提供统一的比较操作符。
 
-The common two-way comparison operators return one of two states, true or false, according to the result of the comparison. For example:
+常见的双向比较操作符根据比较的结果返回两种状态之一，true或false。例如:
 
 \begin{lstlisting}[style=styleCXX]
 const int a = 7;
@@ -9,9 +9,9 @@ const int b = 42;
 static_assert(a < b);
 \end{lstlisting}
 
-The a < b expression uses the less-than comparison operator (<) to test if a is less than b. The comparison operator returns true if the condition is satisfied, or false if not. In this case it returns true because 7 is less than 42.
+a < b表达式使用小于比较操作符(<)来测试a是否小于b。若条件满足，比较操作符返回true，不满足则返回false。这种情况下，返回true，因为7小于42。
 
-The three-way comparison works differently. It returns one of three states. The spaceship operator will return a value equal to 0 if the operands are equal, negative if the left-hand operand is less than the right-hand operand, or positive if the left-hand operand is greater than the right-hand operator.
+这三种方式的比较方式有所不同，会返回三种状态之一。若操作数相等，飞船操作符将返回一个等于0的值，若左操作数小于右操作数则返回负数，若左操作数大于右操作数则返回正数。
 
 \begin{lstlisting}[style=styleCXX]
 const int a = 7;
@@ -19,9 +19,9 @@ const int b = 42;
 static_assert((a <=> b) < 0);
 \end{lstlisting}
 
-The returned value is not an integer. It's an object from the <compare> header that compares with 0.
+返回值不是整数，是<compare>头中的对象，与0进行比较。
 
-If the operands have an integral type, the operator returns a strong\_ordering object from the <compare> library.
+若操作数为整型，则操作符从<compare>库返回strong\_ordered对象。
 
 \begin{lstlisting}[style=styleCXX]
 strong_ordering::equal // operands are equal
@@ -29,7 +29,7 @@ strong_ordering::less // lhs is less than rhs
 strong_ordering::greater // lhs is greater than rhs
 \end{lstlisting}
 
-If the operands have a floating-point type, the operator returns a partial\_ordering object:
+若操作数为浮点类型，则操作符返回partial\_ordered对象:
 
 \begin{lstlisting}[style=styleCXX]
 partial_ordering::equivalent // operands are equivelant
@@ -38,13 +38,13 @@ partial_ordering::greater // lhs is greater than rhs
 partial_ordering::unordered // if an operand is unordered
 \end{lstlisting}
 
-These objects are designed to compare against a literal zero (0) with conventional comparison operators (for example, (a <=> b) < 0). This allows the results of the three-way comparison to be more precise than conventional comparisons.
+这些对象通常与0进行比较，从而区别于常规比较操作符(例如，(a <=> b) < 0)。这使得三向比较的结果比常规比较更精确。
 
-If all of that seems a bit complicated, that's okay. For most applications you will never use the spaceship operator directly. Its real power is in its application as a unified comparison operator for objects. Let's dig a bit deeper.
+若这些看起来有点复杂，没关系。对于大多数应用程序，可能不会直接使用太空船操作符，其主要作用在于为对象提供统一的比较运算符。
 
 \subsubsection{How to do it…}
 
-Let's look at a simple class that encapsulates an integer and provides comparison operators:
+来看一个简单的类，封装了一个整数，并提供了比较运算符:
 
 \begin{lstlisting}[style=styleCXX]
 struct Num {
@@ -64,9 +64,9 @@ struct Num {
 };
 \end{lstlisting}
 
-It's not uncommon to see a list of comparison operator overloads like this. In fact, it should be even more complicated with non-member friends that work with objects on either side of the operator.
+这样的比较操作符重载并不少见。若比较操作符并非两侧对象的友元函数，情况会变得更加复杂。
 
-With the new spaceship operator, all of this can be accomplished with one overload:
+有了新的宇宙飞船操作符，就可以通过一次重载来完成:
 
 \begin{lstlisting}[style=styleCXX]
 #include <compare>
@@ -77,7 +77,7 @@ struct Num {
 };
 \end{lstlisting}
 
-Notice that we need to include the <compare> header for the three-way operator return types. Now we can declare some variables and test them with comparisons:
+注意，我们需要为三向操作符返回类型包含<compare>头文件。现在可以声明一些变量，并通过比较来进行测试:
 
 \begin{lstlisting}[style=styleCXX]
 constexpr Num a{ 7 };
@@ -96,24 +96,23 @@ int main() {
 }
 \end{lstlisting}
 
-The compiler will automatically favor the <=> operator for each of the comparisons.
+对于每一次比较，编译器都会自动使用<=>操作符。
 
-Because the default <=> operator is already constexpr safe, we don't need to declare it as such in our member function.
+因为默认的<=>操作符已经是constexpr安全的，所以不需要在成员函数中这样声明。
 
 \subsubsection{How it works…}
 
-The operator<=> overload takes advantage of a new C++20 concept, rewritten expressions. During overload resolution, the compiler rewrites the expression according to a set of rules. For example, if we write a < b, the compiler will rewrite it to (a <=> b < 0) so that it works with our member operator. The compiler will rewrite every relevant comparison expression for the <=> operator, where we haven't included a more specific operator.
+<=>重载利用了C++20的一个新概念，即重写的表达式。在重载解析期间，编译器根据一组规则重写表达式。例如，a < b，编译器会将其重写为(a <=> b < 0)，以便它与成员操作符可以一起工作。编译器将重写<=>操作符的每个相关比较表达式，其中不包含具体的操作符。
 
-In fact, we no longer need a non-member function to handle comparisons with a compatible type on the left-hand side. The compiler will synthesize an expression that works with the member operator. For example, if we write 42 > a, the compiler will synthesize an expression with the operators reversed (a <=> 42 < 0) so that it works with our member operator.
+事实上，我们不再需要非成员函数来处理与左侧兼容类型的比较。编译器将合成一个与成员操作符一起工作的表达式。例如，42 > a，编译器将合成一个操作符颠倒的表达式(a <=> 42 < 0)，以便与我们的成员操作符一起工作。
 
 \begin{tcolorbox}[colback=webgreen!5!white,colframe=webgreen!75!black,title=Note]
-The <=> operator has higher precedence than the other comparison operators
-so it will always evaluate first. All comparison operators evaluate left-to-right.
+<=>的优先级高于其他比较运算符，因此它总是先求值。所有比较运算符都从左到右计算。
 \end{tcolorbox}
 
 \subsubsection{There's more…}
 
-The default operator will work just fine with a wide variety of classes, including classes with multiple numeric members of different types:
+默认操作符可以很好地处理各种类，包括多个不同类型成员的类:
 
 \begin{lstlisting}[style=styleCXX]
 struct Nums {
@@ -125,7 +124,7 @@ struct Nums {
 };
 \end{lstlisting}
 
-But what if you have a more complex type? Here's an example of a simple fraction class:
+但若有一个更复杂的类型呢?下面是一个简单分数类:
 
 \begin{lstlisting}[style=styleCXX]
 struct Frac {
@@ -145,11 +144,11 @@ struct Frac {
 };
 \end{lstlisting}
 
-In this case we need to define the operator<=> overload because our data members are not stand-alone scalar values. It's still quite simple and it works just as well.
+在本例中，需要定义运算符<=>的重载，因为数据成员不是独立的标量。重载很简单，而且效果很好。
 
-Notice that we also needed an operator== overload. This is because the expression rewrite rules will not rewrite == and != with a custom operator<=> overload. You only need to define operator==. The compiler will rewrite the != expression as needed.
+注意，还需要一个运算符==重载。因为表达式重写规则不会使用自定义操作符<=>重载重写==和!=，所以需要定义操作符==，从而编译器会根据需要重写!=表达式。
 
-Now we can define some objects:
+现在可以定义一些对象:
 
 \begin{lstlisting}[style=styleCXX]
 constexpr Frac a(10,15); // compares equal with 2/3
@@ -157,7 +156,7 @@ constexpr Frac b(2,3);
 constexpr Frac c(5,3);
 \end{lstlisting}
 
-And we can test them with normal comparison operators, as expected:
+可以用正常的比较运算符来测试，会如预期的一样:
 
 \begin{lstlisting}[style=styleCXX]
 int main() {
@@ -171,7 +170,7 @@ int main() {
 }
 \end{lstlisting}
 
-The power of the spaceship operator is in its ability to streamline comparison overloads in your classes. It improves both simplicity and efficiency when compared to overloading each operator independently
+宇宙飞船操作符的强大之处在于，能够简化类中的比较重载。与单独重载每个操作符相比，其简单并且高效。
 
 
 

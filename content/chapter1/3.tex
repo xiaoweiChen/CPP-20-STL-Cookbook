@@ -1,10 +1,10 @@
 
-C++20 allows the use of constexpr in several new contexts. This provides improved efficiency, in that these things may be evaluated at compile time, instead of run time.
+C++20允许在新的上下文中使用constexpr。因为这些可以在编译时计算，而非运行时，从而提高了效率。
 
 
 \subsubsection{How to do it…}
 
-The specification includes the ability to use string and vector objects in constexpr context. It's important to note that these objects may not themselves be declared constexpr, but they may be used in a compile-time context:
+其中包括在constexpr上下文中使用string和vector对象的能力。需要注意的是，这些对象本身可能不声明为constexpr，但可以在编译时上下文中使用:
 
 \begin{lstlisting}[style=styleCXX]
 constexpr auto use_string() {
@@ -13,7 +13,7 @@ constexpr auto use_string() {
 }
 \end{lstlisting}
 
-You can also use algorithms in constexpr context:
+也可以在constexpr上下文中使用算法:
 
 \begin{lstlisting}[style=styleCXX]
 constexpr auto use_vector() {
@@ -22,15 +22,15 @@ constexpr auto use_vector() {
 }
 \end{lstlisting}
 
-The result of the accumulate algorithm is available at compile time and in constexpr context.
+累加算法的结果在编译时和constexpr上下文中可用。
 
 \subsubsection{How it works…}
 
-The constexpr specifier declares a variable or function that may be evaluated at compile time. Before C++20, this was limited to objects initialized with a literal value, or a function within limited constraints. C++17 allowed a somewhat expanded use and C++20 expands it further.
+constexpr说明符声明了一个可以在编译时求值的变量或函数。在C++20之前，这仅限于用文字值初始化的对象，或在有限约束条件下的函数。C++17允许某种程度上的扩展，而C++20进一步对其进行了扩展。
 
-As of C++20, the STL string and vector classes now have constexpr-qualified constructors and destructors, which allow them to be invoked at compile time. This also means that the memory allocated for the string or vector object must be freed at compile time.
+C++20开始，标准string和vector类具有限定的构造函数和析构函数，这是可在编译时使用的前提。所以分配给string或vector对象的内存，必须在编译时释放。
 
-For example, this constexpr function, which returns a vector, will compile without error:
+例如，constexpr函数返回一个vector，编译时不会出错:
 
 \begin{lstlisting}[style=styleCXX]
 constexpr auto use_vector() {
@@ -39,7 +39,7 @@ constexpr auto use_vector() {
 }
 \end{lstlisting}
 
-But if you try to use the result in a run-time context, you will get an error about memory that was allocated during constant evaluation:
+但是若试图在运行时环境中使用结果，会得到一个在常量求值期间分配内存的错误:
 
 \begin{lstlisting}[style=styleCXX]
 int main() {
@@ -48,9 +48,9 @@ int main() {
 }
 \end{lstlisting}
 
-This is because the vector object was allocated and freed during compilation. So, the object is no longer available at run time.
+因为在编译期间分配和释放了vector对象，所以该对象在运行时不再可用。
 
-On the other hand, you can use some constexpr-qualified methods from the vector object, such as size(), at run time:
+另外，可以在运行时使用一些vector对象的适配constexpr的方法，比如size():
 
 \begin{lstlisting}[style=styleCXX]
 int main() {
@@ -59,7 +59,7 @@ int main() {
 }
 \end{lstlisting}
 
-Because the size() method is constexpr-qualified, the expression can be evaluated at compile time.
+因为size()方法是constexpr限定的，所以表达式可以在编译时求值。
 
 
 

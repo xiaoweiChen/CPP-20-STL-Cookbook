@@ -1,5 +1,5 @@
 
-Templates are great for writing code that works with different types. For example, this function will work with any numeric type:
+模板对于编写适用于不同类型的代码非常有用。例如，此函数将适用于任何数字类型:
 
 \begin{lstlisting}[style=styleCXX]
 template <typename T>
@@ -8,22 +8,22 @@ T arg42(const T & arg) {
 }
 \end{lstlisting}
 
-But what happens when you try to call it with a non-numeric type?
+当尝试用非数字类型调用它时，会发生什么呢?
 
 \begin{lstlisting}[style=styleCXX]
 const char * n = "7";
 cout << "result is " << arg42(n) << "\n";
 \end{lstlisting}
 
-Output:
+输出:
 
 \begin{tcblisting}{commandshell={}}
 Result is ion
 \end{tcblisting}
 
-This compiles and runs without error, but the result is unpredictable. In fact, the call is dangerous and it could easily crash or become a vulnerability. I would much prefer the compiler generate an error message so I can fix the code.
+这样编译和运行没有错误，但结果无法预测。事实上，该调用非常危险，很容易造成崩溃或成为漏洞。我更希望编译器生成一个错误消息，这样就可以提前修复代码。
 
-Now, with concepts, I can write it like this:
+有了概念后，就可以这样写:
 
 \begin{lstlisting}[style=styleCXX]
 template <typename T>
@@ -33,21 +33,21 @@ T arg42(const T & arg) {
 }
 \end{lstlisting}
 
-The requires keyword is new for C++20. It applies constraints to a template. Numeric is the name of a concept that only accepts integer and floating-point types. Now, when I compile this code with a non-numeric parameter, I get a reasonable compiler error:
+require关键字是C++20的新特性，将约束应用于模板。Numeric是一个只接受整数和浮点类型的概念的名称。现在，当我用非数字参数编译这段代码时，就会得到了合理的编译器错误:
 
 \begin{tcblisting}{commandshell={}}
 error: 'arg42': no matching overloaded function found
 error: 'arg42': the associated constraints are not satisfied
 \end{tcblisting}
 
-Error messages like this are far more useful than most compiler errors.
+这样的错误消息比大多数编译器错误有用得多。
 
-Let's take a closer look at how to use concepts and constraints in your code.
+仔细看看如何在代码中使用概念和约束。
 
 
 \subsubsection{How to do it…}
 
-A concept is simply a named constraint. The Numeric concept from above looks like this:
+概念只是一个命名的约束。上面的Numeric概念是这样的:
 
 \begin{lstlisting}[style=styleCXX]
 #include <concepts>
@@ -55,9 +55,9 @@ template <typename T>
 concept Numeric = integral<T> || floating_point<T>;
 \end{lstlisting}
 
-This concept requires a type T, which satisfies either the std::integral or std::floating\_point predefined concepts. These concepts are included in the <concepts> header.
+此概念需要类型T，满足std::integral或std::float\_point预定义概念。这些概念包含在<concepts>头文件中。
 
-Concepts and constraints may be used in class templates, function templates, or variable templates. We've seen a constrained function template, now here's a simple constrained class template example:
+概念和约束可以用在类模板、函数模板或变量模板中。我们已经看到了一个约束函数模板，这里是一个简单的约束类模板示例:
 
 \begin{lstlisting}[style=styleCXX]
 template<typename T>
@@ -68,7 +68,7 @@ struct Num {
 };
 \end{lstlisting}
 
-And here's a simple variable template example:
+下面是一个简单的变量模板示例:
 
 \begin{lstlisting}[style=styleCXX]
 template<typename T>
@@ -76,13 +76,13 @@ requires floating_point<T>
 T pi{3.1415926535897932385L};
 \end{lstlisting}
 
-You can use concepts and constraints on any template. Let's consider some further examples. We'll be using function templates in these examples for simplicity.
+可以在任何模板上使用概念和约束。为了简单起见，我们将在这些示例中使用函数模板。
 
 \begin{itemize}
 \item 
-A constraint may use concepts or type traits to evaluate the characteristics of a type. You may use any of the type traits found in the <type\_traits> header, so long as it returns a bool.
+约束可以使用概念或类型特征来评估类型的特征。可以使用<type\_traits>头文件中找到的任何类型特征，只要它返回bool类型。
 
-For example:
+例如:
 
 \begin{lstlisting}[style=styleCXX]
 template<typename T>
@@ -96,20 +96,20 @@ constexpr double avg(vector<T> const& vec) {
 \end{lstlisting}
 
 \item 
-The requires keyword is new in C++20. It introduces a constraint for the template arguments. In this example, the constraint expression tests the template argument against the type trait is\_integral.
+require关键字是C++20中新出现的，为模板参数引入了一个约束。在本例中，约束表达式根据类型特征is\_integral测试模板参数。
 
 \item 
-You can use one of the pre-defined traits found in the <type\_traits> header, or you can define your own, just as you would a template variable. For use in constraints, the variable must return constexpr bool. For example:
+可以使用<type\_traits>头文件中预定义的特性，或者自定义的特性，就像模板变量一样。为了在约束中使用，该变量必须返回constexpr bool。例如:
 
 \begin{lstlisting}[style=styleCXX]
 template<typename T>
 constexpr bool is_gt_byte{ sizeof(T) > 1 };
 \end{lstlisting}
 
-This defines a type trait called is\_gt\_byte. This trait uses the sizeof operator to test if the type T is larger than 1 byte.
+这定义了一个名为is\_gt\_byte的类型特征。该特性使用sizeof操作符来测试类型T是否大于1字节。
 
 \item 
-A concept is simply a named set of constraints. For example:
+概念只是一组命名的约束。例如:
 
 \begin{lstlisting}[style=styleCXX]
 template<typename T>
@@ -117,7 +117,7 @@ concept Numeric = is_gt_byte<T> &&
 	(integral<T> || floating_point<T>);
 \end{lstlisting}
 
-This defines a concept named Numeric. It uses our is\_gt\_byte constraint, along with the floating\_point and integral concepts from the <concepts> header. We can use it to constrain a template to only accept numeric types that are greater than 1 byte in size.
+这定义了一个名为Numeric的概念，使用is\_gt\_byte约束，以及<concepts>头文件中的floating\_point和integral概念。我们可以用它来约束模板，使其只接受大于1字节的数字类型。
 
 \begin{lstlisting}[style=styleCXX]
 template<Numeric T>
@@ -126,16 +126,16 @@ T arg42(const T & arg) {
 }
 \end{lstlisting}
 
-You'll notice that I've applied the constraint in the template declaration, rather than on a separate line in a requires expression. There are a few ways to apply a concept. Let's look at how this works.
+有读者会注意到，我在模板声明中应用了约束，而不是在require表达式中的单独一行中。有几种方法可以使用概念，让我们看看它是如何工作的。
 \end{itemize}
 
 \subsubsection{How it works…}
 
-There are several different ways you can apply a concept or constraint:
+使用概念或约束有几种不同的方法:
 
 \begin{itemize}
 \item 
-You can apply a concept or constraint with the requires keyword:
+可以用require关键字定义一个概念或约束:
 
 \begin{lstlisting}[style=styleCXX]
 template<typename T>
@@ -147,7 +147,7 @@ T arg42(const T & arg) {
 
 
 \item 
-You can apply a concept in the template declaration:
+可以在模板声明中使用概念:
 
 \begin{lstlisting}[style=styleCXX]
 template<Numeric T>
@@ -157,7 +157,7 @@ T arg42(const T & arg) {
 \end{lstlisting}
 
 \item 
-You can use the requires keyword in a function signature:
+可以在函数签名中使用require关键字:
 
 \begin{lstlisting}[style=styleCXX]
 template<typename T>
@@ -167,7 +167,7 @@ T arg42(const T & arg) requires Numeric<T> {
 \end{lstlisting}
 
 \item 
-Or you can use a concept in a parameter list for an abbreviated function template:
+可以在一个参数列表中使用概念来简化函数模板:
 
 \begin{lstlisting}[style=styleCXX]
 auto arg42(Numeric auto & arg) {
@@ -176,49 +176,49 @@ auto arg42(Numeric auto & arg) {
 \end{lstlisting}
 \end{itemize}
 
-For many purposes, choosing one of these strategies may be a matter of style. And there are circumstances where one may be a better option than another.
+如何进行选择，可能就只是偏好问题。在某些情况下，一种选择可能会比另一种更好。
 
 \subsubsection{There's more…}
 
-The standard uses the terms conjunction, disjunction, and atomic, to describe types of expressions that can be used to construct a constraint. Let's define these terms.
+该标准使用术语连接、分离和原子来描述可用于构造约束的表达式类型。我们来定义一下这些术语。
 
-You can combine concepts and constraints using the \&\& and || operators. These combinations are called conjunctions and disjunctions, respectively. You can think of them as logical AND and OR.
+可以使用\&\&和||操作符组合概念和约束。这些组合分别称为连接词和析取词，可以把它们看成逻辑的AND和OR。
 
-A constraint conjunction is formed by using the \&\& operator with two constraints:
+约束连接符是通过使用带有两个约束的\&\&操作符形成的:
 
 \begin{lstlisting}[style=styleCXX]
 Template <typename T>
 concept Integral_s = Integral<T> && is_signed<T>::value;
 \end{lstlisting}
 
-A conjunction is satisfied only if both sides of the \&\& operator are satisfied. It is evaluated left-to-right. The operands of a conjunction are short-circuited, that is, if the left side constraint is not satisfied the right side will not be evaluated.
+只有当\&\&运算符的两边都满足时，连接符才满足。从左到右求值。连接的操作数可短路，若左边的约束不满足，右边的约束就不会求值。
 
-A constraint disjunction is formed by using the || operator with two constraints:
+约束析取通过使用||操作符和两个约束形成:
 
 \begin{lstlisting}[style=styleCXX]
 Template <typename T>
 concept Numeric = integral<T> || floating_point<T>;
 \end{lstlisting}
 
-A disjunction is satisfied if either side of the || operator is satisfied. It is evaluated left-to-right. The operands of a conjunction are short-circuited, that is, if the left side constraint is satisfied the right side will not be evaluated.
+若||运算符的任意一边满足，则析取满足。从左到右求值。连接的操作数是短路的，若左边的约束得到满足，右边的约束就不会求值。
 
-An atomic constraint is an expression that returns a bool type, which cannot be further decomposed. In other words, it is not a conjunction or a disjunction.
+原子约束是返回bool类型的表达式，不能进一步分解。换句话说，不是一个连接或析取。
 
 \begin{lstlisting}[style=styleCXX]
 template<typename T>
 concept is_gt_byte = sizeof(T) > 1;
 \end{lstlisting}
 
-You can also use the logical! (NOT) operator in an atomic constraint:
+也可以在原子约束中使用逻辑!(NOT)操作符:
 
 \begin{lstlisting}[style=styleCXX]
 template<typename T>
 concept is_byte = !is_gt_byte<T>;
 \end{lstlisting}
 
-As expected, the ! operator inverts the value of the bool expression to the right of the !.
+果然，!运算符将bool表达式的值颠倒到!的右侧。
 
-Of course, we can combine all these expression types into a larger expression. We see examples of each of these constraint expressions in the following example:
+当然，可以将所有这些表达式类型组合成一个更大的表达式。我们可以在下面的例子中看到这些约束表达式的例子:
 
 \begin{lstlisting}[style=styleCXX]
 template<typename T>
@@ -226,11 +226,13 @@ concept Numeric = is_gt_byte<T> &&
 (integral<T> || floating_point<T>);
 \end{lstlisting}
 
-Let's break this down. The sub-expression, (integral<T> || floating\_point<T>) is a disjunction. The sub-expression, is\_gt\_byte<T> \&\& (…) is a conjunction. And each of the sub-expressions integral<T>, floating\_point<T>, and is\_gt\_byte<T>, are atomic.
+来分析一下。
 
-These distinctions are mostly for descriptive purposes. While it's good to understand the details, as you write your code, it's safe to think of them as simple logical ||, \&\&, and ! operators.
+子表达式(integral<T> || floating\_point<T>)是一个析取。子表达式is\_gt\_byte<T> \&\&(…)是一个连接。每个子表达式integral<T>，float \_point<T>和is\_gt\_byte<T>，都是原子表达式。
 
-Concepts and constraints are a welcome addition to the C++ standard and I'm looking forward to using them in my future projects.
+这些区别主要是为了描述的目的。虽然了解细节是很好的习惯，但在编写代码时，可以将它们视为简单的逻辑||，\&\&和!操作符。
+
+概念和约束是C++标准的一个很受欢迎的补充，非常期待在未来的项目中使用到它们。
 
 
 

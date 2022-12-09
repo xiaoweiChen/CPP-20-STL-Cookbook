@@ -1,38 +1,37 @@
 
-The new ranges library is one of the more significant additions to C++20. It provides a new paradigm for filtering and processing containers. Ranges provide clean and intuitive building blocks for more effective and readable code.
+范围库是C++20中添加的重要特性之一，可为过滤和处理容器提供了一种新的范例。范围为更有效和可读的代码提供了清晰和直观的构建块。
 
-Let's start by defining a few terms:
+先来定义几个术语:
 
 \begin{itemize}
 \item 
-A Range is a collection of objects which can be iterated. In other words, any structure that supports the begin() and end() iterators is a range. This includes most STL containers.
+“范围”是一个可以迭代的对象的集合，任何支持begin()和end()迭代器的结构都是范围。这包括大多数STL容器。
 
 \item 
-A View is a range that transforms another underlying range. Views are lazy, meaning they only operate as the range iterates. A view returns data from the underlying range and does not own any data itself. Views operate in O(1) constant time.
+“视图”是转换另一个基础范围的范围。视图是惰性的，只在范围迭代时操作。视图从底层范围返回数据，不拥有任何数据。视图的运行时间复杂度是O(1)。
 
 \item 
-A View Adapter is an object that takes a range and returns a view object.
-A view adapter may be chained with other view adapters using the | operator.
+视图适配器是一个对象，可接受一个范围，并返回一个视图对象。视图适配器可以使用|操作符连接到其他视图适配器。
 \end{itemize}
 
 \begin{tcolorbox}[colback=webgreen!5!white,colframe=webgreen!75!black,title=Note]
-The <ranges> library uses the std::ranges and the std::ranges::view namespaces. Recognizing that this is cumbersome, the standard includes an alias for std::ranges::view as the simply, std::view. I still find that cumbersome. For this recipe I will use the following aliases, to save space and because I find it more elegant:
+<ranges>中定义了std::ranges和std::ranges::view命名空间。这貌似有些复杂，标准包含了std::ranges::view的别名，即std::view。我还是觉得那很麻烦。对于这个示例，我将使用以下别名，以节省空间，我觉得这种方式更优雅:
 
 \begin{lstlisting}[style=styleCXX]
 namespace ranges = std::ranges; // save the fingers!
 namespace views = std::ranges::views;
 \end{lstlisting}
 
-This applies to all the code in this recipe.
+这适用于本节中的所有代码。
 \end{tcolorbox}
 
 \subsubsection{How to do it…}
 
-The ranges and views classes are in the <ranges> header. Let's look at how you can use them:
+范围和视图类在<ranges>头文件中，来看看如何使用:
 
 \begin{itemize}
 \item 
-A View is applied to a Range, like this:
+将视图(View)应用于范围(Range)，如下所示:
 
 \begin{lstlisting}[style=styleCXX]
 const vector<int> nums{ 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
@@ -40,73 +39,73 @@ auto result = ranges::take_view(nums, 5);
 for (auto v: result) cout << v << " ";
 \end{lstlisting}
 
-Output:
+输出:
 
 \begin{tcblisting}{commandshell={}}
 1 2 3 4 5
 \end{tcblisting}
 
-ranges::take\_view(range, n) is a view that returns the first n elements.
+ranges::take\_view(range, n)：返回前n个元素的视图。
 
-You may also use the view adapter version of take\_view():
+也可以使用视图适配器版本的take\_view():
 
 \begin{lstlisting}[style=styleCXX]
 auto result = nums | views::take(5);
 for (auto v: result) cout << v << " ";
 \end{lstlisting}
 
-Output:
+输出:
 
 \begin{tcblisting}{commandshell={}}
 1 2 3 4 5
 \end{tcblisting}
 
-View adapters are in the std::ranges::views namespace. A view adapter takes the range operand from the left-hand side of the | operator, much like the iostreams usage of the <{}< operator. The | operands are evaluated left-to-right.
+视图适配器位于std::ranges::views命名空间中。视图适配器从|操作符的左侧获取范围操作数，很像<{}<操作符的iostreams用法。|操作赋会从左向右求值。
 
 \item 
-Because a view adapter is iterable, it also qualifies as a range. This allows them to be applied serially, like this:
+因为视图适配器可迭代，所以也有资格作为范围。这使得它们可以连续使用:
 
 \begin{lstlisting}[style=styleCXX]
 const vector<int> nums{ 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
 auto result = nums | views::take(5) | views::reverse;
 \end{lstlisting}
 
-Output:
+输出:
 
 \begin{tcblisting}{commandshell={}}
 5 4 3 2 1
 \end{tcblisting}
 
 \item 
-The filter() view uses a predicate function:
+filter()视图使用了一个谓词函数:
 
 \begin{lstlisting}[style=styleCXX]
 auto result = nums |
 	views::filter([](int i){ return 0 == i % 2; });
 \end{lstlisting}
 
-Output:
+输出:
 
 \begin{tcblisting}{commandshell={}}
 2 4 6 8 10
 \end{tcblisting}
 
 \item 
-The transform() view uses a transformation function:
+transform()视图使用了一个转换函数:
 
 \begin{lstlisting}[style=styleCXX]
 auto result = nums |
 	views::transform([](int i){ return i * i; });
 \end{lstlisting}
 
-Output:
+输出:
 
 \begin{tcblisting}{commandshell={}}
 1 4 9 16 25 36 49 64 81 100
 \end{tcblisting}
 
 \item 
-Of course, these views and adapters work on ranges of any type:
+当然，这些视图和适配器可适用于任何范围:
 
 \begin{lstlisting}[style=styleCXX]
 cosnt vector<string>
@@ -114,46 +113,46 @@ words{ "one", "two", "three", "four", "five" };
 auto result = words | views::reverse;
 \end{lstlisting}
 
-Output:
+输出:
 
 \begin{tcblisting}{commandshell={}}
 five four three two one
 \end{tcblisting}
 
 \item 
-The ranges library also includes a few range factories. The iota factory will generate an incrementing series of values:
+范围库还包括一些工厂函数。iota工厂将生成一系列递增的值:
 
 \begin{lstlisting}[style=styleCXX]
 auto rnums = views::iota(1, 10);
 \end{lstlisting}
 
-Output:
+输出:
 
 \begin{tcblisting}{commandshell={}}
 1 2 3 4 5 6 7 8 9
 \end{tcblisting}
 
 \item 
-The iota(value, bound) function generates a sequence starting with value and ending before bound. If bound is omitted, the sequence is infinite:
+iota(value, bound)函数的作用是:生成一个从value开始，到bound之前结束的序列。若省略了bound，则序列为无穷大:
 
 \begin{lstlisting}[style=styleCXX]
 auto rnums = views::iota(1) | views::take(200);
 \end{lstlisting}
 
-Output:
+输出:
 
 \begin{tcblisting}{commandshell={}}
 1 2 3 4 5 6 7 8 9 10 11 12 […] 196 197 198 199 200
 \end{tcblisting}
 \end{itemize}
 
-Ranges, Views, and View Adapters are incredibly flexible and useful. Let's take a deeper look for a better understanding.
+范围、视图和视图适配器灵活好用。让我们更深入地了解一下。
 
 \subsubsection{How it works…}
 
-To satisfy the basic requirements for a Range, an object must have at least two iterators, begin() and end(), where the end() iterator is a sentinel, used to determine the end point of a range. Most STL containers qualify as ranges, including string, vector, array, map, and others, with the notable exception of container-adapters, like stack and queue, which don't have begin and end iterators.
+为了满足范围的基本要求，对象必须至少有两个迭代器begin()和end()，其中end()迭代器是一个哨兵，用于确定Range的端点。大多数STL容器都符合范围的要求，包括string、vector、array、map等，值得注意的是，容器适配器除外，如stack和queue，因为它们没有开始迭代器和结束迭代器。
 
-A View is an object which operates on a range and returns a modified range. A view operates lazily, and contains no data of its own. Instead of keeping a copy of the underlying data, it simply returns iterators to underlying elements as needed. Let's examine this code snippet:
+视图是一个对象，操作一个范围并返回一个修改后的范围。视图是惰性操作的，不包含自己的数据。它不保留底层数据的副本，只是根据需要返回底层元素的迭代器。来看一下这个代码段:
 
 \begin{lstlisting}[style=styleCXX]
 vector<int> vi { 0, 1, 2, 3, 4, 5 };
@@ -164,17 +163,17 @@ for(int i : tv) {
 cout << "\n";
 \end{lstlisting}
 
-Output:
+输出:
 
 \begin{tcblisting}{commandshell={}}
 0 1
 \end{tcblisting}
 
-In this example, the take\_view object takes two parameters, a range (in this case, a vector<int> object), and a count. The result is a view with the first count objects from the vector. At evaluation time, during the iteration of the for loop, the take\_view object simply returns iterators that point to elements of the vector object, as needed.
+本例中，take\_view对象接受两个参数，一个范围(在本例中是vector<int>对象)和一个计数。结果是一个包含vector中第一个count对象的视图。在求值时，在for循环的迭代过程中，take\_view对象只根据需要返回指向vector对象元素的迭代器。
 
-The vector object is not modified in this process.
+在此过程中不修改vector对象。
 
-Many of the views in the ranges namespace have corresponding range adapters in the views namespace. These adapters may be used with the bitwise or (|) operator, as a pipe, like this:
+范围命名空间中的许多视图在视图命名空间中都有相应的范围适配器，这些适配器可以使用按位或(|)操作符作为管道:
 
 \begin{lstlisting}[style=styleCXX]
 vector<int> vi { 0, 1, 2, 3, 4, 5 };
@@ -185,13 +184,13 @@ for(int i : tview) {
 cout << "\n";
 \end{lstlisting}
 
-Output:
+输出:
 
 \begin{tcblisting}{commandshell={}}
 0 1
 \end{tcblisting}
 
-As expected, the | operator evaluates left to right. And because the result of the range adapter is another range, these adapter expressions may be chained:
+正如预期的那样，|操作符从左到右求值。因为范围适配器的结果是另一个范围，所以这些适配器表达式可以链接起来:
 
 \begin{lstlisting}[style=styleCXX]
 vector<int> vi { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 };
@@ -202,13 +201,13 @@ for(int i : tview) {
 cout << "\n";
 \end{lstlisting}
 
-Output:
+输出:
 
 \begin{tcblisting}{commandshell={}}
 9 8 7 6 5
 \end{tcblisting}
 
-The library includes a filter view that is used with a predicate, for defining simple filters:
+标准库包括一个过滤器视图，用于定义简单的过滤器:
 
 \begin{lstlisting}[style=styleCXX]
 vector<int> vi { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 };
@@ -216,13 +215,13 @@ auto even = [](long i) { return 0 == i % 2; };
 auto tview = vi | views::filter(even);
 \end{lstlisting}
 
-Output:
+输出:
 
 \begin{tcblisting}{commandshell={}}
 0 2 4 6 8
 \end{tcblisting}
 
-Also included, is a transform view that is used with a transform function for transforming results:
+还包括一个transform视图，与transform函数一起用于转换结果:
 
 \begin{lstlisting}[style=styleCXX]
 vector<int> vi { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 };
@@ -231,67 +230,67 @@ auto x2 = [](auto i) { return i * 2; };
 auto tview = vi | views::filter(even) | views::transform(x2);
 \end{lstlisting}
 
-Output:
+输出:
 
 \begin{tcblisting}{commandshell={}}
 0 4 8 12 16
 \end{tcblisting}
 
-There are quite a few useful views and view adapters in the library. Please check your favorite reference site, or (\url{https://j.bw.org/ranges}) for a complete list.
+库中有相当多有用的视图和视图适配器。可访问(\url{https://j.bw.org/ranges})获取完整的列表。
 
 \subsubsection{There's more…}
 
-Beginning with C++20, most of the algorithms in the <algorithm> header include versions for use with ranges. These versions are still in the <algorithm> header, but in the std::ranges namespace. This distinguishes them from the legacy algorithms.
+从C++20开始，<algorithm>头文件中的大多数算法都会基于范围。这些版本在<algorithm>头文件中，但是在std::ranges命名空间中。这将它们与传统算法区别开来。
 
-This means that, instead of calling an algorithm with two iterators:
+从而，无需再调用带有两个迭代器的算法:
 
 \begin{lstlisting}[style=styleCXX]
 sort(v.begin(), v.end());
 \end{lstlisting}
 
-You can now call it with just a range, like this:
+现在可以用范围来调用:
 
 \begin{lstlisting}[style=styleCXX]
 ranges::sort(v);
 \end{lstlisting}
 
-That's certainly more convenient, but how does it really help?
+这当然更方便，但它真正意义在哪里呢?
 
-Consider the case where you want to sort part of a vector, you could do that the old way, like this:
+回想一下，要对vectore的一部分排序时的情况。可以用老方法来做:
 
 \begin{lstlisting}[style=styleCXX]
 sort(v.begin() + 5, v.end());
 \end{lstlisting}
 
-This would sort the elements of the vector after the first 5. With the ranges version, you can use a view to skip the first 5 elements:
+这将对向量的前5个元素进行排序。范围版本中，可以使用视图来跳过前5个元素:
 
 \begin{lstlisting}[style=styleCXX]
 ranges::sort(views::drop(v, 5));
 \end{lstlisting}
 
-You can even combine views:
+甚至可以组合视图:
 
 \begin{lstlisting}[style=styleCXX]
 ranges::sort(views::drop(views::reverse(v), 5));
 \end{lstlisting}
 
-In fact, you can even use range adapters as the argument to ranges::sort:
+也可以使用范围适配器作为ranges::sort的参数:
 
 \begin{lstlisting}[style=styleCXX]
-	ranges::sort(views::drop(v, 5));
+ranges::sort(v | views::reverse | views::drop(5));
 \end{lstlisting}
 
-In contrast, if you wanted to do this with the traditional sort algorithm and vector iterators, it would look something like this:
+用传统的排序算法和vector迭代器来完成:
 
 \begin{lstlisting}[style=styleCXX]
-	ranges::sort(views::drop(v, 5));
+ranges::sort(v.rbegin() + 5, v.rend());
 \end{lstlisting}
 
-While that's certainly shorter, and not impossible to understand, I find the range adapters version far more intuitive.
+虽然这当然更简单，也很好理解，但我觉得范围适配器版本的会更直观。
 
-You can find a complete list of algorithms that have been constrained to work with ranges on the cppreference site (\url{https://j.bw.org/algoranges}).
+可以在cppreference(\url{https://j.bw.org/algoranges})上找到限制使用范围的完整算法列表。
 
-In this recipe, we've only scratched the surface of Ranges and Views. This feature is the culmination of over a decade of work by many different teams, and I expect it to fundamentally change the way we use containers in the STL.
+这个示例中，我们只触及了范围和视图的冰山一角。这个特性是许多不同团队十多年来工作的结晶，我希望它能从根本上改变我们使用STL容器的方式。
 
 
 

@@ -1,13 +1,13 @@
 
-Header files have been around since the very beginning of the C language. Originally, they were mainly used for text substitution macros and linking external symbols between translation units. With the introduction of templates, C++ leveraged header files to carry actual code. Because templates need to be recompiled for changes in specializations, we've been carrying them around in header files for many years. As the STL continues to grow over the years, these header files have grown as well. The situation has become unwieldy and is no longer scalable for the future.
+头文件在C语言出现之初就存在了。最初，主要用于文本替换宏和翻译单元之间的外部符号链接。随着模板的引入，C++利用头文件来放置实现的代码。因为模板需要重新编译以适应相应的特化，所以多年来我们一直在这样使用头文件。随着STL多年的发展，这些头文件的体积也在不断增长。目前这种情况已经难以处理，并且可扩展性越来越差。
 
-Header files typically contain a lot more than templates. They often contain configuration macros and other symbols that are required for system purposes, but not useful for the application. As the number of headers grows, the number of opportunities for symbol collisions grows as well. This is even more problematic when you consider the abundance of macros, which are not subject to namespace restrictions nor any form of type safety.
+头文件通常包含比模板更多的内容，通常包含系统所需的配置宏和其他符号。随着头文件数量的增加，符号冲突的几率也在增加。考虑到使用更多的宏时，问题就更大了，它们不受命名空间的限制，也不受其他形式的类型安全限制。
 
-C++20 addresses this problem with modules.
+C++20中使用了模块解决了这个问题。
 
 \subsubsection{How to do it…}
 
-You may be used to creating header files like this:
+读者们可能习惯于创建这样的头文件:
 
 \begin{lstlisting}[style=styleCXX]
 #ifndef BW_MATH
@@ -21,7 +21,7 @@ namespace bw {
 #endif // BW_MATH
 \end{lstlisting}
 
-This minimalist example illustrates several of the problems that modules address. The BW\_MATH symbol is used as an include guard. Its only purpose is to prevent the header file from being included more than once, yet its symbol is carried throughout the translation unit. When you include this header in your source file, it may look like this:
+这个极简的例子说明了模块解决的几个问题。BW\_MATH符号用作包含守卫，唯一目的是防止头文件多次包含，但其符号贯穿整个翻译单元。当在源文件中包含这个头文件时，看起来像这样:
 
 \begin{lstlisting}[style=styleCXX]
 #include "bw-math.h"
@@ -30,9 +30,9 @@ This minimalist example illustrates several of the problems that modules address
 #include <iostream>
 \end{lstlisting}
 
-Now that BW\_MATH symbol is available to every other header you've included, and every header included by the other headers, and on and on. That's a lot of opportunities for collision. And keep in mind, the compiler cannot check for these collisions. They're macros. That means they're translated by the preprocessor before the compiler ever has a chance to see them.
+现在BW\_MATH符号可用于包含的其他头文件，以及其他头文件包含的头文件，等等。这就会增大碰撞的几率，并且编译器不能检查这些冲突。他们是宏，在编译器有看到它们前，就已经使用预处理器翻译了。
 
-Now we get to the actual point of the header, the template function:
+现在打开头文件看看，即对模板函数进行了解:
 
 \begin{lstlisting}[style=styleCXX]
 template<typename T>
@@ -41,11 +41,11 @@ T add(T lhs, T rhs) {
 }
 \end{lstlisting}
 
-Because it's a template, every time you use the add() function the compiler must create a separate specialization. This means that the template function must be parsed and specialized each time it's invoked. That's why templates go in header files; the source must be available at compile time. As the STL grows and evolves, with its many large template classes and functions, this becomes a significant scalability problem.
+因为是一个模板，每次使用add()时，编译器需要创建一个特化。从而模板函数每次调用时，都需要解析和特化。这就是为什么模板实现要放在头文件中的原因，源代码必须在编译时可见。随着STL的发展和壮大，现在已经有许多大型模板类和函数，这就成为了一个可扩展性的问题。
 
-Modules solve these problems and more.
+模块解决了这些问题，以及其他问题。
 
-As a module, bw-math.h becomes bw-math.ixx (in the MSVC naming convention) and it looks like this:
+作为一个模块，bw-math.h变成了bw-math.ixx(MSVC的命名约定)，内容如下:
 
 \begin{lstlisting}[style=styleCXX]
 export module bw_math;
@@ -55,9 +55,9 @@ T add(T lhs, T rhs) {
 }
 \end{lstlisting}
 
-Notice that the only symbols exported are the name of the module, bw\_math, and the name of the function, add(). This keeps the namespace clean.
+注意，导出的符号是模块名bw\_math和函数名add()。这可使命名空间保持干净。
 
-The usage is cleaner as well. When we use it in module-test.cpp, it looks like this:
+这种用法也更简洁。在module-test.cpp中使用时，这样就可以:
 
 \begin{lstlisting}[style=styleCXX]
 import bw_math;
@@ -75,9 +75,9 @@ int main() {
 }
 \end{lstlisting}
 
-The import declarations are used where we might otherwise use \#include preprocessor directives. These import the symbol tables from the modules for linkage.
+import声明用在可能使用\#include预处理器指令的地方。会从模块中导入符号表进行链接。
 
-The output of our example looks like this:
+示例的输出如下所示:
 
 \begin{tcblisting}{commandshell={}}
 $ ./module-test
@@ -86,15 +86,15 @@ int: 49
 string: one two
 \end{tcblisting}
 
-The module version works exactly as it did in a header file, only cleaner and more efficiently.
+模块版本的工作原理与头文件中相同，只是更干净、更高效。
 
 \begin{tcolorbox}[colback=webgreen!5!white,colframe=webgreen!75!black,title=Note]
-The compiled module includes a separate metadata file (module-name.ifc in the MSVC naming convention), which describes the module interface. This allows the module to support templates. The metadata includes sufficient information for the compiler to create template specializations.
+编译后的模块包含一个单独的元数据文件(module-name.ifc是MSVC中的命名约定)，描述了模块接口，允许模块支持模板。元数据包含编译器创建模板特化所需的所有信息。
 \end{tcolorbox}
 
 \subsubsection{How it works…}
 
-The import and export declarations are at the core of the Modules implementation. Let's take another look at the bw-math.ixx module:
+导入和导出声明是Modules实现的核心，再来看看bw-math.ixx模块:
 
 \begin{lstlisting}[style=styleCXX]
 export module bw_math;
@@ -104,9 +104,9 @@ T add(T lhs, T rhs) {
 }
 \end{lstlisting}
 
-Notice the two export declarations. The first exports the module itself with export module bw\_math. This declares the translation unit as a module. There must be a module declaration at the top of every module file, and before any other statements. The second export makes the function name add() available to the module consumer.
+请注意这两个导出声明。第一个函数使用export module bw\_math导出模块本身，这将翻译单元声明为一个模块。每个模块文件的顶部，以及任何其他语句之前必须有一个模块声明。第二个导出使函数add()对模块使用者可用。
 
-If your module requires \#include directives, or other global fragments, you will need to first declare your module with a simple module declaration like this:
+若模块需要\#include指令，或者其他全局代码段，需要一个简单的模块声明，像这样:
 
 \begin{lstlisting}[style=styleCXX]
 module;
@@ -116,11 +116,11 @@ export module bw_math;
 ...
 \end{lstlisting}
 
-The module; declaration, on a line by itself at the top of the file, introduces a global module fragment. Only preprocessor directives may appear in the global module fragment. This must be immediately followed by a standard module declaration (export module bw\_math;) and the rest of the module content. Let's look closer at how this works:
+该模块;声明在文件顶部的一行中单独引入了一个全局模块，只有预处理器指令可以出现在全局模块片段中。之后必须立即声明一个标准模块(export module bw\_math;)和其余的模块内容。来看看它是如何工作的:
 
 \begin{itemize}
 \item 
-An export declaration makes a symbol visible to the module consumer, that is, the code that imports the module. Symbols default to private.
+导出声明使一个符号对模块使用者可见，即导入模块的代码，符号默认为private。
 
 \begin{lstlisting}[style=styleCXX]
 export int a{7}; // visible to consumer
@@ -128,7 +128,7 @@ int b{42}; // not visible
 \end{lstlisting}
 
 \item 
-You can export a block, like this:
+可以导出一个代码块，像这样:
 
 \begin{lstlisting}[style=styleCXX]
 export {
@@ -138,7 +138,7 @@ export {
 \end{lstlisting}
 
 \item 
-You can export a namespace:
+导出命名空间:
 
 \begin{lstlisting}[style=styleCXX]
 export namespace bw { // all of the bw namespace is
@@ -151,7 +151,7 @@ export namespace bw { // all of the bw namespace is
 \end{lstlisting}
 
 \item 
-Or, you can export individual symbols from a namespace:
+或者，可以从命名空间中导出单独的符号:
 
 \begin{lstlisting}[style=styleCXX]
 namespace bw { // all of the bw namespace is visible
@@ -164,7 +164,7 @@ namespace bw { // all of the bw namespace is visible
 
 
 \item 
-An import declaration imports a module in the consumer:
+import声明在调用代码中导入一个模块:
 
 \begin{lstlisting}[style=styleCXX]
 import bw_math;
@@ -176,16 +176,16 @@ int main() {
 \end{lstlisting}
 
 \item 
-You can even import a module and export it to the consumer to pass it along:
+甚至可以导入一个模块，并将其导出传递给调用代码:
 
 \begin{lstlisting}[style=styleCXX]
 export module bw_math;
 export import std.core;
 \end{lstlisting}
 
-The export keyword must precede the import keyword.
+export关键字必须在import关键字之前。
 
-The std.core module is now available for the consumer:
+std.core模块现在可以在调用代码中使用:
 
 \begin{lstlisting}[style=styleCXX]
 import bw_math;
@@ -205,10 +205,10 @@ int main() {
 
 \end{itemize}
 
-As you can see, modules are a simple, straightforward alternative to header files. I know a lot of us are looking forward to the broad availability of modules. I can see this greatly reducing our dependency on header files.
+模块是头文件的简化、直接的替代品，很多人都期待着模块的广泛使用。这样就可以大大减少了对头文件的依赖。
 
 \begin{tcolorbox}[colback=webgreen!5!white,colframe=webgreen!75!black,title=Note]
-At the time of writing, the only complete implementation of modules is in a preview release of MSVC. The module filename extension (.ixx) may be different for other compilers. Also, the amalgamated std.core module is part of how MSVC implements the STL as modules in this release. Other compilers may not use this convention. Some details may change when fully compliant implementations are released.
+撰写本文时，模块的唯一完整实现是在MSVC的预览版中。对于其他编译器，模块扩展名(.ixx)可能不同。此外，合并的std.core模块是MSVC在这个版本中如何将STL作为模块实现的一部分。其他编译器可能不使用这个约定。在完全兼容的实现发布时，可能会发生变化。
 \end{tcolorbox}
 
-In the example files, I've included a module version of my format-based print() function. This works on the current preview release of MSVC. It may require some small modifications to make it work on other systems, once they support enough of the modules specification.
+示例文件中，包含了基于格式的print()函数的模块版本，这适用于MSVC的当前预览版本。当其他系统支持模块规范，当前的代码可能需要一些修改才能在其他系统上工作。

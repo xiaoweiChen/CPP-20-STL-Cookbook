@@ -1,108 +1,107 @@
 
-The STL provides a comprehensive set of container types, including sequential containers, associative containers, and container adapters. Here's a brief overview:
+STL提供了一套全面的容器类型，包括顺序容器、关联容器和容器适配器。以下是简要的概述:
 
-\subsubsection{Sequential containers}
+\subsubsection{顺序容器}
 
-
-The sequential containers provide an interface where the elements are arranged in sequence. While you may use the elements sequentially, some of these containers use contiguous storage, and others do not. The STL includes these sequential containers:
+顺序容器提供了一个接口，其中元素按顺序排列。虽然可以按顺序使用元素，但其中一些容器使用连续存储，而其他容器则不使用。STL包含以下顺序容器:
 
 \begin{itemize}
 \item 
-The array is a fixed-size sequence that holds a specific number of elements in contiguous storage. Once allocated, it cannot change size. This is the simplest and fastest contiguous storage container.
+array是一个固定大小的序列，在连续存储器中保存特定数量的元素，分配之后就不能改变大小。这是最简单和最快的连续存储容器。
 
 \item 
-The vector is like an array that can shrink and grow. Its elements are stored contiguously, so changing size may involve the expense of allocating memory and moving data. A vector may keep extra space in reserve to mitigate that cost. Inserting and deleting elements from anywhere other than the back of a vector will trigger realignment of the elements to maintain contiguous storage.
+vector就像一个数组，可以缩小和扩大。其元素是连续存储的，因此改变大小可能涉及分配内存和移动数据的开销。vector可以保留额外的空间来降低操作成本。在vector容器后面以外的任何位置插入和删除元素将触发元素的重新排列，以保持内存的连续存储。
 
 \item 
-The list is a doubly-linked list structure that allows elements to be inserted and deleted in constant (O(1)) time. Traversing the list happens in linear O(n) time. A single-linked variant is available as forward\_list, which only iterates forward. A forward\_list uses less space and is somewhat more efficient than a doubly-linked list, but lacks some capability.
+list是一个双链表结构，允许在常量(O(1))时间内插入和删除元素。遍历列表的时间为线性O(n)。单链接的变体是forward\_list，只能向前迭代。forward\_list会使用更少的空间，并且比双链表更高效，但缺少一些功能。
 
 \item 
-The deque (commonly pronounced, deck) is a double-ended queue. It's a sequential container that can be expanded or contracted on both ends. A deque allows random access to its elements, much like a vector, but does not guarantee contiguous storage.
+deque(通常发音为deck)是一个双端队列。它是一个连续的容器，可以在两端展开或收缩。deque允许随机访问它的元素，很像vector，但不保证存储的连续性。
 \end{itemize}
 
-\subsubsection{Associative containers}
+\subsubsection{关联容器}
 
-An associative container associates a key with each element. Elements are referenced by their key, rather than their position in the container. STL associative containers include these containers:
+关联容器将一个键与每个元素关联起来。元素是通过键来引用的，而不是其在容器中的位置。STL关联容器包括以下容器:
 
 \begin{itemize}
 \item 
-The set is an associative container where each element is also its own key. Elements are ordered, usually by some sort of binary tree. Elements in a set are immutable and cannot be modified, but they can be inserted and removed. Elements in a set are unique, duplicates are not allowed. A set iterates in order according to its sorting operators.
+set是一个关联容器，每个元素也是自己的键，元素通常按某种二叉树方式排序。set中的元素不可变，不能修改，但是可以插入和移除。set中的元素是唯一的，不允许重复。set可以根据排序操作符按顺序进行迭代。
 
 \item 
-The multiset is like a set with non-unique keys, where duplicates are allowed.
+multiset就像一个具有非唯一键的集合，允许重复。
 
 \item 
-The unordered\_set is like a set that does not iterate in order. Elements are not sorted in any specific order, but are organized according to their hash values for fast access.
+unordered\_set就像一个不按顺序迭代的集合。元素不按特定顺序排序，而是根据哈希值进行组织，以便快速访问。
 
 \item 
-The unordered\_multiset is like an unordered\_set with non-unique keys, where duplicates are allowed.
+unordered\_multiset类似于unordered\_set，允许重复。
 
 \item 
-The map is an associative container for key-value pairs, where each key is mapped to a specific value (or payload). The types of the key and value may be different. Keys are unique but values are not. A map iterates in order of its keys, according to its sorting operators.
+map是键-值对的关联容器，其中每个键都映射到特定的值(或有效负载)。键和值的类型可能不同。键是唯一的，但值不是。map根据其排序操作符，按键的顺序进行迭代。
 
 \item 
-The multimap is like a map with non-unique keys, where duplicate keys are allowed.
+multimap类似于具有非唯一键的映射，允许重复键。
 
 \item 
-The unordered\_map is like a map that does not iterate in order.
+unordered\_map就像一个没有按顺序迭代的map。
 
 \item 
-The unordered\_multimap is like an unordered\_map with non-unique keys, where duplicates are allowed.
+unordered\_multimap类似于unordered\_map，允许重复。
 \end{itemize}
 
-\subsubsection{Container adapters}
+\subsubsection{容器适配器}
 
-A container adapter is a class which encapsulates an underlying container. The container class provides a specific set of member functions to access the underlying container elements. The STL provides these container adapters:
+容器适配器是封装底层容器的类，容器类提供了一组特定的成员函数来访问底层容器元素。STL提供了以下容器适配器:
 
 \begin{itemize}
 \item 
-The stack provides a LIFO (last-in, first-out) interface where elements may be added and extracted from only one end of the container. The underlying container may be one of vector, deque, or list. If no underlying container is specified, the default is deque.
+stack提供了后进先出(LIFO)接口，在该接口中只能从容器的一端添加和提取元素。底层容器可以是vector、deque或list中的一种。若没有指定底层容器，默认为deque。
 
 \item 
-The queue provides a FIFO (first-in, first-out) interface where elements may be added at one end of the container and extracted from the other end. The underlying container may be one of deque or list. If no underlying container is specified, the default is deque.
+queue提供了FIFO(先进先出)接口，其中元素可以在容器的一端添加，并从另一端提取。底层容器可以是deque或list容器之一。若没有指定底层容器，默认为deque。
 
 \item 
-The priority\_queue keeps the greatest value element at the top, according to a strict weak ordering. It provides a constant time lookup of the greatest value element, at the expense of logarithmic time insertion and extraction. The underlying container may be one of vector or deque. If no underlying container is specified, the default is vector.
+priority\_queue按照严格的弱顺序将最大的值元素保持在顶部，以对数时间插入和提取为代价，提供了对最大值元素的常数时间查找。底层容器可以是vector或deque中的一个。若没有指定底层容器，默认为vector。
 \end{itemize}
 
 我们将讨论以下主题:
 
 \begin{itemize}
 \item 
-Use uniform erasure functions to delete items from a container
+使用擦除函数从容器中删除项
 
 \item 
-Delete items from an unsorted vector in constant time
+常数时间内从未排序的向量中删除项
 
 \item 
-Access vector elements directly and safely
+安全地访问vector元素
 
 \item 
-Keep vector elements sorted
+保持vector元素的排序
 
 \item 
-Efficiently insert elements into a map
+高效地将元素插入到map中
 
 \item 
-Efficiently modify the keys of map items
+高效地修改map项的键值
 
 \item 
-Use unordered\_map with custom keys
+自定义键值的unordered\_map
 
 \item 
-Use set to sort and filter user input
+使用set对输入进行排序和筛选
 
 \item 
-A simple RPN calculator with deque
+简单的RPN计算器与deque
 
 \item 
-A word frequency counter with map
+使用map的词频计数器
 
 \item 
-Find long sentences with a vector of vectors
+找出含有相应长句的vector
 
 \item 
-A ToDo list using multimap
+使用multimap制作待办事项列表
 \end{itemize}
 
 

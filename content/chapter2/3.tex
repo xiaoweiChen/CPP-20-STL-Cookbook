@@ -1,7 +1,7 @@
 
-Structured binding makes it easy to unpack the values of a structure into separate variables, improving the readability of your code.
+结构化绑定可以很容易地将值解压缩到单独的变量中，从而提高代码的可读性。
 
-With structured binding you can directly assign the member values to variables like this:
+使用结构化绑定，可以直接将成员值分配给变量:
 
 \begin{lstlisting}[style=styleCXX]
 things_pair<int,int> { 47, 9 };
@@ -9,7 +9,7 @@ auto [this, that] = things_pair;
 cout << format("{} {}\n", this, that);
 \end{lstlisting}
 
-Output:
+输出:
 
 \begin{tcblisting}{commandshell={}}
 47 9
@@ -19,7 +19,7 @@ Output:
 
 \begin{itemize}
 \item 
-Structured binding works with pair, tuple, array, and struct. Beginning with C++20, this includes bit-fields. This example uses a C-array:
+结构化绑定使用pair、tuple、array和struct。C++20起，还会包括位域。下面的例子使用了C数组:
 
 \begin{lstlisting}[style=styleCXX]
 int nums[] { 1, 2, 3, 4, 5 };
@@ -27,18 +27,18 @@ auto [ a, b, c, d, e ] = nums;
 cout << format("{} {} {} {} {}\n", a, b, c, d, e);
 \end{lstlisting}
 
-Output:
+输出:
 
 \begin{tcblisting}{commandshell={}}
 1 2 3 4 5
 \end{tcblisting}
 
-Because the structured binding uses automatic type deduction, its type must be auto. The names of the individual variables are within the square brackets, [ a, b, c, d, e ].
+因为结构化绑定使用自动类型推断，所以它的类型必须是auto。各个变量的名称都在方括号内，[a, b, c, d, e]。
 
-In this example the int C-array nums holds five values. These five values are assigned to the variables (a, b, c, d, and e) using structured binding.
+在这个例子中，int型c数组nums包含五个值。使用结构化绑定将这五个值赋给变量(a、b、c、d和e)。
 
 \item 
-This also works with an STL array object:
+这也适用于STL数组对象:
 
 \begin{lstlisting}[style=styleCXX]
 array<int,5> nums { 1, 2, 3, 4, 5 };
@@ -46,14 +46,14 @@ auto [ a, b, c, d, e ] = nums;
 cout << format("{} {} {} {} {}\n", a, b, c, d, e);
 \end{lstlisting}
 
-Output:
+输出:
 
 \begin{tcblisting}{commandshell={}}
 1 2 3 4 5
 \end{tcblisting}
 
 \item 
-Or you can use it with a tuple:
+或者可以将它与tuple一起使用:
 
 \begin{lstlisting}[style=styleCXX]
 tuple<int, double, string> nums{ 1, 2.7, "three" };
@@ -61,14 +61,14 @@ auto [ a, b, c ] = nums;
 cout << format("{} {} {}\n", a, b, c);
 \end{lstlisting}
 
-Output:
+输出:
 
 \begin{tcblisting}{commandshell={}}
 1 2.7 three
 \end{tcblisting}
 
 \item 
-When you use it with a struct it will take the variables in the order they're defined:
+将它与结构体一起使用时，将按照定义的顺序接受变量:
 
 \begin{lstlisting}[style=styleCXX]
 struct Things { int i{}; double d{}; string s{}; };
@@ -77,14 +77,14 @@ auto [ a, b, c ] = nums;
 cout << format("{} {} {}\n", a, b, c);
 \end{lstlisting}
 
-Output:
+输出:
 
 \begin{tcblisting}{commandshell={}}
 1 2.7 three
 \end{tcblisting}
 
 \item 
-You can use a reference with a structured binding, which allows you to modify the values in the bound container, while avoiding duplication of the data:
+可以使用带有结构化绑定的引用，可以修改绑定容器中的值，同时避免重复数据复制:
 
 \begin{lstlisting}[style=styleCXX]
 array<int,5> nums { 1, 2, 3, 4, 5 };
@@ -94,17 +94,17 @@ c = 47;
 cout << format("{} {}\n", nums[2], c);
 \end{lstlisting}
 
-Output:
+输出:
 
 \begin{tcblisting}{commandshell={}}
 3 3
 47 47
 \end{tcblisting}
 
-Because the variables are bound as a reference, you can assign a value to c and it will change the value in the array as well (nums[2]).
+因为变量绑定为引用，所以可以给c赋一个值，这也会改变数组中的值(nums[2])。
 
 \item 
-You can declare the array const to prevent values from being changed:
+可以声明数组const来避免值的改变:
 
 \begin{lstlisting}[style=styleCXX]
 const array<int,5> nums { 1, 2, 3, 4, 5 };
@@ -112,7 +112,7 @@ auto& [ a, b, c, d, e ] = nums;
 c = 47; // this is now an error
 \end{lstlisting}
 
-Or you can declare the binding const for the same effect, while allowing the array to be changed elsewhere and still avoid copying data:
+或者可以声明为const绑定来达到同样的效果，同时允许在其他地方更改数组，从而避免复制数据:
 
 \begin{lstlisting}[style=styleCXX]
 array<int,5> nums { 1, 2, 3, 4, 5 };
@@ -122,21 +122,20 @@ c = 47; // this is also an error
 
 \end{itemize}
 
-
 \subsubsection{How it works…}
 
-Structured binding uses automatic type deduction to unpack the structure into your variables. It determines the type of each value independently, and assigns a corresponding type to each variable.
+结构化绑定使用自动类型推断将结构解压缩到变量中。其独立地确定每个值的类型，并为每个变量分配相应的类型。
 
 \begin{itemize}
 \item 
-Because structured binding uses automatic type deduction, you cannot specify a type for the binding. You must use auto. You should get a reasonable error message if you try to use a type for the binding:
+因为结构化绑定使用自动类型推断，所以不能为绑定指定类型，必须使用auto。若尝试使用一个类型进行绑定，会得到相应的错误信息:
 
 \begin{lstlisting}[style=styleCXX]
 array<int,5> nums { 1, 2, 3, 4, 5 };
 int [ a, b, c, d, e ] = nums;
 \end{lstlisting}
 
-Output:
+输出:
 
 \begin{tcblisting}{commandshell={}}
 error: structured binding declaration cannot have type 'int'
@@ -144,10 +143,10 @@ note: type must be cv-qualified 'auto' or reference to
 cv-qualified 'auto'
 \end{tcblisting}
 
-Above is the error from GCC when I try to use int with the structured binding declaration.
+当我尝试使用int与结构化绑定一起使用，上面就是来自GCC的报错。
 
 \item 
-It's common to use structured binding for a return type from a function:
+对于函数的返回类型，通常使用结构化绑定:
 
 \begin{lstlisting}[style=styleCXX]
 struct div_result {
@@ -170,14 +169,14 @@ int main() {
 }
 \end{lstlisting}
 
-Output:
+输出:
 
 \begin{tcblisting}{commandshell={}}
 quotient: 9, remainder 2
 \end{tcblisting}
 
 \item 
-Because the map container classes return a pair for each element, it can be convenient to use structured binding to retrieve key/value pairs:
+因为map容器类为每个元素返回一对，所以使用结构化绑定来检索键/值对就很方便:
 
 \begin{lstlisting}[style=styleCXX]
 map<string, uint64_t> inhabitants {
@@ -204,7 +203,7 @@ int main() {
 }
 \end{lstlisting}
 
-Output:
+输出:
 
 \begin{tcblisting}{commandshell={}}
 there are 1,086,881,528 cats
@@ -213,7 +212,7 @@ there are 24,246,291 klingons
 there are 17,863,376 pokemon
 \end{tcblisting}
 
-Using structured binding to unpack structures should make your code clearer and easier to maintain.
+使用结构化绑定来解包结构可以使代码更清晰、更容易维护。
 \end{itemize}
 
 

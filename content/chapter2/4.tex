@@ -1,9 +1,9 @@
 
-Beginning with C++17, if and switch now have initialization syntax, much like the for loop has had since C99. This allows you to limit the scope of variables used within the condition.
+C++17起，if和switch现在有初始化语法，就像C99开始的for循环一样。可以在限制条件中，确定变量的使用范围。
 
 \subsubsection{How to do it…}
 
-You may be accustomed to code like this:
+可能习惯于这样的代码:
 
 \begin{lstlisting}[style=styleCXX]
 const string artist{ "Jimi Hendrix" };
@@ -15,9 +15,9 @@ if(pos != string::npos) {
 }
 \end{lstlisting}
 
-This leaves the variable pos exposed outside the scope of the conditional statement, where it needs to be managed, or it can collide with other attempts to use the same symbol.
+这使得变量pos暴露在条件语句的作用域之外，需要对其进行管理，否则它可能与使用相同符号的其他变量发生冲突。
 
-Now you can put the initialization expression inside the if condition:
+现在可以把初始化表达式放在if条件中:
 
 \begin{lstlisting}[style=styleCXX]
 if(size_t pos{ artist.find("Jimi") }; pos != string::npos) {
@@ -27,15 +27,15 @@ if(size_t pos{ artist.find("Jimi") }; pos != string::npos) {
 }
 \end{lstlisting}
 
-Now the scope of the pos variable is confined to the scope of the conditional. This keeps your namespace clean and manageable.
+现在pos变量的作用域限制在条件变量的作用域内，这使得命名空间内保持干净和可管理。
 
 \subsubsection{How it works…}
 
-The initializer expression can be used in either if or switch statements. Here are some examples of each.
+初始化表达式可以在if或switch语句中使用，以下是其各自的例子。
 
 \begin{itemize}
 \item 
-Use an initializer expression with an if statement:
+使用带有if语句的初始化表达式:
 
 \begin{lstlisting}[style=styleCXX]
 if(auto var{ init_value }; condition) {
@@ -46,10 +46,10 @@ if(auto var{ init_value }; condition) {
 // var is NOT visible
 \end{lstlisting}
 
-The variable defined in the initializer expression is visible within the scope of the entire if statement, including the else clause. Once control flows out of the if statement scope, the variable will no longer be visible, and any relevant destructors will be called.
+在初始化表达式中定义的变量，在整个if语句的范围内是可见的，包括else子句。出了if语句的作用域，该变量将不再可见，并且将调用相关的析构函数。
 
 \item 
-Use an initializer expression with a switch statement:
+使用switch语句的初始化表达式:
 
 \begin{lstlisting}[style=styleCXX]
 switch(auto var{ init_value }; var) {
@@ -62,13 +62,13 @@ switch(auto var{ init_value }; var) {
 // var is NOT visible
 \end{lstlisting}
 
-The variable defined in the initializer expression is visible within the scope of the entire switch statement, including all the case clauses and the default clause, if included. Once control flows out of the switch statement scope, the variable will no longer be visible, and any relevant destructors will be called.
+初始化表达式中定义的变量在整个switch语句的作用域中可见，包括所有case子句和default子句(如果包含的话)。当出了switch语句的作用域，变量将不再可见，并且将调用相关的析构函数。
 
 \end{itemize}
 
 \subsubsection{There's more…}
 
-One interesting use case is to limit the scope of a lock\_guard that's locking a mutex. This becomes simple with an initializer expression:
+一个有趣的用例是限制锁定互斥锁的lock\_guard的作用域。使用初始化表达式，会让代码变得更简单:
 
 \begin{lstlisting}[style=styleCXX]
 if (lock_guard<mutex> lg{ my_mutex }; condition) {
@@ -76,9 +76,9 @@ if (lock_guard<mutex> lg{ my_mutex }; condition) {
 }
 \end{lstlisting}
 
-The lock\_guard locks the mutex in its constructor and unlocks it in its destructor. Now the lock\_guard will be automatically destroyed when it runs out of the scope of the if statement. In the past you would have had to delete it or enclose the whole if statement in an extra block of braces.
+lock\_guard在构造函数中锁定互斥量，在析构函数中解锁互斥量。现在，当lock\_guard超出if语句的作用域时，将自动销毁。过去，必须删除它或将整个if语句括在一个额外的大括号块中。
 
-Another use case could be using a legacy interface that uses output parameters, like this one from SQLite:
+另一个用例可能是使用使用输出参数的遗留接口，就像下面示例，来自于SQLite:
 
 \begin{lstlisting}[style=styleCXX]
 if(
@@ -93,9 +93,9 @@ if(
 }
 \end{lstlisting}
 
-Here I can keep the statement handle and the error code localized to the scope of the if statement. Otherwise, I would need to manage those objects globally.
+这里，可以将语句句柄和错误代码本地化到if语句的范围内。否则，需要全局化地管理这些对象。
 
-Using initializer expressions will help keep your code tight and uncluttered, more compact, and easier to read. Refactoring and managing your code will also become easier.
+使用初始化表达式将有助于保持代码紧凑、整洁、紧凑、易阅读。重构和管理代码也会变得更加容易。
 
 
 

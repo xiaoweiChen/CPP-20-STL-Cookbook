@@ -1,15 +1,15 @@
 
-New for C++20, the std::span class is a simple wrapper that creates a view over a contiguous sequence of objects. The span doesn't own any of its own data, it refers to the data in the underlying structure. Think of it as string\_view for C-arrays. The underlying structure may be a C-array, a vector, or an STL array.
+对于C++20来说，std::span类是一个简单的包装器，它在连续的对象序列上创建一个视图。span没有属于自己的数据，其引用底层结构中的数据。可以把它看作C数组的string\_view，底层结构可以是C数组、vector或STL array。
 
 \subsubsection{How to do it…}
 
-You can create a span from any compatible contiguous-storage structure. The most common use case will involve a C-array. For example, if you try to pass a C-array directly to a function, the array is demoted to a pointer and the function has no easy way to know the size of the array:
+可以从兼容的连续存储结构创建一个span，最常见的的是C数组。例如，试图将一个C数组传递给函数，该数组将降级为指针，并且函数没有办法直接了解数组的大小:
 
 \begin{lstlisting}[style=styleCXX]
 void parray(int * a); // loses size information
 \end{lstlisting}
 
-If you define your function with a span parameter, you can pass it a C-array and it will be promoted to span. Here's a template function that takes a span and prints out the size in elements and in bytes:
+若用span形参定义函数，可以传递一个C数组，其将会升级为span。下面是一个模板函数，其接受一个span参数，并以元素和字节为单位输出:
 
 \begin{lstlisting}[style=styleCXX]
 template<typename T>
@@ -21,7 +21,7 @@ void pspan(span<T> s) {
 }
 \end{lstlisting}
 
-You can pass a C-array to this function and it's automatically promoted to span:
+可以传递一个C数组给这个函数，会自动提升为span:
 
 \begin{lstlisting}[style=styleCXX]
 int main() {
@@ -30,7 +30,7 @@ int main() {
 }
 \end{lstlisting}
 
-Output:
+输出:
 
 \begin{tcblisting}{commandshell={}}
 number of elements: 10
@@ -38,13 +38,13 @@ number of bytes: 40
 1 2 3 4 5 6 7 8 9 10
 \end{tcblisting}
 
-The purpose of span is to encapsulate the raw data to provide a measure of safety and utility, with a minimum of overhead.
+span的目的是封装原始数据，并以最小的开销保证安全性和实用性。
 
 \subsubsection{How it works…}
 
-The span class itself doesn't own any data. The data belongs to the underlying data structure. The span is essentially a view over the underlying data. It also provides some useful member functions.
+span类本身不拥有数据，数据属于底层数据结构。span本质上是底层数据的视图，其还提供了一些有用的成员函数。
 
-Defined in the <span> header, the span class looks something like:
+<span>头文件中定义的span类看起来像这样:
 
 \begin{lstlisting}[style=styleCXX]
 template<typename T, size_t Extent = std::dynamic_extent>
@@ -56,35 +56,44 @@ class span {
 };
 \end{lstlisting}
 
-The Extent parameter is a constant of type constexpr size\_t, which is computed at compile time. It's either the number of elements in the underlying data or the std:: dynamic\_extent constant, which indicates that the size is variable. This allows span to use an underlying structure like a vector, which may not always be the same size.
+Extent参数是一个constexpr size\_t类型的常量，在编译时计算。其要么是底层数据中的元素数量，要么是std::dynamic\_extent常量，这表明其大小可变。这允许span使用底层结构(如vector)，但大小并不总是相同。
 
-All member functions are constexpr and const qualified. Member functions include:
+所有成员函数都是constexpr和const限定的。成员功能包括:
 
 \begin{table}[H]
+\centering
 \begin{tabular}{|l|l|}
 \hline
-Public member function & Return value                                  \\ \hline
-T\& front()            & The first element                             \\ \hline
-T\& back()             & The last element                              \\ \hline
-T\& operator{[}{]}     & An indexed element                            \\ \hline
-T* data()              & A pointer to the beginning of the sequence    \\ \hline
-iterator begin()       & An iterator to the first element              \\ \hline
-iterator end()         & An iterator following the last element        \\ \hline
-iterator rbegin()      & A reverse iterator to the first element       \\ \hline
-iterator rend()        & A reverse iterator following the last element \\ \hline
-size\_t size()         & The number of elements in the sequence        \\ \hline
-size\_t size\_bytes()  & The number of bytes in the sequence           \\ \hline
-bool empty()           & True if empty                                 \\ \hline
+\textbf{公共成员函数} & \textbf{返回值}                                  \\ \hline
+T\& front()            & 第一个元素                             \\ \hline
+T\& back()             & 最后一个元素                              \\ \hline
+T\& operator{[}{]}     & 索引位置的元素                            \\ \hline
+T* data()              & 指向序列头部的指针    \\ \hline
+iterator begin()       & 指向第一个元素的迭代器              \\ \hline
+iterator end()         & 指向最后一个元素后面的迭代器        \\ \hline
+iterator rbegin()      & 指向第一个元素的反向迭代器       \\ \hline
+iterator rend()        & 指向最后一个元素后面的反向迭代器 \\ \hline
+size\_t size()         & 序列中元素的数量        \\ \hline
+size\_t size\_bytes()  & 序列所占字节数           \\ \hline
+bool empty()           & 空为真                                 \\ \hline
 \begin{tabular}[c]{@{}l@{}}span\textless{}T\textgreater first\textless{}count\textgreater{}()\\ span\textless{}T\textgreater first(count)\end{tabular} &
-\begin{tabular}[c]{@{}l@{}}A sub-span consisting of the first count elements\\ of the sequence\end{tabular} \\ \hline
-\begin{tabular}[c]{@{}l@{}}span\textless{}T\textgreater last\textless{}count\textgreater{}()\\ span\textless{}T\textgreater last(count)\end{tabular} &
-Returns a sub-span of the last count elements \\ \hline
-\begin{tabular}[c]{@{}l@{}}span\textless{}T\textgreater subspan(offset, \\ count)\end{tabular} &
-\begin{tabular}[c]{@{}l@{}}Retures a sub-span consisting of count elements\\ beginning of offset\end{tabular} \\ \hline
+\begin{tabular}[c]{@{}l@{}}由序列的第一个计数元素组成\\ 的子span\end{tabular} \\ \hline
+
 \end{tabular}
 \end{table}
 
-\begin{tcolorbox}[colback=webgreen!5!white,colframe=webgreen!75!black,title=Important Note]
-The span class is but a simple wrapper that performs no bounds checking. So, if you try to access element n+1 in a span of n elements, the result is undefined, which is tech for, "Bad. Don't do that."
+\begin{table}[H]
+\centering
+\begin{tabular}{|l|l|}
+\hline
+\begin{tabular}[c]{@{}l@{}}span\textless{}T\textgreater last\textless{}count\textgreater{}()\\ span\textless{}T\textgreater last(count)\end{tabular} &
+返回最后一个count元素的子span \\ \hline
+\begin{tabular}[c]{@{}l@{}}span\textless{}T\textgreater subspan(offset, \\ count)\end{tabular} &
+\begin{tabular}[c]{@{}l@{}}返回以offset偏移对头进行偏移后的count个\\ 元素组成的子span\end{tabular} \\ \hline
+\end{tabular}
+\end{table}
+
+\begin{tcolorbox}[colback=webgreen!5!white,colframe=webgreen!75!black,title=重要的Note]
+span类只是一个简单的包装器，不执行边界检查。若尝试访问n个元素中的元素n+1，结果就是未定义的，这很“糟糕”，不要这样做。
 \end{tcolorbox}
 

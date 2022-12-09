@@ -1,9 +1,9 @@
 
-An if constexpr(condition) statement is used where code needs to be executed based on a compile-time condition. The condition may be any constexpr expression of type bool.
+if constexpr(condition)语句用于根据编译时条件执行代码的地方。条件可以是bool类型的constexpr表达式。
 
 \subsubsection{How to do it…}
 
-Consider the case where you have a template function that needs to operate differently depending upon the type of the template parameter.
+试想，有一个模板函数，需要根据模板形参的类型进行不同的操作。
 
 \begin{lstlisting}[style=styleCXX]
 template<typename T>
@@ -24,18 +24,18 @@ int main() {
 }
 \end{lstlisting}
 
-Output:
+输出:
 
 \begin{tcblisting}{commandshell={}}
 value is 47
 value is 47
 \end{tcblisting}
 
-The type of the template parameter T is available at compile time. The constexpr if statement allows the code to easily distinguish between a pointer and a value.
+模板形参T的类型在编译时可用，constexpr if语句可以让代码轻松区分指针和值。
 
 \subsubsection{How it works…}
 
-The constexpr if statement works like a normal if statement except it's evaluated at compile time. The runtime code will not contain any branch statements from a constexpr if statement. Consider our branch statement from above:
+constexpr if语句的工作方式与普通if语句类似，只不过其是在编译时求值的。运行时代码将不包含来自constexpr if语句的任何分支。考虑上面的分支语句:
 
 \begin{lstlisting}[style=styleCXX]
 if constexpr (std::is_pointer_v<T>) {
@@ -45,9 +45,9 @@ if constexpr (std::is_pointer_v<T>) {
 }
 \end{lstlisting}
 
-The condition is\_pointer\_v<T> tests a template parameter, which is not available at runtime. The constexpr keyword tells the compiler that this if statement needs to evaluate at compile time, while the template parameter <T> is available.
+is\_pointer\_v<T>会测试模板参数，该参数在运行时不可用。当模板形参<T>可用时，constexpr关键字会告诉编译器这个if语句需要在编译时求值。
 
-This should make a lot of meta programming situations much easier. The if constexpr statement is available in C++17 and later
+这将使许多元编程情况变得更加容易，if constexpr语句在C++17及更高版本中可用。
 
 
 

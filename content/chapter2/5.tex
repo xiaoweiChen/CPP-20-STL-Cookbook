@@ -1,13 +1,13 @@
 
-Template argument deduction occurs when the types of the arguments to a template function, or class template constructor (beginning with C++17), are clear enough to be understood by the compiler without the use of template arguments. There are certain rules to this feature, but it's mostly intuitive.
+当模板函数或类模板构造函数(C++17起)的实参类型足够清楚，无需使用模板实参，编译器就能理解时，就会进行模板实参推导。这个功能有一定的规则，但主要规则是很直观的。
 
 \subsubsection{How to do it…}
 
-In general, template argument deduction happens automatically when you use a template with clearly compatible arguments. Let's consider some examples.
+通常，当使用具有明确兼容参数的模板时，模板参数推断会自动发生。让我们看一些例子。
 
 \begin{itemize}
 \item 
-In a function template, argument deduction usually looks something like this:
+函数模板中，参数推断通常是这样:
 
 \begin{lstlisting}[style=styleCXX]
 template<typename T>
@@ -23,7 +23,7 @@ int main() {
 }
 \end{lstlisting}
 
-Output:
+输出:
 
 \begin{tcblisting}{commandshell={}}
 T is int
@@ -33,14 +33,14 @@ T is char const *
 T is class std::basic_string<char...
 \end{tcblisting}
 
-Because the types are easily discernable there is no reason to specify a template parameter like f<int>(47) in the function call. The compiler can deduce the <int> type from the argument.
+因为类型很容易识别，所以没有理由在函数调用中指定f<int>(47)这样的模板形参。编译器可以从实参中推导出<int>类型。
 
 \begin{tcolorbox}[colback=webgreen!5!white,colframe=webgreen!75!black,title=Note]
-The above output shows meaningful type names where most compilers will use shorthand, like i for int and PKc for const char *, and so on.
+上面的输出显示了有意义的类型名，大多数编译器都会使用简写，比如i表示int, PKc表示const char *，等等。
 \end{tcolorbox}
 
 \item 
-This works just as well for multiple template parameters:
+这同样适用于多个模板参数:
 
 \begin{lstlisting}[style=styleCXX]
 template<typename T1, typename T2>
@@ -56,7 +56,7 @@ int main() {
 }
 \end{lstlisting}
 
-Output:
+输出:
 
 \begin{tcblisting}{commandshell={}}
 T1 T2: int long
@@ -64,10 +64,10 @@ T1 T2: long double
 T1 T2: double char const *
 \end{tcblisting}
 
-Here the compiler is deducing types for both T1 and T2.
+这里编译器同时推导出了T1和T2的类型。
 
 \item 
-Notice that the types must be compatible with the template. For example, you cannot take a reference from a literal:
+注意，类型必须与模板兼容。例如，不能从字面量中获取引用:
 
 \begin{lstlisting}[style=styleCXX]
 template<typename T>
@@ -82,19 +82,19 @@ int main() {
 \end{lstlisting}
 
 \item 
-Beginning with C++17 you can also use template parameter deduction with classes. So now this will work:
+C++17起，还可以对类使用模板参数推断:
 
 \begin{lstlisting}[style=styleCXX]
 pair p(47, 47.0); // deduces to pair<int, double>
 tuple t(9, 17, 2.5); // deduces to tuple<int, int, double>
 \end{lstlisting}
 
-This eliminates the need for std::make\_pair() and std::make\_tuple() as you can now initialize these classes directly without the explicit template parameters. The std::make\_* helper functions will remain available for backward compatibility.
+这消除了对std::make\_pair()和std::make\_tuple()的需求，现在可以直接初始化这些类，而无需显式的模板参数。std::make\_*工厂函数则保持向后兼容性可用。
 \end{itemize}
 
 \subsubsection{How it works…}
 
-Let's define a class so we can see how this works:
+我们定义一个类，这样就可以了解它是如何工作的:
 
 \begin{lstlisting}[style=styleCXX]
 template<typename T1, typename T2, typename T3>
@@ -115,39 +115,39 @@ class Thing {
 };
 \end{lstlisting}
 
-This is a template class with three types and three corresponding data members. It has a print() function, which returns a formatted string with the three type names.
+这是一个具有三种类型和三个相应数据成员的模板类。有一个print()函数，该函数返回一个带有三个类型名称的格式化字符串。
 
-Without template parameter deduction, I would have to instantiate an object of this type like this:
+若没有模板参数推导，则需要实例化一个这种类型的对象:
 
 \begin{lstlisting}[style=styleCXX]
 Things<int, double, string> thing1{1, 47.0, "three" }
 \end{lstlisting}
 
-Now I can do it like this:
+现在可以这样做:
 
 \begin{lstlisting}[style=styleCXX]
 Things thing1{1, 47.0, "three" }
 \end{lstlisting}
 
-This is both simpler and less error prone.
+既简单又不易出错。
 
-When I call the print() function on the thing1 object, I get this result:
+当在thing1对象上使用print()函数时，得到了这样的结果:
 
 \begin{lstlisting}[style=styleCXX]
 cout << thing1.print();
 \end{lstlisting}
 
-Output:
+输出:
 
 \begin{tcblisting}{commandshell={}}
 int, double, char const *
 \end{tcblisting}
 
-The STL includes a few of these helper functions, like make\_pair() and make\_tuple(), etc. These are now obsolescent, but will be maintained for compatibility with older code.
+STL包含了一些这样的辅助函数，比如make\_pair()和make\_tuple()等。这些代码现在已经过时了，但是为了与旧代码兼容，会保留这些代码。
 
 \subsubsection{There's more…}
 
-Consider the case of a constructor with a parameter pack:
+考虑带有参数包的构造函数:
 
 \begin{lstlisting}[style=styleCXX]
 template <typename T>
@@ -160,9 +160,9 @@ public:
 };
 \end{lstlisting}
 
-Notice the fold expression in the constructor (values + ...). This is a C++17 feature that applies an operator to all the members of a parameter pack. In this case, it initializes v to the sum of the parameter pack.
+注意构造函数中的折叠表达式(values + …)。这是C++17的一个特性，它将操作符应用于一个形参包的所有成员。本例中，将v初始化为参数包的和。
 
-The constructor for this class accepts an arbitrary number of parameters, where each parameter may be a different class. For example, I could call it like this:
+该类的构造函数接受任意数量的形参，其中每个形参可以是不同的类。可以这样调用:
 
 \begin{lstlisting}[style=styleCXX]
 Sum s1 { 1u, 2.0, 3, 4.0f }; // unsigned, double, int,
@@ -170,20 +170,20 @@ Sum s1 { 1u, 2.0, 3, 4.0f }; // unsigned, double, int,
 Sum s2 { "abc"s, "def" }; // std::sring, c-string
 \end{lstlisting}
 
-This, of course, doesn't compile. The template argument deduction fails to find a common type for all those different parameters. We get an error message to the effect of:
+当然，这无法编译。模板实参推导不能为所有这些不同的形参找到一个公共类型，编译器将会报出一个错误消息:
 
 \begin{tcblisting}{commandshell={}}
 cannot deduce template arguments for 'Sum'
 \end{tcblisting}
 
-We can fix this with a template deduction guide. A deduction guide is a helper pattern to assist the compiler with a complex deduction. Here's a guide for our constructor:
+可以用模板推导指南来解决这个问题。推导指南是一种辅助模式，用于协助编译器进行复杂的推导。下面是构造函数的指南:
 
 \begin{lstlisting}[style=styleCXX]
 template <typename... Ts>
 Sum(Ts&& ... ts) -> Sum<std::common_type_t<Ts...>>;
 \end{lstlisting}
 
-This tells the compiler to use the std::common\_type\_t trait, which attempts to find a common type for all the parameters in the pack. Now our argument deduction works and we can see what types it settled on:
+这告诉编译器使用std::common\_type\_t的特征，试图为包中的所有参数找到一个公共类型。现在我们的参数推导工作了，可以看到其确切的类型:
 
 \begin{lstlisting}[style=styleCXX]
 Sum s1 { 1u, 2.0, 3, 4.0f }; // unsigned, double, int,
@@ -196,7 +196,7 @@ cout << format("s1 is {} {}, s2 is {} {}",
 		typeid(v1).name(), v1, typeid(v2).name(), v2);
 \end{lstlisting}
 
-Output:
+输出:
 
 \begin{tcblisting}{commandshell={}}
 s1 is double 10, s2 is class std::string abcdef

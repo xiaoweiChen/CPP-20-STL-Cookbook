@@ -1,26 +1,26 @@
 
-The vector is one of the most widely used containers in the STL, and for good reason. It's just as convenient as an array but far more powerful and flexible. It's common practice to use the [] operator to access elements in a vector like this:
+vector是STL中使用最广泛的容器之一，它和数组一样方便，但更强大和灵活。通常使用[]操作符来访问vector中的元素，如下所示:
 
 \begin{lstlisting}[style=styleCXX]
 vector v{ 19, 71, 47, 192, 4004 };
 auto & i = v[2];
 \end{lstlisting}
 
-The vector class also provides a member function for the same purpose:
+vector类还提供了一个成员函数，用于同样的目的:
 
 \begin{lstlisting}[style=styleCXX]
 auto & i = v.at(2);
 \end{lstlisting}
 
-The result is the same but there is an important difference. The at() function does bounds checking and the [] operator does not. This is intentional, as it allows the [] operator to maintain compatibility with the original C-array. Let's examine this in a bit more detail.
+结果一样，但有一个重要的区别。at()函数执行边界检查，而[]操作符不检查，[]操作符为了保持与原始C数组的兼容性。
 
 \subsubsection{How to do it…}
 
-There are two ways to access an element with an index in a vector. The at() member function does bounds checking, and the [] operator does not.
+有两种方法访问vector中带有索引的元素。at()成员函数执行边界检查，而[]操作符不检查。
 
 \begin{itemize}
 \item 
-Here's a simple main() function that initializes a vector and accesses an element:
+下面是一个简单的main()函数，其初始化一个vector并访问一个元素:
 
 \begin{lstlisting}[style=styleCXX]
 int main() {
@@ -30,16 +30,16 @@ int main() {
 }
 \end{lstlisting}
 
-Output:
+输出:
 
 \begin{tcblisting}{commandshell={}}
 element is 47
 \end{tcblisting}
 
-Here, I used the [] operator to directly access the third element in the vector. As with most sequential objects in C++, the index starts at 0 so the third element is number 2.
+这里，我使用[]操作符直接访问vector中的第三个元素。与C++中的大多数顺序对象一样，索引从0开始，因此第三个元素是2。
 
 \item 
-The vector has five elements, numbered 0 through 4. If I were to try to access element number 5 that would be beyond the boundary of the vector:
+这个vector有5个元素，从0到4。如果我试图访问5号元素，将超出vector的边界:
 
 \begin{lstlisting}[style=styleCXX]
 vector v{ 19, 71, 47, 192, 4004 };
@@ -47,16 +47,16 @@ auto & i = v[5];
 cout << format("element is {}\n", i);
 \end{lstlisting}
 
-Output:
+输出:
 
 \begin{tcblisting}{commandshell={}}
 element is 0
 \end{tcblisting}
 
-This result is extremely deceiving. It's a common error, since humans tend to count from 1, not 0. But there is no guarantee that an element past the end of the vector has any particular value.
+这个结果极具欺骗性。这是一个常见的错误，因为人类倾向于从1开始计数，而不是0。但是不能保证vector范围外的元素的值。
 
 \item 
-Even worse, the [] operator will silently allow you to write to a position beyond the end of the vector:
+更糟糕的是，[]操作符会无声地允许对超出vector结尾的位置进行写入:
 
 \begin{lstlisting}[style=styleCXX]
 vector v{ 19, 71, 47, 192, 4004 };
@@ -65,16 +65,16 @@ auto & i = v[5];
 cout << format("element is {}\n", i);
 \end{lstlisting}
 
-Output:
+输出:
 
 \begin{tcblisting}{commandshell={}}
 element is 2001
 \end{tcblisting}
 
-I have now written to memory that is not under my control and the compiler has silently allowed it, with no error messages or crashes. But do not be fooled—this is extremely dangerous code, and it will cause problems at some point in the future. Out of bounds memory access is one of the primary causes of security breaches.
+现在已经写入内存，编译器已经默默地允许它，没有错误消息或崩溃。但是不要被骗了——这是极其危险的代码，在将来的某个时候会导致问题。越界内存访问是安全漏洞的主要原因之一。
 
 \item 
-The solution is to use the at() member function wherever possible, instead of the [] operator:
+解决方案是尽可能使用at()成员函数，而不是[]操作符:
 
 \begin{lstlisting}[style=styleCXX]
 vector v{ 19, 71, 47, 192, 4004 };
@@ -82,7 +82,7 @@ auto & i = v.at(5);
 cout << format("element is {}\n", i);
 \end{lstlisting}
 
-Now we get a run-time exception:
+现在出现了一个运行时异常:
 
 \begin{tcblisting}{commandshell={}}
 terminate called after throwing an instance of 'std::out_
@@ -92,20 +92,20 @@ this->size() (which is 5)
 Aborted
 \end{tcblisting}
 
-The code compiles without error, but the at() function checks the boundaries of the container and throws a run-time exception when you try to access memory outside of those boundaries. This is the exception message from code compiled with the GCC compiler. The message will be different in different environments.
+代码编译时没有错误，但是at()函数检查容器的边界，并尝试访问这些边界之外的内存时，就抛出运行时异常。这是来自GCC编译器编译的代码的异常消息。在不同的环境中，信息也会不同。
 \end{itemize}
 
 \subsubsection{How it works…}
 
-The [] operator and the at() member function do the same job; they provide direct access to container elements based on their indexed position. The [] operator does it without any bounds checking, so it may be a tiny bit faster in some intensely iterative applications.
+[]操作符和at()成员函数做同样的工作，回根据容器元素的索引位置提供对容器元素的直接访问。[]操作符不进行边界检查，因此在一些频繁迭代的应用程序中，会稍微快一点。
 
-That said, the at() function should be your default choice. While the bounds checking may take a few CPU cycles, it's cheap insurance. For most applications the benefit is well worth the cost.
+也就是说，at()函数应该是首选。虽然边界检查可能需要几个CPU周期，但这是一种成本很低的保险。对于大多数应用来说，这样做物有所值。
 
-While the vector class is commonly used as a direct-access container, the array and deque containers also support both the [] operator and the at() member function. These caveats apply there as well.
+vector类通常用作直接访问容器，而array和deque容器也同时支持[]操作符和at()成员函数。这里的警告同样适用于他们。
 
 \subsubsection{There's more…}
 
-In some applications you may not want your application to just crash when an out-ofbounds condition is encountered. In this case, you can catch the exception, like this:
+某些应用程序中，可能不希望应用程序在遇到出界条件时崩溃。这种情况下，可以捕获异常:
 
 \begin{lstlisting}[style=styleCXX]
 int main() {
@@ -120,7 +120,7 @@ int main() {
 }
 \end{lstlisting}
 
-Output:
+输出:
 
 \begin{tcblisting}{commandshell={}}
 Ouch!
@@ -128,9 +128,9 @@ vector::_M_range_check: __n (which is 5) >= this->size() (which is 5)
 end element is 4004
 \end{tcblisting}
 
-The try block catches the exception specified in the catch clause, in this case the exception is std::out\_of\_range. The e.what() function returns a C-string with the error message from the STL library. Each library will have different messages.
+try块捕获catch子句中指定的异常，当前的异常是std::out\_of\_range。e.what()函数返回一个C字串，其中包含来自STL库的错误消息。每个库都会有不同的消息。
 
-Keep in mind that this also applies to array and deque containers.
+记住，这也适用于array和deque容器。
 
 
 

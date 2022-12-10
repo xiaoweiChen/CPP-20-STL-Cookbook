@@ -1,47 +1,47 @@
 
-The map class is an associative container that holds key-value pairs, where keys must be unique within the container.
+map类是保存键-值对的关联容器，其中键在容器内必须唯一。
 
-There are a number of ways to populate a map container. Consider a map defined like this:
+填充map容器的方法有很多种。考虑这样定义的map:
 
 \begin{lstlisting}[style=styleCXX]
 map<string, string> m;
 \end{lstlisting}
 
-You can add an element with the [] operator:
+使用[]操作符添加一个元素:
 
 \begin{lstlisting}[style=styleCXX]
 m["Miles"] = "Trumpet"
 \end{lstlisting}
 
-You can use the insert() member function:
+使用insert()成员函数:
 
 \begin{lstlisting}[style=styleCXX]
 m.insert(pair<string,string>("Hendrix", "Guitar"));
 \end{lstlisting}
 
-Or, you can use the emplace() member function:
+或者，使用emplace()成员函数:
 
 \begin{lstlisting}[style=styleCXX]
 m.emplace("Krupa", "Drums");
 \end{lstlisting}
 
-I tend to gravitate toward the emplace() function. Introduced with C++11, emplace() uses perfect forwarding to emplace (create in place) the new element for the container. The parameters are forwarded directly to the element constructors. This is quick, efficient, and easy to code.
+我倾向于使用emplace()函数，可以完全转发来为容器放置(在适当的位置创建)新元素。参数直接转发给元素构造函数，快速、高效且易于阅读。
  
-Though it's certainly an improvement over the other options, the problem with emplace() is that it constructs an object even when it's not needed. This involves calling the constructors, allocating memory, and moving data around, and then discarding that temporary object.
+尽管emplace()肯定是对其他选项的改进，但其问题在于，即使在不需要对象时，也会构造对象。这包括调用构造函数、分配内存、移动数据，然后丢弃临时对象。
 
-To solve this problem, C++17 provides the new try\_emplace() function which only constructs the value object if it's needed. This is especially important with large objects or many emplacements.
+为了解决这个问题，C++17提供了新的try\_emplace()函数，该函数只在需要时构造值对象，这对于大型对象尤为重要。
 
 \begin{tcolorbox}[colback=webgreen!5!white,colframe=webgreen!75!black,title=Note]
-Each element of a map is a key-value pair. Within the pair structure, the elements are named, first and second, but their purpose in the map is key and value. I tend to think of the value object as the payload, as this is usually the point of the map. To search for an existing key, the try\_emplace() function must construct the key object; this cannot be avoided. But it need not construct the payload object unless and until it's needed for insertion into the map.
+map的每个元素都是一个键值对，其中元素命名为first和second，但在映射中是键和值。我倾向于将值对象视为有效负载。要搜索一个现有的键，try\_emplace()函数必须构造键对象，但它不需要构造有效负载对象，除非需要插入到map中。
 \end{tcolorbox}
 
 \subsubsection{How to do it…}
 
-The new try\_emplace() function avoids the overhead of constructing the payload object unless and until it is needed. This creates a valuable efficiency in the case of key collisions, especially with large payloads. Let's take a look:
+新的try\_emplace()函数避免了构造有效负载对象的开销，除非必需。这在键值碰撞的情况下效率很高，特别是在大有效载荷的情况下。让我们一起来看看:
 
 \begin{itemize}
 \item 
-First, we create a payload class. For demonstration purposes, this class has a simple std::string payload and displays a message when constructed:
+首先，创建一个有效负载类。出于演示目的，该类有一个简单的std::string有效负载，并在构造时显示一条消息:
 
 \begin{lstlisting}[style=styleCXX]
 struct BigThing {
@@ -53,12 +53,12 @@ struct BigThing {
 using Mymap = map<string, BigThing>;
 \end{lstlisting}
 
-This BigThing class has only one member function, a constructor that displays a message when the object is constructed. We'll use this to keep track of how often a BigThing object is constructed. In practice, of course, this class would be bigger, and use more resources.
+这个BigThing类只有一个成员函数——构造函数，在构造对象时显示一条消息。我们将使用它来跟踪BigThing对象的构造频率。实际中，这个类会更大，使用更多的资源。
 
-Each map element will consist of a pair of objects, a std::string for the key and a BigThing object for the payload. Mymap is just a convenience alias. This allows us to focus on function rather than form.
+每个map元素将由一对对象组成，一个std::string用于键，一个BigThing对象用于负载。Mymap只是一个别名。这使我们能够专注于功能而非形式。
 
 \item 
-We'll also create a printm() function to print the contents of the map:
+我们还将创建一个printm()函数来打印map的内容:
 
 \begin{lstlisting}[style=styleCXX]
 void printm(Mymap& m) {
@@ -69,10 +69,10 @@ void printm(Mymap& m) {
 }
 \end{lstlisting}
 
-This uses the C++20 format() function to print out the map, so we can keep track of the elements as we insert them.
+这使用C++20 format()函数打印map，这样就可以在插入元素时观察它们了。
 
 \item 
-In our main() function we create the map object and insert some elements:
+在main()函数中，我们创建了map对象并插入了一些元素:
 
 \begin{lstlisting}[style=styleCXX]
 int main() {
@@ -86,7 +86,7 @@ int main() {
 }
 \end{lstlisting}
 
-Output:
+输出:
 
 \begin{tcblisting}{commandshell={}}
 BigThing constructed Trumpet
@@ -98,10 +98,10 @@ BigThing constructed Piano
 [Miles:Trumpet] [Zappa:Guitar]
 \end{tcblisting}
 
-Our output shows the construction of each of the payload objects, and then the output from the printm() function call.
+我们的输出显示了每个有效负载对象的构造，然后是printm()函数调用的输出。
 
 \item 
-I used the emplace() function to add the elements to the map, and each payload element was constructed just once. We can use the try\_emplace() function and the result will be the same:
+使用emplace()函数将元素添加到map中，每个有效负载元素只构造一次。这里也可以使用try\_emplace()函数，结果相同:
 
 \begin{lstlisting}[style=styleCXX]
 Mymap m;
@@ -113,7 +113,7 @@ m.try_emplace("Liszt", "Piano");
 printm(m);
 \end{lstlisting}
 
-Output:
+输出:
 
 \begin{tcblisting}{commandshell={}}
 BigThing constructed Trumpet
@@ -126,7 +126,7 @@ BigThing constructed Piano
 \end{tcblisting}
 
 \item 
-The difference between emplace() and try\_emplace() shows up when we try to insert new elements with duplicate keys:
+emplace()和try\_emplace()之间的区别显示在尝试插入具有重复键的新元素时:
 
 \begin{lstlisting}[style=styleCXX]
 cout << "emplace(Hendrix)\n";
@@ -136,7 +136,7 @@ m.try_emplace("Zappa", "Composer");
 printm(m);
 \end{lstlisting}
 
-Output:
+输出:
 
 \begin{tcblisting}{commandshell={}}
 emplace(Hendrix)
@@ -146,34 +146,34 @@ try_emplace(Zappa)
 [Miles:Trumpet] [Zappa:Guitar]
 \end{tcblisting}
 
-The emplace() function tried to add an element with a duplicate key ("Hendrix"). It failed but still constructed the payload object ("Singer"). The try\_emplace() function also tried to add an element with a duplicate key ("Zappa"). It failed and did not construct the payload object.
+emplace()函数尝试添加一个具有重复键的元素(“Hendrix”)。但失败了，但仍然构造了有效负载对象(“Singer”)。try\_emplace()函数还尝试添加一个具有重复键的元素("Zappa")。也失败了，没有构造有效负载对象。
 \end{itemize}
 
-This example demonstrates the distinction between emplace() and try\_emplace().
+这个例子演示了emplace()和try\_emplace()之间的区别。
 
 \subsubsection{How it works…}
 
-The try\_emplace() function signature is similar to that of emplace(), so it should be easy to retrofit legacy code. Here's the try\_emplace() function signature:
+try\_emplace()函数签名与emplace()函数签名相似，因此对历史代码进行改造应该很容易。下面是try\_emplace()函数签名:
 
 \begin{lstlisting}[style=styleCXX]
 pair<iterator, bool> try_emplace( const Key& k,
 Args&&... args );
 \end{lstlisting}
 
-At first glance, this looks different from the emplace() signature:
+乍一看，这与emplace()签名不同:
 
 \begin{lstlisting}[style=styleCXX]
 pair<iterator,bool> emplace( Args&&... args );
 \end{lstlisting}
 
-The distinction is that try\_emplace() uses a separate parameter for the key argument, which allows it to be isolated for construction. Functionally, if you're using template argument deduction, try\_emplace() can be a drop-in replacement:
+区别在于try\_emplace()为键参数使用了一个单独的形参，这允许在构造时隔离。从函数上讲，若正在使用模板参数推导，则可以使用try\_emplace()替换:
 
 \begin{lstlisting}[style=styleCXX]
 m.emplace("Miles", "Trumpet");
 m.try_emplace("Miles", "Trumpet");
 \end{lstlisting}
 
-The return value of try\_emplace() is the same as that of emplace(), a pair representing an iterator and a bool:
+try\_emplace()的返回值与emplace()的返回值相同，是一个表示迭代器和bool的对:
 
 \begin{lstlisting}[style=styleCXX]
 const char * key{"Zappa"};
@@ -186,7 +186,7 @@ if(auto [it, success] = m.try_emplace(key, payload);
 printm(m);
 \end{lstlisting}
 
-Output:
+输出:
 
 \begin{tcblisting}{commandshell={}}
 update
@@ -195,16 +195,15 @@ BigThing constructed Composer
 [Zappa:Composer]
 \end{tcblisting}
 
-Here I used structured binding (auto [it, success] =) with an if initializer statement to test the return value and conditionally update the payload. Notice that it still just constructs the payload object once.
+这里使用了结构化绑定(auto [it, success] =)和if初始化语句来测试返回值，并有条件地更新有效负载。注意，它仍然只构造了一次有效负载对象。
 
-It's worth noting that the try\_emplace() function also works with unordered\_map.
-We change our alias and everything works the same except unordered:
+值得注意的是，try\_emplace()函数也适用于unordered\_map。我们改变了别名，除了无序之外其都一样:
 
 \begin{lstlisting}[style=styleCXX]
 using Mymap = unordered_map<string, BigThing>;
 \end{lstlisting}
 
-The advantage of try\_emplace() is that it only constructs the payload object if and when it's ready to store it in the map. In practice, this should save significant resources at run-time. You should always favor try\_emplace() over emplace().
+try\_emplace()优点，只在准备将有效负载对象存储到map中时构造有效负载对象。实际中，可在运行时节省大量资源，所以应该首选try\_emplace()，而非emplace()。
 
 
 

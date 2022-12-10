@@ -1,7 +1,7 @@
 
-A map is an associative container that stores key-value pairs. The container is ordered by the keys. The keys must be unique and they are const-qualified, so they cannot be changed.
+map是存储键值对的关联容器，容器是按键排序的。键必须是唯一的，并且是const限定的，因此不能更改。
 
-For example, if I populate a map and attempt to change the key, I'll get an error at compilation time:
+例如，若填充一个map并试图更改键，在编译时会得到一个错误:
 
 \begin{lstlisting}[style=styleCXX]
 map<int, string> mymap {
@@ -11,7 +11,7 @@ auto it = mymap.begin();
 it->first = 47;
 \end{lstlisting}
 
-Output:
+输出:
 
 \begin{tcblisting}{commandshell={}}
 error: assignment of read-only member ...
@@ -19,28 +19,26 @@ error: assignment of read-only member ...
   |  ~~~~~~~~~~^~~~
 \end{tcblisting}
 
-If you need to re-order a map container, you may do so by swapping keys using the extract() method. New with C++17, extract() is a member function in the map class and its derivatives.
+若需要重新排序map容器，可以通过使用extract()方法交换键来实现。C++ 17中，extract()是map类及其派生类中的成员函数。
 
-It allows elements of a map to be extracted from the sequence without touching the payload. Once extracted, the key is no longer const-qualified and may be modified.
+它允许从序列中提取map元素，而不涉及有效负载。当提取出来时，键就不再是const限定的，并且可以修改。
 
-Let's look at an example.
+来看一个例子。
 
 \subsubsection{How to do it…}
 
-In this example we'll define a map that represents contestants in a race. At some point during the race, the order changes and we need to modify the keys of the map.
+本例中，我们将定义一个表示比赛中的选手的map。在比赛过程中的某个时刻，顺序发生了变化，需要修改map的键值。
 
 \begin{itemize}
 \item 
-We'll start by defining an alias for the map type:
+先从定义map类型的别名开始:
 
 \begin{lstlisting}[style=styleCXX]
 using Racermap = map<unsigned int, string>;
 \end{lstlisting}
 
-This allows us to use the type consistently throughout our code.
-
 \item 
-We'll write a function for printing out the map:
+编写一个函数来打印map:
 
 \begin{lstlisting}[style=styleCXX]
 void printm(const Racermap &m)
@@ -52,10 +50,10 @@ void printm(const Racermap &m)
 }
 \end{lstlisting}
 
-We can pass the map to this function at any time to print out the current rankings of our contestants.
+我们可以在任何时候将map传递给这个函数，以打印出参赛者的当前排名。
 
 \item 
-In our main() function we define a map with the initial state of our racers:
+在main()函数中，定义了一个带有赛车初始状态的map:
 
 \begin{lstlisting}[style=styleCXX]
 int main() {
@@ -69,12 +67,12 @@ int main() {
 }
 \end{lstlisting}
 
-The key is an int indicating the rank of the racer. The value is a string with the name of the racer.
+键是int型，表示赛车的级别。值是赛车手名称的字符串。
 
-We then call printm() to print the current rank. The call to node\_swap() will swap the keys of two racers, then we print gain.
+然后，调用printm()来打印当前排名。调用node\_swap()将交换两个赛车手的键，然后再次输出。
 
 \item 
-At some point, one of the racers falls behind and another racer takes the opportunity to move up in the rankings. The node\_swap() function will swap the ranking of two racers:
+在某个时刻，一名选手落后了，而另一名选手则趁机提升了排名。node\_swap()函数将交换两个赛车手的排名:
 
 \begin{lstlisting}[style=styleCXX]
 template<typename M, typename K>
@@ -91,14 +89,14 @@ bool node_swap(M & m, K k1, K k2) {
 }
 \end{lstlisting}
 
-This function uses the map.extract() method to extract the specified elements from the map. These extracted elements are called nodes.
+这个函数使用map.extract()方法从映射中提取指定的元素。这些提取出来的元素称为节点。
 
-A node is a new concept beginning with C++17. This allows an element to be extracted from a map-type structure without touching the element itself. The node is unlinked, and a node handle is returned. Once extracted, the node handle provides writable access to the key via the node's key() function. We can then swap the keys and insert them back into the map, without ever having to copy or manipulate the payload.
+节点是一个从C++17出现的新概念，可以在不涉及元素本身的情况下从map类型结构中提取元素。解除节点链接，返回节点句柄。提取后，节点句柄通过节点的key()函数提供对键的可写访问。然后，可以交换键并将它们插入到ma中，而无需复制或操作有效负载。
 
 \item 
-When we run this code we get a printout of the map, before and after the node swap: 
+当我们运行这段代码时，得到了节点交换前后map的打印输出:
 
-Output:
+输出:
 
 \begin{tcblisting}{commandshell={}}
 Rank:
@@ -116,23 +114,21 @@ Rank:
 \end{tcblisting}
 \end{itemize}
 
-This is all made possible by the extract() method and the new node\_handle class.
-Let's take a closer look at how this works.
+这一切都是通过extract()方法和新的node\_handle类实现的。让我们仔细了解它是如何工作的。
 
 \subsubsection{How it works…}
 
-This technique uses the new extract() function, which returns a node\_handle object. As the name suggests, a node\_handle is a handle to a node, which consists of an associative element and its related structures. The extract function disassociates the node while leaving it in place, and returns a node\_handle object. This has the effect of removing the node from the associative container without touching the data itself. The node\_handle allows you to access the disassociated node.
+该技术使用新的extract()函数，该函数返回一个node\_handle对象，node\_handle是节点的句柄，由关联元素及其相关结构组成。extract函数在将节点保留在原处的同时将其解除关联，并返回一个node\_handle对象。这样做的效果是从关联容器中删除节点，而不涉及数据本身。node\_handle允许访问已解除关联的节点。
 
-The node\_handle has a member function, key(), which returns a writable reference to the node key. This allows you to change the key, while it's disassociated from the container.
+node\_handle有一个成员函数key()，返回一个对节点键的可写引用。这就可以在键与容器解关联时，对键值进行修改。
 
 \subsubsection{There's more…}
 
-There are a few things to keep in mind when using extract() and a node\_handle:
+使用extract()和node\_handle时，有几个重点:
 
 \begin{itemize}
 \item 
-If the key is not found, the extract() function returns an empty node handle.
-You can test if a node handle is empty with the empty() function:
+若没有找到键，extract()函数返回一个空节点句柄。可以用empty()函数测试节点句柄是否为空:
 
 \begin{lstlisting}[style=styleCXX]
 auto node{ mapthing.extract(key) };
@@ -142,22 +138,22 @@ if(node.empty()) {
 \end{lstlisting}
 
 \item 
-There are two overloads of the exract() function:
+extract()函数有两个重载:
 
 \begin{lstlisting}[style=styleCXX]
 node_type extract(const key_type& x);
 node_type extract(const_iterator position);
 \end{lstlisting}
 
-We used the first form, by passing a key. You may also use an iterator, which should not require a lookup.
+我们使用了第一种形式，通过传递一个键，也可以使用迭代器。
 
 \item 
-Keep in mind that you cannot make a reference from a literal, so a call like extract(1) will usually crash with a segmentation fault.
+记住，不能使用字面量引用，因此像extract(1)这样的调用通常会因段错误而崩溃。
 
 \item 
-Keys must remain unique when inserted into a map.
+键插入映射时必须保持唯一。
 
-For example, if I try to change a key to a value already in the map:
+例如，若将一个键更改为映射中已经存在的值:
 
 \begin{lstlisting}[style=styleCXX]
 auto node_x{ racers.extract(racers.begin()) };
@@ -170,13 +166,13 @@ if(!status.inserted) {
 }
 \end{lstlisting}
 
-The insert fails and we get our error message:
+插入失败，会得到错误消息:
 
 \begin{tcblisting}{commandshell={}}
 insert failed, dup key: Donkey Kong Jr
 \end{tcblisting}
 
-In this example I've passed the begin() iterator to extract(). I then assigned the key a value that's already in use (5, Donkey Kong Jr). The insert failed and the resulting status.inserted is false. status.position is an iterator to the found key. In the if() block, I used format() to print the value the found key.
+本例中，将begin()迭代器传递给extract()。然后，为键值分配了一个已经在使用的值(5, Donkey Kong Jr)。插入失败和结果status.inserted为false。status. position是指向已找到键的迭代器。在if()块中，我使用format()来打印找到的键值。
 \end{itemize}
 
 

@@ -1,5 +1,5 @@
 
-Before C++20, the erase-remove idiom was commonly used to efficiently delete elements from an STL container. This was a little cumbersome, but not a great burden. It was common to use a function like this for the task:
+C++20前，erase-remove习语通常用于从STL容器中删除元素。这额操作有点麻烦，但也还好。通常使用这样的函数来完成:
 
 \begin{lstlisting}[style=styleCXX]
 template<typename Tc, typename Tv>
@@ -9,49 +9,49 @@ void remove_value(Tc & c, const Tv v) {
 }
 \end{lstlisting}
 
-The std::remove() function is from the <algorithms> header. std::remove() searches for the specified value and removes it by shifting elements forward from the end of the container. It does not change the size of the container. It returns an iterator past the end of the shifted range. We then call the container's erase() function to delete the remaining elements.
+std::remove()函数在<algorithms>头文件中声明。remove()搜索指定的值，并将元素从容器的末尾向前移动来删除它，所以并不会改变容器的大小。它返回一个超出移位范围末端的迭代器，然后调用容器的erase()函数删除剩余的元素。
 
-This two-step process is now reduced to one step with the new uniform erasure function:
+有了新的擦除功能，这个两步过程可以简化为一步:
 
 \begin{lstlisting}[style=styleCXX]
 std::erase(c, 5); // same as remove_value() function
 \end{lstlisting}
 
-This one function call does the same thing as the remove\_value() function we wrote above.
+这个函数与上面的remove\_value()函数功能相同。
 
-There's also a version that uses a predicate function. For example, to remove all even numbered values from a numeric container:
+还有一个版本使用了谓词函数。例如，要从数值容器中删除所有偶数值:
 
 \begin{lstlisting}[style=styleCXX]
 std::erase_if(c, [](auto x) { return x % 2 == 0; });
 \end{lstlisting}
 
-Let's look at the uniform erasure functions in a bit more detail.
+更详细地了解一下擦除函数。
 
 \subsubsection{How to do it…}
 
-There are two forms of the uniform erasure functions. The first form, called erase(), takes two parameters, a container and a value:
+擦除函数有两种形式。第一种形式叫做erase()，有两个参数，一个容器和一个值:
 
 \begin{lstlisting}[style=styleCXX]
 erase(container, value);
 \end{lstlisting}
 
-The container may be any of the sequential containers (vector, list, forward\_list, deque), except array, which cannot change size.
+容器可以是顺序容器(vector, list, forward\_list, deque)，数组除外，数组不能改变大小。
 
-The second form, called erase\_if(), takes a container and a predicate function:
+第二种形式称为erase\_if()，接受一个容器和一个谓词函数:
 
 \begin{lstlisting}[style=styleCXX]
 erase_if(container, predicate);
 \end{lstlisting}
 
-This form works with any of the containers that work with erase(), plus the associative containers, set, map, and their multi-key and unordered variants.
+这种形式适用于任何使用erase()的容器，也适用于关联容器、set、map及其多键和无序的版本。
 
-The functions erase() and erase\_if() are defined, as non-member functions, in the header for the corresponding container. There is no need to include another header.
+函数erase()和erase\_if()作为非成员函数定义在相应容器的头文件中。没有必要包含另一个头文件。
 
-Let's look at some examples:
+来看一些例子:
 
 \begin{itemize}
 \item 
-First, let's define a simple function to print the size and elements of a sequential container:
+首先，定义一个简单的函数来打印顺序容器的大小和元素:
 
 \begin{lstlisting}[style=styleCXX]
 void printc(auto & r) {
@@ -61,39 +61,39 @@ void printc(auto & r) {
 }
 \end{lstlisting}
 
-The printc() function uses the C++20 format() function to format a string for cout.
+printc()函数使用C++20 format()函数为cout格式化字符串。
 
 \item 
-Here's a vector with 10 integer elements, printed with our printc() function:
+下面是一个包含10个整数元素的vector，用printc()函数打印出来:
 
 \begin{lstlisting}[style=styleCXX]
 vector v{ 1, 2, 3, 4, 5, 6, 7, 8, 9 };
 printc(v);
 \end{lstlisting}
 
-Output:
+输出:
 
 \begin{tcblisting}{commandshell={}}
 size: 10: 0 1 2 3 4 5 6 7 8 9
 \end{tcblisting}
 
-We see that the vector has 10 elements. Now we can use erase() to remove all elements with the value 5:
+可以使用erase()删除所有值为5的元素:
 
 \begin{lstlisting}[style=styleCXX]
 erase(v, 5);
 printc(v);
 \end{lstlisting}
 
-Output:
+输出:
 
 \begin{tcblisting}{commandshell={}}
 size: 9: 0 1 2 3 4 6 7 8 9
 \end{tcblisting}
 
-The vector version of the std::erase() function is defined in the <vector> header. After the erase() call, the element with the value 5 has been removed and the vector has 9 elements.
+std::erase()函数的vector版本定义在<vector>头文件中。在erase()调用之后，值为5的元素已被删除，vector中有9个元素。
 
 \item 
-This works just as well with a list container:
+这也适用于列表容器:
 
 \begin{lstlisting}[style=styleCXX]
 list l{ 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 };
@@ -102,17 +102,17 @@ erase(l, 5);
 printc(l);
 \end{lstlisting}
 
-Output:
+输出:
 
 \begin{tcblisting}{commandshell={}}
 size: 10: 0 1 2 3 4 5 6 7 8 9
 size: 9: 0 1 2 3 4 6 7 8 9
 \end{tcblisting}
 
-The list version of the std::erase() function is defined in the <list> header. After the erase() call, the element with the value 5 has been removed and the list has 9 elements.
+std::erase()函数的列表版本定义在<list>头文件中。erase()之后，值为5的元素被删除，list有9个元素。
 
 \item 
-We can use erase\_if() to remove all the even numbered elements with a simple predicate function:
+erase\_if()可以使用一个简单的谓词函数，删除所有偶数元素:
 
 \begin{lstlisting}[style=styleCXX]
 vector v{ 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 };
@@ -121,7 +121,7 @@ erase_if(v, [](auto x) { return x % 2 == 0; });
 printc(v);
 \end{lstlisting}
 
-Output:
+输出:
 
 \begin{tcblisting}{commandshell={}}
 size: 10: 0 1 2 3 4 5 6 7 8 9
@@ -129,7 +129,7 @@ size: 5: 1 3 5 7 9
 \end{tcblisting}
 
 \item 
-The erase\_if() function also works with associative containers, like map:
+erase\_if()函数也适用于关联容器，比如map:
 
 \begin{lstlisting}[style=styleCXX]
 void print_assoc(auto& r) {
@@ -151,19 +151,19 @@ int main() {
 }
 \end{lstlisting}
 
-Output:
+输出:
 
 \begin{tcblisting}{commandshell={}}
 size: 5: 1:uno 2:dos 3:tres 4:quatro 5:cinco
 size: 3: 1:uno 3:tres 5:cinco
 \end{tcblisting}
 
-Because each element of a map is returned as a pair, we need a different function to print them. The print\_assoc() function unpacks the pair elements with a structured binding in the for loop. We also use a structured binding in the predicate function of erase\_if() to isolate the key for filtering the even numbered elements.
+因为map的每个元素都是成对返回的，所以需要不同的函数来打印。print\_assoc()函数的作用:在for循环中使用结构化绑定来解包对元素。我们还在erase\_if()的谓词函数中使用结构化绑定，来隔离用于过滤偶数元素的键值。
 \end{itemize}
 
 \subsubsection{How it works…}
 
-The erase() and erase\_if() functions are simply wrappers that perform the eraseremove idiom in one step. They perform the same operations as a function, like this:
+erase()和erase\_if()函数只是一次性执行erase-remove的包装器:
 
 \begin{lstlisting}[style=styleCXX]
 template<typename Tc, typename Tv>
@@ -173,13 +173,13 @@ void remove_value(Tc & c, const Tv v) {
 }
 \end{lstlisting}
 
-If we consider a simple vector of int, called vec, with the following values:
+若考虑一个简单的int vector，称为vec，具有以下值:
 
 \begin{lstlisting}[style=styleCXX]
 vector vec{ 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 };
 \end{lstlisting}
 
-We can visualize vec as a one-row table of int values:
+可以将vec可视化为一行的int值表:
 
 \hspace*{\fill} \\ %插入空行
 \begin{center}
@@ -195,12 +195,12 @@ We can visualize vec as a one-row table of int values:
 \node[text width=3cm, font=\large] at (12,-1.4) {end()};
 \end{tikzpicture}
 
-Figure 3.1 – begin() and end() iterators
+图3.1  begin()和end()迭代器
 \end{center}
 
-The begin() iterator points at the first element, and the end() iterator points past the last element. This configuration is standard for all STL sequential containers.
+begin()迭代器指向第一个元素，end()迭代器指向最后一个元素。此配置是所有STL顺序容器的标准配置。
 
-When we call remove(c.begin(), c.end(), 5), the algorithm searches for matching elements, starting at the begin() iterator. For each matching element that it finds, it shifts the next element into its place. It continues searching and shifting until it reaches the end() iterator. The result is a container where all the remaining elements are at the beginning, without the deleted elements, and in their original order. The end() iterator is unchanged and the remaining elements are undefined. We can visualize the operation like this:
+使用remove(c.begin()，c.end()，5)时，算法从begin()迭代器开始搜索匹配的元素。对于找到的每个匹配元素，将下一个元素移到它的位置。然后，继续搜索和移动，直到到达end()迭代器。结果是一个容器，其中所有剩余的元素都在最开始的部分，没有删除的元素，并按照它们原来的顺序。end()迭代器不变，其余元素未定义。可以这样可视化操作:
 
 \hspace*{\fill} \\ %插入空行
 \begin{center}
@@ -233,10 +233,10 @@ When we call remove(c.begin(), c.end(), 5), the algorithm searches for matching 
 \node[text width=3cm, font=\large] at (10.0,-0.5) {remove\_it};
 \end{tikzpicture}
 
-Figure 3.2 – Removing an element
+图3.2 移除一个元素
 \end{center}
 
-The remove() function returns an iterator (remove\_it) that points to the first element past the elements that were shifted. The end() iterator remains as it was before the remove() operation. To further illustrate, if we were to remove all even-numbered elements using remove\_if(), our result would look like this:
+remove()函数的作用是:返回一个迭代器(remove\_it)，指向移位的元素之后的第一个元素。end()迭代器保持在remove()操作之前的状态。为了进一步说明，若要使用remove\_if()删除所有偶数元素，结果将如下所示:
 
 \hspace*{\fill} \\ %插入空行
 \begin{center}
@@ -259,20 +259,20 @@ The remove() function returns an iterator (remove\_it) that points to the first 
 \node[text width=3cm, font=\large] at (12,-1.4) {end()};
 \end{tikzpicture}
 	
-Figure 3.3 – After removing even-numbered elements
+图3.3 移除偶数元素后
 \end{center}
 
-In this case, all that remains is the five odd-numbered elements followed by five elements of undefined value.
+本例中，剩下的就是5个奇数元素，后面跟着5个未定义值的元素。
 
-The container's erase() function is then called to erase the remaining elements:
+然后，调用容器的erase()函数来擦除剩余的元素:
 
 \begin{lstlisting}[style=styleCXX]
 c.erase(remove_it, c.end());
 \end{lstlisting}
 
-The container's erase() function is called with the remove\_it and end() iterators to delete all the undefined elements.
+容器的erase()函数使用remove\_it和end()迭代器调用，以删除所有未定义的元素。
 
-The erase() and erase\_if() functions call both the remove() function and the container's erase() function, in order to perform the erase-remove idiom in one step.
+erase()和erase\_if()函数同时调用remove()函数和容器的erase()函数，以便一步执行erase-remove。
 
 
 

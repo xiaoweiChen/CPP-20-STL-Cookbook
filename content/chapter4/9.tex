@@ -1,7 +1,7 @@
 
-Many scripting languages include a function for zipping two sequences together. A typical zip operation will take two input sequences and return a pair of values for each position in both inputs: 
+许多脚本语言都包含一个将两个序列压缩在一起的函数，zip操作就可以接受两个输入序列，并为两个输入中的每个位置返回一对值:
 
-Consider the case of two sequences – they can be containers, iterators, or initialization lists:
+考虑两个序列的情况——它们可以是容器、迭代器或初始化列表:
 
 \hspace*{\fill} \\ %插入空行
 \begin{center}
@@ -18,10 +18,10 @@ Consider the case of two sequences – they can be containers, iterators, or ini
 \node[text width=3cm, font=\large] at (1.5,-0.6) {seq2};
 \end{tikzpicture}
 
-Figure 4.6 – Containers to be zipped
+图4.6 需要压缩的容器
 \end{center}
 
-We want to zip them together to make a new sequence with pairs of elements from the first two sequences:
+我们想把它们压缩在一起，用前两个序列中的元素对组成一个新序列:
 
 \hspace*{\fill} \\ %插入空行
 \begin{center}
@@ -66,18 +66,18 @@ We want to zip them together to make a new sequence with pairs of elements from 
 \node[text width=3cm, font=\large] at (8.2,-3.7) {pair};
 \end{tikzpicture}
 
-Figure 4.7 – Zip operation
+图4.7  Zip操作
 \end{center}
 
-In this recipe we will accomplish this task with an iterator adapter.
+在本节示例中，我们将使用迭代器适配器来完成这项任务。
 
 \subsubsection{How to do it…}
 
-In this recipe we'll build a zip iterator adapter that takes two containers of the same type  and zips the values into std::pair objects:
+这个方法中，将构建一个zip迭代器适配器，接受两个相同类型的容器，并将值压缩到std::pair对象中:
 
 \begin{itemize}
 \item 
-In our main() function we want to call our adapter with two vectors:
+main()函数中，可以想用两个vector来调用适配器:
 
 \begin{lstlisting}[style=styleCXX]
 int main()
@@ -93,16 +93,16 @@ int main()
 }
 \end{lstlisting}
 
-This allows us to use the zip\_iterator in place of the individual vector iterators.
+可以使用zip\_iterator来代替单独的vector迭代器。
 
-And we expect an output like this:
+期望输出如下所示:
 
 \begin{tcblisting}{commandshell={}}
 zipped: [Bob, Dylan] [John, Williams] [Joni, Mitchell]
 \end{tcblisting}
 
 \item 
-Our iterator adapter is in a class called zip\_iterator. We'll start with some type aliases for convenience:
+迭代器适配器在一个名为zip\_iterator的类中。为了方便起见，我们将从一些类型别名开始:
 
 \begin{lstlisting}[style=styleCXX]
 template<typename T>
@@ -112,10 +112,10 @@ class zip_iterator {
 	using it_t = typename T::iterator;
 \end{lstlisting}
 
-These allow us to conveniently define objects and functions.
+这允许我们方便地定义对象和函数。
 
 \item 
-We don't store any data in our iterator. We only store copies of the target containers' begin() and end() iterators:
+迭代器中不存储数据，只存储目标容器的begin()和end()迭代器的副本:
 
 \begin{lstlisting}[style=styleCXX]
 it_t ita_{};
@@ -127,10 +127,10 @@ it_t ita_end_{};
 it_t itb_end_{};
 \end{lstlisting}
 
-ita\_ and itb\_ are iterators from the target containers. The other four iterators are used to generate the begin() and end() iterators for the zip\_iterator adapter.
+ita\_和itb\_是目标容器的迭代器，其他四个迭代器用于为zip\_iterator适配器生成begin()和end()迭代器。
 
 \item 
-We also have a private constructor:
+还有一个私有的构造函数:
 
 \begin{lstlisting}[style=styleCXX]
 // private constructor for begin() and end() objects
@@ -138,10 +138,10 @@ zip_iterator(it_t ita, it_t itb) : ita_{ita}, itb_{itb}
 {}
 \end{lstlisting}
 
-This is used later to construct adapter objects specifically for begin() and end() iterators.
+稍后将用于构造专门用于begin()和end()迭代器的适配器对象。
 
 \item 
-In the public section, we start with the iterator traits type definitions:
+public部分，从迭代器特性类型定义开始:
 
 \begin{lstlisting}[style=styleCXX]
 public:
@@ -156,7 +156,7 @@ using reference = const val_t&;
 \end{lstlisting}
 
 \item 
-The constructor sets up all the private iterator variables:
+构造函数设置所有私有迭代器变量:
 
 \begin{lstlisting}[style=styleCXX]
 zip_iterator(T& a, T& b) :
@@ -170,7 +170,7 @@ zip_iterator(T& a, T& b) :
 \end{lstlisting}
 
 \item 
-We define the minimum operator overloads to work with a forward iterator:
+定义了用于前向迭代器的最小操作符重载:
 
 \begin{lstlisting}[style=styleCXX]
 zip_iterator& operator++() {
@@ -190,7 +190,7 @@ ret_t operator*() const {
 \end{lstlisting}
 
 \item 
-And finally, the begin() and end() functions return the respective iterators:
+最后，begin()和end()函数返回各自的迭代器:
 
 \begin{lstlisting}[style=styleCXX]
 zip_iterator begin() const
@@ -199,10 +199,10 @@ zip_iterator end() const
 	{ return zip_iterator(ita_end_, itb_end_); }
 \end{lstlisting}
 
-These are made simple by the stored iterators and the private constructor.
+存储的迭代器和私有构造函数使这些函数变得简单。
 
 \item 
-Now let's expand our main() function for testing:
+现在展开main()函数进行测试:
 
 \begin{lstlisting}[style=styleCXX]
 int main()
@@ -229,7 +229,7 @@ int main()
 
 
 \item 
-This gives us the output we're looking for:
+这给了我们期望的输出:
 
 \begin{tcblisting}{commandshell={}}
 vec_a: Bob John Joni
@@ -241,10 +241,9 @@ zipped: [Bob, Dylan] [John, Williams] [Joni, Mitchell]
 
 \subsubsection{How it works…}
 
-The zipped iterator adapter is an example of how flexible the iterator abstraction can be.
-We can take the iterators of two containers and use them in one aggregated iterator. Let's see how this works.
+压缩迭代器适配器是迭代器抽象可以多么灵活的一个例子，可以获取两个容器的迭代器，并在一个聚合迭代器中使用。来看看这是如何工作的。
 
-The main constructor for the zip\_iterator class takes two container objects. For the purposes of this discussion, we'll refer to these objects as the target objects.
+zip\_iterator类的主构造函数接受两个容器对象。为了便于讨论，我们将这些对象称为目标对象。
 
 \begin{lstlisting}[style=styleCXX]
 zip_iterator(T& a, T& b) :
@@ -257,9 +256,9 @@ zip_iterator(T& a, T& b) :
 {}
 \end{lstlisting}
 
-The constructor initializes the ita\_ and itb\_ variables from the target begin() iterators. These will be used to navigate the target objects. The target begin() and end() iterators are also saved for later use.
+构造函数从目标begin()迭代器初始化ita\_和itb\_变量，这些将用于导航目标对象。目标begin()和end()迭代器也会保存以供后续使用。
 
-These variables are defined in the private section:
+这些变量在私有部分中定义:
 
 \begin{lstlisting}[style=styleCXX]
 it_t ita_{};
@@ -271,7 +270,7 @@ it_t ita_end_{};
 it_t itb_end_{};
 \end{lstlisting}
 
-The it\_t type is defined as the type of the target iterator class:
+it\_t类型定义为目标迭代器类的类型:
 
 \begin{lstlisting}[style=styleCXX]
 using val_t = typename T::value_type;
@@ -279,9 +278,9 @@ using ret_t = std::pair<val_t, val_t>;
 using it_t = typename T::iterator;
 \end{lstlisting}
 
-The other aliased types are val\_t for the type of the target value, and ret\_t for the return pair. These type definitions are used for convenience throughout the class.
+其他别名类型是val\_t，表示目标值的类型，ret\_t表示返回值对。在整个类中使用这些类型定义是为了方便使用。
 
-The begin() and end() functions use a private constructor that only initializes the ita\_ and itb\_ values:
+begin()和end()函数使用只初始化ita\_和itb\_值的私有构造函数:
 
 \begin{lstlisting}[style=styleCXX]
 zip_iterator begin() const
@@ -290,16 +289,16 @@ zip_iterator end() const
 	{ return zip_iterator(ita_end_, itb_end_); }
 \end{lstlisting}
 
-The private constructor looks like this:
+私有构造函数:
 
 \begin{lstlisting}[style=styleCXX]
 // private constructor for begin() and end() objects
 zip_iterator(it_t ita, it_t itb) : ita_{ita}, itb_{itb} {}
 \end{lstlisting}
 
-This is a constructor that takes it\_t iterators for parameters. It only initializes ita\_and itb\_ so they can be used in the comparison operator overloads.
+这是一个使用it\_t迭代器作为参数的构造函数，只初始化ita\_和itb\_，以便它们可以在比较操作符重载中使用。
 
-The rest of the class just acts like a normal iterator, but it's operating on iterators from the target class:
+类的其余部分就像普通的迭代器一样，但操作的是目标类的迭代器:
 
 \begin{lstlisting}[style=styleCXX]
 zip_iterator& operator++() {
@@ -315,7 +314,7 @@ bool operator!=(const zip_iterator& o) const {
 }
 \end{lstlisting}
 
-The dereference operator returns a std::pair object (ret\_t is an alias for std::pair<val\_t, val\_t>). This is the interface for retrieving a value from the iterator.
+解引用操作符返回一个std::pair对象(ret\_t是std::pair<val\_t, val\_t>的别名)。这是从迭代器接口中检索出的值。
 
 \begin{lstlisting}[style=styleCXX]
 ret_t operator*() const {
@@ -325,7 +324,7 @@ ret_t operator*() const {
 
 \subsubsection{There's more…}
 
-The zip\_iterator adapter can be used to easily zip objects into a map:
+zip\_iterator适配器可以用来轻松地将对象压缩到map中:
 
 \begin{lstlisting}[style=styleCXX]
 map<string, string> name_map{};
@@ -341,7 +340,7 @@ for(auto [a, b] : name_map) {
 cout << '\n';
 \end{lstlisting}
 
-If we add this code to main(), we get this output:
+若将这段代码添加到main()，则会得到这样的输出:
 
 \begin{tcblisting}{commandshell={}}
 name_map: [Bob, Dylan] [John, Williams] [Joni, Mitchell]

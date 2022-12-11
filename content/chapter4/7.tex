@@ -1,13 +1,13 @@
 
-A reverse iterator adapter is an abstraction that reverses the direction of an iterator class. It requires a bidirectional iterator.
+反向迭代器适配器是反转迭代器类方向的抽象，需要是一个双向迭代器。
 
 \subsubsection{How to do it…}
 
-Most bidirectional containers in the STL include a reverse iterator adapter. Other containers, such as the primitive C-array, do not. Let's look at some examples:
+STL中的大多数双向容器都包含一个反向迭代器适配器。其他容器，如原始C数组，则没有。让我们来看一些例子:
 
 \begin{itemize}
 \item 
-Let's start with the printc() function we've used throughout this chapter:
+从本章一直使用的printc()函数开始:
 
 \begin{lstlisting}[style=styleCXX]
 void printc(const auto & c, const string_view s = "") {
@@ -17,10 +17,10 @@ void printc(const auto & c, const string_view s = "") {
 }
 \end{lstlisting}
 
-This uses a range-based for loop to print the elements of a container.
+使用一个基于范围的for循环来打印容器的元素。
 
 \item 
-The range-based for loop works even with primitive C-arrays, which have no iterator class. So, our printc() function already works with a C-array:
+基于范围的for循环，甚至适用于没有迭代器类的C数组。因此，printc()函数也适用于C数组:
 
 \begin{lstlisting}[style=styleCXX]
 int main() {
@@ -29,14 +29,14 @@ int main() {
 }
 \end{lstlisting}
 
-We get this output:
+我们会得到这样的输出:
 
 \begin{tcblisting}{commandshell={}}
 c-array: 1 2 3 4 5
 \end{tcblisting}
 
 \item 
-We can use the begin() and end() iterator adapters to create normal forward iterators for the C-array:
+可以使用begin()和end()迭代器适配器为C数组创建普通的前向迭代器:
 
 \begin{lstlisting}[style=styleCXX]
 auto it = std::begin(array);
@@ -46,14 +46,14 @@ while (it != end_it) {
 }
 \end{lstlisting}
 
-Output from the for loop:
+for循环的输出:
 
 \begin{tcblisting}{commandshell={}}
 1 2 3 4 5
 \end{tcblisting}
 
 \item 
-Or we can use the rbegin() and rend() reverse iterator adapters to create reverse iterators for the C-array:
+或者可以使用rbegin()和rend()反向迭代器适配器为C数组创建反向迭代器:
 
 \begin{lstlisting}[style=styleCXX]
 auto it = std::rbegin(array);
@@ -63,14 +63,14 @@ while (it != end_it) {
 }
 \end{lstlisting}
 
-Now our output is reversed:
+现在输出反过来了:
 
 \begin{tcblisting}{commandshell={}}
 5 4 3 2 1
 \end{tcblisting}
 
 \item 
-We can even create a modified version of printc() that prints in reverse:
+甚至可以创建一个printc()的修改版本，反向打印:
 
 \begin{lstlisting}[style=styleCXX]
 void printr(const auto & c, const string_view s = "") {
@@ -84,20 +84,20 @@ void printr(const auto & c, const string_view s = "") {
 }
 \end{lstlisting}
 
-When we call it with the C-array:
+当用C数组调用它时:
 
 \begin{lstlisting}[style=styleCXX]
 printr(array, "rev c-array");
 \end{lstlisting}
 
-We get this output:
+会得到这样的输出:
 
 \begin{tcblisting}{commandshell={}}
 rev c-array: 5 4 3 2 1
 \end{tcblisting}
 
 \item 
-Of course, this works just as well with any bidirectional STL container:
+当然，这也适用于任何双向STL容器:
 
 \begin{lstlisting}[style=styleCXX]
 vector<int> v{ 1, 2, 3, 4, 5 };
@@ -105,7 +105,7 @@ printc(v, "vector");
 printr(v, "rev vector");
 \end{lstlisting}
 
-Output:
+输出:
 
 \begin{tcblisting}{commandshell={}}
 vector: 1 2 3 4 5
@@ -116,7 +116,7 @@ rev vector: 5 4 3 2 1
 
 \subsubsection{How it works…}
 
-A normal iterator class has a begin() iterator that points to the first element, and an end() iterator that points past the last element:
+一个普通的迭代器类有一个begin()迭代器指向第一个元素，还有一个end()迭代器指向最后一个元素之后:
 
 \hspace*{\fill} \\ %插入空行
 \begin{center}
@@ -134,12 +134,12 @@ A normal iterator class has a begin() iterator that points to the first element,
 \draw[line width=2pt][-latex] (3,-1.4) -- (6.0,-1.4);
 \end{tikzpicture}
 
-Figure 4.3 – Forward iterator
+图4.3 前向迭代器
 \end{center}
 
-You iterate the container by incrementing the begin() iterator with the ++ operator, until it reaches the value of the end() iterator.
+通过使用++操作符递增begin()迭代器来迭代容器，直到end()迭代器的值。
 
-A reverse iterator adapter intercepts the iterator interface and turns it around so the begin() iterator points at to the last element, and end() iterator points before the first element. The ++ and -- operators are also inverted:
+反向迭代器适配器拦截迭代器接口并将其反转，使begin()迭代器指向最后一个元素，end()迭代器指向第一个元素之前。++和--操作符也是颠倒的:
 
 \hspace*{\fill} \\ %插入空行
 \begin{center}
@@ -157,13 +157,13 @@ A reverse iterator adapter intercepts the iterator interface and turns it around
 \draw[line width=2pt][-latex] (5.0,-1.4) -- (2,-1.4);
 \end{tikzpicture}
 
-Figure 4.4 – Reverse iterator adapter
+图4.4 反向迭代器适配器
 \end{center}
 
 
-In the reversed iterator, the ++ operator decrements and the -- operator increments.
+反向迭代器中，++操作符递减，--操作符递增。
 
-It's worth noting that most bidirectional STL containers already include a reverse iterator adapter, accessible by member functions rbegin() and rend():
+大多数双向STL容器已经包含了一个反向迭代器适配器，可以通过成员函数rbegin()和rend()访问:
 
 \begin{lstlisting}[style=styleCXX]
 vector<int> v;
@@ -171,4 +171,4 @@ it = v.rbegin();
 it_end = v.rend();
 \end{lstlisting}
 
-These iterators will operate in reverse and are suitable for many purposes.
+这些迭代器将反向操作，可以用于多种场景。

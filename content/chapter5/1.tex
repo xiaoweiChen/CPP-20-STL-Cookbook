@@ -1,23 +1,23 @@
 
-A lambda is essentially an anonymous function as a literal expression:
+lambda本质上是一个匿名函数作为字面表达式:
 
 \begin{lstlisting}[style=styleCXX]
 auto la = []{ return "Hello\n"; };
 \end{lstlisting}
 
-The variable la may now be used as if it were a function:
+变量la现在可以像函数一样使用:
 
 \begin{lstlisting}[style=styleCXX]
 cout << la();
 \end{lstlisting}
 
-It can be passed to another function:
+可以传递给另一个函数:
 
 \begin{lstlisting}[style=styleCXX]
 f(la);
 \end{lstlisting}
 
-It can be passed to another lambda:
+也可以传递给另一个lambda:
 
 \begin{lstlisting}[style=styleCXX]
 const auto la = []{ return "Hello\n"; };
@@ -25,30 +25,30 @@ const auto lb = [](auto a){ return a(); };
 cout << lb(la);
 \end{lstlisting}
 
-Output:
+输出:
 
 \begin{tcblisting}{commandshell={}}
 Hello
 \end{tcblisting}
 
-Or it can be passed anonymously (as a literal):
+或者它可以匿名传递(作为一个文字):
 
 \begin{lstlisting}[style=styleCXX]
 const auto lb = [](auto a){ return a(); };
 cout << lb([]{ return "Hello\n"; });
 \end{lstlisting}
 
-\subsubsection{Closures}
+\subsubsection{闭包}
 
-The term closure is often applied to any anonymous function. Strictly speaking, a closure is a function that allows the use of symbols outside its own lexical scope.
+闭包这个术语通常应用于任何匿名函数。严格地说，闭包是一个允许在自己的词法范围之外使用符号的函数。
 
-You may have noticed the square brackets in the definition of a lambda:
+可能已经注意到lambda定义中的方括号:
 
 \begin{lstlisting}[style=styleCXX]
 auto la = []{ return "Hello\n"; };
 \end{lstlisting}
 
-The square brackets are used to specify a list of captures. Captures are outside variables that are accessible from within the scope of the lambda body. If I try to use an outside variable without listing it as a capture, I'll get a compilation error:
+方括号用于指定捕获列表，捕获是可从lambda体范围内访问的外部变量。若试图使用外部变量而没有将其列为捕获，会得到一个编译错误:
 
 \begin{lstlisting}[style=styleCXX]
 const char * greeting{ "Hello\n" };
@@ -56,16 +56,16 @@ const auto la = []{ return greeting; };
 cout << la();
 \end{lstlisting}
 
-When I try to compile this with GCC, I get the following error:
+当尝试用GCC编译这个时，得到了以下的错误:
 
 \begin{tcblisting}{commandshell={}}
 In lambda function:
 error: 'greeting' is not captured
 \end{tcblisting}
 
-This is because the body of the lambda has its own lexical scope and the greeting variable is outside of that scope.
+因为lambda的主体有自己的词法作用域，而greeting变量在该作用域之外。
 
-I can specify the greeting variable in a capture. This allows the variable into the scope of the lambda:
+可以在捕获中指定greeting变量，这允许变量进入lambda的作用域:
 
 \begin{lstlisting}[style=styleCXX]
 const char * greeting{ "Hello\n" };
@@ -73,41 +73,40 @@ const auto la = [greeting]{ return greeting; };
 cout << la();
 \end{lstlisting}
 
-Now it compiles and runs as expected:
+现在程序就能按预期编译和运行:
 
 \begin{tcblisting}{commandshell={}}
 $ ./working
 Hello
 \end{tcblisting}
 
-This ability to capture variables outside its own scope is what makes a lambda a closure.
-People use the term in different ways, and that's fine, so long as we can understand each other. Still, it's good to know what the term means.
+这种捕获自身作用域之外变量的能力使lambda成为闭包。人们用不同的方式使用这个词，只要能相互理解就好。尽管如此，了解这个术语的含义还是很有必要的。
 
-Lambda expressions allow us to write good, clean generic code. They allow the use of functional programming patterns, where we can use lambdas as functional parameters to algorithms and even other lambdas.
+lambda表达式允许我们编写良好、干净的泛型代码，了可以使用函数式编程模式，其中可以使用lambda作为算法，甚至作为其他lambda函数的参数。
 
-In this chapter, we will cover the use of lambdas with the STL, in the following recipes:
+本章中，我们将在以下主题中介绍lambda在STL中的使用:
 
 \begin{itemize}
 \item 
-Use lambdas for scoped reusable code
+用于作用域可重用代码
 
 \item 
-Use lambdas as predicates with the algorithm library
+算法库中作为谓词
 
 \item 
-Use std::function as a polymorphic wrapper
+与std::function一起作为多态包装器
 
 \item 
-Concatenate lambdas with recursion
+用递归连接lambda
 
 \item 
-Combine predicates with logical conjunction
+将谓词与逻辑连接词结合起来
 
 \item 
-Call multiple lambdas with the same input
+用相同的输入调用多个lambda
 
 \item 
-Use mapped lambdas for a jump table
+对跳转表使用映射lambda
 \end{itemize}
 
 

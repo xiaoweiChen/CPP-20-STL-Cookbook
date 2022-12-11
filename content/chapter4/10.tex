@@ -1,18 +1,18 @@
 
-This recipe is an example of a full-featured contiguous/random-access iterator. This is the most complete type of iterator for a container. A random-access iterator includes all the features of all the other types of container iterators, along with its random-access capabilities.
+本节中是一个全功能连续/随机访问迭代器的例子，这是容器最完整的迭代器类型。随机访问迭代器包括所有其他类型的容器迭代器的所有特性，以及它的随机访问功能。
 
-While I felt it important to include a complete iterator in this chapter, with over 700 lines of code this example is somewhat larger than the other examples in this book. I'll cover the essential components of the code here. Please see the full source at \url{https://github.com/PacktPublishing/CPP-20-STL-Cookbook/blob/main/ chap04/container-iterator.cpp}.
+虽然在本章中包含一个完整的迭代器很重要，但这个示例的代码超过700行，比本书中的其他示例要大一些。我将在这里介绍代码的基本组件。请在此处查看完整的源代码 \url{https://github.com/PacktPublishing/CPP-20-STL-Cookbook/blob/main/ chap04/container-iterator.cpp}。
 
 
 \subsubsection{How to do it…}
 
-We need a container for our iterator. We'll use a simple array for this, and we'll call it Container. The iterator class is nested within the Container class.
+迭代器需要一个容器。我们将为此使用一个简单的数组，并将其称为Container。迭代器类嵌套在Container类中。
 
-All of this is designed to be consistent with the STL container interfaces.
+所有这些设计会与STL容器的接口一致。
 
 \begin{itemize}
 \item 
-Container is defined as a template class. Its private section has only two elements:
+容器定义为模板类，私有部分只有两个元素:
 
 \begin{lstlisting}[style=styleCXX]
 template<typename T>
@@ -21,10 +21,10 @@ class Container {
 	size_t n_elements_{};
 \end{lstlisting}
 
-We use a unique\_pointer for the data. We let the smart pointer manage its own memory. This mitigates the need for a ~Container() destructor. The n\_elements\_ variable keeps the size of our container.
+我们为数据使用unique\_pointer，让智能指针管理内存。这减少了对~Container()析构函数的需求。n\_elements\_变量保留了容器的大小。
 
 \item 
-In the public section, we have our constructors:
+在public部分中，有构造函数:
 
 \begin{lstlisting}[style=styleCXX]
 Container(initializer_list<T> l) : n_elements_{l.size()}
@@ -37,10 +37,10 @@ Container(initializer_list<T> l) : n_elements_{l.size()}
 }
 \end{lstlisting}
 
-The first constructor uses an initializer\_list to pass elements for the container. We call make\_unique to allocate space and populate the container with a range-based for loop.
+第一个构造函数使用initializer\_list为容器传递元素。使用make\_unique来分配空间，并用基于范围的for循环填充容器。
 
 \item 
-We also have a constructor that allocates space without populating the elements:
+还有一个构造函数，分配空间但不填充元素:
 
 \begin{lstlisting}[style=styleCXX]
 Container(size_t sz) : n_elements_{sz} {
@@ -48,10 +48,10 @@ Container(size_t sz) : n_elements_{sz} {
 }
 \end{lstlisting}
 
-The make\_unique() function constructs empty objects for element.
+make\_unique()函数的作用是为element构造空对象。
 
 \item 
-The size() function returns the number of elements:
+函数的作用是:返回元素的个数:
 
 \begin{lstlisting}[style=styleCXX]
 size_t size() const {
@@ -60,7 +60,7 @@ size_t size() const {
 \end{lstlisting}
 
 \item 
-The operator[]() function returns an indexed element:
+operator[]()函数，返回一个索引元素:
 
 \begin{lstlisting}[style=styleCXX]
 const T& operator[](const size_t index) const {
@@ -69,7 +69,7 @@ const T& operator[](const size_t index) const {
 \end{lstlisting}
 
 \item 
-The at() function returns an indexed element with bounds checking:
+at()函数，对索引元素进行边界检查:
 
 \begin{lstlisting}[style=styleCXX]
 T& at(const size_t index) const {
@@ -82,10 +82,10 @@ T& at(const size_t index) const {
 }
 \end{lstlisting}
 
-This is consistent with STL usage. The at() function is the preferred method.
+这与STL的用法是一致的，at()函数是首选。
 
 \item 
-The begin() and end() functions call the iterator constructor with the address of the container data.
+begin()和end()函数使用容器数据的地址调用迭代器构造函数。
 
 \begin{lstlisting}[style=styleCXX]
 iterator begin() const { return iterator(c_.get()); }
@@ -94,36 +94,36 @@ iterator end() const {
 }
 \end{lstlisting}
 
-The unique\_ptr::get() function returns the address from the smart pointer.
+unique\_ptr::get()函数从智能指针返回地址。
 
 \item 
-The iterator class is nested within the Container class as a public member.
+迭代器类作为公共成员嵌套在Container类中。
 
 \begin{lstlisting}[style=styleCXX]
 class iterator {
 	T* ptr_;
 \end{lstlisting}
 
-The iterator class has one private member, a pointer that's initialized in the begin() and end() methods of the Container class.
+迭代器类有一个私有成员，在Container类的begin()和end()方法中初始化的指针。
 
 \item 
-The iterator constructor takes a pointer to the container data.
+迭代器构造函数接受一个指向容器数据的指针。
 
 \begin{lstlisting}[style=styleCXX]
 iterator(T* ptr = nullptr) : ptr_{ptr} {}
 \end{lstlisting}
 
-We provide a default value because the standard requires a default constructor.
+因为标准需要一个默认构造函数，所以这里提供一个默认值。
 \end{itemize}
 
 \noindent
-\textbf{Operator overloads}
+\textbf{运算符重载}
 
-This iterator provides operator overloads for the following operators: ++, postfix ++, --, postfix --, [], default comparison <=> (C++20), ==, *, ->, +, non-member +, numeric -, object -, +=, and -=. We'll cover a few notable overloads here. See the source code for all of them.
+此迭代器为以下操作符提供操作符重载:++，后缀++，--，后缀--，[]，默认比较<=>(C++20)， ==， *， ->， +，非成员+，数字-，对象-，+=和-=。我们将在这里介绍几个值得注意的重载，具体请参阅这些重载的源代码。
 
 \begin{itemize}
 \item 
-The C++20 default comparison operator <=> provides the functionality of the full suite of comparison operators, except the equality == operator:
+C++20默认的比较运算符<=>提供了全套比较运算符的功能，除了==运算符:
 
 \begin{lstlisting}[style=styleCXX]
 const auto operator<=>(const iterator& o) const {
@@ -131,10 +131,10 @@ const auto operator<=>(const iterator& o) const {
 }
 \end{lstlisting}
 
-This is a C++20 feature, so it requires a compliant compiler and library.
+这是C++20的一个特性，所以需要一个兼容的编译器和库。
 
 \item 
-There are two + operator overloads. These support it + n and n + it operations.
+有两个+操作符重载，支持it + n和n + it操作。
 
 \begin{lstlisting}[style=styleCXX]
 iterator operator+(const size_t n) const {
@@ -147,10 +147,10 @@ friend const iterator operator+(
 }
 \end{lstlisting}
 
-The friend declaration is a special case. When used in a template class member function, it's the equivalent of a non-member function. This allows a non-member function to be defined in the class context.
+友元声明是一种特殊情况。在模板类成员函数中使用时，相当于一个非成员函数。这允许在类上下文中定义非成员函数。
 
 \item 
-The - operator also has two overloads. We need to support both a numeric operand and an iterator operand.
+运算符也有两个重载，需要同时支持数值操作数和迭代器操作数。
 
 \begin{lstlisting}[style=styleCXX]
 const iterator operator-(const size_t n) {
@@ -161,21 +161,21 @@ const size_t operator-(const iterator& o) {
 }
 \end{lstlisting}
 
-This allows both it – n and it – it operations. There's no need for a non-member function, as n – it is not a valid operation.
+这允许it - n和it - it运算。不需要非成员函数，因为(n -)并不是一个有效的操作。
 
 \end{itemize}
 
 
 \noindent
-\textbf{Validation code}
+\textbf{验证}
 
-The C++20 specification §23.3.4.13 requires a specific set of operations and results for a valid random-access iterator. I've included a unit\_tests() function in the source code to validate those requirements.
+C++20规范§23.3.4.13要求一个有效的随机访问迭代器有一组特定的操作和结果。我在源代码中包含了一个unit\_tests()函数来验证这些需求。
 
-The main() function creates a Container object and performs some simple validation functions.
+main()函数创建一个Container对象并执行一些简单的验证函数。
 
 \begin{itemize}
 \item 
-First, we create a Container<string> object x with ten values.
+首先，创建一个Container<string>对象x，其中包含10个值。
 
 \begin{lstlisting}[style=styleCXX]
 Container<string> x{"one", "two", "three", "four",
@@ -184,14 +184,14 @@ Container<string> x{"one", "two", "three", "four",
 cout << format("Container x size: {}\n", x.size());
 \end{lstlisting}
 
-The output gives the number of elements:
+输出给出了元素的数量:
 
 \begin{tcblisting}{commandshell={}}
 Container x size: 10
 \end{tcblisting}
 
 \item 
-We display the elements of the container with a range-based for loop:
+用一个基于范围的for循环来显示容器的元素:
 
 \begin{lstlisting}[style=styleCXX]
 puts("Container x:");
@@ -201,7 +201,7 @@ for(auto e : x) {
 cout << '\n';
 \end{lstlisting}
 
-Output:
+输出:
 
 \begin{tcblisting}{commandshell={}}
 Container x:
@@ -209,7 +209,7 @@ one two three four five six seven eight nine ten
 \end{tcblisting}
 
 \item 
-Next, we test several direct access methods:
+接下来，测试几个直接访问的方法:
 
 \begin{lstlisting}[style=styleCXX]
 puts("direct access elements:");
@@ -223,7 +223,7 @@ cout << format("element begin += 5: {}\n",
 	*(x.begin() += 5));
 \end{lstlisting}
 
-Output:
+输出:
 
 \begin{tcblisting}{commandshell={}}
 direct access elements:
@@ -235,7 +235,7 @@ element begin += 5: six
 \end{tcblisting}
 
 \item 
-We test the container with a ranges::views pipe and views::reverse:
+用ranges::views管道和views::reverse来测试容器:
 
 \begin{lstlisting}[style=styleCXX]
 puts("views pipe reverse:");
@@ -244,7 +244,7 @@ for(auto v : result) cout << format("{} ", v);
 cout << '\n';
 \end{lstlisting}
 
-Output:
+输出:
 
 \begin{tcblisting}{commandshell={}}
 views pipe reverse:
@@ -252,7 +252,7 @@ ten nine eight seven six five four three two one
 \end{tcblisting}
 
 \item 
-Finally, we create a Container object y with 10 uninitialized elements:
+最后，创建一个包含10个未初始化元素的Container对象y:
 
 \begin{lstlisting}[style=styleCXX]
 Container<string> y(x.size());
@@ -263,7 +263,7 @@ for(auto e : y) {
 cout << '\n';
 \end{lstlisting}
 
-Output:
+输出:
 
 \begin{tcblisting}{commandshell={}}
 Container y size: 10
@@ -274,9 +274,9 @@ Container y size: 10
 
 \subsubsection{How it works…}
 
-Although it's a lot of code, this iterator is no more complicated than a smaller iterator. Most of the code is in the operator overloads, which are mostly one or two lines of code each.
+尽管有很多代码，但这个迭代器并不比一个较小的迭代器复杂。大多数代码都在操作符重载中，每个重载通常只有一两行代码。
 
-The container itself is managed by a smart pointer. This is simplified by the fact that it's a flat array and doesn't require expansion or compression.
+容器本身由智能指针管理。这是因为它是一个“平面”数组，所以不需要展开或压缩。
 
-Of course, the STL provides a flat std::array class, as well as other more complex data structures. Still, you may find it valuable to demystify the workings of a complete iterator class.
+当然，STL提供了一个平面std::array类，以及其他更复杂的数据结构。不过，要揭开一个迭代器类的工作原理的神秘面纱，还是挺有趣的。
 

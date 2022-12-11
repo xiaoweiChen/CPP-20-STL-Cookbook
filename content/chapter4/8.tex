@@ -1,8 +1,7 @@
 
-Some objects don't have a specific length. To know their length, you need to iterate through all their elements. For example, elsewhere in this chapter we've seen a generator that doesn't have a specific length. A more common example would be a C-string.
+有些对象没有特定的长度。要想知道长度，需要遍历它们的所有元素。例如，在本章的其他地方，我们已经看到了一个没有特定长度的生成器。一个更常见的例子是C字串。
 
-A C-string is a primitive C-array of characters, terminated with a null '\verb|\|0' value.
-
+C-string是由字符组成的C数组，以空值“\verb|\|0”作为结束。
 
 \hspace*{\fill} \\ %插入空行
 \begin{center}
@@ -16,16 +15,16 @@ A C-string is a primitive C-array of characters, terminated with a null '\verb|\
 \draw[line width=1pt] (1.1*6,1) rectangle (1.1*6+1,0) node[pos=.5] {\verb|\|0};
 \end{tikzpicture}
 
-Figure 4.5 – A C-string with its null terminator
+图4.5 带有空结束符的C-string
 \end{center}
 
-We use C-strings all the time, even if we don't realize it. Any literal string in C/C++ is a C-string:
+即使我们没有意识到，我们也一直在使用C-string。C/C++中的字面值字符串都是C-string:
 
 \begin{lstlisting}[style=styleCXX]
 std::string s = "string";
 \end{lstlisting}
 
-Here, the STL string s is initialized with a literal string. The literal string is a C-string. If we look at the individual characters in hexadecimal, we'll see the null terminator:
+这里，STL字符串s初始化为一个字面值字符串。字面值字符串是一个c字串。若看一下十六进制中的单个字符，就会看到空结束符:
 
 \begin{lstlisting}[style=styleCXX]
 for (char c : "string") {
@@ -33,39 +32,39 @@ for (char c : "string") {
 }
 \end{lstlisting}
 
-The word "string" has six letters. The output from our loop shows seven elements in the array:
+单词“string”有六个字母。循环的输出显示了数组中的七个元素:
 
 \begin{tcblisting}{commandshell={}}
 73 74 72 69 6e 67 00
 \end{tcblisting}
 
-The seventh element is the null terminator.
+第七个是空——结束符。
 
-The loop sees the primitive C-array of characters, with seven values. The fact that it's a string is an abstraction invisible to the loop. If we want the loop to treat it like a string, we'll need an iterator and a sentinel.
+循环看到的是包含7个值的C字符数组，是一个字符串的事实对循环是不可见的抽象。若想让循环像对待字符串一样对待它，需要一个迭代器和一个哨兵。
 
-A sentinel is an object that signals the end of an iterator of indeterminate length. When the iterator hits the end of the data, the sentinel will compare equal with the iterator.
+哨兵是一个对象，标志着一个长度不确定的迭代器的结束。当迭代器到达数据的末尾时，哨兵将与迭代器进行相等比较。
 
-To see how this works, let's build an iterator for C-strings!
+为了了解这是如何工作的，先为C-string构建一个迭代器!
 
 \subsubsection{How to do it…}
 
-To use a sentinel with a C-string, we need to build a custom iterator. It doesn't need to be complicated, just the essentials for use with a range-based for loop.
+要使用带有C-string哨兵，需要构建一个自定义迭代器。不需要很复杂，只需要使用基于范围的for循环的基本要素即可。
 
 \begin{itemize}
 \item 
-We'll start with a couple of convenience definitions:
+我们将从几个定义开始:
 
 \begin{lstlisting}[style=styleCXX]
 using sentinel_t = const char;
 constexpr sentinel_t nullchar = '\0';
 \end{lstlisting}
 
-The using alias for sentinel\_t is const char. We'll use this for the sentinel in our class.
+sentinel\_t是const char的别名，我们类型的哨兵就用这个类型。
 
-We also define the constant nullchar for the null character terminator.
+我们还为空字符结束符定义了常量nullchar。
 
 \item 
-Now we can define our iterator type:
+现在来定义迭代器类型:
 
 \begin{lstlisting}[style=styleCXX]
 class cstr_it {
@@ -85,10 +84,10 @@ public:
 };
 \end{lstlisting}
 
-This is short and simple. It's the minimum necessary for a range-based for loop. Notice the end() function returns a nullchar and the operator!=() overload compares against the nullchar. That's all we need for the sentinel.
+这是基于范围的for循环所必需的最小值，end()函数返回一个nullchar，操作符!=()重载与nullchar进行比较。这就是哨兵所需要的。
 
 \item 
-Now we can define a function for printing our C-string using the sentinel:
+现在，可以定义一个函数，使用哨兵来打印C-string:
 
 \begin{lstlisting}[style=styleCXX]
 void print_cstr(const char * s) {
@@ -100,10 +99,10 @@ void print_cstr(const char * s) {
 }
 \end{lstlisting}
 
-In this function we first print the string. Then we use the format() function to print each individual character as a hexadecimal value.
+这个函数中，首先打印字符串。然后，使用format()函数将每个字符打印为十六进制值。
 
 \item 
-Now we can call print\_cstr() from our main() function:
+现在，可以在main()中调用print\_cstr():
 
 \begin{lstlisting}[style=styleCXX]
 int main() {
@@ -114,26 +113,26 @@ int main() {
 }
 \end{lstlisting}
 
-The output looks like this:
+输出如下所示:
 
 \begin{tcblisting}{commandshell={}}
 array: 61 72 72 61 79
 c-string: 63 2d 73 74 72 69 6e 67
 \end{tcblisting}
 
-Notice that there are no extraneous characters and no null terminators. This is because our sentinel tells the for loop to stop when it sees the nullchar.
+注意，这里没有多余的字符，也没有空终止符。因为哨兵告诉for循环，在看到nullchar时停止。
 
 \end{itemize}
 
 \subsubsection{How it works…}
 
-The sentinel part of the iterator class is very simple. We can easily use the null terminator as the sentinel value by returning it in the end() function:
+迭代器类的哨兵部分非常简单，可以通过在end()函数中返回空结束符，将其作为哨兵值使用:
 
 \begin{lstlisting}[style=styleCXX]
 sentinel_t end() const { return nullchar; }
 \end{lstlisting}
 
-Then the not-equal comparison operator can test for it:
+然后，可以用不等于比较操作符进行测试:
 
 \begin{lstlisting}[style=styleCXX]
 bool operator!=(sentinel_t) const {
@@ -142,9 +141,9 @@ bool operator!=(sentinel_t) const {
 \end{lstlisting}
 
 
-Notice that the parameter is just a type (sentinel\_t). A parameter type is necessary for the function signature, but we don't need the value. All that's necessary is to compare the current iterator with the sentinel.
+注意，参数只是一个类型(sentinel\_t)。参数类型是函数签名所必需的，但我们不需要值，需要做的就是将当前迭代器与哨兵进行比较。
 
-This technique should be useful whenever you have a type or class that doesn't have a predetermined end point for comparison.
+当类型或类没有预定的比较终点时，这种技术应该会用到。
 
 
 

@@ -1,7 +1,7 @@
 
-A generator is an iterator that generates its own sequence of values. It does not use a container. It creates values on the fly, returning one at a time as needed. A C++ generator stands on its own; it does not need to wrap around another object.
+生成器是生成自己的值序列的迭代器。它不使用容器。它动态地创建值，根据需要一次返回一个值。并且，C++生成器可以独立运行。
 
-In this recipe, we'll build a generator for a Fibonacci sequence. This is a sequence where each number is the sum of the previous two numbers in the sequence, starting with 0 and 1:
+本节示例中，我们将为斐波那契数列构建一个生成器。这是一个数列，其中每个数字都是数列中前两个数字的和，从0和1开始:
 
 \begin{equation*}
 F(n)=
@@ -12,15 +12,15 @@ F(n)=
 \end{cases}
 \end{equation*}
 
-The first ten values of the Fibonacci sequence, not counting zero, are: 1, 1, 2, 3, 5, 8, 13, 21, 34, 55. This is a close approximation of the golden ratio found in nature.
+斐波那契数列的前十个值，不包括零，分别是:1,1,2,3,5,8,13,21,34,55。这与自然界的黄金比例非常接近。
 
 \subsubsection{How to do it…}
 
-A Fibonacci sequence is often created with a recursive loop. Recursion in a generator can be difficult and resource-intensive, so instead we'll just save the previous two values in the sequence and add them together. This is more efficient.
+斐波那契数列通常是用递归循环创建的。生成器中的递归可能会很困难，而且需要大量资源，因此只保存序列中的前两个值并将它们相加，这样更有效率更高。
 
 \begin{itemize}
 \item 
-First let's define a function to print the sequence:
+首先，定义一个函数来打印序列:
 
 \begin{lstlisting}[style=styleCXX]
 void printc(const auto & v, const string_view s = "") {
@@ -30,10 +30,10 @@ void printc(const auto & v, const string_view s = "") {
 }
 \end{lstlisting}
 
-We've used this printc() function before. It prints an iterable range, along with a description string, if provided.
+之前使用过这个printc()函数，可打印一个可迭代范围，以及一个描述字符串。
 
 \item 
-Our class begins with a type alias, and a few object variables, all in the private section.
+我们的类从一个类型别名和一些对象变量开始，所有这些都在private部分中。
 
 \begin{lstlisting}[style=styleCXX]
 class fib_generator {
@@ -44,10 +44,10 @@ class fib_generator {
 	fib_t b_ { 1 };
 \end{lstlisting}
 
-The stop\_ variable will be used later as a sentinel. It's set to the number of values to generate. count\_ is used to keep track of how many values we've generated. a\_ and b\_ are the previous two sequence values, used for calculating the next value.
+stop\_变量将在后面用作前哨，设置为要生成的值的数量。count\_用于跟踪生成了多少个值。a\_和b\_是前两个序列值，用于计算下一个值。
 
 \item 
-Still in the private section, we have a simple function for calculating the next value in the Fibonacci sequence.
+仍然在私有部分，有一个简单的函数来计算斐波那契数列中的下一个值。
 
 \begin{lstlisting}[style=styleCXX]
 	constexpr void do_fib() {
@@ -58,7 +58,7 @@ Still in the private section, we have a simple function for calculating the next
 \end{lstlisting}
 
 \item 
-Now in the public section, we have a simple constructor with a default value:
+现在在public部分，有一个简单的构造函数，它有一个默认值:
 
 \begin{lstlisting}[style=styleCXX]
 public:
@@ -66,10 +66,10 @@ public:
 	} {}
 \end{lstlisting}
 
-This constructor is used without an argument to create a sentinel. The stop argument initializes the stop\_ variable to represent how many values to generate.
+该构造函数不带参数，用于创建哨兵。stop参数初始化stop\_变量以表示要生成多少值。
 
 \item 
-The rest of the public functions are the operator overloads expected of a forward iterator:
+其余的公共函数是前向迭代器所期望的操作符重载:
 
 \begin{lstlisting}[style=styleCXX]
 	fib_t operator*() const { return b_; }
@@ -99,10 +99,10 @@ The rest of the public functions are the operator overloads expected of a forwar
 };
 \end{lstlisting}
 
-There's also a simple size() function which can be useful if you need to initialize a target container for a copy operation.
+还有一个简单的size()函数，若需要为复制操作初始化一个目标容器，这个函数会很有用。
 
 \item 
-Now we can use the generator in our main function with a simple call to
+现在可以在main函数中使用生成器
 
 \begin{lstlisting}[style=styleCXX]
 printc():
@@ -111,10 +111,10 @@ printc():
 	}
 \end{lstlisting}
 
-This creates an anonymous fib\_generator object to pass to the printc() function.
+这将创建一个匿名的fib\_generator对象传递给printc()函数。
 
 \item 
-We get this output with the first 10 Fibonacci numbers, not including zero:
+用前10个斐波那契数(不包括零)得到如下输出:
 
 \begin{tcblisting}{commandshell={}}
 1 1 2 3 5 8 13 21 34 55
@@ -123,7 +123,7 @@ We get this output with the first 10 Fibonacci numbers, not including zero:
 
 \subsubsection{How it works…}
 
-The fib\_generator class operates as a forward iterator, simply because it provides all the necessary interface functions:
+fib\_generator类作为前向迭代器运行:
 
 \begin{lstlisting}[style=styleCXX]
 fib_generator {
@@ -138,9 +138,9 @@ public:
 };
 \end{lstlisting}
 
-As far as the range-based for loop is concerned, this is an iterator because it looks like an iterator.
+就基于范围的for循环而言，这是一个迭代器(因为它看起来像一个迭代器)。
 
-The value is calculated in the do\_fib() function:
+该值在do\_fib()函数中计算:
 
 \begin{lstlisting}[style=styleCXX]
 constexpr void do_fib() {
@@ -150,15 +150,15 @@ constexpr void do_fib() {
 }
 \end{lstlisting}
 
-This simply adds b\_ += a\_, stores the result in b\_ and the old b\_ in a\_, setting it up for the next iteration.
+这只是简单地添加了b\_ += a\_，将结果存储在b\_中，将旧的b\_存储在a\_中，为下一次迭代保存必要的值。
 
-The dereference operator * returns the value from b\_, which is the next value in the sequence:
+解引用操作符*返回b\_的值，是序列中的下一个值:
 
 \begin{lstlisting}[style=styleCXX]
 fib_t operator*() const { return b_; }
 \end{lstlisting}
 
-The end() function creates an object where the count\_ variable is equal to the stop\_ variable, creating a sentinel:
+end()函数创建了一个对象，其中count\_变量等于stop\_变量，从而创建了一个哨兵:
 
 \begin{lstlisting}[style=styleCXX]
 const fib_generator end() const {
@@ -168,7 +168,7 @@ const fib_generator end() const {
 }
 \end{lstlisting}
 
-Now the equality comparison operator can easily detect the end of the sequence:
+现在相等比较操作符可以很容易地检测序列的结束:
 
 \begin{lstlisting}[style=styleCXX]
 bool operator==(const fib_generator&o) const {
@@ -178,7 +178,7 @@ bool operator==(const fib_generator&o) const {
 
 \subsubsection{There's more…}
 
-If we want to make our generator work with the algorithm library, we need to provide the traits aliases. These go at the top of the public section:
+若想让生成器与算法库一起工作，需要提供特性别名。这些放在public的顶部:
 
 \begin{lstlisting}[style=styleCXX]
 public:
@@ -190,7 +190,7 @@ public:
 	using reference = const fib_t&;
 \end{lstlisting}
 
-Now we can use our generator with algorithms:
+现在可以使用生成器和算法:
 
 \begin{lstlisting}[style=styleCXX]
 fib_generator fib(10);
@@ -199,7 +199,9 @@ auto x = ranges::views::transform(fib,
 printc(x, "squared:");
 \end{lstlisting}
 
-This uses the ranges::views version of the transform() algorithm to square every value. The resulting object can be used wherever you can use an iterator. We get this output from the printc() call:
+使用transform()算法的ranges::views版本对每个值进行平方。生成的对象可以用于可以使用迭代器的地方。
+
+可以从printc()中获得以下输出:
 
 \begin{tcblisting}{commandshell={}}
 squared:: 1 1 4 9 25 64 169 441 1156 3025

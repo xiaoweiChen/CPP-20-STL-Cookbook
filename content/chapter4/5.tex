@@ -1,26 +1,26 @@
 
-An iterator is essentially an abstraction. It has a specific interface and is used in specific ways. But beyond that, it's just code and it can be used for other purposes. An iterator adapter is a class that looks like an iterator but does something else.
+迭代器本质上是一种抽象，有一个特定的接口，并以特定的方式使用。除此之外，其只是代码，可以用于其他目的。迭代器适配器是一个看起来像迭代器但做其他事情的类。
 
-The STL comes with an assortment of iterator adapters. Often used with the algorithm library, they are quite useful. The STL iterator adaptors generally fall into three categories:
+STL附带了各种迭代器适配器，通常与算法库一起使用。STL迭代器适配器通常分为三类:
 
 \begin{itemize}
 \item 
-Insert iterators, or inserters, are used to insert elements into a container.
+插入迭代器或插入器用于在容器中插入元素。
 
 \item 
-Stream iterators read from and write to a stream.
+流迭代器读取和写入流。
 
 \item 
-Reverse iterators reverse the direction of an iterator.
+反向迭代器反转迭代器的方向。
 \end{itemize}
 
 \subsubsection{How to do it…}
 
-In this recipe, we'll look at a few examples of STL iterator adapters:
+在本节示例中，我们将看一些STL迭代器适配器的例子:
 
 \begin{itemize}
 \item 
-We'll start with a simple function to print the contents of a container:
+将从一个简单的函数开始打印容器的内容:
 
 \begin{lstlisting}[style=styleCXX]
 void printc(const auto & v, const string_view s = "") {
@@ -30,10 +30,10 @@ void printc(const auto & v, const string_view s = "") {
 }
 \end{lstlisting}
 
-The printc() function allows us to easily view the results of our algorithms. It includes an optional string\_view argument for a description.
+printc()函数可以轻松地查看算法的结果，其包含一个可选的string\_view参数用于描述。
 
 \item 
-In our main() function, we'll define a couple of deque containers. We're using deque containers so we can insert at both ends:
+main()函数中，将定义两个deque容器。我们使用的是deque容器，所以可以在两端进行插入:
 
 \begin{lstlisting}[style=styleCXX]
 int main() {
@@ -45,37 +45,37 @@ int main() {
 }
 \end{lstlisting}
 
-Output:
+输出:
 
 \begin{tcblisting}{commandshell={}}
 1 2 3 4 5
 d2 after copy: 1 2 3 4 5
 \end{tcblisting}
 
-We defined deque d1 with five int values, and d2 with space for the same number of elements. The copy() algorithm will not allocate space, so d2 must have room for the elements.
+我们为相同数量的元素定义了带有5个int值的deque d1和带有空格的d2。copy()算法不会分配空间，因此d2必须为元素留有空间。
 
-The copy() algorithm takes three iterators: the begin and end iterators indicate the range of elements to copy from, and the begin iterator of the destination range. It does not check the iterators to make sure they're valid. (Try this without allocating space in a vector and you'll get a segmentation fault error.) 
+copy()算法接受三个迭代器:begin和end迭代器表示要复制的元素范围，begin迭代器表示目标范围，不检查迭代器以确保它们有效。(尝试不分配空间的vector，会出现段错误)
 
-We call printc() on both containers to show the results.
+我们在两个容器上调用printc()来显示结果。
 
 \item 
-The copy() algorithm is not always convenient for this. Sometimes you want to copy and add elements to the end of a container. It would be nice to have an algorithm that calls push\_back() for each element. This is where an iterator adapter is useful. Let's add some code at the end of main():
+copy()算法对此并不总可行。有时想复制并添加元素到容器的末尾，若有一个算法可以为每个元素调用push\_back()就太好了。这就是迭代器适配器有用的地方。让我们在main()的末尾添加一些代码:
 
 \begin{lstlisting}[style=styleCXX]
 copy(d1.begin(), d1.end(), back_inserter(d2));
 printc(d2, "d2 after back_inserter");
 \end{lstlisting}
 
-Output:
+输出:
 
 \begin{tcblisting}{commandshell={}}
 d2 after back_inserter: 1 2 3 4 5 1 2 3 4 5
 \end{tcblisting}
 
-back\_inserter() is an insert iterator adapter that calls push\_back() for each item assigned to it. You can use it anywhere an output iterator is expected.
+back\_inserter()是一个插入迭代器适配器，为分配给它的每个项调用push\_back()。可以在需要输出迭代器的地方使用。
 
 \item 
-There's also a front\_inserter() adapter for when you want to insert at the front of a container:
+还有一个front\_inserter()适配器，用于在容器的前端插入:
 
 \begin{lstlisting}[style=styleCXX]
 deque<int> d3{ 47, 73, 114, 138, 54 };
@@ -83,16 +83,16 @@ copy(d3.begin(), d3.end(), front_inserter(d2));
 printc(d2, "d2 after front_inserter");
 \end{lstlisting}
 
-Output:
+输出:
 
 \begin{tcblisting}{commandshell={}}
 d2 after front_inserter: 54 138 114 73 47 1 2 3 4 5 1 2 3 4 5
 \end{tcblisting}
 
-The front\_inserter() adapter inserts elements at the front using the container's push\_front() method. Notice that the elements in the destination are reversed, because each element is inserted before the previous one.
+front\_inserter()适配器使用容器的push\_front()方法在前端插入元素。注意，目标中的元素是反向的，因为每个元素都插入到前一个元素之前。
 
 \item 
-If we want to insert in the middle, we can use the inserter() adapter:
+若想在中间插入，可以使用inserter()适配器:
 
 \begin{lstlisting}[style=styleCXX]
 auto it2{ d2.begin() + 2};
@@ -100,16 +100,16 @@ copy(d1.begin(), d1.end(), inserter(d2, it2));
 printc(d2, "d2 after middle insert");
 \end{lstlisting}
 
-Output:
+输出:
 
 \begin{tcblisting}{commandshell={}}
 d2 after middle insert: 54 138 1 2 3 4 5 114 73 47 ...
 \end{tcblisting}
 
-The inserter() adapter takes an iterator for the insertion begin point.
+inserter()适配器接受插入起始点的迭代器。
 
 \item 
-Stream iterators are convenient for reading from and writing to iostream objects, this is ostream\_iterator():
+流迭代器可以方便地读写iostream对象，这是ostream\_iterator():
 
 \begin{lstlisting}[style=styleCXX]
 cout << "ostream_iterator: ";
@@ -117,14 +117,14 @@ copy(d1.begin(), d1.end(), ostream_iterator<int>(cout));
 cout << '\n';
 \end{lstlisting}
 
-Output:
+输出:
 
 \begin{tcblisting}{commandshell={}}
 ostream_iterator: 12345
 \end{tcblisting}
 
 \item 
-And here is istream\_iterator():
+下面是istream\_iterator():
 
 \begin{lstlisting}[style=styleCXX]
 vector<string> vs{};
@@ -134,17 +134,17 @@ copy(istream_iterator<string>(cin),
 printc(vs, "vs2");
 \end{lstlisting}
 
-Output:
+输出:
 
 \begin{tcblisting}{commandshell={}}
 $ ./working < five-words.txt
 vs2: this is not a haiku
 \end{tcblisting}
 
-The istream\_iterator() adapter will return an end iterator by default, if no stream is passed.
+若没有传递流，istream\_iterator()适配器将默认返回一个结束迭代器。
 
 \item 
-Reverse adapters are included with most containers, as function members rbegin() and rend():
+反向适配器包含在大多数容器中，如函数成员rbegin()和rend():
 
 \begin{lstlisting}[style=styleCXX]
 for(auto it = d1.rbegin(); it != d1.rend(); ++it) {
@@ -153,7 +153,7 @@ for(auto it = d1.rbegin(); it != d1.rend(); ++it) {
 cout << '\n';
 \end{lstlisting}
 
-Output:
+输出:
 
 \begin{tcblisting}{commandshell={}}
 5 4 3 2 1
@@ -162,22 +162,22 @@ Output:
 
 \subsubsection{How it works…}
 
-The iterator adapters work by wrapping around an existing container. When you call an adapter, like back\_inserter() with a container object:
+迭代器适配器通过包装现有容器来工作。当调用一个适配器时，比如用容器对象的back\_inserter():
 
 \begin{lstlisting}[style=styleCXX]
 copy(d1.begin(), d1.end(), back_inserter(d2));
 \end{lstlisting}
 
-The adapter returns an object that mimics an iterator, in this case a std::back\_insert\_iterator object, which calls the push\_back() method on the container object each time a value is assigned to the iterator. This allows the adapter to be used in place of an iterator, while performing its useful task.
+适配器返回一个模拟迭代器的对象，在本例中是std::back\_insert\_iterator对象，在每次赋值给迭代器时调用容器对象上的push\_back()方法。可以使用适配器代替迭代器，同时执行其他任务。
 
-The istream\_adapter() also requires a sentinel. A sentinel signals the end of an iterator of indeterminate length. When you read from a stream, you don't know how many objects are in the stream until you hit the end. When the stream hits the end, the sentinel will compare equal with the iterator, signaling the end of the stream. The istream\_adapter() will create a sentinel when it's called without a parameter:
+istream\_adapter()也需要一个哨兵，哨兵表示长度不确定的迭代器的结束。当从一个流中读取时，并不知道流中有多少对象，直到终点。当流到达结束时，哨兵将与迭代器进行相等比较，标志流的结束。istream\_adapter()在不带参数的情况下调用时会创建一个哨兵:
 
 \begin{lstlisting}[style=styleCXX]
 auto it = istream_adapter<string>(cin);
 auto it_end = istream_adapter<string>(); // creates sentinel
 \end{lstlisting}
 
-This allows you to test for the end of a stream, as you would with any container:
+这允许测试流的结束，就像测试其他容器一样:
 
 \begin{lstlisting}[style=styleCXX]
 for(auto it = istream_iterator<string>(cin);
@@ -188,7 +188,7 @@ for(auto it = istream_iterator<string>(cin);
 cout << '\n';
 \end{lstlisting}
 
-Output:
+输出:
 
 \begin{tcblisting}{commandshell={}}
 $ ./working < five-words.txt

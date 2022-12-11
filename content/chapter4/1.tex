@@ -1,6 +1,6 @@
 
 
-The STL uses iterators to navigate the elements of its container classes. Most containers include begin() and end() iterators. These are usually implemented as member functions that return an iterator object. The begin() iterator points to the initial container element, and the end() iterator points past the final element:
+STL使用迭代器来导航其容器类的元素，大多数容器都包含begin()和end()迭代器。它们通常实现为返回迭代器对象的成员函数。begin()迭代器指向容器的初始元素，end()迭代器指向最终元素之后的元素:
 
 \hspace*{\fill} \\ %插入空行
 \begin{center}
@@ -16,37 +16,36 @@ The STL uses iterators to navigate the elements of its container classes. Most c
 \node[text width=3cm, font=\large] at (7.5,-1.4) {end()};
 \end{tikzpicture}
 
-Figure 4.1 – The begin() and end() iterators
+图4.1  begin()和end()迭代器
 \end{center}
 
-The end() iterator may function as a sentinel for containers of indeterminate length.
-We'll see some examples of that in this chapter.
+end()迭代器可以作为长度不确定的容器的哨兵。我们将在本章中看到一些例子。
 
-Most STL containers define their own specific iterator type. For example, for a vector of int:
+大多数STL容器都定义了自己特定的迭代器类型。例如，对于int类型的vector:
 
 \begin{lstlisting}[style=styleCXX]
 std::vector<int> v;
 \end{lstlisting}
 
-The iterator type would be defined as:
+迭代器类型定义为:
 
 \begin{lstlisting}[style=styleCXX]
 std::vector<int>::iterator v_it;
 \end{lstlisting}
 
-You can see how this could easily get out of hand. If we had a vector of vector of string:
+可以看到这是多么复杂。若有一个向量string的vector
 
 \begin{lstlisting}[style=styleCXX]
 std::vector<std::vector<int, std::string>> v;
 \end{lstlisting}
 
-Its iterator type would be:
+其迭代器类型为:
 
 \begin{lstlisting}[style=styleCXX]
 std::vector<std::vector<int, std::string>>::iterator v_it;
 \end{lstlisting}
 
-Fortunately, C++11 gave us automatic type deduction and the auto type. By using auto, we rarely need to use the full iterator type definition. For example, if we need an iterator in a for loop, we can use the auto type:
+幸运的是，C++11提供了auto类型推断和自动类型。通过使用auto，很少需要使用完整的迭代器类型定义。例如，在for循环中需要迭代器，可以使用auto类型:
 
 \begin{lstlisting}[style=styleCXX]
 for(auto v_it = v.begin(); v_it != v.end(); ++v_it) {
@@ -54,7 +53,7 @@ for(auto v_it = v.begin(); v_it != v.end(); ++v_it) {
 }
 \end{lstlisting}
 
-Notice the use of the dereference operator * to access the elements from the iterator. This is the same syntax you would use to dereference a pointer:
+注意使用解引用操作符*从迭代器中访问元素，这和解引用指针的语法一样:
 
 \begin{lstlisting}[style=styleCXX]
 const int a[]{ 1, 2, 3, 4, 5 };
@@ -64,7 +63,7 @@ for(const int* p = a; count > 0; ++p, --count) {
 }
 \end{lstlisting}
 
-This also means that you can use a range-based for loop with either a primitive array:
+所以可以使用一个基于范围的for循环和一个原生数组:
 
 \begin{lstlisting}[style=styleCXX]
 const int a[]{ 1, 2, 3, 4, 5 };
@@ -73,7 +72,7 @@ for(auto e : a) {
 }
 \end{lstlisting}
 
-Or with an STL container:
+或者使用STL容器:
 
 \begin{lstlisting}[style=styleCXX]
 std::vector<int> v{ 1, 2, 3, 4, 5 };
@@ -82,7 +81,7 @@ for(auto e : v) {
 }
 \end{lstlisting}
 
-The range-based for loop is just a shorthand for a for loop with iterators:
+基于范围的for循环只是带迭代器的for循环的简写:
 
 \begin{lstlisting}[style=styleCXX]
 {
@@ -95,9 +94,9 @@ The range-based for loop is just a shorthand for a for loop with iterators:
 }
 \end{lstlisting}
 
-Because iterators use the same syntax as a primitive pointer, the range-based for loop works the same with either container.
+因为迭代器使用与基元指针相同的语法，所以基于范围的for循环对这两种容器的处理都一样。
 
-Notice that the range-based for loop calls std::begin() and std::end(), instead of directly calling the begin() and end() member functions. The std:: functions call the member functions to get the iterators. So, why not just call the member functions? The std:: non-member functions are designed to also work with primitive arrays. That's why a for loop works with an array:
+注意，基于范围的for循环调用std::begin()和std::end()，而不是直接调用begin()和end()成员函数。函数调用成员函数来获取迭代器。为什么不直接调用成员函数呢?非成员函数也设计用于原始数组。这就是为什么for循环适用于数组:
 
 \begin{lstlisting}[style=styleCXX]
 const int arr[]{ 1, 2, 3, 4, 5 };
@@ -106,17 +105,17 @@ for(auto e : arr) {
 }
 \end{lstlisting}
 
-Output:
+输出:
 
 \begin{tcblisting}{commandshell={}}
 1 2 3 4 5
 \end{tcblisting}
 
-For most purposes, I tend to favor the member function begin() and end() because they are more explicit. Others favor the std:: non-member functions because they are more general. Six or half-dozen; I suggest you pick a style and stick with it.
+通常，我倾向于使用成员函数begin()和end()，因为它们更显式。其他人更喜欢使用std::的非成员函数，因为它们更通用。萝卜白菜，各有所爱;不过，我建议读者们选择一种风格并坚持下去。
 
-\subsubsection{Iterator categories}
+\subsubsection{类别}
 
-Prior to C++20, iterators were divided into categories based on their capabilities:
+C++20之前，迭代器根据其功能分为以下几类:
 
 % Please add the following required packages to your document preamble:
 % \usepackage{multirow}
@@ -124,84 +123,91 @@ Prior to C++20, iterators were divided into categories based on their capabiliti
 \centering
 \begin{tabular}{|llllll|}
 \hline
-\multicolumn{5}{|c|}{\textbf{Iteratgor Category}} &
-\multicolumn{1}{c|}{\textbf{Iterator Capability}} \\ \hline
-\multicolumn{1}{|l|}{\multirow{5}{*}{\begin{tabular}[c]{@{}l@{}}Contiguous\\ Iterator\end{tabular}}} &
-\multicolumn{1}{l|}{\multirow{4}{*}{\begin{tabular}[c]{@{}l@{}}Random\\ Access Iterator\end{tabular}}} &
-\multicolumn{1}{l|}{\multirow{3}{*}{\begin{tabular}[c]{@{}l@{}}Bidirectional\\ Iterator\end{tabular}}} &
-\multicolumn{1}{l|}{\multirow{2}{*}{\begin{tabular}[c]{@{}l@{}}Forward\\ Iterator\end{tabular}}} &
-\multicolumn{1}{l|}{Input Iterator} &
-\begin{tabular}[c]{@{}l@{}}·Read\\ ·Increment once\end{tabular} \\ \cline{5-6} 
+\multicolumn{5}{|c|}{\textbf{迭代器类别}} &
+\multicolumn{1}{c|}{\textbf{迭代器功能}} \\ \hline
+\multicolumn{1}{|l|}{\multirow{5}{*}{\begin{tabular}[c]{@{}l@{}}连续\\ 迭代器\end{tabular}}} &
+\multicolumn{1}{l|}{\multirow{4}{*}{\begin{tabular}[c]{@{}l@{}}随机\\ 访问迭代器\end{tabular}}} &
+\multicolumn{1}{l|}{\multirow{3}{*}{\begin{tabular}[c]{@{}l@{}}双向\\ 迭代器\end{tabular}}} &
+\multicolumn{1}{l|}{\multirow{2}{*}{\begin{tabular}[c]{@{}l@{}}前向\\ 迭代器\end{tabular}}} &
+\multicolumn{1}{l|}{输入迭代器} &
+\begin{tabular}[c]{@{}l@{}}·读取\\ ·递增一次\end{tabular} \\ \cline{5-6} 
 \multicolumn{1}{|l|}{} &
 \multicolumn{1}{l|}{} &
 \multicolumn{1}{l|}{} &
 \multicolumn{1}{l|}{} &
 \multicolumn{1}{l|}{} &
-\begin{tabular}[c]{@{}l@{}}·Increment multiple\\ times\end{tabular} \\ \cline{4-6} 
+·递增多次 \\ \cline{4-6} 
 \multicolumn{1}{|l|}{} &
 \multicolumn{1}{l|}{} &
 \multicolumn{1}{l|}{} &
 \multicolumn{2}{l|}{} &
-·Decrement \\ \cline{3-6} 
+·可递减 \\ \cline{3-6} 
 \multicolumn{1}{|l|}{} &
 \multicolumn{1}{l|}{} &
 \multicolumn{3}{l|}{} &
-·Random access \\ \cline{2-6} 
+·随机访问 \\ \cline{2-6} 
 \multicolumn{1}{|l|}{} &
 \multicolumn{4}{l|}{} &
-\begin{tabular}[c]{@{}l@{}}·Contiguous storage\\ (such as an array)\end{tabular} \\ \hline
-\multicolumn{6}{|l|}{When any of the above iterators can also write, they are called mutable iterators.} \\ \hline
-\multicolumn{5}{|l|}{Ouput Iterator} &
-\begin{tabular}[c]{@{}l@{}}·Write\\ ·Increment once\end{tabular} \\ \hline
+·连续存储 (比如数组) \\ \hline
+\multicolumn{6}{|l|}{当上面任何一个迭代器也可以写入时，也称为可变迭代器。} \\ \hline
+\multicolumn{5}{|l|}{输出迭代器} &
+\begin{tabular}[c]{@{}l@{}}·可写入\\ ·递增一次\end{tabular} \\ \hline
 \end{tabular}
 \end{table}
 
-These categories are hierarchical, where the more capable iterators inherit the capabilities of the less capable iterators. In other words, the input iterator can read and increment once. The forward iterator has the capabilities of the Input Iterator plus it can increment multiple times. The bidirectional iterator has those capabilities plus it can decrement. And on down the list.
+这些类别是分层级的，功能较强的迭代器继承功能较弱的迭代器的功能。换句话说，输入迭代器只能读取和递增一次。前向迭代器具有输入迭代器的功能，并且可以多次递增。双向迭代器具有这些功能，还可以自减。一次类推下。
 
-The output iterator can write and increment once. If any of the other iterators can also write, it is considered a mutable iterator.
+输出迭代器可以写入和递增一次。若其他迭代器也可以写入，则是可变迭代器。
 
-\subsubsection{Iterator concepts}
+\subsubsection{概念}
 
-Concepts and constraints are new with C++20. A concept is simply a named constraint that restricts the types of arguments to a template function or class, and helps the compiler choose appropriate specializations.
+C++20的概念和约束是新加入的特性。概念只是一个命名约束，将参数的类型限制在模板函数或类中，并帮助编译器选择适当的特化。
 
-Beginning with C++20, the STL defines iterators in terms of concepts instead of categories. Each of these concepts are in the std:: namespace.
+C++20起，STL用概念而不是类别来定义迭代器。这些概念都在std::命名空间中。
 
 \begin{table}[H]
 \centering
 \begin{tabular}{|l|l|}
 \hline
-\textbf{Concept} &
-\textbf{Description} \\ \hline
+\textbf{概念} &
+\textbf{描述} \\ \hline
 indirectly\_readable &
-\begin{tabular}[c]{@{}l@{}}An iterator can be read by the dereference\\ operator,*. This includes pointers, smart pointers,\\ and input iterators.\end{tabular} \\ \hline
+\begin{tabular}[c]{@{}l@{}}迭代器可以由解引用操作符*读取。\\ 这包括指针、智能指针和输入迭代器。\end{tabular} \\ \hline
 indirectly\_writeable &
-The object reference of the iterator is writable. \\ \hline
+迭代器的对象引用是可写的。 \\ \hline
 weakly\_incrementable &
-\begin{tabular}[c]{@{}l@{}}This can be incremented with ++, but does not\\ preserve equality. For example, where a==b, ++a\\ may not equal ++b.\end{tabular} \\ \hline
+\begin{tabular}[c]{@{}l@{}}这个值可以用++递增，但不能保持相等。\\ 例如，a==b，但++a可能不等于++b。\end{tabular} \\ \hline
 incrementable &
-\begin{tabular}[c]{@{}l@{}}This can be incremented with ++ and equality is \\ preserved.\end{tabular} \\ \hline
+可以用++增加，并且保持相等。 \\ \hline
 \begin{tabular}[c]{@{}l@{}}input\_or\_output\_\\ iterator\end{tabular} &
-\begin{tabular}[c]{@{}l@{}}An iterator can be incremented and dereferenced.\\ Every iterator must satisfy this concept.\end{tabular} \\ \hline
+\begin{tabular}[c]{@{}l@{}}迭代器可以递增和解引用。\\ 每个迭代器都必须满足这个概念。\end{tabular} \\ \hline
 sentinel\_for &
-\begin{tabular}[c]{@{}l@{}}A sentinel iterator is used to find the end of an\\ object of indeterminate size, such as an input \\ stream.\end{tabular} \\ \hline
+\begin{tabular}[c]{@{}l@{}}哨兵迭代器用于查找大小不确定的对象的结束， \\ 例如输入流。\end{tabular} \\ \hline
 sized\_sentinel\_for &
-\begin{tabular}[c]{@{}l@{}}A sentinel iterator may be used with another\\ iterator and the - operator to determine its\\ distance in constant time.\end{tabular} \\ \hline
+\begin{tabular}[c]{@{}l@{}}哨兵迭代器可以与另一个迭代器和-操作符一起使用，\\ 以确定它在常数时间内的距离。\end{tabular} \\ \hline
 input\_iterator &
-An iterator that may be read and incremented. \\ \hline
+可读且可加的迭代器。 \\ \hline
 output\_iterator &
-An iterator that may be written to and incremented. \\ \hline
+可写入且可递增的迭代器。 \\ \hline
 forward\_iterator &
-\begin{tabular}[c]{@{}l@{}}This modifies input\_iterator to include\\ incrementable.\end{tabular} \\ \hline
-\begin{tabular}[c]{@{}l@{}}bidirectional\_\\ iterator\end{tabular} &
-\begin{tabular}[c]{@{}l@{}}This modifies forward\_iterator by adding\\ the ability by decrement with the -- operator, It\\ preserves equality.\end{tabular} \\ \hline
-\begin{tabular}[c]{@{}l@{}}random\_access\_\\ iterator\end{tabular} &
-\begin{tabular}[c]{@{}l@{}}This modifies bidirectional\_iterator by adding\\ support for the +,+=,-,-=, and {[}{]} operators.\end{tabular} \\ \hline
-contiguous\_iterator &
-\begin{tabular}[c]{@{}l@{}}This modifies random\_access\_iterator to indicate\\ contiguous storage.\end{tabular} \\ \hline
+这将使input\_iterator具有可递增性。 \\ \hline
 \end{tabular}
 \end{table}
 
-You can use these concepts to constrain the arguments of a template:
+\begin{table}[H]
+\centering
+\begin{tabular}{|l|l|}
+\hline
+\begin{tabular}[c]{@{}l@{}}bidirectional\_\\ iterator\end{tabular} &
+\begin{tabular}[c]{@{}l@{}}它通过使用--操作符自减添加能力\\ preserves 来修改forward\_iterator，使其保持相等。\end{tabular} \\ \hline
+\begin{tabular}[c]{@{}l@{}}random\_access\_\\ iterator\end{tabular} &
+\begin{tabular}[c]{@{}l@{}}通过添加对+、+=、-、-=和{[}{]}操作符\\ 的支持对bidirectional\_iterator进行修改。\end{tabular} \\ \hline
+contiguous\_iterator &
+修改random\_access\_iterator以表示连续的存储。 \\ \hline
+\end{tabular}
+\end{table}
+
+可以使用这些概念来约束模板的参数:
 
 \begin{lstlisting}[style=styleCXX]
 template<typename T>
@@ -215,7 +221,7 @@ void printc(const T & c) {
 }
 \end{lstlisting}
 
-This function requires a random\_access\_iterator. If I call it with a list, which is not a random-access container, the compiler will give me an error:
+这个函数需要一个random\_access\_iterator。若用非随机访问容器的列表使用时，编译器会给报出错误:
 
 \begin{lstlisting}[style=styleCXX]
 int main()
@@ -225,7 +231,7 @@ int main()
 }
 \end{lstlisting}
 
-The list iterator type does not support the random\_access\_iterator concept. So, the compiler gives me an error:
+列表迭代器类型不支持random\_access\_iterator概念。所以，编译器又报出了一个错误:
 
 \begin{tcblisting}{commandshell={}}
 error: no matching function for call to 'printc(std::__
@@ -240,9 +246,9 @@ note: template argument deduction/substitution failed:
 note: constraints not satisfied
 \end{tcblisting}
 
-This is the error output from GCC. Your errors may look different.
+这是GCC的错误输出。不同编译器的错误看起来可能不同。
 
-If I call it with a vector, which is a random-access container:
+若用一个vector来调用，其是一个随机访问容器:
 
 \begin{lstlisting}[style=styleCXX]
 int main()
@@ -252,7 +258,7 @@ int main()
 }
 \end{lstlisting}
 
-Now it compiles and runs without error:
+现在编译和运行都挺好:
 
 \begin{tcblisting}{commandshell={}}
 $ ./working
@@ -260,36 +266,34 @@ $ ./working
 element 0: 1
 \end{tcblisting}
 
-While there are different types of iterators for different types of capabilities (and concepts), the complexity is there to support of ease of use.
+虽然针对不同类型的功能(和概念)有不同类型的迭代器，但其复杂性是为了支持易用性。
 
-With this introduction to iterators, let's now proceed with the following recipes in this chapter:
-
-我们将讨论以下主题:
+通过对迭代器的介绍，现在让我们继续本章中的主菜：
 
 \begin{itemize}
 \item 
-Create an iterable range
+创建可迭代范围
 
 \item 
-Make your iterators compatible with STL iterator traits
+使迭代器与STL迭代器特性兼容
 
 \item 
-Use iterator adapters to fill STL containers
+使用迭代器适配器填充STL容器
 
 \item 
-Create a generator as iterators
+创建一个迭代器生成器
 
 \item 
-Use reverse iterator adapters to iterate backward
+反向迭代器适配器的反向迭代
 
 \item 
-Iterate objects of unknown length with a sentinel
+用哨兵迭代未知长度的对象
 
 \item 
-Build a zip iterator adapter
+构建zip迭代器适配器
 
 \item 
-Create a random-access iterator
+创建随机访问迭代器
 \end{itemize}
 
 

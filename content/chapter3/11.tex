@@ -1,12 +1,11 @@
 
-An RPN (Reverse Polish Notation) calculator is a stack-based calculator that uses postfix notation, where the operator follows the operands. It's commonly used in printing calculators and, notably, the HP 12C, the most popular electronic calculator of all time.
+RPN(逆波兰表达式)计算器是一种基于堆栈的计算器，它使用后缀符号，其中操作符紧跟在操作数之后。它通常用于打印计算器，特别是HP 12C，有史以来最受欢迎的电子计算器。
 
-After becoming familiar with its operational modality, many people prefer an RPN calculator. (I've been using the HP 12C and 16C since they were first introduced in the early 1980s.) For example, using conventional algebraic notation, to add 1 and 2 you would type 1 + 2. Using RPN, you would type 1 2 +. The operator comes after the operands.
+熟悉了其操作模式后，许多人更喜欢RPN计算器(自从惠普12C和16C在上世纪80年代初首次推出以来，我一直在使用它们)。例如，使用传统的代数符号，要将1和2相加，可以输入1 + 2。使用RPN，可以输入1 2 +。操作符跟在操作数后面。
 
-Using an algebraic calculator, you would need to press an = key to indicate that you want a result. With an RPN calculator this is unnecessary because the operator processes immediately, serving a double purpose. On the other hand, an RPN calculator often requires an Enter keypress to push an operand onto the stack.
+使用代数计算器，需要按下=键来表示需要一个结果。对于RPN计算器，这是不必要的，因为操作人员立即进行处理，具有双重目的。另一方面，RPN计算器通常需要按回车键将操作数推入堆栈。
 
-We can easily implement an RPN calculator using a stack-based data structure.
-For example, consider an RPN calculator with a four-position stack:
+我们可以使用基于堆栈的数据结构轻松实现RPN计算器。例如，实现一个具有四个位置堆栈的RPN计算器:
 
 \hspace*{\fill} \\ %插入空行
 \begin{center}
@@ -31,10 +30,10 @@ For example, consider an RPN calculator with a four-position stack:
 \node[text width=3cm, font=\large] at (4.6,-3.3) {+};
 \end{tikzpicture}
 	
-Figure 3.5 – RPN addition operation
+图3.5  RPN的加法操作
 \end{center}
 
-Each operand is pushed onto the stack as they are entered. When the operator is entered, the operands are popped off, operated upon, and the result is pushed back onto the stack. The result may then be used in the next operation. For example, consider the case of (3+2)×3:
+每个操作数在输入时压入堆栈。当输入操作符时，操作数弹出，操作，结果压回堆栈。然后，该结果可用于下一个操作。例如，考虑(3+2)×3的情况:
 
 \hspace*{\fill} \\ %插入空行
 \begin{center}
@@ -71,10 +70,10 @@ Each operand is pushed onto the stack as they are entered. When the operator is 
 \node[text width=3cm, font=\large] at (7.2,-3.3) {×};
 \end{tikzpicture}
 
-Figure 3.6 – RPN stack operations
+图3.6  RPN的堆栈操作
 \end{center}
 
-One advantage of RPN is that you can leave operands on the stack for future calculations, reducing the need for separate memory registers. Consider the case of (9×6)+(2×3):
+RPN的优点是可以将操作数留在堆栈上以供将来计算，从而减少了对单独内存寄存器的需求。考虑(9×6)+(2×3)的情况:
 
 \hspace*{\fill} \\ %插入空行
 \begin{center}
@@ -123,20 +122,20 @@ One advantage of RPN is that you can leave operands on the stack for future calc
 \node[text width=3cm, font=\large] at (9.8,-3.3) {×};
 \end{tikzpicture}
 
-Figure 3.7 – RPN multiple stack operations
+图3.7  RPN的多栈操作
 \end{center}
 
-Notice that we first perform the operations within the parentheses, then the final operation on the intermediate results. This may seem more complex at first, but it makes a lot of sense once you get used to it.
+注意，首先执行括号内的操作，然后对中间结果执行最后的操作。这可能一开始看起来比较复杂，但当习惯了，就很有意义了。
 
-Now, let's build a simple RPN calculator using the STL deque container.
+现在，使用STL deque容器构建一个简单的RPN计算器。
 
 \subsubsection{How to do it…}
 
-For this implementation, we'll use a deque container for our stack. Why not use a stack container? The stack class is a container-adapter, which uses another container (usually a deque) for its storage. For our purposes, stack doesn't provide any tangible advantage over deque. And deque allows us to iterate over and display the RPN stack, like a paper tape calculator.
+对于这个实现，我们将为堆栈使用deque容器。为什么不使用stack容器呢?stack类是一个容器适配器，它使用另一个容器(通常是deque)进行存储。就我们的目标而言，stack与deque相比并没有任何明显的优势。deque允许我们遍历和显示RPN堆栈，就像纸带计算器一样。
 
 \begin{itemize}
 \item 
-We'll encapsulate our RPN calculator in a class. There are a few advantages to using a class here. Encapsulation provides safety, reusability, extensibility, and a clean interface. We'll call our class RPN:
+我们将把RPN计算器封装在一个类中，这样做有几个优点。封装提供了安全性、可重用性、可扩展性和干净的接口。我们将类命名为RPN:
 
 \begin{lstlisting}[style=styleCXX]
 class RPN {
@@ -148,15 +147,14 @@ class RPN {
 };
 \end{lstlisting}
 
-The deque data store, named deq\_, is in the private area of the class to protect it.
-This is where we store the RPN stack.
+deque数据存储名为deq\_，位于类的private区域。这是我们存储RPN堆栈的地方。
 
-The zero\_ constant is used throughout the class, both as a return value and as a comparison operand. The inf\_ constant is used for a divide-by-zero error. These constants are declared constexpr static so they don't take up space in every instance.
+zero\_常量在整个类中都有使用，既作为返回值，也作为比较操作数。常量inf\_用于除零错误。这些常量会声明为constexpr static，因此不会在每个实例中占用空间。
 
-I like to name private data members with a trailing underscore to remind me that they're private.
+命名私有数据成员时，我喜欢在后面加下划线，以提醒我它们是私有的。
 
 \item 
-We don't need an explicit constructor or destructor because the deque class manages its own resources. So, our public interface consists of just three functions:
+我们不需要显式构造函数或析构函数，因为deque类管理自己的资源。所以，公共接口只包含三个功能:
 
 \begin{lstlisting}[style=styleCXX]
 public:
@@ -183,14 +181,14 @@ public:
 	}
 \end{lstlisting}
 
-The double op() function is the main entry point for the RPN class. It takes a string, with either a number or an operator. If it's a number, it's converted into a double and pushed onto the stack. If it's an operator, we call optor() to perform the operation. This is the main logic of the class.
+double op()函数是RPN类的主要入口点，接受一个字符串，包含数字或操作符。若是数字，则转换为双精度数并压入堆栈。若是一个操作符，则调用optor()来执行该操作。这是这个类的主要逻辑。
 
-The void clear() function simply calls clear() on the deque to empty the stack.
+void clear()函数只是在deque上调用clear()来清空堆栈。
 
-And finally, the string get\_stack\_string() function returns the contents of the stack in a string.
+最后，string get\_stack\_string()函数以字符串形式返回堆栈的内容。
 
 \item 
-In the private section, we have the supporting utilities that make the interface work. The pop\_get2() function pops two operands from the stack and returns them as a pair. We use this as operands for the operators:
+在private部分中，有为公共接口工作进行支持的工具函数。pop\_get2()函数从堆栈中弹出两个操作数，并将它们作为一对返回，这里使用this作为操作符的操作数:
 
 \begin{lstlisting}[style=styleCXX]
 pair<double, double> pop_get2() {
@@ -204,7 +202,7 @@ pair<double, double> pop_get2() {
 \end{lstlisting}
 
 \item 
-The is\_numeric() function checks to see if the string is entirely numeric. We also allow the decimal . character
+is\_numeric()函数的作用是:检查字符串是否完全是数字，也接受小数点字符。
 
 \begin{lstlisting}[style=styleCXX]
 bool is_numeric(const string& s) {
@@ -217,7 +215,7 @@ bool is_numeric(const string& s) {
 \end{lstlisting}
 
 \item 
-The optor() function performs the operators. We use a map container to map an operator to a corresponding lambda function.
+optor()函数执行操作符，使用map容器将操作符映射到相应的lambda函数。
 
 \begin{lstlisting}[style=styleCXX]
 double optor(const string& op) {
@@ -240,16 +238,16 @@ double optor(const string& op) {
 }
 \end{lstlisting}
 
-The map container with lambda functions makes a quick and easy jump table.
+带有lambda函数的map容器可以快速简便地创建跳转表。
 
-We use the find() function in map to test if we have a valid operator.
+使用map中的find()函数来测试是否有一个有效的操作符。
 
-After a test for divide-by-zero, the map is dereferenced, and the operator is called.
+在对除零进行测试之后，取消对map的引用，并调用操作符。
 
-The result of the operation is pushed onto the stack and returned.
+操作的结果会压入堆栈并返回。
 
 \item 
-Those are all the function members of the RPN class. Now we can use it in our main() function:
+这些都是RPN类的函数成员，现在可以在main()函数中使用:
 
 \begin{lstlisting}[style=styleCXX]
 int main() {
@@ -263,11 +261,10 @@ int main() {
 }
 \end{lstlisting}
 
-We'll test this is by piping a string into the program from the command line. We use a for loop to fetch each word from the cin stream and pass it to rpn.op(). I like the for loop here, as it's easy to contain the scope of the o variable. We then print the stack using the get\_stack\_string() function after each command line item.
-
+我们将通过从命令行将字符串输送到程序中来进行测试，使用for循环从cin流中获取每个单词，并将其传递给rpn.op()。我喜欢这里的for循环，因为它很容易包含o变量的作用域。然后在每个命令行项后使用get\_stack\_string()函数打印堆栈。
 
 \item 
-We can run the program by piping in an expression like this:
+可以通过输入这样的表达式来运行程序:
 
 \begin{tcblisting}{commandshell={}}
 $ echo "9 6 * 2 3 * +" | ./rpn
@@ -281,15 +278,15 @@ $ echo "9 6 * 2 3 * +" | ./rpn
 \end{tcblisting}
 \end{itemize}
 
-This looks like a lot of coding but it's actually quite simple. With the comments, the RPN class is less than 70 lines of code. The full rpn.cpp source code is in the GitHub repository.
+这看起来像很多编码，但实际上很简单。加上注释，RPN类的代码不到70行。完整的rpn.cpp源代码在GitHub的库中。
 
 \subsubsection{How it works…}
 
-The RPN class operates by first determining the nature of each chunk of input. If it's a number, we push it onto the stack. If it's an operator, we pop two operands off the top of the stack, apply the operation, and push the result back on the stack. If we don't recognize the input, we just ignore it.
+RPN类首先确定每个输入块的性质。若是一个数字，则压入堆栈。若是操作符，则从堆栈顶部取出两个操作数，进行操作，并将结果推回堆栈。若是不识别的输入，就忽略它。
 
-The deque class is a double-ended queue. To use it as a stack, we pick an end and both push and pop from that same end. I chose the front end of the deque, but it would work just as well from the back. We just need to do everything from the same end.
+deque类是一个双端队列。为了将其用作堆栈，我们选择一个端点，并从同一端点进行push和pop。
 
-If we determine that an input is numeric, we convert it to a double and push it onto the front of the deque using push\_front().
+若确定一个输入是数字，可以将它转换为double，并使用push\_front()将它推到deque的前面。
 
 \begin{lstlisting}[style=styleCXX]
 if(is_numeric(s)) {
@@ -299,7 +296,7 @@ if(is_numeric(s)) {
 }
 \end{lstlisting}
 
-When we need to use values from the stack, we pop them off the front of the deque. We use front() to get the value, and then pop\_front() to pop it off the stack.
+当需要使用堆栈中的值时，可以将它们从deque的前面弹出。使用front()获取值，然后pop\_front()将其从堆栈中弹出。
 
 \begin{lstlisting}[style=styleCXX]
 pair<double, double> pop_get2() {
@@ -312,7 +309,7 @@ pair<double, double> pop_get2() {
 }
 \end{lstlisting}
 
-Using a map for our operators makes it easy to both check if an operator is valid, and to execute the operation.
+为操作符使用map使得检查操作符是否有效和执行操作变得容易。
 
 \begin{lstlisting}[style=styleCXX]
 map<string, double (*)(double, double)> opmap {
@@ -325,19 +322,19 @@ map<string, double (*)(double, double)> opmap {
 };
 \end{lstlisting}
 
-We can test for the validity of an operator by using the find() function:
+可以使用find()函数来测试操作符的有效性:
 
 \begin{lstlisting}[style=styleCXX]
 if(opmap.find(op) == opmap.end()) return zero_;
 \end{lstlisting}
 
-And we can call the operator by dereferencing the map with the at() function:
+可以通过使用at()函数对map进行解引用来调用该操作符:
 
 \begin{lstlisting}[style=styleCXX]
 opmap.at(op)(l, r)
 \end{lstlisting}
 
-We both call the operator lambda and push the result onto the deque in one statement:
+这里调用运算符lambda，并在一条语句中将结果推入deque:
 
 \begin{lstlisting}[style=styleCXX]
 deq_.push_front(opmap.at(op)(l, r));
@@ -345,7 +342,7 @@ deq_.push_front(opmap.at(op)(l, r));
 
 \subsubsection{There's more…}
 
-In this recipe, we use the cin stream to feed operations to the RPN calculator. It would be just as easy to do this with an STL container.
+在这个示例中，我们使用cin流向RPN计算器提供操作。使用STL容器同样可以做到这一点。
 
 \begin{lstlisting}[style=styleCXX]
 int main() {
@@ -360,7 +357,7 @@ int main() {
 }
 \end{lstlisting}
 
-Output:
+输出:
 
 \begin{tcblisting}{commandshell={}}
 9: 9
@@ -372,7 +369,7 @@ Output:
 +: 60
 \end{tcblisting}
 
-By putting the RPN calculator in a class with a clean interface, we've created a flexible tool that can be used in many different contexts.
+通过将RPN计算器放在一个清晰接口的类中，我们创建了一个可以在许多不同上下文中使用的灵活工具。
 
 
 

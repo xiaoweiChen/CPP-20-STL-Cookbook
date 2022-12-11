@@ -1,43 +1,41 @@
 
-This recipe uses the unique key property of the map container to count duplicate words from a stream of text.
+STL映射容器是一个关联容器，由按键值对组织的元素组成。键用于查找，并且必须是唯一的。
 
-The STL map container is an associative container. It consists of elements organized in key-value pairs. The keys are used for lookup and must be unique.
-
-In this recipe, we will leverage the unique key requirement of the STL map container to count the number of occurrences of each word in a text file.
+在这个示例中，我们将利用map容器的唯一键值来计算文本文件中每个单词的出现次数。
 
 \subsubsection{How to do it…}
 
-There are a few parts to this task that we can solve separately:
+这个任务有几个部分可以分开解决:
 
 \begin{enumerate}
 \item 
-We need to get the text from a file. We'll use the cin stream for this.
+要从一个文件中获取文本，使用cin流。
 
 \item 
-We need to separate words from punctuation and other non-word content. We'll use the regex (Regular Expression) library for this.
+需要把单词和标点符号，以及其他非单词的内容分开。为此，需要使用正则表达式库。
 
 \item 
-We need to count the frequency of each word. This is the main objective of the recipe. We'll use the STL map container for this.
+需要计算每个单词的出现频率，将为此使用map容器。
 
 \item 
-Finally, we need to sort the results, first by frequency and then alphabetically by word within frequency. For this we'll use a the STL sort algorithm with a vector container.
+最后，需要对结果进行排序，首先按频率排序，然后按频率内的单词的字母顺序排序。为此，将对vector容器进行排序。
 \end{enumerate}
 
-Even with all those tasks, the resulting code is relatively short, just about 70 lines with headers and all. Let's dive in:
+即使完成了所有这些任务，代码也相对较短。让我们深入了解一下:
 
 \begin{itemize}
 \item 
-We'll start with some aliases for convenience:
+为了方便起见，先从别名开始:
 
 \begin{lstlisting}[style=styleCXX]
 namespace ranges = std::ranges;
 namespace regex_constants = std::regex_constants;
 \end{lstlisting}
 
-For namespaces within the std:: space, I like to make aliases that are shorter, but still let me know that I'm using a token in a particular namespace. Especially with the ranges namespace, which often re-uses the names of existing algorithms.
+对于std::空间中的命名空间，我喜欢使用短别名。注意，在范围(ranges)命名空间中，会重用现有算法的名称。
 
 \item 
-We store the regular expression in a constant. I don't like to clutter up the global namespace because that can lead to collisions. I tend to use a namespace based on my initials for things like this:
+将正则表达式存储在一个常量中。我不喜欢使全局名称空间混乱，因为这会导致冲突。我倾向于使用基于我名字首字母的命名空间，比如:
 
 \begin{lstlisting}[style=styleCXX]
 namespace bw {
@@ -45,10 +43,10 @@ namespace bw {
 }
 \end{lstlisting}
 
-It's easy enough to get it later using bw::re, and that tells me exactly what it is.
+稍后使用bw::re很容易获取它。
 
 \item 
-At the top of main(), we define our data structures:
+在main()的顶部，定义了数据结构:
 
 \begin{lstlisting}[style=styleCXX]
 int main() {
@@ -58,10 +56,10 @@ int main() {
 	size_t total_words{};
 \end{lstlisting}
 
-Our main map is called wordmap. We have a vector named wordvec that we'll use as a sorting container. And finally, our regex class, word\_re.
+我们的主map叫做wordmap。我们有一个名为wordvec的vector，我们将对其进行排序。最后，是我们的正则表达式类，word\_re。
 
 \item 
-The for loop is where most of the work happens. We read text from the cin stream, apply the regex, and store words in the map:
+for循环是大部分工作发生的地方，从cin流中读取文本，应用正则表达式，并将单词存储在map中:
 
 \begin{lstlisting}[style=styleCXX]
 for(string s{}; cin >> s; ) {
@@ -83,20 +81,20 @@ for(string s{}; cin >> s; ) {
 }
 \end{lstlisting}
 
-I like a for loop for this because it allows me to contain the scope of the s variable.
+我喜欢for循环，因为它允许我控制变量s的作用域。
 
-We start by defining iterators for the regex results. This allows us to distinguish multiple words even when surrounded only by punctuation. The for(r\_it...) loop returns individual words from the cin string.
+首先为正则表达式结果定义迭代器。这使我们能够区分多个单词，即使周围只有标点符号。for(r\_it…)循环返回cin字符串中的单个单词。
 
-The smatch type is a specialization of a regex string match class. It gives us the next word from our regex.
+smatch类型是正则表达式字符串匹配类的特化，给出了正则表达式中的下一个单词。
 
-We then use the transform algorithm to make the words lowercase – so we can count words regardless of case. (For example, "The" is the same word as "the".) 
+然后，使用转换算法使单词小写——这样就可以不考虑大小写而计算单词。(例如，“The”和“the”是同一个词。)
 
-Next, we use try\_emplace() to add the word to the map. If it's already there, it will not be replaced.
+接下来，使用try\_emplace()将单词添加到映射中。若已经有了，就不会替换。
 
-Finally, we increment the count for the word in the map with ++count.
+最后，使用++count增加map中单词的计数。
 
 \item 
-Now we have the words and their frequency counts in our map. But they're in alphabetical order and we want them in descending order of frequency. For this, we put them in a vector and sort them:
+现在在map上有了单词和它们的频率计数，目前按字母顺序排列，不过我们希望按词频降序排列。为此，将其放在一个vector中并对其进行排序:
 
 \begin{lstlisting}[style=styleCXX]
 auto unique_words = wordmap.size();
@@ -114,12 +112,12 @@ cout << format("unique word count: {}\n",
 	unique_words);
 \end{lstlisting}
 
-wordvec is a vector of pairs, with the word and the frequency count.
+Wordvec是一个vector，每个元素包含有单词和频率计数。
 
-We use the ranges::move() algorithm to populate the vector, then the ranges::sort() algorithm to sort the vector. Notice that the predicate lambda function sorts first by the count (descending) and then by the word (ascending).
+我们使用ranges::move()算法来填充vector，然后使用ranges::sort()算法对vector进行排序。注意，谓词Lambda函数首先按计数排序(降序)，然后按单词排序(升序)。
 
 \item 
-Finally, we print the results:
+最后，打印结果:
 
 \begin{lstlisting}[style=styleCXX]
 	for(int limit{20}; auto& [w, count] : wordvec) {
@@ -129,10 +127,10 @@ Finally, we print the results:
 }
 \end{lstlisting}
 
-I set a limit to print only the first 20 entries. You can comment out the if(-limit == 0) break; line to print the whole list.
+目前，设置了只打印前20个条目的限制。读者们可以注释掉if(-limit == 0) break;，从而可以打印整个列表。
 
 \item 
-In the example files, I've included a text file with a copy of The Raven, by Edgar Allen Poe. The poem is in the public domain. We can use this to test the program:
+示例文件中，包含了埃德加·艾伦·坡的《乌鸦》副本的文本文件，我们可以用它来测试程序:
 
 \begin{tcblisting}{commandshell={}}
 $ ./word-count < the-raven.txt
@@ -162,20 +160,20 @@ unique word count: 439
 
 \end{itemize}
 
-The poem has 1,098 words total, and 439 of them are unique.
+这首诗共有1098个单词，其中出现了439个单词。
 
 \subsubsection{How it works…}
 
-The core of the recipe is the use of a map object to count duplicate words. But there are other parts that merit consideration.
+这个示例的核心是使用一个map对象来计数重复的单词。
 
-We use the cin stream to read text from the standard input. By default, cin will skip whitespace when reading into a string object. By putting a string object on the right-hand side of the >{}> operator (cin >{}> s) we get chunks of text separated by whitespace. This is a good enough definition of a word-at-a-time for many purposes, but we need linguistic words. And for that we will use a regular expression.
+我们使用cin流从标准输入中读取文本。默认情况下，cin在读入字符串对象时会跳过空格。通过将一个字符串对象放在>{}>操作符的右边(cin >{}> s)，可以得到用空格分隔的文本块。对于许多目的来说，这是足够好的定义，但我们需要语言学上的单词。为此，需要使用正则表达式。
 
-The regex class provides a choice of regular expression grammars and it defaults to ECMA grammar. In the ECMA grammar, the regular expression "(\verb|\|w+)" is a shortcut for "([A-Za-z0-9\_]+)". This will select words that include these characters.
+regex类提供了正则表达式语法的选择，它默认为ECMA语法。在ECMA语法中，正则表达式“(\verb|\|w+)”是“([a- za -z0-9\_]+)”的简写。这将选择包含这些字符的单词。
 
-Regular expressions are a language unto themselves. To learn more about regular expressions, I recommend the book Mastering Regular Expressions by Jeffrey Friedl.
+正则表达式本身就是一种语言。要了解更多关于正则表达式的知识，我推荐Jeffrey Friedl的《Mastering regular expressions》这本书。
 
-As we get each word from the regex engine, we use the map object's try\_emplace() method to conditionally add the word to our wordmap. If the word is not in the map, we add it with a count of 0. If the word is already in the map, the count is untouched. We increment the count later in the loop, so it's always correct.
+当从正则表达式引擎获取每个单词时，可以使用map对象的try\_emplace()方法有条件地将单词添加到单词映射中。若单词不在map中，则将其添加为0。若单词已经在map中，则计数不会受到影响。我们在后面的循环中增加计数，所以其内容总是正确的。
 
-After the map is populated with all the unique words from the file, we transfer it to a vector using the ranges::move() algorithm. The move() algorithm makes this transfer quick and efficient. Then we can sort it in the vector using ranges::sort(). The predicate lambda function for sorting includes comparisons for both sides of the pair, so we end up with a result that's sorted by both word count (descending) and the word.
+在用文件中的所有单词填充map后，我们使用ranges::move()算法将其传输到一个vector中，move()算法使这种传输快速而有效。然后，可以使用ranges::sort()对vector进行排序。用于排序的谓词lambda函数包括对对两边的比较，因此我们最终得到一个按字数(降序)和单词排序的结果。
 
 

@@ -1,18 +1,17 @@
 
-It can be useful for a writer to make sure they are using variety of sentence lengths, or to ensure none of their sentences are too long. Let's build a tool that evaluates a text file for sentence length.
-Choosing the appropriate container is key when using the STL. If you need something ordered, it's often best to use an associative container, such as map or multimap. In this case, however, since we need a custom sort, it's easier to sort a vector.
+对于作者来说，确保使用了不同的句子长度，或者确保句子不太长很有帮助。现在，来构建一个评估文本句子长度的工具。在使用STL时，选择适当的容器是关键。若需要一些有序的东西，通常最好使用关联容器，比如map或multimap。然而，在这种情况下，因为需要自定义排序，所以vector可能更合适。
 
-The vector is generally the most flexible of the STL containers. Whenever another container type seems appropriate, but is missing one important capability, the vector is often an effective solution. In this case, where we need a custom sort, the vector works great.
+vector容器通常是STL容器中最灵活的。每当另一种容器类型看起来合适，但缺少一个重要功能时，vector通常是一种有效的解决方案。所以，我们需要一个自定义排序时，就很适合使用vector完成。
 
-This recipe uses a vector of vectors. The inner vector stores the words of a sentence, and the outer vector stores the inner vectors. As you'll see, this affords a lot of flexibility while retaining all the relevant data.
+这个示例使用了vector的vector。内部vector存储句子中的单词，外部vector存储内部vector，这在保留所有相关数据的同时提供了很大的灵活性。
 
 \subsubsection{How to do it…}
 
-This program needs to read in words, find the ends of sentences, store and sort the sentences, then print out the results.
+程序需要读入单词，找到句子的结尾，存储和排序句子，然后打印出结果。
 
 \begin{itemize}
 \item 
-We'll start by writing a little function to tell us when we've hit the end of a sentence:
+先写一个小函数来判断什么时候到达了句尾:
 
 \begin{lstlisting}[style=styleCXX]
 bool is_eos(const string_view & str) {
@@ -25,21 +24,21 @@ bool is_eos(const string_view & str) {
 }
 \end{lstlisting}
 
-The is\_eos() function uses string\_view because it's efficient and we don't need anything more. Then we use the strchr() library function to check if a word contains one of the end-of-sentence punctuation characters (".!?"). These are the three possible characters to end a sentence in the English language.
+is\_eos()函数使用string\_view，因为它很有效，而且不需要其他东西。然后，使用strchr()库函数检查单词是否包含句尾标点字符(".!?")。这是英语中结束句子最有可能的三个字符。
 
 \item 
-In the main() function, we start by defining the vector of vectors:
+main()函数中，我们首先定义vector的vector:
 
 \begin{lstlisting}[style=styleCXX]
 vector<vector<string>> vv_sentences{vector<string>{}};
 \end{lstlisting}
 
-This defines a vector of elements typed vector<string> named vv\_sentences. The vv\_sentences object is initialized with one empty vector for the first sentence.
+这定义了一个名为vv\_sentence的元素vector，类型为vector<string>。vv\_sentence对象初始化为第一个句子的空vector。
 
-This creates a vector that contains other vectors. The inner vectors will each hold a sentence of words.
+这将创建一个包含其他vector的vector，内部vector将每个包含一个词的句子。
 
 \item 
-Now we can process the stream of words:
+现在可以处理单词流了:
 
 \begin{lstlisting}[style=styleCXX]
 for(string s{}; cin >> s; ) {
@@ -50,10 +49,10 @@ for(string s{}; cin >> s; ) {
 }
 \end{lstlisting}
 
-The for loop returns one word at a time from the input stream. The back() method on the vv\_sentences object is used to access the current vector of words, and the current word is added using emplace\_back(). Then we call is\_eos() to see if this was the end of a sentence. If so, we add a new empty vector to vv\_sentences to start the next sentence.
+for循环每次从输入流返回一个单词。vv\_sentence对象上的back()方法用于访问单词的当前vector，并且使用emplace\_back()添加当前单词。然后调用is\_eos()来查看这是否是句子的结尾。若是这样，可以添加一个新的空vector到vv\_sentence开始下一个句子。
 
 \item 
-Because we always add a new empty vector to the end of vv\_sentences after each end-of-sentence character, we will usually end up with an empty sentence vector at the end. Here we check for this, and delete it if necessary:
+我们总是在vv\_sentence的每个句尾字符之后添加一个新的空vector，所以需要在结尾得到一个空的句子vector。在这里进行检查，并在必要时将其删除:
 
 \begin{lstlisting}[style=styleCXX]
 	// delete back if empty
@@ -62,7 +61,7 @@ Because we always add a new empty vector to the end of vv\_sentences after each 
 \end{lstlisting}
 
 \item 
-Now we can sort the vv\_sentences vector by the size of the sentences:
+现在可以根据句子的大小对vv\_sentence vector进行排序:
 
 \begin{lstlisting}[style=styleCXX]
 	sort(vv_sentences, [](const auto& l,
@@ -71,10 +70,10 @@ Now we can sort the vv\_sentences vector by the size of the sentences:
 		});
 \end{lstlisting}
 
-This is why the vector is so convenient for this project. It's quick and easy to sort using the ranges::sort() algorithm with a simple predicate for sorting by size in descending order.
+这就是为什么vector对这个项目如此方便。使用ranges::sort()算法和一个简单的谓词，会使按大小降序排序非常快速和容易。
 
 \item 
-Now we can print our result:
+现在可以打印结果了:
 
 \begin{lstlisting}[style=styleCXX]
 	constexpr int WLIMIT{10};
@@ -95,10 +94,10 @@ Now we can print our result:
 }
 \end{lstlisting}
 
-The outer loop and the inner loop correspond to the outer and inner vectors. We simply loop through the vectors and print out the size of the inner vector with format("{}: ", size) and then each word with format("{} ", s). We don't want to print the very long sentences in their entirety, so we define a limit of 10 words and print an ellipsis if there's more.
+外环和内环分别对应于外vector和内vector。简单地遍历这些vector，并使用format("{}: "， size)打印出内部vector的大小，然后使用format("{} "， s)打印出每个单词。若不想完整地打印非常长的句子，可以定义了10个单词的限制，若有更多，则打印省略号。
 
 \item 
-The output looks like this, using the first few paragraphs of this recipe for input:
+输出看起来像这样:
 
 \begin{tcblisting}{commandshell={}}
 $ ./sentences < sentences.txt
@@ -127,7 +126,7 @@ STL.
 
 \subsubsection{How it works…}
 
-Finding punctuation is simple using the strchr() function from the C Standard Library. Remember, all of C and its Standard Library are included in the definition of the C++ language. There's no reason not to use it where appropriate.
+使用C标准库中的strchr()函数查找标点符号非常简单，所有的C及其标准库都包含在C++语言的定义中，可以在适当的时候使用。
 
 \begin{lstlisting}[style=styleCXX]
 bool is_eos(const string_view & str) {
@@ -139,9 +138,9 @@ bool is_eos(const string_view & str) {
 }
 \end{lstlisting}
 
-This function will fail to properly separate sentences if there's punctuation in the middle of words. That may happen in some forms of poetry or in a badly formatted text file. I've seen this done with std::string iterators, and with regular expressions, but for our purposes this is quick and easy.
+若单词中间有标点符号，这个函数将无法正确地分开句子。这可能发生在某些形式的诗歌或格式糟糕的文本文件中。我曾见过用std::string迭代器和正则表达式来实现这一点，但对于我们来说，快速和简单就够了。
 
-We read the text file one word at a time using cin:
+使用cin逐字读取文本文件:
 
 \begin{lstlisting}[style=styleCXX]
 for(string s{}; cin >> s; ) {
@@ -149,27 +148,27 @@ for(string s{}; cin >> s; ) {
 }
 \end{lstlisting}
 
-This avoids the overhead of reading a large file into memory all at once. The vector will already be large, containing all the words of the file. It's not necessary to also hold the entire text file in memory. In the rare case that a file is too large, it would be necessary to find another strategy, or use a database.
+这避免了一次性将一个大文件读入内存的开销。vector已经很大，包含文件的所有单词，没有必要将整个文本文件也保存在内存中。在文件过大的情况下，有必要找到另一种策略，或使用数据库。
 
-The vector of vectors may look complex at first glance, but it's no more complicated than using two separate vectors.
+“vector的vector”乍一看可能很复杂，但它并不比使用两个独立的vector复杂。
 
 \begin{lstlisting}[style=styleCXX]
 vector<vector<string>> vv_sentences{vector<string>{}};
 \end{lstlisting}
 
-This declares an outer vector, with inner elements of type vector<string>. The outer vector is named vv\_sentences. The inner vectors are anonymous; they require no name. This definition initializes the vv\_sentences object with one element, an empty vector<string> object.
+这声明了一个外部vector，内部元素类型为vector<string>。外层vector命名为vv\_sentence。内vector是匿名的，不需要命名。这里的定义用一个空vector<string>对象初始化vv\_sentence对象。
 
-The current inner vector will always be available as vv\_senteces.back():
+当前的内部vector，可以作为vv\_sentence.back()使用:
 
 \begin{lstlisting}[style=styleCXX]
 vv_sentences.back().emplace_back(s);
 \end{lstlisting}
 
-When we've completed one inner vector, we simply create a new one with:
+当完成一个内部vector量时，可以简单地创建一个新vector:
 
 \begin{lstlisting}[style=styleCXX]
 vv_sentences.emplace_back(vector<string>{});
 \end{lstlisting}
 
-This creates a new anonymous vector<string> object and emplaces it at the back of the vv\_sentences object.
+这将创建一个新的匿名vector<string>对象，并将其放置在vv\_sentence对象的后面。
 

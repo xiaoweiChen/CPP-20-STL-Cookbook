@@ -1,26 +1,26 @@
 
-An ordered task list (or a ToDo list) is a common computing application. Formally stated, it's a list of tasks associated with a priority, sorted in reverse numerical order.
+有序任务列表(或待办事项列表)是一种常见的计算应用程序，它是一个与优先级相关的任务列表，按反向数字顺序排序。
 
-You may be tempted to use a priority\_queue for this, because as the name implies, it's already sorted in priority (reverse numerical) order. The disadvantage of a priority\_queue is that it has no iterators, so it's difficult to operate on it without pushing and popping items to and from the queue.
+读者可能倾向于使用priority\_queue，因为它已经按照优先级(反向数字)顺序排序了。priority\_queue的缺点是没有迭代器，因此若不从队列中推入或弹出项，就很难对其进行操作。
 
-For this recipe, we'll use a multimap for the ordered list. The multimap associative container keeps items in order, and it can be accessed using reverse iterators for the proper sort order.
+对于本节的示例，我们将为有序列表使用一个multimap。multimap关联容器保持项目的顺序，并且可以使用反向迭代器以适当的排序顺序对其进行访问。
 
 \subsubsection{How to do it…}
 
-This is a short and simple recipe that initializes a multimap and prints it in reverse order.
+这是一个简短而简单的示例，用于初始化multimap并以相反的顺序打印。
 
 \begin{itemize}
 \item 
-We start with a type alias for our multimap:
+从multimap的类型别名开始:
 
 \begin{lstlisting}[style=styleCXX]
 using todomap = multimap<int, string>;
 \end{lstlisting}
 
-Our todomap is a multimap with an int key and a string payload.
+todomap是一个具有int键和字符串的multimap。
 
 \item 
-We have a small utility function for printing the todomap in reverse order:
+这里有一个小函数来倒序打印todomap:
 
 \begin{lstlisting}[style=styleCXX]
 void rprint(todomap& todo) {
@@ -33,10 +33,10 @@ void rprint(todomap& todo) {
 }
 \end{lstlisting}
 
-This uses reverse iterators to print the todomap.
+可以使用反向迭代器来打印todomap。
 
 \item 
-The main() function is short and sweet:
+main()函数很简单:
 
 \begin{lstlisting}[style=styleCXX]
 int main()
@@ -51,10 +51,10 @@ int main()
 }
 \end{lstlisting}
 
-We initialize the todomap with tasks. Notice that the tasks are not in any particular order, but they do have priorities in the keys. The rprint() function will print them in priority order.
+我们用任务初始化todomap。请注意，任务没有任何特定的顺序，但在键中确实有优先级。rprint()函数可以按优先级顺序打印它们。
 
 \item 
-The output looks like this:
+输出如下所示:
 
 \begin{tcblisting}{commandshell={}}
 $ ./todo
@@ -64,16 +64,16 @@ $ ./todo
 0: watch teevee
 \end{tcblisting}
 
-The ToDo list prints out in priority order, just as we need it.
+待办事项列表会按优先级顺序打印出来。
 
 \end{itemize}
 
 
 \subsubsection{How it works…}
 
-It's a short and simple recipe. It uses the multimap container to hold items for a prioritized list.
+这是一个简短而简单的示例，使用multimap容器来保存优先级列表中的项。
 
-The only trick is in the rprint() function:
+需要一些说明的仅是rprint()函数:
 
 \begin{lstlisting}[style=styleCXX]
 void rprint(todomap& todo) {
@@ -84,7 +84,7 @@ void rprint(todomap& todo) {
 }
 \end{lstlisting}
 
-Notice the reverse iterators, rbegin() and rend(). It's not possible to change the sort order of a multimap, but it does provide reverse iterators. This makes the multimap behave exactly as we need it for our prioritized list.
+注意反向迭代器rbegin()和rend()。不可能改变multimap的排序顺序，但是它提供了反向迭代器。这使得multimap的行为完全符合我们对优先级列表的要求。
 
 
 

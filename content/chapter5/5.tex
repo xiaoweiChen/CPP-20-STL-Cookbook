@@ -1,13 +1,13 @@
 
-The class template std::function is a thin polymorphic wrapper for functions. It can store, copy, and invoke any function, lambda expression, or other function objects. It can be useful in places where you would like to store a reference to a function or lambda. Using std::function allows you to store functions and lambdas with different signatures in the same container, and it maintains the context of lambda captures.
+类模板std::function是函数的精简多态包装器，可以存储、复制和调用函数、lambda表达式或其他函数对象。在想要存储对函数或lambda的引用的地方，就很有用。使用std::function允许在同一个容器中存储具有不同签名的函数和lambda，并且其可以维护lambda捕获的上下文。
 
 \subsubsection{How to do it…}
 
-This recipe uses the std::function class to store different specializations of a lambda in a vector:
+这个示例使用std::function类来存储vector中lambda的不同特化:
 
 \begin{itemize}
 \item 
-This recipe is contained in the main() function, where we start by declaring three containers of different types:
+这个示例包含在main()函数中，首先声明三个不同类型的容器:
 
 \begin{lstlisting}[style=styleCXX]
 int main() {
@@ -16,10 +16,10 @@ int main() {
 	vector<int> v;
 \end{lstlisting}
 
-These containers, deque, list, and vector, will be referenced by a template lambda.
+这些容器是，deque, list和vector，将由模板lambda引用。
 
 \item 
-We'll declare a simple print\_c lambda function for printing out the containers:
+我们将声明一个名为print\_c的简单lambda函数对容器的值进行打印:
 
 \begin{lstlisting}[style=styleCXX]
 auto print_c = [](auto& c) {
@@ -29,7 +29,7 @@ auto print_c = [](auto& c) {
 \end{lstlisting}
 
 \item 
-Now we declare a lambda that returns an anonymous lambda:
+现在声明一个返回匿名lambda的lambda:
 
 \begin{lstlisting}[style=styleCXX]
 auto push_c = [](auto& container) {
@@ -39,20 +39,20 @@ auto push_c = [](auto& container) {
 };
 \end{lstlisting}
 
-The push\_c lambda takes a reference to a container, which is captured by the anonymous lambda. The anonymous lambda calls the push\_back() member on the captured container. The return value from push\_c is the anonymous lambda.
+push\_c接受对容器的引用，该容器由匿名lambda捕获。匿名lambda调用捕获容器上的push\_back()成员。push\_c的返回值是匿名lambda。
 
 \item 
-Now we declare a vector of std::function elements, and populate it with three instances of push\_c():
+现在声明一个std::function元素的vector，并用push\_c()的三个实例对其进行填充:
 
 \begin{lstlisting}[style=styleCXX]
 const vector<std::function<void(int)>>
 	consumers { push_c(d), push_c(l), push_c(v) };
 \end{lstlisting}
 
-Each of the elements in the initializer list is a function call to the push\_c lambda. push\_c returns an instance of the anonymous lambda, which gets stored in the vector via the function wrapper. The push\_c lambda is called with the three containers, d, l, and v. The containers are passed as captures with the anonymous lambda.
+初始化器列表中的每个元素都是对push\_c的函数调用。push\_c返回匿名lambda的实例，该实例通过函数包装器存储在vector中。push\_c是用d、l和v这三个容器调用的。容器用匿名lambda作为捕获进行传递。
 
 \item 
-Now we loop through the consumers vector, and call each of the lambda elements 10 times, populating the three containers with integers 0–9 in each container:
+现在循环遍历consumers vector，并调用每个lambda元素10次，每个容器中用0-9填充三个容器:
 
 \begin{lstlisting}[style=styleCXX]
 for(auto &consume : consumers) {
@@ -63,7 +63,7 @@ for(auto &consume : consumers) {
 \end{lstlisting}
 
 \item 
-Now our three containers, the deque, list, and vector, should all be populated with integers. Let's print them out:
+现在我们的三个容器，deque, list和vector，已经用整数填充。现在将它们打印出来:
 
 \begin{lstlisting}[style=styleCXX]
 print_c(d);
@@ -71,7 +71,8 @@ print_c(l);
 print_c(v);
 \end{lstlisting}
 
-Our output should be:
+输出应是:
+
 \begin{tcblisting}{commandshell={}}
 0 1 2 3 4 5 6 7 8 9
 0 1 2 3 4 5 6 7 8 9
@@ -81,7 +82,7 @@ Our output should be:
 
 \subsubsection{How it works…}
 
-Lambdas are often used with indirection and this recipe is a good example of such. For example, the push\_c lambda returns an anonymous lambda:
+Lambdas经常间接使用，这就是一个很好的例子。例如，push\_c返回一个匿名lambda:
 
 \begin{lstlisting}[style=styleCXX]
 auto push_c = [](auto& container) {
@@ -91,23 +92,23 @@ auto push_c = [](auto& container) {
 };
 \end{lstlisting}
 
-This anonymous lambda is the one that's stored in the vector:
+这个匿名表达式存储在vector中:
 
 \begin{lstlisting}[style=styleCXX]
 const vector<std::function<void(int)>>
 	consumers { push_c(d), push_c(l), push_c(v) };
 \end{lstlisting}
 
-This is the definition of the consumers container. It is initialized with three elements, where each element is initialized with a call to push\_c, which returns an anonymous lambda. It's the anonymous lambda that gets stored in the vector, not the push\_c lambda.
+这是consumers容器的定义，由三个元素初始化，其中每个元素都通过调用push\_c进行初始化，该调用返回一个匿名lambda。存储在vector中的是匿名表达式，而不是push\_c。
 
-The vector definition uses the std::function class as the type of the elements. The function constructor takes any callable object and stores its reference as the function target:
+vector定义使用std::function类作为元素的类型。函数构造函数可以接受任何可调用对象，并将其引用存储为函数目标:
 
 \begin{lstlisting}[style=styleCXX]
 template< class F >
 function( F&& f );
 \end{lstlisting}
 
-When its function call () operator is invoked, the function object calls the target function with the intended parameters:
+当函数使用函数操作符时，函数对象可以使用参数调用目标函数:
 
 \begin{lstlisting}[style=styleCXX]
 for(auto &c : consumers) {
@@ -117,11 +118,11 @@ for(auto &c : consumers) {
 }
 \end{lstlisting}
 
-This calls each anonymous lambda, as stored in the consumers container, 10 times, thus populating the d, l, and v containers.
+这将调用存储在consumers容器中的每个匿名表达式10次，从而填充d、l和v容器。
 
 \subsubsection{There's more…}
 
-The nature of the std::function class makes it useful for many purposes. You can think of it as a polymorphic function container. It can store a standalone function:
+function类的性质使它在很多方面都很有用，可以将其视为一个多态函数容器。可以存储为一个独立的函数:
 
 \begin{lstlisting}[style=styleCXX]
 void hello() {
@@ -133,7 +134,7 @@ int main() {
 }
 \end{lstlisting}
 
-It can store a member function, using std::bind to bind function parameters:
+可以存储一个成员函数，使用std::bind来绑定函数形参:
 
 \begin{lstlisting}[style=styleCXX]
 struct hello {
@@ -147,7 +148,7 @@ int main() {
 }
 \end{lstlisting}
 
-Or it can store any executable object:
+或者可以存储可执行对象:
 
 \begin{lstlisting}[style=styleCXX]
 struct hello {
@@ -159,7 +160,7 @@ int main() {
 }
 \end{lstlisting}
 
-The output is as follows:
+输出如下所示:
 
 \begin{tcblisting}{commandshell={}}
 Hello Bob

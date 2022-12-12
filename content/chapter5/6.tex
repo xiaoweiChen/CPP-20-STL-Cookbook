@@ -1,13 +1,13 @@
 
-You can stack lambdas so that the output of one is the input of the next, using a simple recursive function. This creates a simple way to build one function upon another.
+可以使用一个简单的递归函数来级联lambda，这样一个的输出就是下一个的输入。这创建了一种在另一个函数上构建一个函数的简单方法。
 
 \subsubsection{How to do it…}
 
-This is a short and simple recipe that uses one recursive function to do most of the work:
+这是一个简短而简单的配方，使用一个递归函数来完成大部分工作:
 
 \begin{itemize}
 \item 
-We'll start by defining the concatenation function concat():
+首先，定义连接函数concat():
 
 \begin{lstlisting}[style=styleCXX]
 template <typename T, typename ...Ts>
@@ -22,10 +22,10 @@ auto concat(T t, Ts ...ts) {
 }
 \end{lstlisting}
 
-This function returns an anonymous lambda, which in turn calls the function again, until the parameter pack is exhausted.
+该函数返回一个匿名lambda，该lambda再次调用该函数，直到耗尽参数包。
 
 \item 
-In the main() function, we create a couple of lambdas and call the concat() function with them:
+main()函数中，我们创建了一对lambda，并使用它们调用concat()函数:
 
 \begin{lstlisting}[style=styleCXX]
 int main() {
@@ -37,11 +37,11 @@ int main() {
 }
 \end{lstlisting}
 
-The concat() function is called with three parameters: two lambdas, and the std::plus() function.
+concat()函数调用时带有三个参数:两个lambdas和std::plus()函数。
 
-As the recursion unravels, the functions are called right-to-left, starting with plus(). The plus() function takes two arguments and returns the sum. The return value from plus() is passed to twice(), and its return value is passed to thrice().
+随着递归的展开，函数称为从右到左，从plus()开始。plus()函数接受两个参数并返回和。plus()的返回值传递给twice()，它的返回值传递给threice()。
 
-The result is then printed to the console with format():
+然后，使用format()将结果打印到控制台:
 
 \begin{tcblisting}{commandshell={}}
 30
@@ -51,7 +51,7 @@ The result is then printed to the console with format():
 
 \subsubsection{How it works…}
 
-The concat() function is simple, but may be confusing due to the recursion and the indirection of the returned lambda:
+concat()函数很简单，但由于间接递归和返回lambda，可能会令人困惑:
 
 \begin{lstlisting}[style=styleCXX]
 template <typename T, typename ...Ts>
@@ -66,13 +66,13 @@ auto concat(T t, Ts ...ts) {
 }
 \end{lstlisting}
 
-The concat() function is called with a parameter pack. With ellipses, the sizeof... operator returns the number of elements in the parameter pack. This is used to test for the end of the recursion.
+concat()函数使用参数包调用。对于省略号，sizeof…运算符返回参数包中的元素数。这用于测试递归的结束。
 
-The concat() function returns a lambda. The lambda recursively calls the concat() function. Because the first argument of concat() is not part of the parameter pack, each recursive call peels off the first element of the pack.
+concat()函数返回一个lambda，递归调用concat()函数。因为concat()的第一个参数不是参数包的一部分，所以每次递归调用都会剥离包的第一个元素。
 
-The outer return statement returns the lambda. The inner return is from the lambda. The lambda calls the function that was passed to concat() and returns its value.
+外层返回语句返回lambda，内部的返回值来自于。lambda调用传递给concat()的函数并返回其值。
 
-Feel free to take this apart and study it. There's value in this technique.
+读者们可以把它拆开来，细细研究。这项技术还是很有价值的。
 
 
 

@@ -1,6 +1,6 @@
-Much of the power of the STL is in the standardization of container interfaces. If a container has a particular capability, there's a good chance that the interface for that capability is standardized across container types. This standardization makes possible a library of algorithms that operate seamlessly across containers and sequences sharing a common interface.
+STL的强大之处在于容器接口的标准化。若容器具有特定的功能，那么该功能的接口很可能是跨容器类型标准化的。这种标准化使得容器可以直接支持某些算法。
 
-For example, if we want to sum all the elements in a vector of int, we could use a loop:
+例如，若想对int类型的vector中所有元素求和，可以使用循环:
 
 \begin{lstlisting}[style=styleCXX]
 vector<int> x { 1, 2, 3, 4, 5 };
@@ -8,55 +8,55 @@ long sum{};
 for( int i : x ) sum += i; // sum is 15
 \end{lstlisting}
 
-Or we could use an algorithm:
+或者用一个算法:
 
 \begin{lstlisting}[style=styleCXX]
 vector<int> x { 1, 2, 3, 4, 5 };
 auto sum = accumulate(x.begin(), x.end(), 0); // sum is 15
 \end{lstlisting}
 
-This same syntax works with other containers:
+同样的语法也适用于其他容器:
 
 \begin{lstlisting}[style=styleCXX]
 deque<int> x { 1, 2, 3, 4, 5 };
 auto sum = accumulate(x.begin(), x.end(), 0); // sum is 15
 \end{lstlisting}
 
-The algorithm version is not necessarily shorter, but it is easier to read and easier to maintain. And an algorithm is often more efficient than the equivalent loop.
+算法版本不一定更短，但更易于阅读和维护。而且算法通常比等效循环更有效。
 
-Beginning with C++20, the ranges library provides a set of alternative algorithms that operate with ranges and views. This book will demonstrate those alternatives where appropriate. For more information on ranges and views, refer to the recipe Create views into containers with ranges in Chapter 1, New C++20 Features, of this book.
+C++20起，范围库提供了一组操作范围和视图的替代算法。本书将在适当的地方演示这些替代方案。有关范围和视图的更多信息，请参阅本书第1章中的示例。
 
-Most of the algorithms are in the algorithm header. Some numeric algorithms, notably accumulate(), are in the numeric header, and some memory-related algorithms are in the memory header.
+大多数算法都在算法头中。一些数值算法，特别是accumulate()，在<numeric>头文件中，而一些与内存相关的算法在<memory>头文件中。
 
-We will cover STL algorithms in the following recipes:
+我们将使用以下示例中介绍STL算法:
 
 \begin{itemize}
 \item 
-Copy from one iterator to another
+基于迭代器的复制
 
 \item 
-Join container elements into a string
+将容器元素连接到一个字符串中
 
 \item 
-Sort containers with std::sort
+使用std::sort对容器进行排序
 
 \item 
-Modify containers with std::transform
+使用std::transform修改容器内容
 
 \item 
-Find items in a container
+在容器中查找特定项
 
 \item 
-Limit the values of a container to a range with std::clamp
+将容器的值限制在std::clamp的范围内
 
 \item 
-Sample data sets with std::sample
+使用std::sample的样本数据集
 
 \item 
-Generate permutations of data sequences
+生成数据序列的排列
 
 \item 
-Merge sorted containers
+合并已排序的容器
 \end{itemize}
 
 

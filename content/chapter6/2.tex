@@ -1,14 +1,14 @@
 
-The copy algorithms are generally used to copy from and to containers, but in fact, they work with iterators, which is far more flexible.
+复制算法通常用于从容器复制到容器，但若它们与迭代器一起工作，则要灵活得多。
 
 
 \subsubsection{How to do it…}
 
-In this recipe, we will experiment with std::copy and std::copy\_n to get a good understanding of how they work:
+在这个示例中，将使用std::copy和std::copy\_n进行实验，以便更好地理解其是如何工作的:
 
 \begin{itemize}
 \item 
-Let's start with a function to print a container:
+先从一个打印容器的函数开始:
 
 \begin{lstlisting}[style=styleCXX]
 void printc(auto& c, string_view s = "") {
@@ -19,7 +19,7 @@ void printc(auto& c, string_view s = "") {
 \end{lstlisting}
 
 \item 
-In main(), we define a vector and print it with printc():
+在main()中，定义了一个vector，并使用printc()将其打印出来:
 
 \begin{lstlisting}[style=styleCXX]
 int main() {
@@ -30,30 +30,30 @@ int main() {
 }
 \end{lstlisting}
 
-We get this output:
+会得到这样的输出:
 
 \begin{tcblisting}{commandshell={}}
 v1: [alpha] [beta] [gamma] [delta] [epsilon]
 \end{tcblisting}
 
 \item 
-Now, let's create a second vector with enough space to copy the first vector:
+现在，创建一个有足够空间复制第一个vector的第二个vector:
 
 \begin{lstlisting}[style=styleCXX]
 vector<string> v2(v1.size());
 \end{lstlisting}
 
 \item 
-We can copy v1 to v2 using the std::copy() algorithm:
+可以使用std::copy()算法将v1复制到v2:
 
 \begin{lstlisting}[style=styleCXX]
 std::copy(v1.begin(), v1.end(), v2.begin());
 printc(v2);
 \end{lstlisting}
 
-The std::copy() algorithm takes two iterators for the range of the copy source, and one iterator for the destination. In this case, we give it the begin() and end() iterators of v1 to copy the entire vector. The begin() iterator of v2 serves as the destination for the copy.
+std::copy()算法接受两个用于复制源范围的迭代器和一个用于复制目标范围的迭代器，给定v1的begin()和end()迭代器来复制整个vector。v2的begin()迭代器作为复制的目标。
 
-Our output is now:
+现在的输出是:
 
 \begin{tcblisting}{commandshell={}}
 v1: [alpha] [beta] [gamma] [delta] [epsilon]
@@ -61,7 +61,7 @@ v2: [alpha] [beta] [gamma] [delta] [epsilon]
 \end{tcblisting}
 
 \item 
-The copy() algorithm does not allocate space for the destination. So, v2 must already have the space for the copy. Alternately, you can use the back\_inserter() iterator adapter to insert the elements at the back of the vector:
+copy()算法不为目标分配空间。因此，v2必须已经有用于复制的空间。或者，可以使用back\_inserter()迭代器适配器将元素插入到vector的后面:
 
 \begin{lstlisting}[style=styleCXX]
 vector<string> v2{};
@@ -69,29 +69,28 @@ std::copy(v1.begin(), v1.end(), back_inserter(v2))
 \end{lstlisting}
 
 \item 
-We can also use the ranges::copy() algorithm to copy an entire range.
-A container object serves as a range so we can use v1 as the source. We still use an iterator for the destination:
+也可以使用ranges::copy()算法来复制整个范围。容器对象作为一个范围，因此可以使用v1作为源。这里，仍然使用目标迭代器:
 
 \begin{lstlisting}[style=styleCXX]
 vector<string> v2(v1.size());
 ranges::copy(v1, v2.begin());
 \end{lstlisting}
 
-This also works with back\_inserter():
+这也适用于back\_inserter():
 
 \begin{lstlisting}[style=styleCXX]
 vector<string> v2{};
 ranges::copy(v1, back_inserter(v2));
 \end{lstlisting}
 
-Output:
+输出:
 
 \begin{tcblisting}{commandshell={}}
 v2: [alpha] [beta] [gamma] [delta] [epsilon]
 \end{tcblisting}
 
 \item 
-You can copy a certain number of elements using copy\_n():
+可以使用copy\_n()复制一定数量的元素:
 
 \begin{lstlisting}[style=styleCXX]
 vector<string> v3{};
@@ -99,14 +98,14 @@ std::copy_n(v1.begin(), 3, back_inserter(v3));
 printc(v3, "v3");
 \end{lstlisting}
 
-In the second argument, the copy\_n() algorithm is a count for the number of elements to copy. The output is:
+第二个参数中，copy\_n()算法是要复制的元素数量的计数。输出结果为:
 
 \begin{tcblisting}{commandshell={}}
 v3: [alpha] [beta] [gamma]
 \end{tcblisting}
 
 \item 
-There's also a copy\_if() algorithm that uses a Boolean predicate function to determine which elements to copy:
+还有一个copy\_if()算法，其使用一个布尔谓词函数来确定要复制哪些元素:
 
 \begin{lstlisting}[style=styleCXX]
 vector<string> v4{};
@@ -115,7 +114,7 @@ std::copy_if(v1.begin(), v1.end(), back_inserter(v4),
 printc(v4, "v4");
 \end{lstlisting}
 
-There's also a ranges version of copy\_if():
+还有一个copy\_if()的范围版本:
 
 \begin{lstlisting}[style=styleCXX]
 vector<string> v4{};
@@ -124,16 +123,16 @@ ranges::copy_if(v1, back_inserter(v4),
 printc(v4, "v4");
 \end{lstlisting}
 
-The output includes only strings longer than 4 characters:
+输出只包含长度超过4个字符的字符串:
 
 \begin{tcblisting}{commandshell={}}
 v4: [alpha] [gamma] [delta] [epsilon]
 \end{tcblisting}
 
-Notice that the value beta is excluded.
+注意，beta值被排除在外。
 
 \item 
-You can use any of these algorithms to copy to or from any sequence, including a stream iterator:
+可以使用这些算法中的任何一个来复制到或从任何序列，包括流迭代器:
 
 \begin{lstlisting}[style=styleCXX]
 ostream_iterator<string> out_it(cout, " ");
@@ -141,7 +140,7 @@ ranges::copy(v1, out_it)
 cout << '\n';
 \end{lstlisting}
 
-Output:
+输出为:
 
 \begin{tcblisting}{commandshell={}}
 alpha beta gamma delta epsilon
@@ -150,7 +149,7 @@ alpha beta gamma delta epsilon
 
 \subsubsection{How it works…}
 
-The std::copy() algorithm is very simple. An equivalent function would look like this:
+std::copy()算法非常简单，等价的函数是这样的:
 
 \begin{lstlisting}[style=styleCXX]
 template<typename Input_it, typename Output_it>
@@ -163,9 +162,9 @@ Output_it bw_copy(Input_it begin_it, Input_it end_it,
 }
 \end{lstlisting}
 
-The copy() function uses the destination iterator's assignment operator to copy from the input iterator to the output iterator until it reaches the end of the input range.
+copy()函数使用目标迭代器的赋值操作符，从输入迭代器复制到输出迭代器，直到到达输入范围的末尾。
 
-There is also a version of this algorithm called std::move(), which moves elements instead of copying them:
+这个算法还有一个版本叫做std::move()，其移动元素而不是复制它们:
 
 \begin{lstlisting}[style=styleCXX]
 std::move(v1.begin(), v1.end(), v2.begin());
@@ -173,20 +172,20 @@ printc(v1, "after move: v1");
 printc(v2, "after move: v2");
 \end{lstlisting}
 
-This performs a move instead of copy assignment. After the move operation, the elements in v1 will be empty, and the elements that were in v1 are now in v2. The output looks like this:
+这将执行移动而不是复制赋值。移动操作之后，v1中的元素将为空，v1中的元素现在在v2中。输出如下所示:
 
 \begin{tcblisting}{commandshell={}}
 after move1: v1: [] [] [] [] []
 after move1: v2: [alpha] [beta] [gamma] [delta] [epsilon]
 \end{tcblisting}
 
-There is also a ranges version of the move() algorithm that performs the same operation:
+还有一个move()算法的范围版本，执行相同的操作:
 
 \begin{lstlisting}[style=styleCXX]
 ranges::move(v1, v2.begin());
 \end{lstlisting}
 
-The power of these algorithms lies in their simplicity. By letting the iterators manage the data, these simple, elegant functions allow you to seamlessly copy or move between any of the STL containers that support the required iterators.
+这些算法的强大之处在于其简单。通过让迭代器管理数据，这些简单、优雅的函数允许在支持所需迭代器的任何STL容器之间无缝复制或移动。
 
 
 

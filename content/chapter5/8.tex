@@ -1,13 +1,13 @@
 
-You can easily create multiple instances of a lambda with different capture values by wrapping the lambda in a function. This allows you to call different versions of a lambda with the same input.
+通过将lambda包装在函数中，可以轻松地创建具有不同捕获值的lambda的多个实例。可以使用相同的输入调用lambda的不同版本。
 
 \subsubsection{How to do it…}
 
-This is a simple example of a lambda that wraps a value in different types of braces:
+这是一个用不同类型的大括号包装值的简单例子:
 
 \begin{itemize}
 \item 
-We'll start by creating the wrapper function braces():
+首先创建包装器函数braces():
 
 \begin{lstlisting}[style=styleCXX]
 auto braces (const char a, const char b) {
@@ -17,10 +17,10 @@ auto braces (const char a, const char b) {
 }
 \end{lstlisting}
 
-The braces() function wraps a lambda that returns a three-value string, where the first and last values are characters passed to the lambda as captures, and the middle value is passed as a parameter.
+braces()函数包装了一个lambda，该lambda返回一个三值字符串，其中第一个和最后一个值是作为捕获传递给lambda的字符，中间的值作为参数传递。
 
 \item 
-In the main() function, we use braces() to create four lambdas, using four different sets of braces:
+在main()函数中，使用braces()创建了四个lambda，使用了四组不同的括号:
 
 \begin{lstlisting}[style=styleCXX]
 auto a = braces('(', ')');
@@ -30,7 +30,7 @@ auto d = braces('|', '|');
 \end{lstlisting}
 
 \item 
-Now we can call our lambdas from a simple for() loop:
+现在，可以在简单的for()循环中调用lambda:
 
 \begin{lstlisting}[style=styleCXX]
 for( int i : { 1, 2, 3, 4, 5 } ) {
@@ -39,12 +39,12 @@ for( int i : { 1, 2, 3, 4, 5 } ) {
 }
 \end{lstlisting}
 
-This is two nested for() loops. The outer loop simply counts from 1 to 5, passing an integer to the inner loop. The inner loop calls the lambdas with the braces.
+这是两个嵌套的for()循环。外部循环只是从1数到5，将一个整数传递给内部循环。内部循环调用带大括号的lambda函数。
 
-Both loops use an initializer list as the container in a range-based for() loop. This is a convenient technique for looping through a small set of values.
+这两个循环都使用初始化器列表作为基于范围的for()循环中的容器。这是一种方便的方法，可以循环使用一小组值。
 
 \item 
-The output from our program looks like this:
+程序的输出如下所示:
 
 \begin{tcblisting}{commandshell={}}
 (1) [1] {1} |1|
@@ -54,12 +54,12 @@ The output from our program looks like this:
 (5) [5] {5} |5|
 \end{tcblisting}
 
-The output shows each of the integers, in each combination of braces.
+输出会显示了每个整数的括号组合。
 \end{itemize}
 
 \subsubsection{How it works…}
 
-This is a simple example of how to use a wrapper for a lambda. The braces() function constructs a lambda using the braces passed to it:
+这是一个如何为lambda使用包装器的简单示例。braces()函数使用传递给它的括号构造了一个lambda:
 
 \begin{lstlisting}[style=styleCXX]
 auto braces (const char a, const char b) {
@@ -69,7 +69,7 @@ auto braces (const char a, const char b) {
 }
 \end{lstlisting}
 
-By passing the braces() function parameters to the lambda, it can return a lambda with that context. So, each of the assignments in the main function carries those parameters with it:
+通过将括号()函数参数传递给lambda，可以返回具有该上下文的lambda。所以，main函数中的每个赋值操作都带有这些参数:
 
 \begin{lstlisting}[style=styleCXX]
 auto a = braces('(', ')');
@@ -78,7 +78,7 @@ auto c = braces('{', '}');
 auto d = braces('|', '|');
 \end{lstlisting}
 
-When these lambdas are called with a digit, they will return a string with that digit in the corresponding braces.
+当使用数字调用这些lambda时，将返回一个字符串，对应的大括号中会包含该数字。
 
 
 

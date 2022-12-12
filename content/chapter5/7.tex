@@ -1,13 +1,13 @@
 
-This example wraps a lambda in a function to create a custom conjunction for use with an algorithm predicate.
+此示例将lambda包装在函数中，以创建用于算法谓词的自定义连接。
 
 \subsubsection{How to do it…}
 
-The copy\_if() algorithm requires a predicate that takes one parameter. In this recipe, we will create a predicate lambda from three other lambdas:
+copy\_if()算法需要带有一个参数的谓词。在这个示例中，我们将从其他三个lambda创建一个谓词lambda:
 
 \begin{itemize}
 \item 
-First, we'll write the combine() function. This function returns a lambda for use with the copy\_if() algorithm:
+首先，编写combine()函数。这个函数返回一个用于copy\_if()算法的lambda:
 
 \begin{lstlisting}[style=styleCXX]
 template <typename F, typename A, typename B>
@@ -18,10 +18,10 @@ auto combine(F binary_func, A a, B b) {
 }
 \end{lstlisting}
 
-The combine() function takes three function parameters – a binary conjunction and two predicates – and returns a lambda that calls the conjunction with the two predicates.
+combine()函数接受三个函数参数——一个二元连接符和两个谓词——并返回一个lambda，该lambda调用带有两个谓词的连接符。
 
 \item 
-In the main() function, we create the lambdas for use with combine():
+main()函数中，创建了用于combine()的lambda:
 
 \begin{lstlisting}[style=styleCXX]
 int main() {
@@ -36,10 +36,10 @@ int main() {
 	};
 \end{lstlisting}
 
-The begins\_with and ends\_with lambdas are simple filter predicates to find strings that begin with 'a' and end with 'b', respectively. The bool\_and lambda is the conjunction.
+begin\_with和ends\_with是简单的过滤器谓词，用于分别查找以'a'开头和以'b'结尾的字符串。bool\_and可对两个参数进行与操作。
 
 \item 
-Now we can call the copy\_if algorithm with combine():
+现在，可以使用combine()调用copy\_if算法:
 
 \begin{lstlisting}[style=styleCXX]
 std::copy_if(istream_iterator<string>{cin}, {},
@@ -49,9 +49,9 @@ std::copy_if(istream_iterator<string>{cin}, {},
 cout << '\n';
 \end{lstlisting}
 
-The combine() function returns a lambda that combines the two predicates with the conjunction.
+combine()函数返回一个lambda，该lambda将两个谓词与连接词组合在一起。
 
-The output looks like the following:
+输出如下所示:
 
 \begin{tcblisting}{commandshell={}}
 $ echo aabb bbaa foo bar abazb | ./conjunction
@@ -61,7 +61,7 @@ aabb abazb
 
 \subsubsection{How it works…}
 
-The std::copy\_if() algorithm requires a predicate function that takes one parameter, but our conjunction requires two parameters, each of which require one parameter. We resolve this with a function that returns a lambda specifically for this context:
+std::copy\_if()算法需要一个带有一个形参的谓词函数，但连接需要两个形参，每个形参都需要一个参数。我们用一个函数来解决这个问题，该函数返回一个专门用于此上下文的lambda:
 
 \begin{lstlisting}[style=styleCXX]
 template <typename F, typename A, typename B>
@@ -72,7 +72,7 @@ auto combine(F binary_func, A a, B b) {
 }
 \end{lstlisting}
 
-The combine() function creates a lambda from three parameters, each of which is a function. The returned lambda takes the one parameter that's required of the predicate function. Now we can call copy\_if() with the combine() function:
+combine()函数从三个形参创建一个lambda，每个形参都是一个函数。返回的lambda接受谓词函数所需的一个参数。现在可以用combine()函数调用copy\_if():
 
 \begin{lstlisting}[style=styleCXX]
 std::copy_if(istream_iterator<string>{cin}, {},
@@ -80,7 +80,7 @@ std::copy_if(istream_iterator<string>{cin}, {},
 			combine(bool_and, begins_with, ends_with));
 \end{lstlisting}
 
-This passes the combined lambda to the algorithm so it can operate within that context.
+这将组合lambda传递给算法，以便其在该上下文中进行操作。
 
 
 

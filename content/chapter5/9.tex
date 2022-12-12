@@ -1,14 +1,14 @@
 
-A jump table is a useful pattern when you want to select an action from a user or other input. Jump tables are often implemented in if/else or switch structures. In this recipe, we'll build a concise jump table using only an STL map and anonymous lambdas.
+当希望从用户或其他输入中选择操作时，跳转表是一种有用的模式。跳转表通常在if/else或switch结构中实现。在这个示例中，我们将只使用STL map和匿名lambdas构建一个简洁的跳转表。
 
 
 \subsubsection{How to do it…}
 
-It's easy to build a simple jump table from a map and lambdas. The map provides simple indexed navigation and the lambda can be stored as payload. Here's how to do it:
+从map和lambda构建简单的跳转表很容易。映射提供了简单的索引导航，lambda可以存储为有效负载。
 
 \begin{itemize}
 \item 
-First, we'll create a simple prompt() function to get input from the console:
+首先，创建一个简单的prompt()函数来从控制台获取输入:
 
 \begin{lstlisting}[style=styleCXX]
 const char prompt(const char * p) {
@@ -25,10 +25,10 @@ const char prompt(const char * p) {
 }
 \end{lstlisting}
 
-The C-string parameter is used as a prompt. std::getline() is called to get input from the user. The response is stored in r, checked for length, then if it's one character in length, it's converted to uppercase and returned.
+C-string参数用作提示符，std::getline()被调用来获取用户的输入。响应存储在r中，检查长度。若长度为一个字符，则将其转换为大写并返回。
 
 \item 
-In the main() function, we declare and initialize a map of lambdas:
+在main()函数中，声明并初始化了lambda的map:
 
 \begin{lstlisting}[style=styleCXX]
 using jumpfunc = void(*)();
@@ -41,17 +41,16 @@ map<const char, jumpfunc> jumpmap {
 };
 \end{lstlisting}
 
-The map container is loaded with anonymous lambdas for the jump table.
-These lambdas could easily call other functions or perform simple tasks.
+map容器装载了用于跳转表的匿名lambda。这些lambda可以很容易地调用其他函数或执行简单的任务。
 
-The using alias is for convenience. We're using the function pointer type void(*) () for the lambda payload. If you prefer, you could use std::function() if you need more flexibility or if you just find it more readable. It has very little overhead:
+使用别名是为了方便，为lambda有效负载使用函数指针类型void(*)()。若需要更大的灵活性，或者发现它更具可读性，这里可以使用std::function()。其开销很小:
 
 \begin{lstlisting}[style=styleCXX]
 using jumpfunc = std::function<void()>;
 \end{lstlisting}
 
 \item 
-Now we can prompt for user input and select an action from the map:
+现在可以提示用户输入，并从map中选择一个动作:
 
 \begin{lstlisting}[style=styleCXX]
 char select{};
@@ -64,13 +63,13 @@ while(select != 'X') {
 }
 \end{lstlisting}
 
-This is how we use the map-based jump table. We loop until 'X' is selected for exit. We call prompt() with a prompt string, call find() on the map object, then call the lambda with it->second().
+这就是基于map的跳转表，循环直到选择“X”退出。我们使用提示字符串调用prompt()，在map对象上调用find()，然后使用it->second()它调用表达式。
 \end{itemize}
 
 
 \subsubsection{How it works…}
 
-The map container makes an excellent jump table. It's concise and easy to navigate:
+map容器是一个很好的跳转表。简洁明了，易于操作:
 
 \begin{lstlisting}[style=styleCXX]
 using jumpfunc = void(*)();
@@ -83,9 +82,9 @@ map<const char, jumpfunc> jumpmap {
 };
 \end{lstlisting}
 
-Anonymous lambdas are stored as payload in the map container. The keys are the character responses from the menu of actions.
+匿名lambda作为有效负载存储在映射容器中，键是动作菜单中的字符响应。
 
-You can test the validity of a key and select a lambda in one action:
+可以测试一个键的有效性，并在一个动作中选择一个lambda表达式:
 
 \begin{lstlisting}[style=styleCXX]
 auto it = jumpmap.find(select);
@@ -93,7 +92,7 @@ if(it != jumpmap.end()) it->second();
 else cout << "Invalid response\n";
 \end{lstlisting}
 
-This is a simple, elegant solution, where we would have otherwise used awkward branching code.
+这是一个简单而优雅的解决方案，否则只能使用令人尴尬的分支代码。
 
 
 

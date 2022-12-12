@@ -1,13 +1,13 @@
 
-Some functions in the algorithm library require the use of a predicate function. A predicate is a function (or functor or lambda) that tests a condition and returns a Boolean true/false response.
+算法库中的某些函数需要使用谓词函数。谓词是测试条件并返回布尔true/false响应的函数(或函子或lambda)。
 
 \subsubsection{How to do it…}
 
-For this recipe, we will experiment with the count\_if() algorithm using different types of predicates:
+对于这个示例，我们将使用不同类型的谓词来测试count\_if()算法:
 
 \begin{itemize}
 \item 
-First, let's create a function for use as a predicate. A predicate takes a certain number of arguments and returns a bool. A predicate for count\_if() takes one argument:
+首先，创建一个用作谓词的函数。谓词接受一定数量的参数并返回bool类型。count\_if()的谓词有一个参数:
 
 \begin{lstlisting}[style=styleCXX]
 bool is_div4(int i) {
@@ -15,10 +15,10 @@ bool is_div4(int i) {
 }
 \end{lstlisting}
 
-This predicate checks whether an int value is divisible by 4.
+该谓词检查int值是否能被4整除。
 
 \item 
-In main(), we'll define a vector of int values, and use it to test our predicate function with count\_if():
+在main()中，定义一个int值的vector，并使用它来测试count\_if()的谓词:
 
 \begin{lstlisting}[style=styleCXX]
 int main() {
@@ -29,20 +29,20 @@ int main() {
 }
 \end{lstlisting}
 
-The output is as follows:
+输出如下:
 
 \begin{tcblisting}{commandshell={}}
 numbers divisible by 4: 5
 \end{tcblisting}
 
-(The 5 divisible numbers are: 4, 4, 8, 12, and 20.) 
+(5个可整除数分别是:4,4,8,12和20。)
 
-The count\_if() algorithm uses the predicate function to determine which elements of the sequence to count. It calls the predicate with each element as a parameter, and only counts the element if the predicate returns true.
+count\_if()算法使用谓词来确定计算序列中的哪些元素，对每个元素作为参数调用谓词，并且仅在谓词返回true时计数元素。
 
-In this case, we used a function as a predicate.
+本例中，我们使用函数作为谓词。
 
 \item 
-We could also use a functor as a predicate:
+也可以将函子用作谓词:
 
 \begin{lstlisting}[style=styleCXX]
 struct is_div4 {
@@ -52,23 +52,23 @@ struct is_div4 {
 };
 \end{lstlisting}
 
-The only change here is that we need to use an instance of the class as the predicate:
+这里唯一的变化是需要使用类的实例作为谓词:
 
 \begin{lstlisting}[style=styleCXX]
 int count = count_if(v.begin(), v.end(), is_div4());
 \end{lstlisting}
 
-The advantage of a functor is that it can carry context and access class and instance variables. This was the common way to use predicates before C++11 introduced lambda expressions.
+函子的优点是可以携带上下文并访问类和实例变量。在C++11引入lambda表达式之前，这是使用谓词的常用方法。
 
 \item 
-With a lambda expression, we have the best of both worlds: the simplicity of a function and the power of a functor. We can use a lambda as a variable:
+使用lambda表达式，其具有两个优点:函数的简单性和函子的强大功能。可以使用lambda作为变量:
 
 \begin{lstlisting}[style=styleCXX]
 auto is_div4 = [](int i){ return i % 4 == 0; };
 int count = count_if(v.begin(), v.end(), is_div4);
 \end{lstlisting}
 
-Or we can use an anonymous lambda:
+或者可以使用匿名lambda:
 
 \begin{lstlisting}[style=styleCXX]
 int count = count_if(v.begin(), v.end(),
@@ -76,7 +76,7 @@ int count = count_if(v.begin(), v.end(),
 \end{lstlisting}
 
 \item 
-We can take advantage of the lambda capture by wrapping the lambda in a function, and using that function context to produce the same lambda with different parameters:
+可以通过在函数中包装lambda来利用lambda捕获，并使用该函数上下文生成具有不同参数的相同lambda:
 
 \begin{lstlisting}[style=styleCXX]
 auto is_div_by(int divisor) {
@@ -84,9 +84,9 @@ auto is_div_by(int divisor) {
 }
 \end{lstlisting}
 
-This function returns a predicate lambda with the divisor from the capture context.
+该函数从捕获上下文返回一个带除数的谓词lambda。
 
-We can then use that predicate with count\_if()
+然后，可以使用count\_if()这个谓词
 
 \begin{lstlisting}[style=styleCXX]
 for( int i : { 3, 4, 5 } ) {
@@ -97,9 +97,9 @@ for( int i : { 3, 4, 5 } ) {
 }
 \end{lstlisting}
 
-Each call to is\_div\_by() returns a predicate with a different divisor from i.
+每次调用is\_div\_by()都会返回一个与i除数不同的谓词。
 
-Now we get this output:
+现在得到这样的输出:
 
 \begin{tcblisting}{commandshell={}}
 numbers divisible by 3: 2
@@ -110,40 +110,40 @@ numbers divisible by 5: 2
 
 \subsubsection{How it works…}
 
-The type of a function pointer is represented as a pointer followed by the function call () operator:
+函数指针的类型表示为后跟函数调用函数操作符的指针:
 
 \begin{lstlisting}[style=styleCXX]
 void (*)()
 \end{lstlisting}
 
-You can declare a function pointer and initialize it with the name of an existing function:
+可以声明一个函数指针，并用函数名对其进行初始化:
 
 \begin{lstlisting}[style=styleCXX]
 void (*fp)() = func;
 \end{lstlisting}
 
-Once declared, a function pointer may be dereferenced and used as if it were the function itself:
+声明后，函数指针可以解引用，并像使用函数本身一样使用:
 
 \begin{lstlisting}[style=styleCXX]
 func(); // do the func thing
 \end{lstlisting}
 
-A lambda expression has the same type as a function pointer:
+lambda表达式具有与函数指针相同的类型:
 
 \begin{lstlisting}[style=styleCXX]
 void (*fp)() = []{ cout << "foo\n"; };
 \end{lstlisting}
 
-This means that wherever you use a function pointer with a certain signature, you may also use a lambda with the same signature. This allows function pointers, functors, and lambdas to work interchangeably:
+这意味着无论在哪里使用具有特定签名的函数指针，都可以使用具有相同签名的lambda。这使得函数指针、函子和lambda的工作方式一致:
 
 \begin{lstlisting}[style=styleCXX]
 bool (*fp)(int) = is_div4;
 bool (*fp)(int) = [](int i){ return i % 4 == 0; };
 \end{lstlisting}
 
-Because of this interchangeability, an algorithm such as count\_if() accepts a function, functor, or lambda where it expects a predicate with a particular function signature.
+由于这种等价性，像count\_if()这样的算法接受函数、函子或lambda(在这些函数中期望具有特定函数签名的谓词)。
 
-This applies to any algorithm that uses a predicate.
+这适用于任何使用谓词的算法。
 
 
 

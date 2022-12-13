@@ -1,13 +1,13 @@
 
-Sometimes, there is no algorithm in the library to accomplish a task at hand. We can use iterators, with the same techniques as the algorithms library, to easily write one.
+有时，库中没有现成的算法来完成任务。我们可以使用迭代器，使用与算法库相同的方式，编写一个迭代器。
 
-For example, we often need to join elements from a container, with separators, into a string. One common solution is to use a simple for() loop:
+例如，需要使用分隔符将容器中的元素连接到一个字符串中。常见的解决方案是使用简单的for()循环:
 
 \begin{lstlisting}[style=styleCXX]
 for(auto v : c) cout << v << ', ';
 \end{lstlisting}
 
-The problem with this otherwise simple solution is that it leaves a trailing separator:
+这个方案的问题是在尾部留下了一个分隔符:
 
 \begin{lstlisting}[style=styleCXX]
 vector<string> greek{ "alpha", "beta", "gamma",
@@ -16,44 +16,44 @@ for(auto v : greek) cout << v << ", ";
 cout << '\n';
 \end{lstlisting}
 
-Output:
+输出:
 
 \begin{tcblisting}{commandshell={}}
 alpha, beta, gamma, delta, epsilon,
 \end{tcblisting}
 
-This may be fine in a testing environment, but in any production system, that trailing comma is unacceptable.
+这在测试环境中可能没问题，但在生产系统中，后面的逗号是无法接受的。
 
-The ranges::views library has a join() function, but it doesn't provide a separator:
+ranges::views库有一个join()函数，但不提供分隔符:
 
 \begin{lstlisting}[style=styleCXX]
 auto greek_view = views::join(greek);
 \end{lstlisting}
 
-The views::join() function returns a ranges::view object. This requires a separate step to display or turn into a string. We can cycle through the view with a for() loop:
+views::join()函数的作用是:返回一个ranges::view对象。这需要一个单独的步骤来显示或转换为字符串。我们可以使用for()循环遍历视图:
 
 \begin{lstlisting}[style=styleCXX]
 for(const char c : greek_view) cout << c;
 cout << '\n';
 \end{lstlisting}
 
-The output looks like this:
+输出如下所示:
 
 \begin{tcblisting}{commandshell={}}
 alphabetagammadeltaepsilon
 \end{tcblisting}
 
-It's all there, but we need a proper separator between the elements to make it useful for our purposes.
+我们需要在元素之间设置一个适当的分隔符。
 
-Since the algorithms library does not have a function that suits our needs, we'll write one.
+由于算法库没有满足需求的函数，就需要我们自己编写一个。
 
 \subsubsection{How to do it…}
 
-For this recipe, we will take the elements of a container and join them into a string with separators:
+这个示例中，我们将一个容器的元素用分隔符连接成一个字符串:
 
 \begin{itemize}
 \item 
-In our main() function, we declare a vector of strings:
+在main()函数中，声明了一个字符串vector:
 
 \begin{lstlisting}[style=styleCXX]
 int main() {
@@ -64,7 +64,7 @@ int main() {
 \end{lstlisting}
 
 \item 
-Now, let's write a simple join() function that uses an ostream object to join elements with a separator:
+现在，来编写一个简单的join()函数，使用ostream对象用分隔符连接元素:
 
 \begin{lstlisting}[style=styleCXX]
 namespace bw {
@@ -78,24 +78,24 @@ namespace bw {
 }
 \end{lstlisting}
 
-I've put this in my own bw namespace to avoid name collisions.
+我把它放在我自己的bw名称空间中，以避免名称冲突。
 
-We can call it with cout like this:
+可以这样与cout一起使用:
 
 \begin{lstlisting}[style=styleCXX]
 bw::join(greek.begin(), greek.end(), cout, ", ") << '\n';
 \end{lstlisting}
 
-Because it returns the ostream object, we can follow it with << to add a newline to the stream.
+因为其返回ostream对象，所以可以在它后面加上<{}<来向流中添加换行符。
 
-Output:
+输出:
 
 \begin{tcblisting}{commandshell={}}
 alpha, beta, gamma, delta, epsilon
 \end{tcblisting}
 
 \item 
-We'll often want a string, instead of directly writing to cout. We can overload this function for a version that returns a string object:
+这里通常需要一个字符串，而不是直接写入到cout。对于返回string对象的版本，所以可以重载此函数:
 
 \begin{lstlisting}[style=styleCXX]
 template<typename I>
@@ -106,23 +106,23 @@ string join(I it, I end_it, string_view sep = "") {
 }
 \end{lstlisting}
 
-This also goes in the bw namespace. This function creates an ostringstream object to pass to the ostream version of bw::join(). It returns a string object from the str() method of the ostringstream object.
+这也在bw名称空间中。这个函数创建一个ostringstream对象，传递给bw::join()的ostream版本，从ostringstream对象的str()方法返回一个字符串对象。
 
-We can use it like this:
+可以这样使用:
 
 \begin{lstlisting}[style=styleCXX]
 string s = bw::join(greek.begin(), greek.end(), ", ");
 cout << s << '\n';
 \end{lstlisting}
 
-Output:
+输出:
 
 \begin{tcblisting}{commandshell={}}
 alpha, beta, gamma, delta, epsilon
 \end{tcblisting}
 
 \item 
-Let's add one final overload to make this easier to use:
+来添加最后一个重载，让它更容易使用:
 
 \begin{lstlisting}[style=styleCXX]
 string join(const auto& c, string_view sep = "") {
@@ -130,14 +130,14 @@ string join(const auto& c, string_view sep = "") {
 }
 \end{lstlisting}
 
-This version just takes a container and a separator, which should satisfy most use cases nicely:
+这个版本只需要一个容器和一个分隔符，这应该可以很好地满足大多数用例:
 
 \begin{lstlisting}[style=styleCXX]
 string s = bw::join(greek, ", ");
 cout << s << '\n';
 \end{lstlisting}
 
-Output:
+输出:
 
 \begin{tcblisting}{commandshell={}}
 alpha, beta, gamma, delta, epsilon
@@ -146,7 +146,7 @@ alpha, beta, gamma, delta, epsilon
 
 \subsubsection{How it works…}
 
-Most of the work in this recipe is done by the iterators and the ostream object:
+这个示例中的大部分工作由迭代器和ostream对象完成:
 
 \begin{lstlisting}[style=styleCXX]
 namespace bw {
@@ -160,25 +160,25 @@ namespace bw {
 }
 \end{lstlisting}
 
-The separators go after the first element, between each of the successive elements, and stop before the final element. This means we can either add a separator before each element, skipping the first, or after each element, skipping the last. The logic is simpler if we test for, and skip, the first element. We do that in the line just before the while() loop:
+分隔符在第一个元素之后，在每个连续元素之间，并在最后一个元素之前停止。所以可以在每个元素之前添加分隔符，跳过第一个，也可以在每个元素之后添加分隔符，跳过最后一个。若测试并跳过第一个元素，逻辑会更简单。我们在while()循环之前的那行代码中这样做:
 
 \begin{lstlisting}[style=styleCXX]
 if(it != end_it) o << *it++;
 \end{lstlisting}
 
-Once we have the first element out of the way, we can simply add a separator before each remaining element:
+完成了第一个元素，就可以简单地在每个剩余元素之前添加分隔符:
 
 \begin{lstlisting}[style=styleCXX]
 while(it != end_it) o << sep << *it++;
 \end{lstlisting}
 
-We return the ostream object as a convenience. This allows the user to easily add a newline, or other objects, to the stream:
+为了方便起见，我们返回ostream对象。这允许用户轻松地向流中添加换行符或其他对象:
 
 \begin{lstlisting}[style=styleCXX]
 bw::join(greek.begin(), greek.end(), cout, ", ") << '\n';
 \end{lstlisting}
 
-Output:
+输出:
 
 \begin{tcblisting}{commandshell={}}
 alpha, beta, gamma, delta, epsilon
@@ -186,7 +186,7 @@ alpha, beta, gamma, delta, epsilon
 
 \subsubsection{There's more…}
 
-As with any of the library algorithms, the join() function will work with any container that supports forward iterators. For example, here's a list of double constants from the numbers library:
+与任何标准库算法一样，join()函数将适用于支持前向迭代器的容器。例如，下面是数字库中的double常量列表:
 
 \begin{lstlisting}[style=styleCXX]
 namespace num = std::numbers;
@@ -194,19 +194,19 @@ list<double> constants { num::pi, num::e, num::sqrt2 };
 cout << bw::join(constants, ", ") << '\n';
 \end{lstlisting}
 
-Output:
+输出:
 
 \begin{tcblisting}{commandshell={}}
 3.14159, 2.71828, 1.41421
 \end{tcblisting}
 
-It will even work with a ranges::view object, like the greek\_view defined earlier in this recipe:
+其可以与ranges::view对象一起工作，就像前面在这个示例中定义的greek\_view一样:
 
 \begin{lstlisting}[style=styleCXX]
 cout << bw::join(greek_view, ":") << '\n';
 \end{lstlisting}
 
-Output:
+输出:
 
 \begin{tcblisting}{commandshell={}}
 a:l:p:h:a:b:e:t:a:g:a:m:m:a:d:e:l:t:a:e:p:s:i:l:o:n

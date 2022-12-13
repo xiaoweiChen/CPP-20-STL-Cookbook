@@ -1,15 +1,13 @@
 
-The std::transform() function is remarkably powerful and flexible. One of the more commonly deployed algorithms in the library, it applies a function or lambda to each element in a container, storing the results in another container while leaving the original in place.
-
-Given its power, it's deceptively simple to use.
+std::transform()函数非常强大和灵活，是库中最常用的算法之一，它将函数或lambda应用于容器中的每个元素，将结果存储在另一个容器中，同时保留原始的元素。
 
 \subsubsection{How to do it…}
 
-In this recipe, we will explore a few applications for the std::transform() function:
+在这个示例中，将探索std::transform()函数的一些使用方式:
 
 \begin{itemize}
 \item 
-We'll start with a simple function that prints the contents of a container:
+我们将从一个打印容器内容的简单函数开始:
 
 \begin{lstlisting}[style=styleCXX]
 void printc(auto& c, string_view s = "") {
@@ -19,10 +17,10 @@ void printc(auto& c, string_view s = "") {
 }
 \end{lstlisting}
 
-We'll use this to view the results of our transformations.
+我们将使用它来查看转换的结果。
 
 \item 
-In the main() function, let's declare a couple of vectors:
+在main()函数中，声明两个vector:
 
 \begin{lstlisting}[style=styleCXX]
 int main() {
@@ -33,14 +31,14 @@ int main() {
 }
 \end{lstlisting}
 
-This prints out the contents of v1:
+输出v1的内容:
 
 \begin{tcblisting}{commandshell={}}
 v1: 1 2 3 4 5 6 7 8 9 10
 \end{tcblisting}
 
 \item 
-Now we can use the transform() function to insert the square of each value into v2:
+现在可以使用transform()函数将每个值的平方插入到v2中:
 
 \begin{lstlisting}[style=styleCXX]
 cout << "squares:\n";
@@ -49,9 +47,9 @@ transform(v1.begin(), v1.end(), back_inserter(v2),
 printc(v2, "v2");
 \end{lstlisting}
 
-The transform() function takes four arguments. The first two are the begin() and end() iterators for the source range. The third argument is the begin() iterator for the destination range. In this case, we're using the back\_inserter() algorithm to insert the results in v2. The fourth argument is the transformation function. In this case, we're using a simple lambda to square the value.
+transform()函数有四个参数。前两个是源范围的begin()和end()迭代器，第三个参数是目标范围的begin()迭代器。本例中，使用back\_inserter()算法将结果插入到v2中。第四个参数是变换函数，我们使用lambda来对值进行平方。
 
-Output:
+输出:
 
 \begin{tcblisting}{commandshell={}}
 squares:
@@ -59,7 +57,7 @@ v2: 1 4 9 16 25 36 49 64 81 100
 \end{tcblisting}
 
 \item 
-Of course, we can use transform() with any type. Here's an example that converts a vector of string objects to lowercase. First, we need a function to return the lowercase value of a string:
+当然，我们可以对任何类型使用transform()，下面是一个将字符串对象的向量转换为小写的例子。首先，需要一个函数来返回字符串的小写值:
 
 \begin{lstlisting}[style=styleCXX]
 string str_lower(const string& s) {
@@ -71,7 +69,7 @@ string str_lower(const string& s) {
 }
 \end{lstlisting}
 
-Now we can use the str\_lower() function with transform:
+现在可以在transform中使用str\_lower()函数了:
 
 \begin{lstlisting}[style=styleCXX]
 vector<string> vstr1{ "Mercury", "Venus", "Earth",
@@ -86,7 +84,7 @@ transform(vstr1.begin(), vstr1.end(),
 printc(vstr2, "vstr2");
 \end{lstlisting}
 
-This calls str\_lower() for every element in vstr1 and inserts the results into vstr2. The result is:
+这将为vstr1中的每个元素调用str\_lower()，并将结果插入vstr2。结果为:
 
 \begin{tcblisting}{commandshell={}}
 vstr: Mercury Venus Earth Mars Jupiter Saturn Uranus
@@ -96,10 +94,10 @@ vstr: mercury venus earth mars jupiter saturn uranus
 neptune pluto
 \end{tcblisting}
 
-(Yes, Pluto will always be a planet to me.)
+(是的，冥王星对我来说永远都是行星。)
 
 \item 
-There's also a ranges version of transform:
+transform还有一个范围版本:
 
 \begin{lstlisting}[style=styleCXX]
 cout << "ranges squares:\n";
@@ -108,14 +106,14 @@ auto view1 = views::transform(v1, [](int x){
 printc(view1, "view1");
 \end{lstlisting}
 
-The ranges version has a more succinct syntax and returns a view object, rather than populating another container.
+范围版本具有更简洁的语法，并返回一个视图对象，而不是填充另一个容器。
 \end{itemize}
 
 \subsubsection{How it works…}
 
-The std::transform() function works very much like std::copy(), with the addition of the user-provided function. Each element in the input range is passed to the function, and the return value from the function is copy-assigned to the destination iterator. This makes transform() a singularly useful and powerful algorithm.
+std::transform()函数的工作原理与std::copy()非常相似，只不过增加了用户提供的函数。输入范围内的每个元素都传递给函数，函数的返回值会复制赋值给目标迭代器。
 
-It's worth noting that transform() does not guarantee the elements will be processed in order. If you need to ensure the order of the transformation, you will want to use a for loop instead:
+值得注意的是，transform()并不保证元素将按顺序处理。若需要确保转换的顺序，需要使用for循环:
 
 \begin{lstlisting}[style=styleCXX]
 v2.clear(); // reset vector v2 to empty state
@@ -123,7 +121,7 @@ for(auto e : v1) v2.push_back(e * e);
 printc(v2, "v2");
 \end{lstlisting}
 
-Output:
+输出:
 
 \begin{tcblisting}{commandshell={}}
 v2: 1 4 9 16 25 36 49 64 81 100

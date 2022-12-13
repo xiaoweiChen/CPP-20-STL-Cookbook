@@ -1,14 +1,13 @@
 
-The algorithm library contains a set of functions for finding elements in a container.
-The std::find() function, and its derivatives, search sequentially through a container and return an iterator pointing to the first matching element, or the end() element if there's no match.
+算法库包含一组用于在容器中查找元素的函数。std::find()函数及其派生函数在容器中依次搜索并返回指向第一个匹配元素的迭代器，若没有匹配则返回end()。
 
 \subsubsection{How to do it…}
 
-The find() algorithm works with any container that satisfies the Forward or Input iterator qualifications. For this recipe, we'll use vector containers. The find() algorithm searches sequentially for the first matching element in a container. In this recipe, we'll walk through a few examples:
+find()算法适用于满足前向或输入迭代器条件的容器。对于这个示例，我们将使用vector容器。find()算法按顺序搜索容器中第一个匹配的元素。先来看几个例子:
 
 \begin{itemize}
 \item 
-We'll start by declaring a vector of int in the main() function:
+首先，在main()函数中声明一个int类型的向量:
 
 \begin{lstlisting}[style=styleCXX]
 int main() {
@@ -18,7 +17,7 @@ int main() {
 \end{lstlisting}
 
 \item 
-Now, let's search for the element with the value 7:
+现在，让搜索值为7的元素:
 
 \begin{lstlisting}[style=styleCXX]
 auto it1 = find(v.begin(), v.end(), 7);
@@ -26,16 +25,16 @@ if(it1 != v.end()) cout << format("found: {}\n", *it1);
 else cout << "not found\n";
 \end{lstlisting}
 
-The find() algorithm takes three arguments: the begin() and end() iterators, and the value to search. It returns an iterator to the first element it finds, or the end() iterator if the search failed to find a match.
+find()算法接受三个参数:begin()和end()迭代器，以及要搜索的值。算法会返回其找到的第一个元素的迭代器，若搜索未能找到匹配，则返回end()迭代器。
 
-Output:
+输出:
 
 \begin{tcblisting}{commandshell={}}
 found: 7
 \end{tcblisting}
 
 \item 
-We can also search for something more complex than a scalar. The object needs to support the equality comparison operator, ==. Here's a simple struct with an operator==() overload:
+也可以寻找比标量更复杂的对象，相应的对象需要支持相等比较运算符==。下面是一个简单的结构体，带有运算符==()重载:
 
 \begin{lstlisting}[style=styleCXX]
 struct City {
@@ -50,12 +49,12 @@ struct City {
 };
 \end{lstlisting}
 
-Notice that the operator=() overload only compares the name members.
+注意，operator=()重载只比较name成员。
 
-I've also included an str() function that returns a string representation of a City element.
+这还包含了一个str()函数，其返回City元素的字符串表示形式。
 
 \item 
-Now we can declare a vector of City elements:
+现在可以声明一个City元素的vector:
 
 \begin{lstlisting}[style=styleCXX]
 const vector<City> c{
@@ -67,7 +66,7 @@ const vector<City> c{
 \end{lstlisting}
 
 \item 
-We can search the vector of City just as we did with the vector of int:
+可以像搜索int vector一样搜索City vector:
 
 \begin{lstlisting}[style=styleCXX]
 auto it2 = find(c.begin(), c.end(), City{"Berlin"});
@@ -76,14 +75,14 @@ if(it2 != c.end()) cout << format("found: {}\n",
 else cout << "not found\n";
 \end{lstlisting}
 
-Output:
+输出:
 
 \begin{tcblisting}{commandshell={}}
 found: [Berlin, 3566791]
 \end{tcblisting}
 
 \item 
-If we want to search on the pop member instead of name, we can use the find\_if() function with a predicate:
+若想搜索pop成员而不是name，可以使用find\_if()函数和一个谓词:
 
 \begin{lstlisting}[style=styleCXX]
 auto it3 = find_if(begin(c), end(c),
@@ -94,16 +93,16 @@ if(it3 != c.end()) cout << format("found: {}\n",
 else cout << "not found\n";
 \end{lstlisting}
 
-The predicate tests the pop member, so we get this output:
+谓词会测试pop成员，因此得到如下输出:
 
 \begin{tcblisting}{commandshell={}}
 found: [Tokyo, 37435191]
 \end{tcblisting}
 
 \item 
-Notice that the result from find\_if() returns only the first element that satisfies the predicate, even though there are two elements in the vector with pop values greater than 20,000,000.
+注意，find\_if()的结果只返回满足谓词的第一个元素，尽管vector中有两个元素的pop值大于20,000,000。
 
-The find() and find\_if() functions return only one iterator. The ranges library provides ranges::views::filter(), a view adapter that will give us all the matching iterators without disturbing our vector:
+find()和find\_if()函数只返回一个迭代器。范围库提供了ranges::views::filter()，这是一个视图适配器，可为我们提供所有匹配的迭代器，而不会干扰我们的vector:
 
 \begin{lstlisting}[style=styleCXX]
 auto vw1 = ranges::views::filter(c,
@@ -111,7 +110,7 @@ auto vw1 = ranges::views::filter(c,
 for(const City& e : vw1) cout << format("{}\n", e.str());
 \end{lstlisting}
 
-This gives us both matching elements in our output:
+输出两个匹配的元素:
 
 \begin{tcblisting}{commandshell={}}
 [Tokyo, 37435191]
@@ -121,16 +120,16 @@ This gives us both matching elements in our output:
 
 \subsubsection{How it works…}
 
-The find() and find\_if() functions search sequentially through a container, checking each element until it finds a match. If it finds a match, it returns an iterator pointing to that match. If it reaches the end() iterator without finding a match, it returns the end() iterator to indicate no match was found.
+find()和find\_if()函数依次在容器中搜索，检查每个元素，直到找到为止。若找到匹配项，则返回指向该匹配项的迭代器。若到达end()迭代器而没有找到匹配项，则返回end()迭代器以表明没有找到匹配项。
 
-The find() function takes three arguments, the begin() and end() iterators, and a search value. The signature looks like this:
+find()函数接受三个参数，begin()和end()迭代器，以及一个搜索值。其签名是这样的:
 
 \begin{lstlisting}[style=styleCXX]
 template<class InputIt, class T>
 constexpr InputIt find(InputIt, InputIt, const T&)
 \end{lstlisting}
 
-The find\_if() function uses a predicate instead of a value:
+find\_if()函数使用谓词，而不是值:
 
 \begin{lstlisting}[style=styleCXX]
 template<class InputIt, class UnaryPredicate>
@@ -140,14 +139,14 @@ constexpr InputIt find_if(InputIt, InputIt, UnaryPredicate)
 
 \subsubsection{There's more…}
 
-Both find() functions search sequentially and return when they find the first match. If you want to find more matching elements, you can use the filter() function from the ranges library:
+find()函数都按顺序搜索并在找到第一个匹配时返回。若想找到更多匹配的元素，可以使用范围库中的filter()函数:
 
 \begin{lstlisting}[style=styleCXX]
 template<ranges::viewable_range R, class Pred>
 constexpr ranges::view auto ranges::views::filter(R&&, Pred&&);
 \end{lstlisting}
 
-The filter() function returns a view, a non-destructive window into the container with only the filtered elements. We can then use the view as we would any other container:
+filter()函数的作用是返回一个视图，其指向容器，其中只包含筛选过的元素。然后，可以像使用其他容器一样使用视图:
 
 \begin{lstlisting}[style=styleCXX]
 auto vw1 = std::ranges::views::filter(c,
@@ -155,7 +154,7 @@ auto vw1 = std::ranges::views::filter(c,
 for(const City& e : vw1) cout << format("{}\n", e.str());
 \end{lstlisting}
 
-Output:
+输出:
 
 \begin{tcblisting}{commandshell={}}
 [Tokyo, 37435191]

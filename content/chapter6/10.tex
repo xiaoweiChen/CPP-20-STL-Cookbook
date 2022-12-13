@@ -1,13 +1,13 @@
 
-The std::merge() algorithm takes two sorted sequences and creates a third merged and sorted sequence. This technique is often used as part of a merge sort, allowing very large amounts of data to be broken down into chunks, sorted separately, and merged into one sorted target.
+merge()算法接受两个已排序的序列，并创建第三个已合并并排序的序列。这种技术通常用作归并排序的一部分，允许将非常大量的数据分解成块，分别排序，并合并到一个排序的目标中。
 
 \subsubsection{How to do it…}
 
-For this recipe, we'll take two sorted vector containers and merge them into a third vector using std::merge().
+对于这个示例，我们将使用std::merge()将两个已排序的vector容器，合并至第三个vector。
 
 \begin{itemize}
 \item 
-We'll start with a simple function to print the contents of a container:
+从一个简单的函数开始打印容器的内容:
 
 \begin{lstlisting}[style=styleCXX]
 void printc(const auto& c, string_view s = "") {
@@ -17,10 +17,10 @@ void printc(const auto& c, string_view s = "") {
 }
 \end{lstlisting}
 
-We'll use this to print the source and destination sequences.
+我们将使用它来打印源序列和目标序列。
 
 \item 
-In the main() function, we'll declare our source vectors, along with the destination vector, and print them out:
+main()函数中，将声明源vector和目标vector，并将它们打印出来:
 
 \begin{lstlisting}[style=styleCXX]
 int main() {
@@ -34,7 +34,7 @@ int main() {
 }
 \end{lstlisting}
 
-The output is:
+输出为:
 
 \begin{tcblisting}{commandshell={}}
 vs1: dog cat velociraptor
@@ -42,7 +42,7 @@ vs2: kirk sulu spock
 \end{tcblisting}
 
 \item 
-Now we can sort our vectors and print them again:
+现在可以对vector进行排序并再次打印:
 
 \begin{lstlisting}[style=styleCXX]
 sort(vs1.begin(), vs1.end());
@@ -51,7 +51,7 @@ printc(vs1, "vs1 sorted");
 printc(vs2, "vs2 sorted");
 \end{lstlisting}
 
-Output:
+输出:
 
 \begin{tcblisting}{commandshell={}}
 vs1 sorted: cat dog velociraptor
@@ -59,7 +59,7 @@ vs2 sorted: kirk spock sulu
 \end{tcblisting}
 
 \item 
-Now that our source containers are sorted, we can merge them for our final merged result:
+现在源容器已经排序，可以将其合并:
 
 \begin{lstlisting}[style=styleCXX]
 merge(vs1.begin(), vs1.end(), vs2.begin(), vs2.end(),
@@ -67,24 +67,24 @@ merge(vs1.begin(), vs1.end(), vs2.begin(), vs2.end(),
 printc(dest, "dest");
 \end{lstlisting}
 
-Output:
+输出:
 
 \begin{tcblisting}{commandshell={}}
 dest: cat dog kirk spock sulu velociraptor
 \end{tcblisting}
 
-This output represents the merge of the two sources into one sorted vector.
+该输出表示将两个源合并为一个排序的vector。
 \end{itemize}
 
 \subsubsection{How it works…}
 
-The merge() algorithm takes begin() and end() iterators from both the sources and an output iterator for the destination:
+merge()算法使用begin()和end()迭代器，分别来自源迭代器和目标迭代器的输出迭代器:
 
 \begin{lstlisting}[style=styleCXX]
 OutputIt merge(InputIt1, InputIt1, InputIt2, InputIt2, OutputIt)
 \end{lstlisting}
 
-It takes the two input ranges, performs its merge/sort operation, and sends the resulting sequence to the output iterator.
+其接受两个输入范围，执行归并/排序操作，并将结果序列发送给输出迭代器。
 
 
 

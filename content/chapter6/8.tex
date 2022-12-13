@@ -1,15 +1,15 @@
 
-The std::sample() algorithm takes a random sample of a sequence of values and populates a destination container with the sample. It is useful for analyzing a larger set of data, where the random sample is taken to be representative of the whole.
+std::sample()算法获取值序列的随机样本，并用该样本填充目标容器。其对于分析更大的数据集很有用，其中随机样本可用来代表整个数据。
 
-A sample set allows us to approximate the characteristics of a large set of data, without analyzing the full set. This provides efficiency in exchange for accuracy, a fair trade-off in many circumstances.
+样本集允许近似一个大数据集的特征，而不需要分析整个数据集。这提供了效率与准确性的交换，在许多情况下是一种公平的交换。
 
 \subsubsection{How to do it…}
 
-In this recipe, we'll use an array of 200,000 random integers, with standard normal distribution. We'll sample a few hundred values to create a histogram of the frequency of each value.
+这个示例中，我们将使用一个具有标准正态分布的200,000个随机整数数组。我们将对几百个值进行采样，以创建每个值频率的直方图。
 
 \begin{itemize}
 \item 
-We'll start with a simple function to return a rounded int from a double. The standard library lacks such a function and we'll need it later:
+我们将从一个简单的函数开始，从一个double型返回一个四舍五入的int型。标准库缺少这样一个函数，我们稍后会创建它:
 
 \begin{lstlisting}[style=styleCXX]
 int iround(const double& d) {
@@ -17,10 +17,10 @@ int iround(const double& d) {
 }
 \end{lstlisting}
 
-The standard library provides several versions of std::round(), including one that returns a long int. But we need an int, and this is a simple solution that avoids compiler warnings about narrowing conversion while hiding away the unsightly static\_cast.
+标准库提供了几个版本的std::round()，包括一个返回长int的版本。但我们需要一个int，这是一个简单的解决方案，可以避免编译器关于缩小转换的警告，同时隐藏难看的static\_cast。
 
 \item 
-In the main() function, we'll start with some useful constants:
+main()函数中，可从一些有用的常量开始:
 
 \begin{lstlisting}[style=styleCXX]
 int main() {
@@ -32,10 +32,10 @@ int main() {
 }
 \end{lstlisting}
 
-We have values for n\_data and n\_samples, used for the size of the data and sample containers, respectively. We also have values for mean and dev, the mean and standard deviation parameters for the normal distribution of random values.
+我们有n\_data和n\_samples的值，分别用于数据和样本容器的大小。也有均值和dev的值，随机值正态分布的均值和标准差参数。
 
 \item 
-We now set up our random number generator and distribution objects. These are used to initialize the source data set:
+现在，设置随机数生成器和分布对象，用于初始化源数据集:
 
 \begin{lstlisting}[style=styleCXX]
 std::random_device rd;
@@ -43,22 +43,22 @@ std::mt19937 rng(rd());
 std::normal_distribution<> dist{ mean, dev };
 \end{lstlisting}
 
-The random\_device object provides access to the hardware random number generator. The mt19937 class is an implementation of the Mersenne Twister random number algorithm, a high-quality algorithm that will perform well on most systems with a data set of the size we're using. The normal\_distribution class provides a distribution of random numbers around the mean with the standard deviation provided.
+random\_device对象提供对硬件随机数生成器的访问。mt19937类是Mersenne Twister随机数算法的实现，这是一种高质量的算法，在我们所使用的这种大小的数据集的大多数系统上都能很好地执行。正态分布类提供了均值附近的随机数分布，并提供了标准偏差。
 
 \item 
-Now we populate an array with an n\_data number of random int values:
+现在可以用n\_data个数的随机int值填充一个数组:
 
 \begin{lstlisting}[style=styleCXX]
 array<int, n_data> v{};
 for(auto& e : v) e = iround(dist(rng));
 \end{lstlisting}
 
-The array container is fixed in size, so the template parameters include a size\_t value for the number of elements to allocate. We use a for() loop to populate the array.
+数组容器的大小固定，因此模板参数包含一个size\_t值，表示要分配的元素数量。这里使用for()循环填充数组。
 
-The rng object is the hardware random number generator. This is passed to dist(), our normal\_distribution object, and then to iround(), our integer rounding function.
+rng对象是硬件随机数生成器，其可传递给normal\_distribution对象的dist()，然后传递给round()，我们的整数舍入函数。
 
 \item 
-At this point, we have an array with 200,000 data points. That's a lot to analyze, so we'll use the sample() algorithm to take a sample of 500 values:
+此时，就有一个包含200,000个数据点的数组。这有很多要分析的，我们将使用sample()算法取500个值的样本:
 
 \begin{lstlisting}[style=styleCXX]
 array<int, n_samples> samples{};
@@ -66,20 +66,20 @@ sample(data.begin(), data.end(), samples.begin(),
 	n_samples, rng);
 \end{lstlisting}
 
-We define another array object to hold the samples. This one is n\_samples in size. Then we use the sample() algorithm to populate the array with n\_samples random data points.
+我们定义另一个数组对象来保存样本。这个的大小是n\_samples。然后，使用sample()算法用n\_samples随机数据点填充数组。
 
 \item 
-We create a histogram to analyze the samples. A map structure is perfect for this as we can easily map the frequency of each value:
+我们创建一个直方图来分析样本。map结构是完美的，可以很容易地映射每个值的频率:
 
 \begin{lstlisting}[style=styleCXX]
 std::map<int, size_t> hist{};
 for (const int i : samples) ++hist[i];
 \end{lstlisting}
 
-The for() loop takes each value from the samples container and uses it as a key in the map. The increment expression ++hist[i] counts the number of occurrences of each value in the sample set.
+for()循环从样本容器中获取每个值，并将其用作map中的键。增量表达式++hist[i]计算样本集中每个值出现的次数。
 
 \item 
-We print out the histogram using the C++20 format() function:
+我们使用C++20的format()函数打印出直方图:
 
 \begin{lstlisting}[style=styleCXX]
 constexpr size_t scale{ 3 };
@@ -91,11 +91,11 @@ for (const auto& [value, count] : hist) {
 }
 \end{lstlisting}
 
-The format() specifiers that look like \{:>3\} make space for a certain number of characters. The angle bracket specifies alignment, right or left.
+format()说明符看起来像\{:>3\}为一定数量的字符腾出空间。尖括号指定左对齐或右对齐。
 
-The string(count, char) constructor creates a string with a character repeated the number of times specified, in this case, n asterisk characters *, where n is count/scale, the frequency of a value in the histogram, divided by the scale constant.
+string(count, char)构造函数创建一个字符串，其中一个字符重复指定的次数，在本例中是n个星号字符*，其中n是count/scale，即直方图中某个值的频率，除以缩放常数。
 
-The output looks like this:
+输出如下所示:
 
 \begin{tcblisting}{commandshell={}}
 $ ./sample
@@ -120,25 +120,25 @@ n count graph/3
  9 ( 1)
 \end{tcblisting}
 
-This is a nice graphical representation of the histogram. The first number is the value, the second number is the frequency of the value, and the asterisks are a visual representation of the frequency, where each asterisk represents scale (3) occurrences in the sample set.
+这是直方图的一个很好的图形表示。第一个数字是值，第二个数字是值的频率，星号是频率的直观表示，其中每个星号代表样本集中出现的规模(3)次。
 
-Your output will differ each time you run the code.
+每次运行代码时输出都会有所不同。
 \end{itemize}
 
 \subsubsection{How it works…}
 
-The std::sample() function selects a specific number of elements from random locations in the source container and copies them to the destination container.
+std::sample()函数的作用是:从源容器中的随机位置选择特定数量的元素，并将其复制到目标容器中。
 
-The signature of sample() looks like this:
+sample()的签名是这样的:
 
 \begin{lstlisting}[style=styleCXX]
 OutIter sample(SourceIter, SourceIter, OutIter,
 	SampleSize, RandNumGen&&);
 \end{lstlisting}
 
-The first two arguments are begin() and end() iterators on a container with the full data set. The third argument is an iterator for the destination of the samples. The fourth argument is the sample size, and the final argument is a random number generator function.
+前两个参数是包含完整数据集的容器上的begin()和end()迭代器。第三个参数是用于示例目标的迭代器。第四个参数是样本大小，最后一个参数是随机数生成器函数。
 
-The sample() algorithm uses uniform distribution, so each data point has the same chance of being sampled.
+sample()算法采用均匀分布，因此每个数据点采样的概率相同。
 
 
 

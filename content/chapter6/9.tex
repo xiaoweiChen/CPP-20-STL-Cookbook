@@ -1,13 +1,13 @@
 
-There are many use cases for permutations, including testing, statistics, research, and more. The next\_permutation() algorithm generates permutations by re-ordering a container to the next lexicographical permutation.
+排列有许多用例，包括测试、统计、研究等。next\_permutation()算法通过将容器重新排序到下一个字典排列来生成排列。
 
 \subsubsection{How to do it…}
 
-For this recipe, we will print out the permutations of a set of three strings:
+对于这个示例，我们将打印出一组三个字符串的排列:
 
 \begin{itemize}
 \item 
-We'll start by creating a short function for printing the contents of a container:
+首先创建一个简短的函数来打印容器的内容:
 
 \begin{lstlisting}[style=styleCXX]
 void printc(const auto& c, string_view s = "") {
@@ -17,10 +17,10 @@ void printc(const auto& c, string_view s = "") {
 }
 \end{lstlisting}
 
-We'll use this simple function to print our data set and permutations.
+使用简单的函数来打印数据集和排列。
 
 \item 
-In the main() function, we declare a vector of string objects and sort it with the sort() algorithm.
+main()函数中，声明了一个字符串对象的vector，并使用sort()算法对其进行排序。
 
 \begin{lstlisting}[style=styleCXX]
 int main() {
@@ -30,10 +30,10 @@ int main() {
 }
 \end{lstlisting}
 
-The next\_permutation() function requires a sorted container.
+next\_permutation()函数需要一个已排序的容器。
 
 \item 
-Now we can list the permutations with next\_permutation() in a do loop:
+现在可以在do循环中使用next\_permutation()列出排布情况:
 
 \begin{lstlisting}[style=styleCXX]
 do {
@@ -41,9 +41,9 @@ do {
 } while (next_permutation(vs.begin(), vs.end()));
 \end{lstlisting}
 
-The next\_permutation() function modifies the container and returns true if there is another permutation, or false if not.
+next\_permutation()函数修改容器，若有另一个排列则返回true若没有则返回false。
 
-The output lists six permutations of our three pets:
+输出列出了三种宠物的六种排列:
 
 \begin{tcblisting}{commandshell={}}
 cat dog velociraptor
@@ -57,9 +57,9 @@ velociraptor dog cat
 
 \subsubsection{How it works…}
 
-The std::next\_permutation() algorithm generates lexicographical permutations of a set of values, that is, permutations based on dictionary ordering. The input must be sorted because the algorithm steps through permutations in lexicographical order. So, if you start with a set like 3, 2, 1, it will terminate immediately as this is the last lexicographical order of those three elements.
+std::next\_permutation()算法生成一组值的字典排列，即基于字典排序的排列。必须对输入进行排序，因为算法按字典顺序逐级进行排列。所以，若从3,2,1这样的集合开始，其会立即终止，因为这三个元素的最后一个字符是字典顺序的最后一个。
 
-For example:
+例如:
 
 \begin{lstlisting}[style=styleCXX]
 vector<string> vs{ "velociraptor", "dog", "cat" };
@@ -68,15 +68,15 @@ do {
 } while (next_permutation(vs.begin(), vs.end()));
 \end{lstlisting}
 
-This gives us the following output:
+输出:
 
 \begin{tcblisting}{commandshell={}}
 velociraptor dog cat
 \end{tcblisting}
 
-While the term lexicographical implies alphabetical ordering, the implementation uses standard comparison operators, so it works on any sortable values.
+虽然术语lexicographically意味着字母顺序，但实现使用标准比较操作符，因此其适用于任何可排序的值。
 
-Likewise, if values in the set repeat, they are only counted according to lexicographical order. Here we have a vector of int with two repeating sequences of five values:
+同样，若集合中的值重复，则仅根据字典顺序对它们进行计数。这里有一个int类型的vector，其有两个五个值的重复序列:
 
 \begin{lstlisting}[style=styleCXX]
 vector<int> vi{ 1, 2, 3, 4, 5, 1, 2, 3, 4, 5 };
@@ -89,16 +89,16 @@ do {
 cout << format("number of permutations: {}\n", count);
 \end{lstlisting}
 
-Output:
+输出:
 
 \begin{tcblisting}{commandshell={}}
 Vi sorted: 1 1 2 2 3 3 4 4 5 5
 number of permutations: 113400
 \end{tcblisting}
 
-There are 113,400 permutations of these values. Notice that it's not 10! (3,628,800) because some values repeat. Since 3,3 and 3,3 sort the same, they are not different lexicographical permutations.
+这些值有113,400种排列。注意，不是10!(3,628,800)，因为有些值重复。因为3,3和3,3排序相同，所以其是字典序。
 
-In other words, if I list the permutations of this short set:
+换句话说，若列出这个短集合的排列:
 
 \begin{lstlisting}[style=styleCXX]
 vector<int> vi2{ 1, 3, 1 };
@@ -108,7 +108,7 @@ do {
 } while (next_permutation(vi2.begin(), vi2.end()));
 \end{lstlisting}
 
-We get only three permutations, not 3! (9), because of the repeating values:
+由于有重复，所以只有三种排列，不是3的阶乘(9):
 
 \begin{tcblisting}{commandshell={}}
 1 1 3

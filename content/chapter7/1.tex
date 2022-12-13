@@ -1,41 +1,41 @@
-String formatting has traditionally been a weak point with the STL. Until recently, we've been left with an imperfect choice between the cumbersome STL iostreams or the archaic legacy printf(). Beginning with C++20 and the format library, STL string formatting has finally grown up. Closely based on Python's str.format() method, the new format library is fast and flexible, providing many of the advantages of both iostreams and printf(), along with good memory management and type safety.
+字符串格式化一直是STL的一个弱点。直到最近，还只能在笨重的STL iostreams和过时的遗留printf()之间做出艰难的选择。C++20起加入了格式库，STL字符串格式终于发展起来了。新的格式库紧密地基于Python的str.format()方法，快速灵活，结合了iostreams和printf()的许多优点，以及良好的内存管理和类型安全。
 
-For more about the format library, see the Format text with the new format library recipe in Chapter 1, New C++20 Features.
+有关格式库的更多信息，请参阅第1章中使用新格式库的示例。
 
-While we no longer need to use iostreams for string formatting, it is still quite useful for other purposes, including file and stream I/O, and some type conversions.
+虽然不再需要使用iostreams进行字符串格式化，但其对于其他目的仍然有用，包括文件和流I/O，以及一些类型转换。
 
-In this chapter, we will cover these subjects and more in the following recipes:
+本章中，我们将讨论以下主题:
 
 \begin{itemize}
 \item 
-Use string\_view as a lightweight string object
+轻量级字符串对象——string\_view
 
 \item 
-Concatenate strings
+连接字符串
 
 \item 
-Transform strings
+转换字符串
 
 \item 
-Format text with C++20's format library
+使用格式库格式化文本
 
 \item 
-Trim whitespace from strings
+删除字符串中的空白
 
 \item 
-Read strings from user input
+从用户输入中读取字符串
 
 \item 
-Count words in a file
+统计文件中的单词数
 
 \item 
-Initialize complex structures from file input
+使用文件输入初始化复杂结构体
 
 \item 
-Customize a string class with char\_traits
+使用char\_traits定义一个字符串类
 
 \item 
-Parse strings with Regular Expressions
+用正则表达式解析字符串
 \end{itemize}
 
 

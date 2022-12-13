@@ -1,6 +1,6 @@
-The STL string class is a powerful, full-featured tool for storing, manipulating, and displaying character-based data. It has much of the convenience you would find in a high-level scripting language, yet remains as quick and agile as you would expect from C++.
+STL字符串类是一个功能强大的全功能工具，用于存储、操作和显示基于字符的数据。它具有在高级脚本语言中可以找到的许多便利、快速和敏捷。
 
-The string class is based on basic\_string, a contiguous container class that may be instantiated with any character type. Its class signature looks like this:
+string类基于basic\_string，这是一个连续的容器类，可以用字符类型实例化。其类签名是这样的:
 
 \begin{lstlisting}[style=styleCXX]
 template<
@@ -10,9 +10,9 @@ template<
 > class basic_string;
 \end{lstlisting}
 
-The Traits and Allocator template parameters are usually left to their default values.
+Trait和Allocator模板参数通常保留默认值。
 
-The underlying storage of basic\_string is a contiguous sequence of CharT, and can be accessed with the data() member function:
+basic\_string的底层存储是一个连续的CharT序列，可以通过data()成员函数访问:
 
 \begin{lstlisting}[style=styleCXX]
 const std::basic_string<char> s{"hello"};
@@ -23,22 +23,22 @@ for(size_t i{0}; i < s.size(); ++i) {
 cout << '\n';
 \end{lstlisting}
 
-Output:
+输出:
 
 \begin{tcblisting}{commandshell={}}
 h e l l o
 \end{tcblisting}
 
-The data() member function returns a CharT* that points to the underlying array of characters. Since C++11, the array returned by data() is null-terminated, making data() equivalent to c\_str().
+data()成员函数返回一个指向底层字符数组的CharT*。从c++ 11开始，data()返回的数组以空结束，使得data()等价于c\_str()。
 
-The basic\_string class includes many of the methods you would find in other contiguous-storage classes, including insert(), erase(), push\_back(), pop\_back(), and others. These methods operate on the underlying array of CharT.
+basic\_string类包含许多在其他连续存储类中可以找到的方法，包括insert()、erase()、push\_back()、pop\_back()等。这些方法操作底层的CharT数组。
 
-std::string is a type alias for std::basic\_string<char>:
+std::string是std::basic\_string<char>类型的别名:
 
 \begin{lstlisting}[style=styleCXX]
 using std::string = std::basic_string<char>;
 \end{lstlisting}
 
-For most purposes, you'll use std::string.
+对于大多数情况，都会使用std::string。
 
 

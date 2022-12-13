@@ -1,13 +1,13 @@
 
-Introduced with C++17, the std::clamp() function can be used to limit the range of a numeric scalar to within minimum and maximum values. The function is optimized to use move semantics, where possible, for maximum speed and efficiency.
+C++17中添加了std::clamp()函数，可将标量数值的范围限制在最小值和最大值之间。该函数经过优化，可以使用move语义，以获得最大的速度和效率。
 
 \subsubsection{How to do it…}
 
-We can use clamp() to constrain the values of a container by using it in a loop, or with the transform() algorithm. Let's look at some examples.
+可以使用clamp()在循环中使用容器，或者使用transform()算法来限制容器的值。让我们来看一些例子。
 
 \begin{itemize}
 \item 
-We'll start with a simple function for printing out the values of a container:
+从一个简单的输出容器值的函数开始:
 
 \begin{lstlisting}[style=styleCXX]
 void printc(auto& c, string_view s = "") {
@@ -17,11 +17,10 @@ void printc(auto& c, string_view s = "") {
 }
 \end{lstlisting}
 
-Notice the format string "\{:>5\} ". This right-aligns each value to 5 spaces, for a tabular view.
+注意格式字符串“\{:>5\}”。对于表格视图，这将每个值右对齐到5个空格。
 
 \item 
-In the main() function, we'll define an initializer list for use with our container.
-This allows us to use the same values more than once:
+在main()函数中，定义一个用于容器的初始化式列表。这允许我们多次使用相同的值:
 
 \begin{lstlisting}[style=styleCXX]
 int main() {
@@ -31,20 +30,20 @@ int main() {
 }
 \end{lstlisting}
 
-That's a nice range of values to work with clamp().
+对于使用clamp()来说，这是一个很好的值范围。
 
 \item 
-Let's also define some constants for use as our limits:
+先来定义一些常数作为极值:
 
 \begin{lstlisting}[style=styleCXX]
 constexpr int ilow{0};
 constexpr int ihigh{500};
 \end{lstlisting}
 
-We'll use these values in our calls to clamp().
+在调用clamp()时使用这些值。
 
 \item 
-Now we can define a container in our main() function. We'll use a vector of int:
+现在可以在main()函数中定义一个容器，这里将使用int类型的vector:
 
 \begin{lstlisting}[style=styleCXX]
 vector<int> voi{ il };
@@ -52,7 +51,7 @@ cout << "vector voi before:\n";
 printc(voi);
 \end{lstlisting}
 
-Using the values from our initializer list, the output is:
+使用初始化器列表中的值，输出如下:
 
 \begin{tcblisting}{commandshell={}}
 vector voi before:
@@ -60,7 +59,7 @@ vector voi before:
 \end{tcblisting}
 
 \item 
-Now we can use a for loop with clamp() to limit the values to between 0 and 500:
+现在可以使用一个带有clamp()的for循环来限制值在0到500之间:
 
 \begin{lstlisting}[style=styleCXX]
 cout << "vector voi after:\n";
@@ -68,7 +67,7 @@ for(auto& e : voi) e = clamp(e, ilow, ihigh);
 printc(voi);
 \end{lstlisting}
 
-This applies the clamp() function to each value in the container, using 0 and 500 for the low and high limits, respectively. Now, the output is:
+这将clamp()函数应用于容器中的每个值，分别使用0和500作为下限和上限，输出是:
 
 \begin{tcblisting}{commandshell={}}
 vector voi before:
@@ -77,10 +76,10 @@ vector voi after:
 0 0 500 4 5 0 100 200 500
 \end{tcblisting}
 
-After the clamp() operation, the negative values are 0 and the values greater than 500 are 500.
+clamp()操作后，负值为0，大于500的值为500。
 
 \item 
-We can do the same thing with the transform() algorithm, using clamp() in a lambda. This time we'll use a list container:
+可以用transform()算法做同样的事情，在lambda中使用clamp()。这次使用一个list容器:
 
 \begin{lstlisting}[style=styleCXX]
 cout << "list loi before:\n";
@@ -92,7 +91,7 @@ cout << "list loi after:\n";
 printc(loi);
 \end{lstlisting}
 
-The output is the same as in the version with a for loop:
+输出结果与使用for循环的版本相同:
 
 \begin{tcblisting}{commandshell={}}
 list loi before:
@@ -104,7 +103,7 @@ list loi after:
 
 \subsubsection{How it works…}
 
-The clamp() algorithm is a simple function that looks something like this:
+clamp()算法是一个简单的函数:
 
 \begin{lstlisting}[style=styleCXX]
 template<class T>
@@ -114,22 +113,21 @@ constexpr const T& clamp( const T& v, const T& lo,
 }
 \end{lstlisting}
 
-If the value of v is less than lo, it returns lo. If hi is less than v, it returns hi.
-The function is fast and efficient.
+若v的值小于lo，则返回lo。若hi小于v，则返回hi。功能简单高效。
 
-In our examples, we used a for loop to apply clamp() to a container:
+我们的例子中，可以使用for循环对容器应用clamp():
 
 \begin{lstlisting}[style=styleCXX]
 for(auto& v : voi) v = clamp(v, ilow, ihigh);
 \end{lstlisting}
 
-We also used the transform() algorithm with clamp() in a lambda:
+这里还在lambda中使用了transform()算法和clamp():
 
 \begin{lstlisting}[style=styleCXX]
 transform(loi.begin(), loi.end(), loi.begin(),
 	[=](auto v){ return clamp(v, ilow, ihigh); });
 \end{lstlisting}
 
-In my experiments, both versions gave the same results, and both produced similar code from the GCC compiler. There was a slight difference in compiled size (the version with the for loop was smaller, as expected) and a negligible difference in performance.
+实验中，两个版本给出了相同的结果，并且都从GCC编译器生成了类似的代码。编译的大小略有不同(使用for循环的版本更小，正如预期的那样)，性能上的差异可以忽略不计。
 
-In general, I prefer the for loop, but the transform() version may be more flexible in other applications.
+我更喜欢for循环，但transform()版本在其他应用程序中可能更灵活。

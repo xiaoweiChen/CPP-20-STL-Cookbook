@@ -1,17 +1,17 @@
 
-The std::string class is a contiguous container, much like a vector or an array. It supports the contiguous\_iterator concept and all corresponding algorithms.
+string类是一个连续容器，很像vector或数组。它支持contiguous\_iterator和所有相应的算法。
 
-The string class is a specialization of basic\_string with a char type. This means that the elements of the container are of type char. Other specializations are available, but string is most common.
+string类是具有char类型的basic\_string的特化，所以容器的元素是char类型的。其他特化也可用，但字符串是最常见的。
 
-Because it is fundamentally a contiguous container of char elements, string may be used with the transform() algorithm, or any other technique that uses the contiguous\_iterator concept.
+因为其本质上是一个连续的char元素容器，所以string可以与transform()算法或任何其他使用contiguous\_iterator的技术一起使用。
 
 \subsubsection{How to do it…}
 
-There are several ways to do transformations, depending on the application. This recipe will explore a few of them.
+根据应用程序的不同，有几种方法可以进行转换。本示例将探索其中的一些。
 
 \begin{itemize}
 \item 
-We'll start with a few predicate functions. A predicate function takes a transformation element and returns a related element. For example, here is a simple predicate that returns an upper-case character:
+我们将从几个谓词函数开始，谓词函数接受一个转换元素并返回一个相关元素。例如，这是一个返回大写字符的简单谓词:
 
 \begin{lstlisting}[style=styleCXX]
 char char_upper(const char& c) {
@@ -19,9 +19,9 @@ char char_upper(const char& c) {
 }
 \end{lstlisting}
 
-This function is a wrapper around std::toupper(). Because the toupper() function returns an int and string elements are type char, we cannot use the toupper() function directly in a transformation.
+这个函数是对std::toupper()的包装。由于toupper()函数返回int类型，而字符串元素是char类型，因此不能在转换中直接使用toupper()函数。
 
-Here is a corresponding char\_lower() function:
+下面是一个相应的char\_lower()函数:
 
 \begin{lstlisting}[style=styleCXX]
 char char_lower(const char& c) {
@@ -30,7 +30,7 @@ char char_lower(const char& c) {
 \end{lstlisting}
 
 \item 
-The rot13() function is a fun transformation predicate for demonstration purposes. It's a simple substitution cypher, not suitable for encryption but commonly used for obfuscation:
+rot13()函数是一个有趣的转换谓词，用于演示目的。这是一个简单的替换密码，不适合加密，但通常用于做模糊处理:
 
 \begin{lstlisting}[style=styleCXX]
 char rot13(const char& x) {
@@ -44,7 +44,7 @@ char rot13(const char& x) {
 \end{lstlisting}
 
 \item 
-We can use these predicates with the transform() algorithm:
+可以在transform()算法中使用这些谓词:
 
 \begin{lstlisting}[style=styleCXX]
 main() {
@@ -56,9 +56,7 @@ main() {
 	...
 \end{lstlisting}
 
-The transform() function calls char\_upper() with each element of s, puts the result back in s and transforms all the characters to uppercase: 
-
-Output:
+transform()函数对s中的每个元素调用char\_upper()，将结果放回s并将所有字符转换为大写:
 
 \begin{tcblisting}{commandshell={}}
 hello jimi
@@ -66,37 +64,37 @@ HELLO JIMI
 \end{tcblisting}
 
 \item 
-Instead of transform(), we can also use a simple for loop with a predicate function:
+除了transform()，还可以使用一个简单的带有谓词函数的for循环:
 
 \begin{lstlisting}[style=styleCXX]
 for(auto& c : s) c = rot13(c);
 cout << s;
 \end{lstlisting}
 
-Starting with our uppercase string object, the result is:
+结果是:
 
 \begin{tcblisting}{commandshell={}}
 URYYB WVZV
 \end{tcblisting}
 
 \item 
-The fun thing about the rot13 cypher is that it unscrambles itself. Because there are 26 letters in the ASCII alphabet, rotating 13 and then rotating 13 again results in the original string. Let's transform to lowercase and rot13 again to restore our string:
+rot13密码的有趣之处在于它可以快速破解。因为ASCII字母表中有26个字母，旋转13然后再旋转13会得到原始字符串。让我们再次转换为小写字母和rot13来恢复我们的字符串:
 
 \begin{lstlisting}[style=styleCXX]
 for(auto& c : s) c = rot13(char_lower(c));
 cout << s;
 \end{lstlisting}
 
-Starting with our uppercase string object, the result is:
+结果是:
 
 \begin{tcblisting}{commandshell={}}
 hello jimi
 \end{tcblisting}
 
-Because of their uniform interface, the predicate functions may be chained as parameters of each other. We could also use char\_lower(rot13(c)) with the same result.
+由于其统一接口，谓词函数可以作为彼此的参数链接起来。也可以使用char\_lower(rot13(c))得到同样的结果。
 
 \item 
-If your requirement is too complex for a simple character-by-character transformation, you may use string iterators as you would with any contiguous container. Here's a simple function that transforms a lowercase string to Title Case by capitalizing the first character and every character that follows a space:
+若需求过于复杂，无法进行简单的逐字符转换，则可以像处理任何连续容器一样使用字符串迭代器。下面是一个简单的函数，通过大写第一个字符和空格后面的每个字符将小写字符串转换为Title Case:
 
 \begin{lstlisting}[style=styleCXX]
 string& title_case(string& s) {
@@ -116,13 +114,13 @@ string& title_case(string& s) {
 }
 \end{lstlisting}
 
-Because it returns a reference to the transformed string, we can call it with cout, like this:
+因为它返回一个对转换后的字符串的引用，可以用cout调用，像这样:
 
 \begin{lstlisting}[style=styleCXX]
 cout << title_case(s);
 \end{lstlisting}
 
-Output:
+输出为:
 
 \begin{tcblisting}{commandshell={}}
 Hello Jimi
@@ -132,10 +130,10 @@ Hello Jimi
 
 \subsubsection{How it works…}
 
-The std::basic\_string class, and its specializations (including string), are supported by iterators fully compliant with contiguous\_iterator. This means that any technique that works with any contiguous container also works with string.
+std::basic\_string类及其特化(包括string)由完全兼容contiguous\_iterator的迭代器支持，所以适用于任何连续容器的技术，也适用于字符串。
 
 \begin{tcolorbox}[colback=webgreen!5!white,colframe=webgreen!75!black,title=Note]
-These transformations will not work with string\_view objects because the underlying data is const-qualified.
+这些转换将不适用于string\_view对象，因为底层数据是const限定的。
 \end{tcolorbox}
 
 

@@ -1,25 +1,25 @@
 
-There are several ways to concatenate strings in C++. In this recipe, we will look at the three most common: the string class operator+(), the string class append() function, and the ostringstream class operator<{}<(). New in C++20, we also have the format() function. Each of these has its advantages, disadvantages, and use cases.
+在C++中，有几种方法可以连接字符串。本节中，我们将研究三个最常见的:字符串类操作符+()、字符串类append()函数和ostringstream类操作符<{}<()。C++20中新增了format()函数。
 
 \subsubsection{How to do it…}
 
-In this recipe, we will examine ways to concatenate strings. We will then perform some benchmarks and consider the different use cases.
+本示例中，将研究连接字符串的方法。然后，执行一些基准测试，并考虑不同的用例。
 
 \begin{itemize}
 \item 
-We'll start with a couple of std::string objects:
+从两个std::string对象开始:
 
 \begin{lstlisting}[style=styleCXX]
 string a{ "a" };
 string b{ "b" };
 \end{lstlisting}
 
-The string objects are constructed from literal C-strings.
+string对象是由字面C-string构造的。
 
-The C-string constructor makes a copy of the literal string and uses the local copy as the underlying data for the string object.
+C-string构造函数生成字面值字符串的副本，并使用本地副本作为字符串对象的底层数据。
 
 \item 
-Now, let's construct a new empty string object and concatenate a and b with a separator and a newline:
+现在，构造一个新的空字符串对象，并用分隔符和换行符连接a和b:
 
 \begin{lstlisting}[style=styleCXX]
 string x{};
@@ -27,14 +27,14 @@ x += a + ", " + b + "\n";
 cout << x;
 \end{lstlisting}
 
-Here, we used the string object's += and + operators to concatenate the a and b strings, along with literal strings ", " and "\verb|\|n". The resulting string has the elements concatenated together:
+这里，使用字符串对象的+=和+操作符来连接a和b字符串，以及字面字符串“，”和“\verb|\|n”。结果字符串包含连接在一起的元素:
 
 \begin{tcblisting}{commandshell={}}
 a, b
 \end{tcblisting}
 
 \item 
-We could instead use the string object's append() member function:
+可以使用string对象的append()成员函数:
 
 \begin{lstlisting}[style=styleCXX]
 string x{};
@@ -45,14 +45,14 @@ x.append("\n");
 cout << x;
 \end{lstlisting}
 
-This gives us the same result:
+结果相同:
 
 \begin{tcblisting}{commandshell={}}
 a, b
 \end{tcblisting}
 
 \item 
-Or, we could construct an ostringstream object, which uses the stream interface:
+或者，可以构造一个ostringstream对象，使用流接口:
 
 \begin{lstlisting}[style=styleCXX]
 ostringstream x{};
@@ -60,14 +60,14 @@ x << a << ", " << b << "\n";
 cout << x.str();
 \end{lstlisting}
 
-We get the same result:
+我们得到了相同的结果:
 
 \begin{tcblisting}{commandshell={}}
 a, b
 \end{tcblisting}
 
 \item 
-We could also use the C++20 format() function:
+也可以使用C++20的format()函数:
 
 \begin{lstlisting}[style=styleCXX]
 string x{};
@@ -75,7 +75,7 @@ x = format("{}, {}\n", a, b);
 cout << x;
 \end{lstlisting}
 
-We get the same result:
+还是相同的结果:
 
 \begin{tcblisting}{commandshell={}}
 a, b
@@ -85,28 +85,28 @@ a, b
 
 \subsubsection{How it works…}
 
-The string object has two distinct methods for concatenating a string, the + operator and the append() member function.
+string对象有两种不同的方法用于连接字符串:+操作符和append()成员函数。
 
-The append() member function adds data to the end of the string object's data. It must allocate and manage memory to accomplish this.
+append()成员函数的作用是:将数据添加到字符串对象的数据末尾。必须分配和管理内存来完成这个任务。
 
-The + operator uses the operator+() overload to construct a new string object with the old and new data, and returns the new object.
++操作符使用操作符+()重载构造一个包含新旧数据的新字符串对象，并返回新对象。
 
-The ostringstream object works like an ostream but stores its output for use as a string.
+ostringstream对象的工作方式类似于ostream，但将其输出存储为字符串使用。
 
-The C++20 format() function uses a format string with variadic arguments and returns a newly constructed string object.
+C++20的format()函数使用带有可变参数的格式字符串，并返回一个新构造的字符串对象。
 
 \subsubsection{There's more…}
 
-How do you decide which concatenation strategy is right for your code? We can start with some benchmarks.
+如何决定哪种连接策略适合自己的代码?可以从一些基准测试开始。
 
 \noindent
-\textbf{Benchmarks}
+\textbf{基准测试}
 
-I performed these tests using GCC 11 on Debian Linux:
+我在Debian Linux上使用GCC 11执行了这些测试:
 
 \begin{itemize}
 \item 
-First, we'll create a timer function using the <chrono> library:
+首先，使用<chrono>库创建一个计时器函数:
 
 \begin{lstlisting}[style=styleCXX]
 using std::chrono::high_resolution_clock;
@@ -122,10 +122,10 @@ void timer(string(*f)()) {
 }
 \end{lstlisting}
 
-The timer function calls the function passed to it, marking the time before and after the function call. It then displays the duration using cout.
+timer函数调用传递给它的函数，标记函数调用前后的时间。然后使用cout显示持续时间。
 
 \item 
-Now, we create a function that concatenates strings, using the append() member function:
+现在，使用append()成员函数创建了一个连接字符串的函数:
 
 \begin{lstlisting}[style=styleCXX]
 string append_string() {
@@ -145,7 +145,7 @@ string append_string() {
 }
 \end{lstlisting}
 
-For benchmarking purposes, this function repeats the concatenation 10 million times. We call this function from main() with timer():
+为了进行基准测试，该函数将重复连接1000万次。使用timer()从main()调用这个函数:
 
 \begin{lstlisting}[style=styleCXX]
 int main() {
@@ -153,7 +153,7 @@ int main() {
 }
 \end{lstlisting}
 
-We get this output:
+得到这样的输出:
 
 \begin{tcblisting}{commandshell={}}
 append_string
@@ -161,10 +161,10 @@ a, b
 duration: 425.361643 ms
 \end{tcblisting}
 
-So, on this system, our concatenation ran 10 million iterations in about 425 milliseconds.
+所以，在这个系统上，连接字符串在大约425毫秒内运行了1000万次。
 
 \item 
-Now, let's create the same function with the + operator overload:
+现在，用+操作符重载创建相同的函数:
 
 \begin{lstlisting}[style=styleCXX]
 string concat_string() {
@@ -181,7 +181,7 @@ string concat_string() {
 }
 \end{lstlisting}
 
-Our benchmark output:
+基准测试输出:
 
 \begin{tcblisting}{commandshell={}}
 concat_string
@@ -189,10 +189,10 @@ a, b
 duration: 659.957702 ms
 \end{tcblisting}
 
-This version performed 10 million iterations in about 660 milliseconds.
+这个版本在大约660毫秒内执行了1000万次。
 
 \item 
-Now, let's try it with ostringstream:
+现在，让用ostringstream试试:
 
 \begin{lstlisting}[style=styleCXX]
 string concat_ostringstream() {
@@ -209,7 +209,7 @@ string concat_ostringstream() {
 }
 \end{lstlisting}
 
-Our benchmark output:
+基准测试输出:
 
 \begin{tcblisting}{commandshell={}}
 ostringstream
@@ -217,10 +217,10 @@ a, b
 duration: 3462.020587 ms
 \end{tcblisting}
 
-This version ran 10 million iterations in about 3.5 seconds.
+这个版本在3.5秒内运行了1000万次迭代。
 
 \item 
-Here's the format() version:
+下面是format()版本:
 
 \begin{lstlisting}[style=styleCXX]
 string concat_format() {
@@ -237,7 +237,7 @@ string concat_format() {
 }
 \end{lstlisting}
 
-Our benchmark output:
+基准测试输出:
 
 \begin{tcblisting}{commandshell={}}
 append_format
@@ -245,10 +245,10 @@ a, b
 duration: 782.800547 ms
 \end{tcblisting}
 
-The format() version ran 10 million iterations in about 783 milliseconds.
+format()版本在大约783毫秒内运行了1000万次迭代。
 
 \item 
-Summary of the results:
+结果总结:
 
 % Please add the following required packages to your document preamble:
 % \usepackage[table,xcdraw]{xcolor}
@@ -258,7 +258,7 @@ Summary of the results:
 \begin{tabular}{|c|c|}
 	\hline
 	\rowcolor[HTML]{9B9B9B} 
-	{\color[HTML]{FFFFFF} Concatenation method} & {\color[HTML]{FFFFFF} Benchmark in millisecond} \\ \hline
+	{\color[HTML]{FFFFFF} 连接方式} & {\color[HTML]{FFFFFF} 基准(毫秒)} \\ \hline
 	append()      & 425 ms   \\ \hline
 	operator+()   & 660 ms   \\ \hline
 	format()      & 783 ms   \\ \hline
@@ -266,34 +266,35 @@ Summary of the results:
 \end{tabular}
 
 \hspace*{\fill} \\ %插入空行
-A comparison of concatenation performance
+连接字符串的性能比较
 \end{table}
 
 \end{itemize}
 
 \noindent
-\textbf{Why the performance discrepancies?}
+\textbf{为什么会出现性能差异?}
 
-We can see from these benchmarks that the ostringstream version takes many times longer than the string-based versions.
+可以从这些基准测试中看到，ostringstream版本比基于字符串的版本花费的时间长很多倍。
 
-The append() method is slightly faster than the + operator. It needs to allocate memory but does not construct new objects. Some optimizations may be possible due to repetition.
+append()方法比+运算符略快，需要分配内存，但不构造新对象。由于重复进行，所以内部可能有一些优化。
 
-The + operator overload probably calls the append() method. The extra function call could make it incrementally slower than the append() method.
++操作符重载可能调用append()方法，所以函数调用会使它比append()方法慢。
 
-The format() version creates one new string object but without the overhead of the iostream system.
+format()版本创建了一个新的字符串对象，但没有iostream的开销。
 
-The ostringstream operator <{}< overload creates a new ostream object for each operation. Given the complexity of the stream object, along with managing the stream state, this makes it much slower than either of the string-based versions.
+ostringstream操作符<{}<重载为每个操作创建一个新的ostream对象。考虑到流对象的复杂性，以及对流状态的管理，这使得它比基于字符串其他版本都要慢得多。
 
-\subsubsection{Why would I choose one over another?}
+\noindent
+\textbf{如何选择?}
 
-Some measure of personal preference will be involved. The operator overloads (+ or <{}<) can be convenient. Performance may or may not be an issue for you.
+其中会涉及到一些个人偏好的因素。操作符重载(+或<{}<)可以很方便，若不考虑性能的话。
 
-The ostringstream class has one distinct advantage over the string methods: it specializes the << operator for each different type, so it's able to operate in circumstances where you may have different types calling the same code.
+与string方法相比，ostringstream类有一个明显的优势:针对每种不同的类型，有相应的<{}<操作符，因此能够在不同类型调用相同代码的情况下进行操作。
 
-The format() function offers the same type-safety and customization options and is significantly faster than the ostringstream class.
+format()函数提供了相同的类型安全和自定义选项，并且比ostringstream类快得多。
 
-The string object's + operator overload is fast, easy to use, and easy to read but is incrementally slower than append().
+string对象的+操作符重载快速、易于使用、易于读取，但比append()慢了一点点。
 
-The append() version is fastest but requires a separate function call for each item.
+append()版本是最快的，但需要为每个项使用单独的函数。
 
-For my purposes, I like the format() function or the string object's + operator for most circumstances. I'll use append() if every bit of speed matters. I'll use ostringstream where I need its unique features and performance is not an issue.
+通常，我更喜欢format()函数或字符串对象的+运算符。如果性能很重要，我会使用append()。我将在需要ostringstream独特特性，且性能不是问题的地方使用它。

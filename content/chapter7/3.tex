@@ -1,13 +1,13 @@
 
-The string\_view class provides a lightweight alternative to the string class. Instead of maintaining its own data store, string\_view operates on a view of a C-string. This makes string\_view smaller and more efficient than std::string. It's useful in cases where you need a string object but don't need the more memory- and computation-intensive features of std::string.
+string\_view类提供了string类的轻量级替代方案。string\_view不维护自己的数据存储，而是对C-string的视图进行操作。这使得string\_view比std::string更小，更高效。它在需要字符串对象，但不需要更多内存，对于计算密集型的std::string很有用。
 
 \subsubsection{How to do it…}
 
-The string\_view class looks deceptively similar to the STL string class, but it works a bit differently. Let's consider some examples:
+string\_view类看起来与STL string类相似，但工作方式略有不同。来看一些例子:
 
 \begin{itemize}
 \item 
-Here's an STL string initialized from a C-string (array of char):
+这是一个从C-string (char数组)初始化的STL字符串:
 
 \begin{lstlisting}[style=styleCXX]
 char text[]{ "hello" };
@@ -16,16 +16,16 @@ text[0] = 'J';
 cout << text << ' ' << greeting << '\n';
 \end{lstlisting}
 
-Output:
+输出:
 
 \begin{tcblisting}{commandshell={}}
 Jello hello
 \end{tcblisting}
 
-Notice that the string does not change when we modify the array. This is because the string constructor creates its own copy of the underlying data.
+当修改数组时，字符串不会改变。这是因为string构造函数创建了自己的底层数据副本。
 
 \item 
-When we do the same with a string\_view, we get a different result:
+当对string\_view执行同样的操作时，会得到不同的结果:
 
 \begin{lstlisting}[style=styleCXX]
 char text[]{ "hello" };
@@ -34,16 +34,16 @@ text[0] = 'J';
 cout << text << ' ' << greeting << '\n';
 \end{lstlisting}
 
-Output:
+输出:
 
 \begin{tcblisting}{commandshell={}}
 Jello Jello
 \end{tcblisting}
 
-The string\_view constructor creates a view of the underlying data. It does not make its own copy. This results in significant efficiencies but also allows for side effects.
+string\_view构造函数创建底层数据的视图，但不保留自己的副本。这会更高效，但也会有副作用。
 
 \item 
-Because string\_view doesn't copy the underlying data, the source data must remain in scope for the duration of the string\_view object. So, this does not work:
+因为string\_view不复制底层数据，源数据必须在string\_view对象存在期间保持在作用域内。所以，这是不行的:
 
 \begin{lstlisting}[style=styleCXX]
 string_view sv() {
@@ -57,10 +57,10 @@ int main() {
 }
 \end{lstlisting}
 
-Because the underlying data goes out of scope after the sv() function returns, the greeting object in main() is no longer valid by the time we use it.
+因为在sv()函数返回后底层数据超出了作用域，所以main()中greeting对象使用它时不再有效。
 
 \item 
-The string\_view class has constructors that make sense for the underlying data. This includes character arrays (const char*), contiguous ranges (including std::string), and other string\_view objects. This example uses the ranges constructor:
+string\_view类具有对底层数据有意义的构造函数,包括字符数组(const char*)、连续范围(包括std::string)和其他string\_view对象。下面的例子使用了范围构造函数:
 
 \begin{lstlisting}[style=styleCXX]
 string str{ "hello" };
@@ -68,23 +68,23 @@ string_view greeting{ str };
 cout << greeting << '\n';
 \end{lstlisting}
 
-Output:
+输出:
 
 \begin{tcblisting}{commandshell={}}
 hello
 \end{tcblisting}
 
 \item 
-There is also a stringview literal operator sv, defined in the std::literals namespace:
+还有一个stringview文字操作符sv，定义在std::literals命名空间中:
 
 \begin{lstlisting}[style=styleCXX]
 using namespace std::literals;
 cout << "hello"sv.substr(1, 4) << '\n';
 \end{lstlisting}
 
-This constructs a constexpr string\_view object and calls its method substr() to get the 4 values starting at index 1.
+这构造了一个constexpr的string\_view对象，并调用substr()来获得从索引1开始的4个值。
 
-Output:
+输出:
 
 \begin{tcblisting}{commandshell={}}
 ello
@@ -93,13 +93,13 @@ ello
 
 \subsubsection{How it works…}
 
-The string\_view class is effectively an iterator adapter on a contiguous sequence of characters. The implementation typically has two members: a const CharT * and a size\_t. It works by wrapping a contiguous\_iterator around the source data.
+string\_view类实际上是一个连续字符序列上的迭代器适配器。实现通常有两个成员:一个const CharT *和一个size\_t。工作原理是在源数据周围包装一个contiguous\_iterator。
 
-This means that you can use it like std::string for many purposes, with a few important distinctions:
+可以像std::string那样使用它，但有一些区别:
 
 \begin{itemize}
 \item 
-The copy constructor does not copy the data. This means that when you make a copy of a string\_view, each copy operates on the same underlying data:
+复制构造函数不复制数据，当复制一个string\_view时，复制操作都会对相同的底层数据进行:
 
 \begin{lstlisting}[style=styleCXX]
 char text[]{ "hello" };
@@ -112,7 +112,7 @@ text[0] = 'J';
 cout << format("{} {} {} {}\n", sv1, sv2, sv3, sv4);
 \end{lstlisting}
 
-Output:
+输出:
 
 \begin{tcblisting}{commandshell={}}
 hello hello hello hello
@@ -120,7 +120,7 @@ Jello Jello Jello Jello
 \end{tcblisting}
 
 \item 
-Keep in mind that when you pass a string\_view to a function, it uses the copy constructor:
+记住，将string\_view传递给函数时，它会使用复制构造函数:
 
 \begin{lstlisting}[style=styleCXX]
 void f(string_view sv) {
@@ -142,7 +142,7 @@ int main() {
 }
 \end{lstlisting}
 
-Output:
+输出:
 
 \begin{tcblisting}{commandshell={}}
 sv1: 0x7ffd80fa7b2a hello
@@ -150,18 +150,18 @@ f(sv): 0x7ffd80fa7b2a Jello
 sv1: 0x7ffd80fa7b2a Jello
 \end{tcblisting}
 
-Notice that the address of the underlying data (returned by the data() member function) is the same for all instances of the string\_view. That's because the copy constructor does not make a copy of the underlying data. Even though the string\_view member pointer is const-qualified, it's still possible to cast away the const qualifier, though it's not recommended because it could cause unintended side effects. But it is worth noting that the data is never copied.
+因为复制构造函数不会对底层数据进行复制，底层数据的地址(由data()成员函数返回)对于string\_view的所有实例都相同。尽管string\_view成员指针是const限定的，但仍然可以取消const限定符。但不建议这样做，因为可能会导致意想不到的副作用。但需要注意的是，数据永远不会进行复制。
 
 \item 
-The string\_view class lacks methods that directly operate on the underlying string. Methods such as append(), operator+(), push\_back(), pop\_back(), replace(), and resize(), which are supported in string, are not supported in string\_view.
+string\_view类缺少直接操作底层字符串的方法。在string中支持的append()、operator+()、push\_back()、pop\_back()、replace()和resize()等方法在string\_view中不支持。
 
-If you need to concatenate strings with the + operator, you'll need a std::string. For example, this does not work with string\_view:
+若需要用+操作符连接字符串，需要使用std::string。例如，这对string\_view不起作用:
 
 \begin{lstlisting}[style=styleCXX]
 sv1 = sv2 + sv3 + sv4; // does not work
 \end{lstlisting}
 
-You'll need to use string instead:
+这时需要使用string代替:
 
 \begin{lstlisting}[style=styleCXX]
 string str1{ text };
@@ -173,7 +173,7 @@ str1 = str2 + str3 + str4; // works
 cout << str1 << '\n';
 \end{lstlisting}
 
-Output:
+输出:
 
 \begin{tcblisting}{commandshell={}}
 JelloJelloJello

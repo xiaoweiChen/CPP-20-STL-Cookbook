@@ -1,21 +1,21 @@
 
-The string class is an alias of the basic\_string class, with the signature:
+string类是basic\_string类的别名，签名为:
 
 \begin{lstlisting}[style=styleCXX]
 class basic_string<char, std::char_traits<char>>;
 \end{lstlisting}
 
-The first template parameter provides the type of character. The second template parameter provides a character traits class, which provides basic character and string operations for the specified character type. We normally use the default char\_traits<char> class.
+第一个模板参数提供字符类型。第二个模板形参提供一个字符特征类，为指定的字符类型提供基本的字符和字符串操作。我们通常使用的是char\_traits<char>类。
 
-We can modify the behavior of a string by providing our own custom character traits class.
+我们可以通过提供自己的自定义字符特征类，来修改字符串的行为。
 
 \subsubsection{How to do it…}
 
-In this recipe, we will create a character traits class for use with basic\_string that will ignore casing for comparison purposes:
+在这个示例中，将创建一个字符特征类，用于basic\_string，其可以进行忽略大小的比较:
 
 \begin{itemize}
 \item 
-First, we'll need a function to convert characters to a common case. We'll use lowercase here, but it's an arbitrary choice. Uppercase would work just as well:
+首先，需要一个函数将字符转换为通用大小写。这里我们将使用小写字母，但这是一个随意的选择。大写的也可以:
 
 \begin{lstlisting}[style=styleCXX]
 constexpr char char_lower(const char& c) {
@@ -24,10 +24,10 @@ constexpr char char_lower(const char& c) {
 }
 \end{lstlisting}
 
-This function must be constexpr (for C++20 and later), so the existing std::tolower() function won't work here. Fortunately, it's a simple solution to a simple problem.
+这个函数必须是constexpr(对于C++20及更高版本)，所以现有的std::tolower()函数在这里不能工作。
 
 \item 
-Our traits class is called ci\_traits (ci stands for case-independent). It inherits from std::char\_traits<char>:
+我们的特征类称为ci\_traits(ci代表大小写无关)，继承自std::char\_traits<char>:
 
 \begin{lstlisting}[style=styleCXX]
 class ci_traits : public std::char_traits<char> {
@@ -36,10 +36,10 @@ class ci_traits : public std::char_traits<char> {
 };
 \end{lstlisting}
 
-The inheritance allows us to override only the functions that we need.
+继承允许我们只重载需要的函数。
 
 \item 
-The comparison functions are called lt() for less than and eq() for equal to:
+比较函数在小于时称为lt()，在等于时称为eq():
 
 \begin{lstlisting}[style=styleCXX]
 static constexpr bool lt(char_type a, char_type b)
@@ -52,10 +52,10 @@ noexcept {
 }
 \end{lstlisting}
 
-Notice that we compare the lowercase versions of characters.
+注意，这里比较了字符的小写版本。
 
 \item 
-There's also a compare() function, which compares two C-strings. It returns +1 for greater than, -1 for less than, and 0 for equal to. We can use the spaceship <=> operator for this:
+还有一个compare()函数，用于比较两个c字符串。大于则返回+1，小于则返回-1，等于则返回0。我们可以使用三向比较操作符<=>:
 
 \begin{lstlisting}[style=styleCXX]
 static constexpr int compare(const char_type* s1,
@@ -71,7 +71,7 @@ const char_type* s2, size_t count) {
 \end{lstlisting}
 
 \item 
-Finally, we need to implement a find() function. This returns a pointer to the first instance of a found character, or nullptr if not found:
+最后，需要实现一个find()函数。这将返回一个指向已找到字符的第一个实例的指针，若未找到则返回nullptr:
 
 \begin{lstlisting}[style=styleCXX]
 static constexpr const char_type* find(const char_type*
@@ -85,14 +85,14 @@ p, size_t count, const char_type& ch) {
 \end{lstlisting}
 
 \item 
-Now that we have a ci\_traits class, we can define an alias for our string class:
+现在有了一个ci\_traits类，可以为我们的字符串类定义一个别名:
 
 \begin{lstlisting}[style=styleCXX]
 using ci_string = std::basic_string<char, ci_traits>;
 \end{lstlisting}
 
 \item 
-In our main() function, we define a string and a ci\_string:
+main()函数中，定义了一个字符串和一个ci\_string:
 
 \begin{lstlisting}[style=styleCXX]
 int main() {
@@ -102,14 +102,14 @@ int main() {
 \end{lstlisting}
 
 \item 
-We want to print them using cout, but this won't work:
+想用cout打印它们，但这行不通:
 
 \begin{lstlisting}[style=styleCXX]
 cout << "string: " << s << '\n';
 cout << "ci_string: " << ci_s << '\n';
 \end{lstlisting}
 
-First, we need an operator overload for the operator<{}<:
+首先，需要重载操作符<{}<:
 
 \begin{lstlisting}[style=styleCXX]
 std::ostream& operator<<(std::ostream& os,
@@ -118,7 +118,7 @@ const ci_string& str) {
 }
 \end{lstlisting}
 
-Now, we get this output:
+现在，会得到这样的输出:
 
 \begin{tcblisting}{commandshell={}}
 string: Foo Bar Baz
@@ -126,7 +126,7 @@ ci_string: Foo Bar Baz
 \end{tcblisting}
 
 \item 
-Let's compare two ci\_string objects with different cases:
+比较两个具有不同情况的ci\_string对象:
 
 \begin{lstlisting}[style=styleCXX]
 ci_string compare1{"CoMpArE StRiNg"};
@@ -140,16 +140,16 @@ if (compare1 == compare2) {
 }
 \end{lstlisting}
 
-Output:
+输出为:
 
 \begin{tcblisting}{commandshell={}}
 Match! CoMpArE StRiNg == compare string
 \end{tcblisting}
 
-The comparison works as expected.
+比较和预期的一样。
 
 \item 
-Using the find() function on the ci\_s object, we search for a lowercase b and find an uppercase B:
+在ci\_s对象上使用find()函数，搜索小写的b并找到大写的B:
 
 \begin{lstlisting}[style=styleCXX]
 size_t found = ci_s.find('b');
@@ -157,7 +157,7 @@ cout << format("found: pos {} char {}\n", found,
 ci_s[found]);
 \end{lstlisting}
 
-Output:
+输出为:
 
 \begin{tcblisting}{commandshell={}}
 found: pos 4 char B
@@ -165,17 +165,16 @@ found: pos 4 char B
 \end{itemize}
 
 \begin{tcolorbox}[colback=webgreen!5!white,colframe=webgreen!75!black,title=Note]
-Notice that the format() function doesn't require a specialization. This was tested with the fmt.dev reference implementation. It did not work with the preview release of MSVC's format(), even with a specialization. Hopefully, this will be fixed in a future release.
+注意format()函数不需要特化，这是用fmt.dev参考实现测试的。它不能与MSVC的format()预览版一起工作，即使是特化也不行。希望在未来的版本中可以修复这个问题。
 \end{tcolorbox}
 
 \subsubsection{How it works…}
 
-
-This recipe works by replacing the std::char\_traits class in the template specialization of the string class with a ci\_traits class of our own. The basic\_string class uses the traits class for its fundamental character-specific functions, such as comparisons and searching. When we replace it with our own class, we can change these fundamental behaviors.
+这个配方的工作方式是将字符串类的模板特化中的std::char\_traits类替换为我们的ci\_traits类。basic\_string类使用特征类来实现其基本的特定于字符的函数，比如比较和搜索。当用我们自己的类来代替它时，可以改变这些基本行为。
 
 \subsubsection{There's more…}
 
-We can also override the assign() and copy() member functions to create a class that stores lowercase characters:
+也可以重写assign()和copy()成员函数来创建一个存储小写字符的类:
 
 \begin{lstlisting}[style=styleCXX]
 class lc_traits : public std::char_traits<char> {
@@ -201,7 +200,7 @@ class lc_traits : public std::char_traits<char> {
 };
 \end{lstlisting}
 
-Now, we can create an lc\_string alias, and the object stores lowercase characters:
+现在，可以创建一个lc\_string别名，对象存储小写字符:
 
 \begin{lstlisting}[style=styleCXX]
 using lc_string = std::basic_string<char, lc_traits>;
@@ -210,14 +209,14 @@ lc_string lc_s{"Foo Bar Baz"};
 cout << "lc_string: " << lc_s << '\n';
 \end{lstlisting}
 
-Output:
+输出为:
 
 \begin{tcblisting}{commandshell={}}
 lc_string: foo bar baz
 \end{tcblisting}
 
 \begin{tcolorbox}[colback=webgreen!5!white,colframe=webgreen!75!black,title=Note]
-These techniques work as expected on GCC and Clang but not on the preview release of MSVC. I expect that this will be fixed in a future release.
+这些方法在GCC和Clang上可以正常工作，但在MSVC预览版上则不行。我希望在未来的版本中可以修复这个问题。
 \end{tcolorbox}
 
 

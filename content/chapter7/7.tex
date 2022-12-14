@@ -1,13 +1,13 @@
 
-It is common for input from users to include extraneous whitespace at one or both ends of a string. This can be problematic, so we often need to remove it. In this recipe, we'll use the string class methods, find\_first\_not\_of() and find\_last\_not\_of(), to trim whitespace from the ends of a string.
+用户的输入通常在字符串的一端或两端包含无关的空格。这可能会有问题，所以我们经常需要移除它。在这个示例中，我们将使用字符串类方法find\_first\_not\_of()和find\_last\_not\_of()来去除字符串末尾的空白。
 
 \subsubsection{How to do it…}
 
-The string class includes methods for finding elements that are, or are not, included in a list of characters. We'll use these methods to trim string:
+string类包含用于查找字符列表中包含或不包含的元素的方法。我们将使用这些方法来修剪字符串:
 
 \begin{itemize}
 \item 
-We start by defining string with input from a hypothetical ten-thumbed user:
+从定义字符串开始，输入假设来自一个的“十指”用户:
 
 \begin{lstlisting}[style=styleCXX]
 int main() {
@@ -16,7 +16,7 @@ int main() {
 	...
 \end{lstlisting}
 
-Our input has a few extra tab \verb|\|t and newline \verb|\|n characters before and after the content. We print it with surrounding brackets to show the whitespace:
+输入在内容前后有一些额外的制表符\verb|\|t和换行符\verb|\|n个字符。我们用括号打印它，以显示空格:
 
 \begin{lstlisting}[style=styleCXX]
 [           ten-thumbed input
@@ -24,7 +24,7 @@ Our input has a few extra tab \verb|\|t and newline \verb|\|n characters before 
 \end{lstlisting}
 
 \item 
-Here's a trimstr() function to remove all the whitespace characters from both ends of string:
+下面是一个trimstr()函数，用于删除字符串两端的所有空白字符:
 
 \begin{lstlisting}[style=styleCXX]
 string trimstr(const string& s) {
@@ -37,18 +37,18 @@ string trimstr(const string& s) {
 }
 \end{lstlisting}
 
-We defined our set of whitespace characters as space, tab, return, newline, vertical tab, and form feed. Some of these are more common than others, but that's the canonical set.
+将空白字符集定义为空格、制表符、返回符、换行符、垂直制表符和换行符。其中一些比另一些更常见，但这是标准集。
 
-This function uses the find\_first\_not\_of() and find\_last\_not\_of() methods of the string class to find the first/last elements that are not a member of the set.
+这个函数使用string类的find\_first\_not\_of()和find\_last\_not\_of()方法来查找不是集合成员的第一个/最后一个元素。
 
 \item 
-Now, we can call the function to get rid of all that unsolicited whitespace:
+现在，可以使用该函数来消除所有未经请求的空白:
 
 \begin{lstlisting}[style=styleCXX]
 cout << format("[{}]\n", trimstr(s));
 \end{lstlisting}
 
-Output:
+输出为:
 
 \begin{tcblisting}{commandshell={}}
 [ten-thumbed input]
@@ -58,16 +58,16 @@ Output:
 
 \subsubsection{How it works…}
 
-The string class's various find...() member functions return a position as a size\_t value:
+string类的各种find…()成员函数返回一个位置作为size\_t值:
 
 \begin{lstlisting}[style=styleCXX]
 size_t find_first_not_of( const CharT* s, size_type pos = 0 );
 size_t find_last_not_of( const CharT* s, size_type pos = 0 );
 \end{lstlisting}
 
-The return value is the zero-based position of the first matching character (not in the s list of characters) or the special value, string::npos, if not found. npos is a static member constant that represents an invalid position.
+返回值是第一个匹配字符的从零开始的位置(不在s字符列表中)，若没有找到，则返回特殊值string::npos。npos是一个表示无效位置的静态成员常量。
 
-We test for (first == string::npos) and return an empty string \{\} if there is no match. Otherwise, we use the first and last positions with the s.substr() method to return the string without whitespace.
+我们测试(first == string::npos)，如果不匹配则返回空字符串\{\}。否则，使用s.substr()方法，通过确认第一个和最后一个字符的位置，来返回不带空格的字符串。
 
 
 

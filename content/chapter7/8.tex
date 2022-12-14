@@ -1,7 +1,7 @@
 
-The STL provides character-based input from the standard input stream using the std::cin object. The cin object is a global singleton that reads input from the console as an istream input stream.
+STL使用std::cin对象从标准输入流提供基于字符的输入。cin对象是一个全局单例对象，可从控制台读取输入作为istream输入流。
 
-By default, cin reads one word at a time until it reaches the end of the stream:
+默认情况下，cin每次读取一个单词，直到它到达流的末尾:
 
 \begin{lstlisting}[style=styleCXX]
 string word{};
@@ -12,7 +12,7 @@ while(cin >> word) {
 cout << '\n';
 \end{lstlisting}
 
-Output:
+输出为:
 
 \begin{tcblisting}{commandshell={}}
 $ ./working
@@ -20,17 +20,17 @@ Enter words: big light in sky
 [big] [light] [in] [sky]
 \end{tcblisting}
 
-This is of limited usefulness, and it may lead some to dismiss cin as minimally functional.
+这可能会让一些人认为cin功能很弱。
 
-While cin certainly has its quirks, it can be easily wrangled into providing line-oriented input.
+虽然cin确实有它的怪癖，但其更容易用来提供面向行的输入。
 
 \subsubsection{How to do it…}
 
-To get basic line-oriented functionality from cin, there are two significant behaviors that need to be understood. One is the ability to get a line at a time, instead of a word at a time. The other is the ability to reset the stream after an error condition. Let's look at these in some detail:
+要从cin获得基本的面向行的功能，需要理解两个重要的行为。一种是一次获得一行字的能力，而不是一次获得一个字。另一个是在出现错误条件后重置流的能力。让我们来了解一下细节:
 
 \begin{itemize}
 \item 
-First, we need to prompt the user for input. Here's a simple prompt function:
+首先，需要提示用户进行输入。下面是一个简单的提示函数:
 
 \begin{lstlisting}[style=styleCXX]
 bool prompt(const string_view s, const string_view s2 = "") {
@@ -41,10 +41,10 @@ bool prompt(const string_view s, const string_view s2 = "") {
 }
 \end{lstlisting}
 
-The cout.flush() function call ensures that the output is displayed immediately. Sometimes, when the output doesn't include a newline, the output stream may not flush automatically.
+调用count .flush()函数确保立即显示输出。有时，输出不包括换行符时，输出流可能不会自动刷新。
 
 \item 
-The cin class has a getline() method that gets a line of text from the input stream and puts it in a C-string array:
+cin类有一个getline()方法，从输入流中获取一行文本，并将其放入C-string数组中:
 
 \begin{lstlisting}[style=styleCXX]
 constexpr size_t MAXLINE{1024 * 10};
@@ -55,27 +55,27 @@ cin.getline(s, MAXLINE, '\n');
 cout << s << '\n';
 \end{lstlisting}
 
-Output:
+输出为:
 
 \begin{tcblisting}{commandshell={}}
 Words here: big light in sky
 big light in sky
 \end{tcblisting}
 
-The cin.getline() method takes three arguments:
+cin.getline()方法有三个参数:
 
 \begin{lstlisting}[style=styleCXX]
 getline(char* s, size_t count, char delim );
 \end{lstlisting}
 
-The first argument is a C-string array for the destination. The second is the size of the array. The third is the delimiter for the end of the line.
+第一个参数是目标的C-string数组。第二个是数组的大小。第三个是行尾的分隔符。
 
-The function will not put more than count-1 characters in the array, leaving room for a null terminator.
+该函数在数组中放置的字符不超过count-1，为空结束符留出空间。
 
-The delimiter defaults to the newline '\verb|\|n' character.
+分隔符默认为换行符'\verb|\|n'字符。
 
 \item 
-The STL also provides a stand-alone getline() function that works with an STL string object:
+STL还提供了一个独立的getline()函数，用于STL字符串对象:
 
 \begin{lstlisting}[style=styleCXX]
 string line{};
@@ -85,7 +85,7 @@ getline(cin, line, '\n');
 cout << line << '\n';
 \end{lstlisting}
 
-Output:
+输出为:
 
 \begin{tcblisting}{commandshell={}}
 $ ./working
@@ -93,22 +93,22 @@ More words here (p1a): slated to appear in east
 slated to appear in east
 \end{tcblisting}
 
-The stand-alone std::getline() function takes three arguments:
+std::getline()函数有三个参数:
 
 \begin{lstlisting}[style=styleCXX]
 getline(basic_istream&& in, string& str, char delim );
 \end{lstlisting}
 
-The first argument is the output stream, second is a reference to a string object, and the third is the end-of-line delimiter.
+第一个参数是输出流，第二个参数是对字符串对象的引用，第三个参数是行结束分隔符。
 
-If not specified, the delimiter defaults to the newline '\verb|\|n' character.
+若未指定，分隔符默认为换行符'\verb|\|n'字符。
 
-I find the standalone getline() more convenient than the cin.getline() method.
+我感觉，getline()比cin.getline()方法更方便。
 
 \item 
-We can use cin to get a specific type from the input stream. To do this, we must be able to handle an error condition.
+可以使用cin从输入流中获取特定的类型。要做到这一点，必须能够处理错误条件。
 
-When cin encounters an error, it sets the stream to an error condition and stops accepting input. To retry input after an error, we must reset the state of the stream. Here's a function that resets the input stream after an error:
+当cin遇到错误时，其将流设置为错误条件并停止接受输入。要在错误后重试输入，必须重置流的状态。下面是一个在错误后重置输入流的函数:
 
 \begin{lstlisting}[style=styleCXX]
 void clearistream() {
@@ -118,10 +118,10 @@ void clearistream() {
 }
 \end{lstlisting}
 
-The cin.clear() function resets the error flags on the input stream but leaves text in the buffer. We then clear the buffer by reading a line and discarding it.
+clear()函数的作用是:重置输入流中的错误标志，但将文本保留在缓冲区中。然后，通过读取一行并丢弃，来清除缓冲区。
 
 \item 
-We can accept numeric input by using cin with numeric type variables:
+可以通过对数值类型变量使用cin来接受数值输入:
 
 \begin{lstlisting}[style=styleCXX]
 double a{};
@@ -134,7 +134,7 @@ for(prompt(p2); !(cin >> a >> b); prompt(p2)) {
 cout << format("You entered {} and {}\n", a, b);
 \end{lstlisting}
 
-Output:
+输出为:
 
 \begin{tcblisting}{commandshell={}}
 $ ./working
@@ -144,10 +144,10 @@ Please enter two numbers: 47 73
 You entered 47 and 73
 \end{tcblisting}
 
-The cin >{}> a >{}> b expression accepts input from the console and attempts to convert the first two words to types compatible with a and b (double). If it fails, we call clearistream() and try again.
+cin >{}> a >{}> b表达式接受来自控制台的输入，并尝试将前两个单词转换为与a和b兼容的类型(double)。若失败了，则再次使用clearistream()。
 
 \item 
-We can use the getline() separator parameter to get comma-separated input:
+可以使用getline()分隔符参数来获取逗号分隔的输入:
 
 \begin{lstlisting}[style=styleCXX]
 line.clear();
@@ -160,7 +160,7 @@ while(getline(ss, word, ',')) {
 }
 \end{lstlisting}
 
-Output:
+输出为:
 
 \begin{tcblisting}{commandshell={}}
 $ ./working
@@ -170,19 +170,19 @@ word: [that]
 word: [other]
 \end{tcblisting}
 
-Because this code runs after the numbers code, and because cin is messy, there may still be a line ending in the buffer. The while(line.empty()) loop will optionally eat any empty lines.
+因为这段代码是在数字代码之后运行的，并且因为cin是混乱的，所以缓冲区中可能仍然有结束的行。while(line.empty())循环将有选择地获取空行。
 
-We use a stringstream object to process the words, so we don't have to do it with cin. This allows us to use getline() to get one line without waiting for the end-of-file state.
+使用一个stringstream对象来处理单词，所以不必使用cin。所以可以使用getline()来获取一行，而无需等待文件结束状态。
 
-Then, we call getline() on the stringstream object to parse out words separated by commas. This gives us words but with leading whitespace. We use the trimstr() function from the Trim whitespace from strings recipe in this chapter to trim the whitespace.
+然后，在stringstream对象上调用getline()来解析用逗号分隔的单词。这给了我们带有前导空格的单词。我们使用本章中的trimstr()函数来清理空白字符。
 \end{itemize}
 
 \subsubsection{How it works…}
 
 
-The std::cin object is more useful than it may appear, but it can be a challenge to use. It tends to leave line endings on the stream, and in the case of errors, it can end up ignoring input.
+std::cin对象比它看起来更有用，但使用它可能是一个挑战。其倾向于在流上留下行结束符，并且在出现错误的情况下，可能会忽略输入。
 
-The solution is to use getline() and, when necessary, put the line into a stringstream for convenient parsing.
+解决方案是使用getline()，并在必要时将行放入stringstream中，以便于解析。
 
 
 

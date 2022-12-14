@@ -1,13 +1,13 @@
 
-By default, the basic\_istream class reads one word at a time. We can take advantage of this property to use an istream\_iterator to count words.
+默认情况下，basic\_istream类每次读取一个单词。可以利用这个属性使用istream\_iterator来计算单词数。
 
 \subsubsection{How to do it…}
 
-This is a simple recipe to count words using an istream\_iterator:
+这是一个使用istream\_iterator来计数单词的简单方法:
 
 \begin{itemize}
 \item 
-We'll start with a simple function to count words using an istream\_iterator object:
+先从一个简单的函数开始，使用istream\_iterator对象来计数单词:
 
 \begin{lstlisting}[style=styleCXX]
 size_t wordcount(auto& is) {
@@ -16,10 +16,10 @@ size_t wordcount(auto& is) {
 }
 \end{lstlisting}
 
-The distance() function takes two iterators and returns the number of steps between them. The using statement creates an alias it\_t for the istream\_iterator class with a string specialization. We then call distance() with an iterator, initialized with the input stream it\_t\{is\}, and another with the default constructor, which gives us an end-of-stream sentinel.
+distance()函数接受两个迭代器，并返回它们之间的长度。using语句为istream\_iterator类创建了一个带有字符串特化的别名it\_t。然后，用一个迭代器调用distance()，迭代器用输入流it\_t\{is\}初始化，另一个用默认构造函数调用distance()，作为流的结束哨点。
 
 \item 
-We call wordcount() from main():
+在main()中使用wordcount():
 
 \begin{lstlisting}[style=styleCXX]
 int main() {
@@ -31,7 +31,7 @@ int main() {
 }
 \end{lstlisting}
 
-This calls wordcount() with our fstream object and prints the number of words in the file. When I call it with the text of Edgar Allan Poe's The Raven, we get this output:
+这将使用fstream对象调用wordcount()并打印文件中的字数。当用其处理埃德加·爱伦·坡的《乌鸦》时，我们可得到这样的输出:
 
 \begin{tcblisting}{commandshell={}}
 There are 1068 words in the file.
@@ -40,4 +40,4 @@ There are 1068 words in the file.
 
 \subsubsection{How it works…}
 
-Because basic\_istream defaults to word-by-word input, the number of steps in a file will be the number of words. The distance() function will measure the number of steps between two iterators, so calling it with the beginning and the sentinel of a compatible object will count the number of words in the file.
+因为basic\_istream默认为逐字输入，文件中的步数将是字数。distance()函数将测量两个迭代器之间的长度，因此使用兼容对象的起始和末尾迭代器来计算文件中的字数。

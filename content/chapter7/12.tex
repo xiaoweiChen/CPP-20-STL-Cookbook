@@ -1,60 +1,60 @@
 
-Regular Expressions (commonly abbreviated as regex) are commonly used for lexical analysis and pattern-matching on streams of text. They are common in Unix textprocessing utilities, such as grep, awk, and sed, and are an integral part of the Perl language. There are a few common variations in the syntax. A POSIX standard was approved in 1992, while other common variations include Perl and ECMAScript (JavaScript) dialects. The C++ regex library defaults to the ECMAScript dialect.
+正则表达式(通常缩写为regex)通常用于文本流的词法分析和模式匹配。它们在Unix文本处理实用程序(如grep、awk和sed)中很常见，并且是Perl语言不可分割的一部分。POSIX标准于1992年获得批准，而其他常见的变体包括Perl和ECMAScript (JavaScript)方言。C++ regex库默认使用ECMAScript方言。
 
-The regex library was first introduced to the STL with C++11. It can be very useful for finding patterns in text files.
+regex库是在C++11中首次引入STL的，其对于在文本文件中查找模式非常有用。
 
-To learn more about Regular Expression syntax and usage, I recommend the book, Mastering Regular Expressions by Jeffrey Friedl.
+要了解更多关于正则表达式的语法和用法，我推荐Jeffrey Friedl的《Mastering Regular Expressions》这本书。
 
 \subsubsection{How to do it…}
 
-For this recipe, we will extract hyperlinks from an HTML file. A hyperlink is coded in HTML like this:
+对于这个示例，我们将从HTML文件中提取超链接。超链接是这样用HTML编码的:
 
 \begin{lstlisting}[style=styleCXX]
 <a href="http://example.com/file.html">Text goes here</a>
 \end{lstlisting}
 
-We will use a regex object to extract both the link and the text, as two separate strings.
+我们将使用一个regex对象来提取链接和文本，作为两个单独的字符串。
 
 
 \begin{itemize}
 \item 
-Our example file is called the-end.html. It's taken from my website (\url{https://bw.org/end/}), and is included in the GitHub repository:
+我们的示例文件名为the-end.html。它来自我的网站(\url{https://bw.org/end/})，并包含在GitHub存储库中:
 
 \begin{lstlisting}[style=styleCXX]
 const char * fn{ "the-end.html" };
 \end{lstlisting}
 
 \item 
-Now, we define our regex object with a regular expression string:
+现在，用正则表达式字符串定义regex对象:
 
 \begin{lstlisting}[style=styleCXX]
 const std::regex
 	link_re{ "<a href=\"([^\"]*)\"[^<]*>([^<]*)</a>" };
 \end{lstlisting}
 
-Regular expressions can look intimidating at first, but they're actually rather simple.
+正则表达式一开始看起来很吓人，但实际上它们很简单。
 
-This is parsed as follows:
+解析如下:
 
 \begin{enumerate}[label=\Roman*.]
 \item 
-Match the whole string.
+匹配整个字符串。
 
 \item 
-Find the substring <a href="
+查找子字符串<a href="
 
 \item 
-Store everything up to the next " as sub-match 1.
+存储到下一个双引号间的所有内容，作为子匹配1。
 
 \item 
-Skip past the > character.
+跳过>字符。
 
 \item 
-Store everything up to the string </a> as sub-match 2.
+将字符串</a>之前的所有内容存储为子匹配2。
 \end{enumerate}
 
 \item 
-Now, we read our file entirely into a string:
+现在，将文件放入一个字符串:
 
 \begin{lstlisting}[style=styleCXX]
 string in{};
@@ -62,20 +62,20 @@ std::ifstream infile(fn, std::ios_base::in);
 for(string line{}; getline(infile, line);) in += line;
 \end{lstlisting}
 
-This opens the HTML file, reads it line by line, and appends each line to the string object, in.
+这将打开HTML文件，逐行读取它，并将每行追加到字符串对象中。
 
 \item 
-To extract the link strings, we set up an sregex\_token\_iterator object to step through the file and extract each of the matched elements:
+为了提取链接字符串，设置了sregex\_token\_iterator对象，来逐级遍历文件并提取每个匹配的元素:
 
 \begin{lstlisting}[style=styleCXX]
 std::sregex_token_iterator it{ in.begin(), in.end(),
 	link_re, {1, 2} };
 \end{lstlisting}
 
-The 1 and 2 correspond to the sub-matches in the regular expression.
+1和2对应正则表达式中的子匹配项。
 
 \item 
-We have a corresponding function to step through the results with the iterator:
+我们有一个对应的函数，用迭代器逐级遍历结果:
 
 \begin{lstlisting}[style=styleCXX]
 template<typename It>
@@ -89,13 +89,13 @@ void get_links(It it) {
 }
 \end{lstlisting}
 
-We call the function with the regex iterator:
+使用regex迭代器调用函数:
 
 \begin{lstlisting}[style=styleCXX]
 get_links(it);
 \end{lstlisting}
 
-And we get this result with our descriptions and links:
+用描述和链接得到了这个结果:
 
 \begin{tcblisting}{commandshell={}}
 Bill Weinman............ https://bw.org/
@@ -108,31 +108,31 @@ back to the internet.... https://duckduckgo.com/
 
 \subsubsection{How it works…}
 
-The STL regex engine operates as a generator that evaluates and yields one result at a time. We set up the iterator using sregex\_iterator or sregex\_token\_iterator. While sregex\_token\_iterator supports sub-matches, sregex\_iterator does not.
+STL正则表达式引擎作为生成器运行，每次计算并产生一个结果。我们使用sregex\_iterator或sregex\_token\_iterator来设置迭代器，sregex\_token\_iterator支持子匹配，sregex\_iterator不支持子匹配。
 
-The parentheses in our regex serve as sub-matches, numbered 1 and 2 respectively:
+正则表达式中的括号作为子匹配项，分别编号为1和2:
 
 \begin{lstlisting}[style=styleCXX]
 const regex link_re{ "<a href=\"([^\"]*)\"[^<]*>([^<]*)</a>" };
 \end{lstlisting}
 
-Each part of the regex matches is illustrated here:
+正则表达式匹配的每个部分如下图所示:
 
 \begin{center}
 \includegraphics[width=0.8\textwidth]{content/chapter7/images/1.png}\\
-Figure 7.1 – A Regular Expression with sub-matches
+图7.1 带有子匹配项的正则表达式
 \end{center}
 
-This allows us to match a string and use parts of that string as our results:
+这允许我们匹配一个字符串，并使用该字符串的部分作为的结果:
 
 \begin{lstlisting}[style=styleCXX]
 sregex_token_iterator it{ in.begin(), in.end(), link_re, {1, 2}
 };
 \end{lstlisting}
 
-The sub-matches are numbered, beginning with 1. Sub-match 0 is a special value that represents the entire match.
+子匹配项从1开始编号。子匹配0是一个特殊值，表示整个匹配。
 
-Once we have our iterator, we use it as we would any other iterator:
+要支持迭代器，就可以像这样使用它:
 
 \begin{lstlisting}[style=styleCXX]
 for(It end_it{}; it != end_it; ) {
@@ -143,7 +143,7 @@ for(It end_it{}; it != end_it; ) {
 }
 \end{lstlisting}
 
-This simply steps through our results via the regex iterator, giving us the formatted output:
+这只是通过regex迭代器逐步遍历结果，给我们格式化的输出如下所示:
 
 \begin{tcblisting}{commandshell={}}
 Bill Weinman............ https://bw.org/

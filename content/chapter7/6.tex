@@ -1,51 +1,51 @@
 
-C++20 introduces the new format() function, which returns a formatted representation of its arguments in a string. format() uses a Python-style formatting string, with concise syntax, type safety, and excellent performance.
+C++20引入了新的format()函数，该函数以字符串形式返回参数的格式化表示。format()使用python风格的格式化字符串，具有简洁的语法、类型安全，以及出色的性能。
 
-The format() function takes a format string and a template, parameter pack, for its arguments:
+format()函数接受一个格式字符串和一个模板形参包作为参数:
 
 \begin{lstlisting}[style=styleCXX]
 template< class... Args >
 string format(const string_view fmt, Args&&... args );
 \end{lstlisting}
 
-The format string uses curly braces \{\} as a placeholder for the formatted arguments:
+格式化字符串使用大括号\{\}作为格式化参数的占位符:
 
 \begin{lstlisting}[style=styleCXX]
 const int a{47};
 format("a is {}\n", a);
 \end{lstlisting}
 
-Output:
+输出为:
 
 \begin{tcblisting}{commandshell={}}
 a is 47
 \end{tcblisting}
 
-It also uses the braces for format specifiers, for example:
+还使用大括号作为格式说明符，例如:
 
 \begin{lstlisting}[style=styleCXX]
 	format("Hex: {:x} Octal: {:o} Decimal {:d} \n", a, a, a);
 \end{lstlisting}
 
-Output:
+输出为:
 
 \begin{tcblisting}{commandshell={}}
 Hex: 2f Octal: 57 Decimal 47
 \end{tcblisting}
 
-This recipe will show you how to use the format() function for some common string formatting solutions.
+本示例展示了如何将format()函数，用于一些常见的字符串格式化解决方案。
 
 \begin{tcolorbox}[colback=webgreen!5!white,colframe=webgreen!75!black,title=Note]
-This chapter was developed using a preview release of the Microsoft Visual C++ compiler on Windows 10. At the time of writing, this is the only compiler that fully supports the C++20 <format> library. Final implementations may differ in some details.
+本章是使用Windows 10上的Microsoft Visual C++编译器预览版开发的。在撰写本文时，这是唯一完全支持C++ 20 <format>库的编译器。最终的实现可能在某些细节上有所不同。
 \end{tcolorbox}
 
 \subsubsection{How to do it…}
 
-Let's consider some common formatting solutions using the format() function:
+使用format()函数来考虑一些常见的格式化解决方案:
 
 \begin{itemize}
 \item 
-We'll start with some variables to format:
+先从一些变量开始格式化:
 
 \begin{lstlisting}[style=styleCXX]
 const int inta{ 47 };
@@ -54,10 +54,10 @@ const string_view alien{ "vulcans" };
 const double df_pi{ pi };
 \end{lstlisting}
 
-The pi constant is in the <numbers> header and the std::numbers namespace.
+pi常数在<numbers>头文件和std::numbers命名空间中。
 
 \item 
-We can display the variables using cout:
+可以使用cout显示变量:
 
 \begin{lstlisting}[style=styleCXX]
 cout << "inta is " << inta << '\n'
@@ -66,7 +66,7 @@ cout << "inta is " << inta << '\n'
 << "π is " << df_pi << '\n';
 \end{lstlisting}
 
-We get this output:
+得到这样的输出:
 
 \begin{tcblisting}{commandshell={}}
 a is 47
@@ -76,30 +76,30 @@ All vulcans are welcome here
 \end{tcblisting}
 
 \item 
-Now, let's look at each of these with format(), starting with the C-string, human:
+现在，来看看format()如何对它们进行处理:
 
 \begin{lstlisting}[style=styleCXX]
 cout << format("Hello {}\n", human);
 \end{lstlisting}
 
-This is the simplest form of the format() function. The format string has one placeholder \{\} and one corresponding variable, human. The output is:
+这是format()函数的最简单形式。格式字符串有一个占位符\{\}和一个对应的变量human。输出结果为:
 
 \begin{tcblisting}{commandshell={}}
 Hello earthlings
 \end{tcblisting}
 
 \item 
-The format() function returns a string, and we use cout << to display the string.
+format()函数返回一个字符串，我们使用cout<{}<来显示该字符串。
 
-The original proposal for the format() library included a print() function, using the same parameters as format(). That would allow us to print our formatted strings in one step:
+format()库的建议包括一个print()函数，使用与format()相同的参数，这就可以打印格式化的字符串:
 
 \begin{lstlisting}[style=styleCXX]
 print("Hello {}\n", cstr);
 \end{lstlisting}
 
-Unfortunately, print() didn't make it into the C++20 standard, although it is expected to be included in C++23.
+但print()没有进入C++20，但有望加入C++23。
 
-We can provide the same functionality with a simple function, using vformat():
+我们可以用一个简单的函数，使用vformat()提供相同的功能:
 
 \begin{lstlisting}[style=styleCXX]
 template<typename... Args>
@@ -111,135 +111,135 @@ Args&&... args) {
 }
 \end{lstlisting}
 
-This simple one-line function gives us a serviceable print() function. We can use it in place of the cout <{}< format() combination:
+这个简单的单行函数提供了一个有用的print()函数，可以用它来代替cout <{}< format()组合:
 
 \begin{lstlisting}[style=styleCXX]
 print("Hello {}\n", human);
 \end{lstlisting}
 
-Output:
+输出为:
 
 \begin{tcblisting}{commandshell={}}
 Hello earthlings
 \end{tcblisting}
 
-A more complete version of this function may be found in the include directory of the example files.
+该函数的更完整版本可以在示例文件的include目录中找到。
 
 \item 
-The format string also provides positional options:
+格式字符串还提供了位置选项:
 
 \begin{lstlisting}[style=styleCXX]
 print("Hello {} we are {}\n", human, alien);
 \end{lstlisting}
 
-Output:
+输出为:
 
 \begin{tcblisting}{commandshell={}}
 Hello earthlings we are vulcans
 \end{tcblisting}
 
-We can change the order of the arguments by using positional options in the format string:
+可以在格式字符串中使用位置选项来改变参数的顺序:
 
 \begin{lstlisting}[style=styleCXX]
 print("Hello {1} we are {0}\n", human, alien);
 \end{lstlisting}
 
-Now, we get this output:
+现在，可以得到这样的输出:
 
 \begin{tcblisting}{commandshell={}}
 Hello vulcans we are earthlings
 \end{tcblisting}
 
-Notice that the arguments remain the same. Only the positional values in the braces have changed. The positional indices are zero-based, just like the [] operator.
+注意，参数保持不变。只有大括号中的位置值发生了变化。位置索引是从零开始的，就像[]操作符一样。
 
-This feature can be useful for internationalization, as different languages use different orders for parts of speech in a sentence.
+这个特性对于国际化(或本地化)非常有用，因为不同的语言在句子中使用不同的词性顺序。
 
 \item 
-There are many formatting options for numbers:
+数字有很多格式化选项:
 
 \begin{lstlisting}[style=styleCXX]
 print("π is {}\n", df_pi);
 \end{lstlisting}
 
-Output:
+输出为:
 
 \begin{tcblisting}{commandshell={}}
 π is 3.141592653589793
 \end{tcblisting}
 
-We can specify the number of digits of precision:
+可以指定精度的位数:
 
 \begin{lstlisting}[style=styleCXX]
 print("π is {:.5}\n", df_pi);
 \end{lstlisting}
 
-Output:
+输出为:
 
 \begin{tcblisting}{commandshell={}}
 π is 3.1416
 \end{tcblisting}
 
-The colon character : is used to separate positional indices from formatting arguments:
+冒号字符“:”用于分隔位置索引和格式化参数:
 
 \begin{lstlisting}[style=styleCXX]
 print("inta is {1:}, π is {0:.5}\n", df_pi, inta);
 \end{lstlisting}
 
-Output:
+输出为:
 
 \begin{tcblisting}{commandshell={}}
 inta is 47, π is 3.1416
 \end{tcblisting}
 
 \item 
-If we want a value to take up a certain amount of space, we can specify the number of characters like this:
+若想要一个值占用一定的空间，可以这样指定字符的数量:
 
 \begin{lstlisting}[style=styleCXX]
 print("inta is [{:10}]\n", inta);
 \end{lstlisting}
 
-Output:
+输出为:
 
 \begin{tcblisting}{commandshell={}}
 inta is [    47]
 \end{tcblisting}
 
-We can align it left or right:
+可以向左或向右对齐:
 
 \begin{lstlisting}[style=styleCXX]
 print("inta is [{:<10}]\n", inta);
 print("inta is [{:>10}]\n", inta);
 \end{lstlisting}
 
-Output:
+输出为:
 
 \begin{tcblisting}{commandshell={}}
 inta is [47     ]
 inta is [     47]
 \end{tcblisting}
 
-By default, it fills with space characters, but we can change that:
+默认情况下，用空格字符填充，但可以进行修改:
 
 \begin{lstlisting}[style=styleCXX]
 print("inta is [{:*<10}]\n", inta);
 print("inta is [{:0>10}]\n", inta);
 \end{lstlisting}
 
-Output:
+输出为:
 
 \begin{tcblisting}{commandshell={}}
 inta is [47********]
 inta is [0000000047]
 \end{tcblisting}
 
-We can also center a value:
+还可以将值居中:
 
 \begin{lstlisting}[style=styleCXX]
 print("inta is [{:^10}]\n", inta);
 print("inta is [{:_^10}]\n", inta);
 \end{lstlisting}
 
-Output:
+输出为:
 
 \begin{tcblisting}{commandshell={}}
 inta is [    47    ]
@@ -247,7 +247,7 @@ inta is [____47____]
 \end{tcblisting}
 
 \item 
-We can format integer numbers as hexadecimal, octal, or the default decimal representation:
+可以将整数格式化为十六进制、八进制或默认的十进制表示形式:
 
 \begin{lstlisting}[style=styleCXX]
 print("{:>8}: [{:04x}]\n", "Hex", inta);
@@ -255,7 +255,7 @@ print("{:>8}: [{:4o}]\n", "Octal", inta);
 print("{:>8}: [{:4d}]\n", "Decimal", inta);
 \end{lstlisting}
 
-Output:
+输出为:
 
 \begin{tcblisting}{commandshell={}}
     Hex: [002f]
@@ -263,33 +263,33 @@ Output:
 Decimal: [  47]
 \end{tcblisting}
 
-Notice that I used right alignment to line up the labels.
+注意，这里使用右对齐来排列标签。
 
-Use a capital X for uppercase hexadecimal:
+大写十六进制使用大写X:
 
 \begin{lstlisting}[style=styleCXX]
 print("{:>8}: [{:04X}]\n", "Hex", inta);
 \end{lstlisting}
 
-Output:
+输出为:
 
 \begin{tcblisting}{commandshell={}}
     Hex: [002f]
 \end{tcblisting}
 
 \begin{tcolorbox}[colback=gray!5!white,colframe=gray!75!black,title=Tip]
-By default, Windows uses uncommon character encodings. Recent versions may default to UTF-16 or UTF-8 BOM. Older versions may default to "code page" 1252, a superset of the ISO 8859-1 ASCII standard. No Windows system defaults to the more common UTF-8 (no BOM).
+默认情况下，Windows使用不常见的字符编码。最新版本可能默认为UTF-16或UTF-8 BOM。旧版本可能默认为“代码页”1252，这是ISO 8859-1 ASCII标准的超集。Windows系统默认为更常见的UTF-8 (No BOM)。
 
-By default, Windows will not display the standard UTF-8 π character. To make Windows compatible with UTF-8 encoding (and the rest of the world), use the compiler switch /utf-8 and issue the command chcp 65001 on the command line when testing. Now, you can have your π and eat it too.
+默认情况下，Windows不会显示标准UTF-8 π字符。要使Windows兼容UTF-8编码(以及其他编码)，请在测试时使用编译器开关/ UTF-8并在命令行上发出命令chcp 65001。现在，你也可以得到π并使用它。
 \end{tcolorbox}
 	
 \end{itemize}
 
 \subsubsection{How it works…}
 
-The <format> library uses a template parameter pack to pass arguments to the formatter. This allows the arguments to be individually inspected for class and type. The library function, make\_format\_args() takes a parameter pack and returns a format\_args object, which provides a type erased list of arguments to be formatted.
+<format>库使用模板形参包将参数传递给格式化器，需要单独检查参数的类和类型。标准库函数make\_format\_args()接受一个形参包并返回一个format\_args对象，该对象需要提供格式化参数的类型擦除列表。
 
-We can see this in action in our print() function:
+可以在print()函数中看到这些:
 
 \begin{lstlisting}[style=styleCXX]
 template<typename... Args>
@@ -301,11 +301,11 @@ constexpr void print(const string_view str_fmt, Args&&... args)
 }
 \end{lstlisting}
 
-The make\_format\_args() function takes a parameter pack and returns a format\_args object. The vformat() function takes a format string and the format\_args object, and returns a std::string. We use the c\_str() method to get a C-string for use with fputs().
+make\_format\_args()函数的作用是:接受一个参数包并返回format\_args对象。vformat()函数的作用是:接受格式字符串和format\_args对象，并返回一个std::string。然后，使用c\_str()方法来获取用于fputs()的C字符串。
 
 \subsubsection{There's more…}
 
-It's common practice to overload the ostream <{}< operator for custom classes. For example, given a class Frac that holds the values of a fraction:
+对于自定义类重载ostream <{}<操作符是常见的做法。例如，给定一个保存分数值的类Frac:
 
 \begin{lstlisting}[style=styleCXX]
 template<typename T>
@@ -318,7 +318,7 @@ Frac<long> n{ 3, 5 };
 cout << "Frac: " << n << '\n';
 \end{lstlisting}
 
-We want to print the object as a fraction like 3/5. So, we would write a simple operator<{}< specialization like this:
+我们想把对象打印成3/5这样的分数。因此，需要编写一个简单的操作符<{}<特化，就像这样:
 
 \begin{lstlisting}[style=styleCXX]
 template <typename T>
@@ -328,13 +328,13 @@ std::ostream& operator<<(std::ostream& os, const Frac<T>& f) {
 }
 \end{lstlisting}
 
-Now our output is:
+现在输出是:
 
 \begin{tcblisting}{commandshell={}}
 Frac: 3/5
 \end{tcblisting}
 
-To provide format() support for our custom class, we need to create a formatter object specialization, like this:
+为了为我们的自定义类提供format()支持，需要创建一个特化的格式化器对象，如下所示:
 
 \begin{lstlisting}[style=styleCXX]
 template <typename T>
@@ -346,15 +346,15 @@ struct std::formatter<Frac<T>> : std::formatter<unsigned> {
 };
 \end{lstlisting}
 
-The specialization of the std::formatter class overloads its format() method. We inherit from the formatter<unsigned> specialization for simplicity. The format() method is called with a Context object, which provides the output context for the formatted string. For the return value, we use the format\_to() function with ctx.out, a normal format string, and parameters.
+formatter类的特化重载了它的format()方法。为了简单起见，我们继承了formatter<unsigned>特化。format()方法使用Context对象调用，该对象为格式化的字符串提供输出上下文。再将ctx.out传入format\_to()函数，将返回一个正常格式字符串。
 
-Now, we can now use our print() function with the Frac class:
+现在，可以在Frac类中使用print()函数:
 
 \begin{lstlisting}[style=styleCXX]
 print("Frac: {}\n", n);
 \end{lstlisting}
 
-The formatter now recognizes our class and provides our desired output:
+格式化器现在可以识别我们的类，并提供我们想要的输出:
 
 \begin{tcblisting}{commandshell={}}
 Frac: 3/5

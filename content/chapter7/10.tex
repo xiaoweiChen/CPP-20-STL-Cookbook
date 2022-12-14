@@ -1,13 +1,13 @@
 
-One strength of the input stream is its ability to parse different types of data from a text file and convert them to their corresponding fundamental types. Here's a simple technique for importing data into a container of structures using an input stream.
+输入流的一个优点是能够解析文本文件中不同类型的数据，并将它们转换为相应的基本类型。下面是一个使用输入流将数据导入结构容器的简单技术。
 
 \subsubsection{How to do it…}
 
-In this recipe, we'll take a data file and import its disparate fields into a vector of struct objects. The data file represents cities with their populations and map coordinates:
+这个示例中，我们将获取一个数据文件，并将其不同的字段导入到struct对象的向量中。数据文件表示城市及其人口和地图坐标:
 
 \begin{itemize}
 \item 
-This is cities.txt, the data file we'll read:
+这是cities.txt，是要读取的数据文件:
 
 \begin{tcblisting}{commandshell={}}
 Las Vegas
@@ -22,17 +22,17 @@ Sydney
 5312000 -33.8688 151.2093
 \end{tcblisting}
 
-The city name is on a line by itself. The second line is population, followed by longitude and latitude. This pattern repeats for each of the five cities.
+城市名称单独在一行上。第二行是人口，然后是经度和纬度。这一模式在五个城市中都重复出现。
 
 \item 
-We'll define our filename in a constant so that we can open it later:
+我们将在一个常量中定义文件名，以便稍后可以打开它:
 
 \begin{lstlisting}[style=styleCXX]
 constexpr const char * fn{ "cities.txt" };
 \end{lstlisting}
 
 \item 
-Here's a City struct to hold the data:
+下面是一个保存数据的City结构体:
 
 \begin{lstlisting}[style=styleCXX]
 struct City {
@@ -44,14 +44,14 @@ struct City {
 \end{lstlisting}
 
 \item 
-We would like to read the file and populate a vector of City objects:
+我们希望读取文件并填充City对象的vector:
 
 \begin{lstlisting}[style=styleCXX]
 vector<City> cities;
 \end{lstlisting}
 
 \item 
-Here's where the input stream makes this easy. We can simply specialize operator>{}> for our City class like this:
+这里是输入流使这变得容易的地方。可以简单地为City类特化操作符>{}>，如下所示:
 
 \begin{lstlisting}[style=styleCXX]
 std::istream& operator>>(std::istream& in, City& c) {
@@ -62,14 +62,14 @@ std::istream& operator>>(std::istream& in, City& c) {
 }
 \end{lstlisting}
 
-The std::ws input manipulator discards leading whitespace from the input stream.
+std::ws输入操纵符将丢弃输入流中前面的空格。
 
-We use getline() to read the city name, as it could be one or more words.
+我们使用getline()来读取城市名称，因为可能由多个单词组成。
 
-This leverages the >{}> operator for the population (unsigned long), and latitude and longitude (both double) elements to populate the correct type.
+这利用填充(unsigned long)的>{}>操作符，以及纬度和经度(都是double)元素来填充正确的类型。
 
 \item 
-Now, we can open the file and use the >{}> operator to read the file directly into the vector of City objects:
+现在，可以打开文件并使用>{}>操作符将文件直接读入City对象的vector:
 
 \begin{lstlisting}[style=styleCXX]
 ifstream infile(fn, std::ios_base::in);
@@ -81,7 +81,7 @@ for(City c{}; infile >> c;) cities.emplace_back(c);
 \end{lstlisting}
 
 \item 
-We can display the vector using format():
+可以使用format()来显示vector:
 
 \begin{lstlisting}[style=styleCXX]
 for (const auto& [name, pop, lat, lon] : cities) {
@@ -90,7 +90,7 @@ for (const auto& [name, pop, lat, lon] : cities) {
 }
 \end{lstlisting}
 
-Output:
+输出为:
 
 \begin{tcblisting}{commandshell={}}
 $ ./initialize_container < cities.txt
@@ -102,7 +102,7 @@ Sydney......... pop 5,312,000 coords -33.8688, 151.2093
 \end{tcblisting}
 
 \item 
-The make\_commas() function was also used in the Use structured binding to return multiple values recipe in Chapter 2, General STL Features. It takes a numeric value and returns a string object, with commas added for readability:
+make\_comma()函数也在第2章中使用，接受一个数值并返回一个字符串对象，为了可读性，添加了逗号:
 
 \begin{lstlisting}[style=styleCXX]
 string make_commas(const unsigned long num) {
@@ -117,7 +117,7 @@ string make_commas(const unsigned long num) {
 
 \subsubsection{How it works…}
 
-The heart of this recipe is the istream class operator>{}> overload:
+这个示例的核心是istream类操作符>{}>重载:
 
 \begin{lstlisting}[style=styleCXX]
 std::istream& operator>>(std::istream& in, City& c) {
@@ -128,20 +128,20 @@ std::istream& operator>>(std::istream& in, City& c) {
 }
 \end{lstlisting}
 
-By specifying our City class in the function header, this function will be called every time a City object appears on the right-hand side of an input stream >{}> operator:
+通过在函数头中指定我们的City类，每当一个City对象出现在输入流>{}>操作符的右侧时，将使用这个函数:
 
 \begin{lstlisting}[style=styleCXX]
 City c{};
 infile >> c;
 \end{lstlisting}
 
-This allows us to specify exactly how the input stream reads data into a City object.
+这允许我们精确地指定输入流如何将数据读入City对象。
 
 \subsubsection{There's more…}
 
-When you run this code on a Windows system, you'll notice that the first word of the first line gets corrupted. That's because Windows always includes a Byte Order Mark (BOM) at the head of any UTF-8 file. So, when you read a file on Windows, the BOM will be included in the first object you read. The BOM is anachronistic, but at the time of writing, there is no way to stop Windows from employing it.
+当在Windows系统上运行这段代码时，会注意到第一行的第一个单词损坏了。这是因为Windows总是在任何UTF-8文件的开头包含一个字节顺序标记(BOM)。因此，当在Windows上读取文件时，BOM将包含在读取的第一个对象中。BOM是不合时宜的，但在撰写本文时，没有办法阻止Windows使用它。
 
-The solution is to call a function that checks the first three bytes of a file for the BOM. The BOM for UTF-8 is EF BB BF. Here's a function that searches for, and skips, a UTF-8 BOM:
+解决方案是调用一个函数来检查文件的前三个字节的BOM。UTF-8的BOM是EF BB BF。下面是一个搜索并跳过UTF-8 BOM的函数:
 
 \begin{lstlisting}[style=styleCXX]
 // skip BOM for UTF-8 on Windows
@@ -156,9 +156,9 @@ void skip_bom(auto& fs) {
 }
 \end{lstlisting}
 
-This reads the first three bytes of the file and checks them for the UTF-8 BOM signature. If any of the three bytes do not match, it resets the input stream to the beginning of the file. If the file has no BOM, there's no harm done.
+这将读取文件的前三个字节，并检查是否为UTF-8 BOM签名。若这三个字节中的任何一个不匹配，会将输入流重置到文件的开头。若文件没有BOM，则不有任何问题。
 
-You simply call this function before you begin reading from a file:
+只需在开始读取文件之前调用这个函数:
 
 \begin{lstlisting}[style=styleCXX]
 int main() {
@@ -174,10 +174,10 @@ int main() {
 }
 \end{lstlisting}
 
-This will ensure that the BOM is not included in the first string of the file.
+这将确保BOM不包含在文件的第一个字符串中。
 
 \begin{tcolorbox}[colback=webgreen!5!white,colframe=webgreen!75!black,title=Note]
-Because the cin input stream is not seekable, the skip\_bom() function will not work on the cin stream. It will only work with a seekable text file.
+因为cin输入流不可定位，所以skip\_bom()函数将不能在cin流上工作，其只适用于可搜索的文本文件。
 \end{tcolorbox}
 
 

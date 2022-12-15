@@ -1,13 +1,13 @@
 
-Smart pointers are an excellent tool for managing allocated heap memory.
+智能指针是管理已分配堆内存的优秀工具。
 
-Heap memory is managed at the lowest level by the C functions, malloc() and free(). malloc() allocates a block of memory from the heap, and free() returns it to the heap. These functions do not perform initialization and do not call constructors or destructors. If you fail to return allocated memory to the heap with a call to free(), the behavior is undefined and often leads to memory leaks and security vulnerabilities.
+堆内存由C函数malloc()和free()在最低层进行管理。malloc()从堆中分配一块内存，free()将它返回给堆。这些函数不执行初始化，也不调用构造函数或析构函数。若未能通过调用free()将已分配的内存返回给堆，则该行为是未定义的，通常会导致内存泄漏和安全漏洞。
 
-C++ provides the new and delete operators to allocate and free heap memory, in place of malloc() and free(). The new and delete operators call object constructors and destructors but still do not manage memory. If you allocate memory with new and fail to free it with delete, you will leak memory.
+C++提供了new和delete操作符来分配和释放堆内存，用以取代malloc()和free()。new和delete操作符调用对象构造函数和析构函数，但仍然不管理内存。若使用new分配内存，而未能使用delete释放它，还是会泄漏内存。
 
-Introduced with C++14, smart pointers comply with the Resource Acquisition Is Initialization (RAII) idiom. This means that when memory is allocated for an object, that object's constructor is called. And when the object's destructor is called, the memory is automatically returned to the heap.
+C++14中引入的智能指针遵循资源获取即初始化(Resource Acquisition Is Initialization, RAII)习惯用法，当为一个对象分配内存时，将调用该对象的构造函数。当调用对象的析构函数时，内存会自动返回到堆中。
 
-For example, when we create a new smart pointer with make\_unique():
+例如，当使用make\_unique()创建一个新的智能指针时:
 
 \begin{lstlisting}[style=styleCXX]
 { // beginning of scope
@@ -17,24 +17,24 @@ For example, when we create a new smart pointer with make\_unique():
 } // end of scope, dtor called, memory freed
 \end{lstlisting}
 
-make\_unique() allocates memory for a Thing object, calls the Thing default constructor, constructs a unique\_ptr<Thing> object, and returns the unique\_ptr. When p goes out of scope, the Thing destructor is called, and the memory is automatically returned to the heap.
+make\_unique()为Thing对象分配内存，调用Thing默认构造函数，构造一个unique\_ptr<Thing>对象，并返回unique\_ptr。当p超出作用域时，调用Thing析构函数，内存自动返回到堆中。
 
-Aside from the memory management, a smart pointer works very much like a primitive pointer:
+除了内存管理之外，智能指针的工作原理非常类似于基本指针:
 
 \begin{lstlisting}[style=styleCXX]
 auto x = *p; // *p derefs the pointer, returns Thing object
 auto y = p->thname; // p-> derefs the pointer, returns member
 \end{lstlisting}
 
-unique\_ptr is a smart pointer that allows only one instance of the pointer. It may be moved, but it may not be copied. Let's take a closer look at how to use unique\_ptr.
+unique\_ptr是一个智能指针，只允许一个指针实例。它可以移动，但不能复制。来仔细了解一下，如何使用unique\_ptr。
 
 \subsubsection{How to do it…}
 
-In this recipe, we examine std::unique\_ptr with a demonstration class that prints when its constructors and destructor are called:
+在这个示例中，我们用一个演示类检查std::unique\_ptr，当使用它的构造函数和析构函数时输出:
 
 \begin{itemize}
 \item 
-First, we'll create a simple demonstration class:
+首先，创建一个简单的演示类:
 
 \begin{lstlisting}[style=styleCXX]
 struct Thing {
@@ -51,10 +51,10 @@ struct Thing {
 };
 \end{lstlisting}
 
-This class has a default constructor, a parameterized constructor, and a destructor. Each of these has a simple print statement to tell us what was called.
+该类有一个默认构造函数、一个参数化构造函数和一个析构函数。每一个都有一个简单的打印语句告诉我们调用了什么。
 
 \item 
-When we just construct a unique\_ptr, it does not allocate memory or construct a managed object:
+当只构造一个unique\_ptr时，不会分配内存或构造一个托管对象:
 
 \begin{lstlisting}[style=styleCXX]
 int main() {
@@ -63,7 +63,7 @@ int main() {
 }
 \end{lstlisting}
 
-Output:
+输出为:
 
 \begin{tcblisting}{commandshell={}}
 end of main()
@@ -71,7 +71,7 @@ end of main()
 
 
 \item 
-When we use the new operator, it allocates memory and constructs a Thing object:
+当使用new操作符时，会分配内存并构造一个Thing对象:
 
 \begin{lstlisting}[style=styleCXX]
 int main() {
@@ -80,7 +80,7 @@ int main() {
 }
 \end{lstlisting}
 
-Output:
+输出为:
 
 \begin{tcblisting}{commandshell={}}
 default ctor: unk
@@ -88,12 +88,12 @@ end of main()
 dtor: unk
 \end{tcblisting}
 
-The new operator constructs a Thing object by calling the default constructor. The unique\_ptr<Thing> destructor calls the Thing destructor when the smart pointer reaches the end of its scope.
+new操作符通过调用默认构造函数构造Thing对象。unique\_ptr<Thing>析构函数在智能指针到达其作用域的末尾时，调用Thing析构函数。
 
-The Thing default constructor does not initialize the thname string, leaving its default value, "unk".
+Thing默认构造函数不初始化thname字符串，会保留其默认值“unk”。
 
 \item 
-We can use make\_unique() to get the same result:
+也可以使用make\_unique():
 
 \begin{lstlisting}[style=styleCXX]
 int main() {
@@ -102,7 +102,7 @@ int main() {
 }
 \end{lstlisting}
 
-Output:
+输出为:
 
 \begin{tcblisting}{commandshell={}}
 default ctor: unk
@@ -110,10 +110,10 @@ end of main()
 dtor: unk
 \end{tcblisting}
 
-The make\_unique() helper function takes care of the memory allocation and returns a unique\_ptr object. This is the recommended way to construct a unique\_ptr.
+make\_unique()工厂函数负责内存分配并返回unique\_ptr对象。这是构造unique\_ptr的推荐方法。
 
 \item 
-Any arguments you pass to make\_unique() are used in constructing the target object:
+传递给make\_unique()的参数都将用于构造目标对象:
 
 \begin{lstlisting}[style=styleCXX]
 int main() {
@@ -122,7 +122,7 @@ int main() {
 }
 \end{lstlisting}
 
-Output:
+输出为:
 
 \begin{tcblisting}{commandshell={}}
 param ctor: Thing 1
@@ -130,10 +130,10 @@ end of main()
 dtor: Thing 1
 \end{tcblisting}
 
-The parameterized constructor assigns a value to thname, so our Thing object is now "Thing 1".
+参数化构造函数将值赋给thname，因此Thing对象现在是“Thing 1”。
 
 \item 
-Let's write a function that takes a unique\_ptr<Thing> argument:
+让我们创建一个函数，其有一个unique\_ptr<Thing>参数:
 
 \begin{lstlisting}[style=styleCXX]
 void process_thing(unique_ptr<Thing> p) {
@@ -143,19 +143,19 @@ void process_thing(unique_ptr<Thing> p) {
 }
 \end{lstlisting}
 
-If we try to pass a unique\_ptr to this function, we get a compiler error:
+若尝试传递一个unique\_ptr给这个函数，会得到一个编译器错误:
 
 \begin{lstlisting}[style=styleCXX]
 process_thing(p1);
 \end{lstlisting}
 
-Compiler error:
+编译器错误为：
 
 \begin{tcblisting}{commandshell={}}
 error: use of deleted function...
 \end{tcblisting}
 
-This is because the function call tries to make a copy of the unique\_ptr object, but the unique\_ptr copy constructor is deleted to prevent copying. The solution is to have the function take a const\& reference:
+这是因为函数调用试图复制unique\_ptr对象，但删除了unique\_ptr复制构造函数以防止复制。解决方案是让函数接受一个const\&引用参数:
 
 \begin{lstlisting}[style=styleCXX]
 void process_thing(const unique_ptr<Thing>& p) {
@@ -165,7 +165,7 @@ void process_thing(const unique_ptr<Thing>& p) {
 }
 \end{lstlisting}
 
-Output:
+输出为:
 
 \begin{tcblisting}{commandshell={}}
 param ctor: Thing 1
@@ -175,7 +175,7 @@ dtor: Thing 1
 \end{tcblisting}
 
 \item 
-We can call process\_thing() with a temporary object, which is immediately destroyed at the end of the function scope:
+可以用一个临时对象调用process\_thing()，其会在函数作用域的末尾立即销毁:
 
 \begin{lstlisting}[style=styleCXX]
 int main() {
@@ -186,7 +186,7 @@ int main() {
 }
 \end{lstlisting}
 
-Output:
+输出为:
 
 \begin{tcblisting}{commandshell={}}
 param ctor: Thing 1
@@ -202,23 +202,23 @@ dtor: Thing 1
 
 \subsubsection{How it works…}
 
-A smart pointer is simply an object that presents a pointer interface while owning and managing the resources of another object.
+智能指针只是一个对象，在拥有和管理另一个对象的资源时，可以提供指针接口。
 
-The unique\_ptr class is distinguished by its deleted copy constructor and copy assignment operator, which prevents the smart pointer from being copied.
+unique\_ptr类由其删除的复制构造函数和复制赋值操作符来区分，这可以防止智能指针的复制。
 
-You may not copy a unique\_ptr:
+不能复制unique\_ptr:
 
 \begin{lstlisting}[style=styleCXX]
 auto p2 = p1;
 \end{lstlisting}
 
-Compiler error:
+编译器错误:
 
 \begin{tcblisting}{commandshell={}}
 error: use of deleted function...
 \end{tcblisting}
 
-But you can move a unique\_ptr:
+但可以移动unique\_ptr:
 
 \begin{lstlisting}[style=styleCXX]
 auto p2 = std::move(p1);
@@ -226,9 +226,9 @@ process_thing(p1);
 process_thing(p2);
 \end{lstlisting}
 
-After the move, p1 is invalid and p2 is "Thing 1".
+移动后，p1无效，p2为“Thing 1”。
 
-Output:
+输出为:
 
 \begin{tcblisting}{commandshell={}}
 invalid pointer
@@ -237,28 +237,28 @@ end of main()
 dtor: Thing 1
 \end{tcblisting}
 
-The unique\_ptr interface has a method to reset a pointer:
+unique\_ptr接口有一个重置指针的方法:
 
 \begin{lstlisting}[style=styleCXX]
 p1.reset(); // pointer is now invalid
 process_thing(p1);
 \end{lstlisting}
 
-Output:
+输出为:
 
 \begin{tcblisting}{commandshell={}}
 dtor: Thing 1
 invalid pointer
 \end{tcblisting}
 
-The reset() method may also be used to replace the managed object with another of the same type:
+reset()方法也可以将管理对象替换为另一个相同类型的对象:
 
 \begin{lstlisting}[style=styleCXX]
 p1.reset(new Thing("Thing 3"));
 process_thing(p1);
 \end{lstlisting}
 
-Output:
+输出为:
 
 \begin{tcblisting}{commandshell={}}
 param ctor: Thing 3

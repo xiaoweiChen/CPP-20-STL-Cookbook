@@ -1,15 +1,15 @@
 
-Strictly speaking, std::weak\_ptr is not a smart pointer. Rather, it's an observer that operates in cooperation with shared\_ptr. A weak\_ptr object does not hold a pointer on its own.
+严格地说，std::weak\_ptr不是一个智能指针。相反，它是一个与shared\_ptr合作运行的观察者。weak\_ptr本身不保存指针。
 
-There are circumstances where shared\_ptr objects may create dangling pointers or race conditions, which could lead to memory leaks or other problems. The solution is to use weak\_ptr objects with shared\_ptr.
+某些情况下，shared\_ptr对象可能会创建悬空指针或数据竞争，这可能导致内存泄漏或其他问题。解决方案是使用具有shared\_ptr的weak\_ptr对象。
 
 \subsubsection{How to do it…}
 
-In this recipe, we examine the use of std::weak\_ptr with std::shared\_ptr, using a demonstration class that prints when its constructors and destructor are called.
+这个示例中，使用std::shared\_ptr来检查std::weak\_ptr的使用。创建一个演示类，当调用它的构造函数和析构函数时进行打印。
 
 \begin{itemize}
 \item 
-We start with the same class we've used to demonstrate shared\_ptr and unique\_ptr:
+展示将要在shared\_ptr和unique\_ptr中创建的类型:
 
 \begin{lstlisting}[style=styleCXX]
 struct Thing {
@@ -26,10 +26,10 @@ struct Thing {
 };
 \end{lstlisting}
 
-This class has a default constructor, a parameterized constructor, and a destructor. Each of these has a simple print statement to tell us what was called.
+该类有一个默认构造函数、一个参数化构造函数和一个析构函数。每一个都有一个简单的打印语句告诉我们调用了什么。
 
 \item 
-We also need a function to examine a weak\_ptr object:
+还需要一个函数来检查weak\_ptr对象:
 
 \begin{lstlisting}[style=styleCXX]
 void get_weak_thing(const weak_ptr<Thing>& p) {
@@ -40,10 +40,10 @@ void get_weak_thing(const weak_ptr<Thing>& p) {
 }
 \end{lstlisting}
 
-A weak\_ptr does not operate as a pointer on its own; it requires the use of a shared\_ptr. The lock() function returns a shared\_ptr object, which can then be used to access the managed object.
+weak\_ptr本身不作为指针操作，其需要使用shared\_ptr.lock()函数返回一个shared\_ptr对象，然后可以使用该对象访问托管对象。
 
 \item 
-Because weak\_ptr requires an associated shared\_ptr, we'll start main() by creating a shared\_ptr<Thing> object. When we create a weak\_ptr object without assigning the shared\_ptr, the expired flag is initially set:
+因为weak\_ptr需要一个相关的shared\_ptr，将通过创建一个shared\_ptr<Thing>对象来启动main()。当创建一个weak\_ptr对象而不分配shared\_ptr时，会对过期(expired)标志进行设置:
 
 \begin{lstlisting}[style=styleCXX]
 int main() {
@@ -54,7 +54,7 @@ int main() {
 }
 \end{lstlisting}
 
-Output:
+输出为:
 
 \begin{tcblisting}{commandshell={}}
 param ctor: Thing 1
@@ -62,48 +62,48 @@ expired: true
 no shared object
 \end{tcblisting}
 
-The make\_shared() function allocates memory and constructs a Thing object.
+make\_shared()函数分配内存并构造一个Thing对象。
 
-The weak\_ptr<Thing> declaration constructs a weak\_ptr object without assigning a shared\_ptr. So, when we check the expired flag, it's true, indicating that there is no associated shared\_ptr.
+weak\_ptr<Thing>声明构造了一个weak\_ptr对象，但没有分配shared\_ptr。因此，当检查过期标志时，其为真，表明并没有相关的shared\_ptr。
 
-The get\_weak\_thing() function is not able to obtain a lock because there is no shared\_ptr available.
+get\_weak\_thing()函数不能获得锁，因为没有shared\_ptr可用。
 
 \item 
-When we assign the shared\_ptr to the weak\_ptr, we can use the weak\_ptr to access the managed object:
+将shared\_ptr分配给weak\_ptr时，可以使用weak\_ptr来访问托管对象:
 
 \begin{lstlisting}[style=styleCXX]
 wp1 = thing1;
 get_weak_thing(wp1);
 \end{lstlisting}
 
-Output:
+输出为:
 
 \begin{tcblisting}{commandshell={}}
 Thing 1: count 2
 \end{tcblisting}
 
-The get\_weak\_thing() function is now able to obtain a lock and access the managed object. The lock() method returns a shared\_ptr, and the use\_count() reflects the fact that there is now a second shared\_ptr managing the Thing object.
+get\_weak\_thing()函数现在可以获取锁并访问托管对象。lock()方法返回一个shared\_ptr，use\_count()反映了现在有第二个shared\_ptr管理Thing对象的事实。
 
-The new shared\_ptr is destroyed at the end of the get\_weak\_thing() scope.
+新shared\_ptr在get\_weak\_thing()作用域的末尾销毁。
 
 \item 
-The weak\_ptr class has a constructor that takes a shared\_ptr for one-step construction:
+weak\_ptr类有一个构造函数，其接受shared\_ptr进行一步构造:
 
 \begin{lstlisting}[style=styleCXX]
 weak_ptr<Thing> wp2(thing1);
 get_weak_thing(wp2);
 \end{lstlisting}
 
-Output:
+输出为:
 
 \begin{tcblisting}{commandshell={}}
 Thing 1: count 2
 \end{tcblisting}
 
-The use\_count() is 2 again. Remember that the previous shared\_ptr was destroyed when its enclosing get\_weak\_thing() scope ended.
+use\_count()再次为2。记住，之前的shared\_ptr在其封闭的get\_weak\_thing()作用域结束时销毁。
 
 \item 
-When we reset shared\_ptr, its associated weak\_ptr objects are expired:
+重置shared\_ptr时，其关联的weak\_ptr对象将过期:
 
 \begin{lstlisting}[style=styleCXX]
 thing1.reset();
@@ -111,7 +111,7 @@ get_weak_thing(wp1);
 get_weak_thing(wp2);
 \end{lstlisting}
 
-Output:
+输出为:
 
 \begin{tcblisting}{commandshell={}}
 dtor: Thing 1
@@ -119,27 +119,27 @@ no shared object
 no shared object
 \end{tcblisting}
 
-After the reset(), the use count reaches zero, and the managed object is destroyed and the memory released.
+reset()后，使用计数为零，管理对象销毁，内存释放。
 \end{itemize}
 
 
 \subsubsection{How it works…}
 
-A weak\_ptr object is an observer that holds a non-owning reference to a shared\_ptr object. The weak\_ptr observes the shared\_ptr so that it knows when the managed object is, and is not, available. This allows use of a shared\_ptr in circumstances where you may not always know if the managed object is active.
+weak\_ptr对象是一个观察者，其对shared\_ptr对象属于非所有引用。weak\_ptr会观察shared\_ptr，这样就知道托管对象什么时候可用，什么时候不可用。这允许在您可能不总是知道托管对象是否处于活动状态的情况下，使用shared\_ptr。
 
-The weak\_ptr class has a use\_count() function that returns the use count of shared\_ptr, or 0 if the managed object has been deleted:
+weak\_ptr类有一个use\_count()函数，返回shared\_ptr的使用计数，若管理对象已删除，则返回0:
 
 \begin{lstlisting}[style=styleCXX]
 long use_count() const noexcept;
 \end{lstlisting}
 
-weak\_ptr also has an expired() function that reports if the managed object has been deleted:
+weak\_ptr还有一个expired()函数，会报告托管对象是否已删除:
 
 \begin{lstlisting}[style=styleCXX]
 bool expired() const noexcept;
 \end{lstlisting}
 
-The lock() function is the preferred way to access the shared pointer. It checks expired() to see if the managed object is available. If so, it returns a new shared\_ptr that shares ownership with the managed object. Otherwise, it returns an empty shared\_ptr. It does all that as one atomic operation:
+lock()函数是访问shared\_ptr的首选方法，其检查expired()以查看管理对象是否可用。若是，它将返回一个新的shared\_ptr，该shared\_ptr与管理对象共享所有权。否则，会返回一个空的shared\_ptr。这些会作为一个原子操作完成:
 
 \begin{lstlisting}[style=styleCXX]
 std::shared_ptr<T> lock() const noexcept;
@@ -148,7 +148,7 @@ std::shared_ptr<T> lock() const noexcept;
 
 \subsubsection{There's more…}
 
-One important use case for weak\_ptr is when there's a possibility of circular references to shared\_ptr objects. For example, consider the case of two classes that link to each other (perhaps in a hierarchy):
+weak\_ptr的一个重要用例是有可能循环引用shared\_ptr对象。例如，考虑两个相互链接的类的情况(可能在一个层次结构中):
 
 \begin{lstlisting}[style=styleCXX]
 struct circB;
@@ -162,7 +162,7 @@ struct circB {
 };
 \end{lstlisting}
 
-We have print statements in the destructors, so we can see when the objects are destroyed. We can now create two objects that point at each other with shared\_ptr:
+在析构函数中有print语句，因此可以看到对象何时销毁。现在，可以通过shared\_ptr创建两个相互指向的对象:
 
 \begin{lstlisting}[style=styleCXX]
 int main() {
@@ -174,15 +174,15 @@ int main() {
 }
 \end{lstlisting}
 
-When we run this, notice that the destructors are never called:
+当运行这个函数时，会发现析构函数从未调用:
 
 \begin{tcblisting}{commandshell={}}
 end of main()
 \end{tcblisting}
 
-Because the objects maintain shared pointers that refer to each other, the use counts never reach zero, and the managed objects are never destroyed.
+因为对象维护着相互引用的共享指针，所以使用计数永远不会达到零，并且托管对象永远不会销毁。
 
-We can resolve this problem by changing one of the classes to use a weak\_ptr:
+我们可以通过更改其中一个类来使用weak\_ptr来解决这个问题:
 
 \begin{lstlisting}[style=styleCXX]
 struct circB {
@@ -191,7 +191,7 @@ struct circB {
 };
 \end{lstlisting}
 
-The code in main() remains the same, and we get this output:
+main()中的代码保持不变，我们会得到这样的输出:
 
 \begin{tcblisting}{commandshell={}}
 end of main()
@@ -199,7 +199,7 @@ dtor A
 dtor B
 \end{tcblisting}
 
-By changing one shared\_ptr to a weak\_ptr, we have resolved the circular reference, and the objects are now properly destroyed at the end of their scope.
+通过将一个shared\_ptr更改为weak\_ptr，我们已经解决了循环引用，并且现在在对象作用域的末尾，就可以正确地销毁对象了。
 
 
 

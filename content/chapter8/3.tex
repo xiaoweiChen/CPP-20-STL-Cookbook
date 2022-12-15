@@ -1,32 +1,32 @@
 
-Introduced with C++17, the std::any class provides a type-safe container for a single object of any type.
+C++17中引入了std::any类，可为任何类型的单个对象提供了类型安全的容器。
 
-For example, this is a default-constructed any object:
+例如，这是一个默认构造的any对象:
 
 \begin{lstlisting}[style=styleCXX]
 any x{};
 \end{lstlisting}
 
-This object has no value. We can test that with the has\_value() method:
+该对象无值，可以使用has\_value()方法进行测试:
 
 \begin{lstlisting}[style=styleCXX]
 if(x.has_value()) cout << "have value\n";
 else cout << "no value\n";
 \end{lstlisting}
 
-Output:
+输出为:
 
 \begin{tcblisting}{commandshell={}}
 no value
 \end{tcblisting}
 
-We assign a value to the any object with the assignment operator:
+我们使用赋值操作符为any对象赋值:
 
 \begin{lstlisting}[style=styleCXX]
 x = 42;
 \end{lstlisting}
 
-Now, the any object has a value, and a type:
+现在，any对象有一个值和一个类型:
 
 \begin{lstlisting}[style=styleCXX]
 if(x.has_value()) {
@@ -37,18 +37,18 @@ if(x.has_value()) {
 }
 \end{lstlisting}
 
-Output:
+输出为:
 
 \begin{tcblisting}{commandshell={}}
 x has type: i
 x has value: 42
 \end{tcblisting}
 
-The type() method returns a type\_info object. The type\_info::name() method returns an implementation-defined name for the type in a C-string. In this case, for GCC, the i means int.
+type()方法返回一个type\_info对象。type\_info::name()方法返回C-string类型的实现定义的名称。在本例中，GCC中i表示int。
 
-We use the any\_cast<type>() non-member function to cast the value for use.
+我们使用any\_cast<type>()非成员函数强制转换值进行使用。
 
-We can re-assign the any object with different values of different types:
+可以用不同类型的不同值重新赋值:
 
 \begin{lstlisting}[style=styleCXX]
 x = "abc"s;
@@ -56,23 +56,23 @@ cout << format("x is type {} with value {}\n",
 	x.type().name(), any_cast<string>(x))
 \end{lstlisting}
 
-Output:
+输出为:
 
 \begin{tcblisting}{commandshell={}}
 x is type NSt7__cxx1112basic_string... with value abc
 \end{tcblisting}
 
-I've abbreviated the long type name from GCC but you get the idea. The same any object that once held an int now contains an STL string object.
+我用GCC缩写了这个长类型名，相同的任何对象，曾经持有int，现在包含一个STL字符串对象。
 
-The main usefulness of the any class is in creating a polymorphic function. Let's examine how to do that in this recipe:
+any类的主要用途是创建一个多态函数。让我们来看看如何在这个示例中做到这一点:
 
 \subsubsection{How to do it…}
 
-In this recipe, we'll build a polymorphic function using the any class. A polymorphic function is one that can take objects of different types in its parameters:
+这个示例中，我们将使用any类构建一个多态函数。多态函数是可以在其参数中接受不同类型对象的函数:
 
 \begin{itemize}
 \item 
-Our polymorphic function takes an any object and prints its type and value:
+我们的多态函数可以接受任意对象并，打印其类型和值:
 
 \begin{lstlisting}[style=styleCXX]
 void p_any(const any& a) {
@@ -95,12 +95,12 @@ void p_any(const any& a) {
 }
 \end{lstlisting}
 
-The p\_any() function first tests to see if the object has a value. It then tests the type() method against various types and takes appropriate action for each type.
+p\_any()函数首先测试对象是否有值。然后，针对各种类型测试type()方法，并对每种类型采取适当的操作。
 
-Before the any class, we would have had to write four different specializations for this function, and we still wouldn't be able to easily handle the default case.
+在any类之前，我们必须为这个函数编写四种不同的专门化，并且仍然不能轻松地处理默认情况。
 
 \item 
-We call this function from main(), like this:
+我们在main()调用这个函数，如下所示:
 
 \begin{lstlisting}[style=styleCXX]
 p_any({});
@@ -110,7 +110,7 @@ p_any(any(list{ 1, 2, 3 }));
 p_any(any(vector{ 1, 2, 3 }));
 \end{lstlisting}
 
-Output:
+输出为:
 
 \begin{tcblisting}{commandshell={}}
 one.
@@ -122,44 +122,44 @@ something else: St6vectorIiSaIiEE
 
 \end{itemize}
 
-Our polymorphic function handles the various types with a minimum of code.
+我们的多态函数用最少的代码处理了各种类型的变量。
 
 \subsubsection{How it works…}
 
-The std::any copy constructor and assignment operator use direct initialization to make a non-const copy of the target object as the contained object. The type of the contained object is stored separately as a typeid object.
+any复制构造函数和赋值操作符，可以直接初始化来生成目标对象的非const副本作为包含对象。所包含对象的类型作为typeid对象单独存储。
 
-Once initialized, the any object has the following methods:
-
-\begin{itemize}
-\item 
-emplace() replaces the contained object, constructing the new object in place.
-
-\item 
-reset() destroys the contained object.
-
-\item 
-has\_value() returns true if there is a contained object.
-
-\item 
-type() returns a typeid object, representing the type of the contained object.
-
-\item 
-operator=() replaces the contained object by a copy or move operation.
-\end{itemize}
-
-The any class also supports the following non-member functions:
+初始化后，any对象有以下方法:
 
 \begin{itemize}
 \item 
-any\_cast<T>(), a template function, provides type-safe access to the contained object.
-
-Keep in mind that the any\_cast<T>() function returns a copy of the contained object. You may use any\_cast<T\&>() to return a reference.
+emplace()替换包含的对象，在适当的位置构造新对象。
 
 \item 
-std::swap() specializes the std::swap algorithm.
+reset() 替换包含的对象，在适当的位置构造新对象。
+
+\item 
+has\_value() 若有包含对象，则返回true。
+
+\item 
+type() 返回typeid对象，表示所包含对象的类型。
+
+\item 
+operator=() 用复制或移动操作替换包含的对象。
 \end{itemize}
 
-If you try to cast an any object with the wrong type, it throws a bad\_any\_cast exception:
+any类还支持以下非成员函数:
+
+\begin{itemize}
+\item 
+any\_cast<T>()，模板函数，提供对包含对象的类型安全访问。
+
+请记住，any\_cast<T>()函数返回包含对象的副本。可以使用any\_cast<T\&>()来返回引用。
+
+\item 
+std::swap()专门处理std::swap算法。
+\end{itemize}
+
+若用错误的类型强制转换any对象，它会抛出一个bad\_any\_cast异常:
 
 \begin{lstlisting}[style=styleCXX]
 try {
@@ -169,7 +169,7 @@ try {
 }
 \end{lstlisting}
 
-Output:
+输出为:
 
 \begin{tcblisting}{commandshell={}}
 any: bad any_cast

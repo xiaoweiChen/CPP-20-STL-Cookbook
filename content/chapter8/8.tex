@@ -1,17 +1,17 @@
 
-The std::shared\_ptr class is a smart pointer that owns its managed object and maintains a use counter to keep track of copies. This recipe explores the use of shared\_ptr to manage memory while sharing copies of the pointer.
+shared\_ptr类是一个智能指针，拥有自己的托管对象，并维护一个使用计数器来跟踪副本。此示例探索了shared\_ptr的使用方式，以在共享指针副本的同时管理内存。
 
 \begin{tcolorbox}[colback=webgreen!5!white,colframe=webgreen!75!black,title=Note]
-For more detail about smart pointers, see the introduction to the Manage allocated memory with std::unique\_ptr recipe earlier in this chapter.
+有关智能指针的更多详细信息，请参阅本章前面关于使用std::unique\_ptr管理已分配内存的介绍。
 \end{tcolorbox}
 
 \subsubsection{How to do it…}
 
-In this recipe, we examine std::shared\_ptr with a demonstration class that prints when its constructors and destructor are called:
+在这个示例中，用一个演示类检查std::shared\_ptr，当调用它的构造函数和析构函数时进行打印输出:
 
 \begin{itemize}
 \item 
-First, we create a simple demonstration class:
+首先，创建一个简单的演示类:
 
 \begin{lstlisting}[style=styleCXX]
 struct Thing {
@@ -28,10 +28,10 @@ struct Thing {
 };
 \end{lstlisting}
 
-This class has a default constructor, a parameterized constructor, and a destructor. Each of these has a simple print statement to tell us what was called.
+该类有一个默认构造函数、一个参数化构造函数和一个析构函数。每一个都有一个简单的打印语句，显示调用了哪些函数。
 
 \item 
-The shared\_ptr class works very much like other smart pointers, in that it may be constructed with the new operator or with its helper, the make\_shared() function:
+shared\_ptr类的工作原理与其他智能指针非常相似，也可以用new操作符或make\_shared()函数来构造:
 
 \begin{lstlisting}[style=styleCXX]
 int main() {
@@ -41,7 +41,7 @@ int main() {
 }
 \end{lstlisting}
 
-Output:
+输出为:
 
 \begin{tcblisting}{commandshell={}}
 param ctor: Thing 1
@@ -51,12 +51,12 @@ dtor: Thing 2
 dtor: Thing 1
 \end{tcblisting}
 
-The make\_shared() function is recommended, as it manages the construction process and is less prone to error.
+推荐使用make\_shared()函数，因为它会管理构造过程，不太容易出错。
 
-As with the other smart pointers, the managed object is destroyed, and its memory is returned to the heap when the pointer goes out of scope.
+与其他智能指针一样，当指针超出作用域时，托管对象将销毁，其内存将返回到堆中。
 
 \item 
-Here's a function to check the use count of a shared\_ptr object:
+下面是一个检查shared\_ptr对象的使用计数的函数:
 
 \begin{lstlisting}[style=styleCXX]
 void check_thing_ptr(const shared_ptr<Thing>& p) {
@@ -66,16 +66,16 @@ void check_thing_ptr(const shared_ptr<Thing>& p) {
 }
 \end{lstlisting}
 
-thname is a member of the Thing class, so we access it through the pointer with the p-> member dereference operator. The use\_count() function is a member of the shared\_ptr class, so we access it with the p. object member operator.
+thname是Thing类的成员，因此可以通过带有p->成员解引用操作符的指针访问它。use\_count()函数是shared\_ptr类的成员，因此，可以使用p. object成员操作符访问它。
 
-Let's call this with our pointers:
+让我们使用指针来对其进行调用:
 
 \begin{lstlisting}[style=styleCXX]
 check_thing_ptr(p1);
 check_thing_ptr(p2);
 \end{lstlisting}
 
-Output:
+输出为:
 
 \begin{tcblisting}{commandshell={}}
 Thing 1 use count: 1
@@ -84,7 +84,7 @@ Thing 2 use count: 1
 
 
 \item 
-When we make copies of our pointers, the use count increases, but no new objects are constructed:
+当复制指针时，使用计数会增加，但不会构造新的对象:
 
 \begin{lstlisting}[style=styleCXX]
 cout << "make 4 copies of p1:\n";
@@ -95,7 +95,7 @@ auto pd = p1;
 check_thing_ptr(p1);
 \end{lstlisting}
 
-Output:
+输出为:
 
 \begin{tcblisting}{commandshell={}}
 make 4 copies of p1:
@@ -103,7 +103,7 @@ Thing 1 use count: 5
 \end{tcblisting}
 
 \item 
-When we check any of the other copies, we get the same result:
+当我们检查其他副本时，会得到相同的结果:
 
 \begin{lstlisting}[style=styleCXX]
 check_thing_ptr(pa);
@@ -112,7 +112,7 @@ check_thing_ptr(pc);
 check_thing_ptr(pd);
 \end{lstlisting}
 
-Output:
+输出为:
 
 \begin{tcblisting}{commandshell={}}
 Thing 1 use count: 5
@@ -121,10 +121,10 @@ Thing 1 use count: 5
 Thing 1 use count: 5
 \end{tcblisting}
 
-Each pointer reports the same use count
+每个指针都会报告相同的使用计数。
 
 \item 
-When the copies go out of scope, they are destroyed, and the use count is decremented:
+当副本超出作用域时，将进行销毁，并使计数递减:
 
 \begin{lstlisting}[style=styleCXX]
 { // new scope
@@ -138,7 +138,7 @@ When the copies go out of scope, they are destroyed, and the use count is decrem
 check_thing_ptr(p1);
 \end{lstlisting}
 
-Output:
+输出为:
 
 \begin{tcblisting}{commandshell={}}
 make 4 copies of p1:
@@ -147,7 +147,7 @@ Thing 1 use count: 1
 \end{tcblisting}
 
 \item 
-Destroying a copy reduces the use count but does not destroy the managed object. The object is destroyed when the final copy goes out of scope and the use count reaches zero:
+销毁副本将减少使用计数，但不会销毁管理对象。当最终副本超出作用域且使用计数为零时，对象将销毁:
 
 \begin{lstlisting}[style=styleCXX]
 {
@@ -163,7 +163,7 @@ Destroying a copy reduces the use count but does not destroy the managed object.
 } // end of scope
 \end{lstlisting}
 
-Output:
+输出为:
 
 \begin{tcblisting}{commandshell={}}
 make 4 copies of p1:
@@ -172,19 +172,19 @@ Thing 1 use count: 3
 dtor: Thing 1
 \end{tcblisting}
 
-Destroying pb (a copy) and p1 (the original) leaves three copies of the pointer (pa, bc, and pd), so the managed object remains.
+销毁pb(一个副本)和p1(原始)会留下三个指针副本(pa、bc和pd)，因此管理对象仍然存在。
 
-The remaining three pointer copies are destroyed at the end of the scope in which they were created. Then the object is destroyed and its memory returned to the heap.
+其余三个指针副本将在创建它们的作用域的末尾销毁。然后销毁对象，并将其内存返回到堆中。
 
 \end{itemize}
 
 \subsubsection{How it works…}
 
-The shared\_ptr class is distinguished by its management of multiple pointers to the same managed object.
+shared\_ptr类的区别在于它对指向同一个托管对象的多个指针的管理。
 
-The shared\_ptr object's copy constructor and copy assignment operator increment a use counter. The destructor decrements the use counter until it reaches zero, then destroys the managed object, and returns its memory to the heap. 
+shared\_ptr对象的复制构造函数和复制赋值操作符增加一个使用计数器。析构函数将使用计数器减为零，然后销毁托管对象，并将其内存返回给堆。
 
-The shared\_ptr class manages both the managed object and a heap-allocated control block. The control block contains the use counter, along with other housekeeping objects. The control block is managed and shared between copies along with the managed object. This allows the original shared\_ptr object to cede control to its copies, so that the last remaining shared\_ptr may manage the object and its memory.
+shared\_ptr类同时管理托管对象和堆分配的控制块。控制块包含使用计数器以及其他管家对象，控制块与管理对象一起在副本之间进行管理和共享。所以原始shared\_ptr对象将控制权转让给其副本，以便其他shared\_ptr可以管理对象及其内存。
 
 
 

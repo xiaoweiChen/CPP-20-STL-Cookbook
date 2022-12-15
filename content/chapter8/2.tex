@@ -1,7 +1,7 @@
 
-Introduced with C++17, the std::optional class holds an optional value.
+C++17引入的std::optional类保存了一个可选值。
 
-Consider the case where you have a function that may or may not return a value – for example, a function that checks if a number is prime but returns the first factor if there is one. This function should return either a value or a bool status. We could create a struct that carries both value and status:
+假设有一个函数，它可能返回值，也可能不返回值——例如，一个函数检查一个数字是否是质数，但若存在第一个因数，则返回第一个因数。此函数应返回值或bool状态。我们可以创建一个同时包含值和状态的结构体:
 
 \begin{lstlisting}[style=styleCXX]
 struct factor_t {
@@ -22,9 +22,9 @@ factor_t factor(long n) {
 }
 \end{lstlisting}
 
-It's a clumsy solution but it works, and it's not uncommon.
+这是一个笨拙的解决方案，但它是有效的，而且很常见。
 
-It could be made a lot simpler with the optional class:
+optional类可以让这个任务变得简单很多:
 
 \begin{lstlisting}[style=styleCXX]
 optional<long> factor(long n) {
@@ -35,9 +35,9 @@ optional<long> factor(long n) {
 }
 \end{lstlisting}
 
-With optional, we can return a value or a non-value.
+使用optional，可以返回值或非值。
 
-We can call it, like this:
+我们可以这样使用:
 
 \begin{lstlisting}[style=styleCXX]
 long a{ 42 };
@@ -50,58 +50,56 @@ if(y) cout << format("lowest factor of {} is {}\n", b, *y);
 else cout << format("{} is prime\n", b);
 \end{lstlisting}
 
-Our output is:
+输出是:
 
 \begin{tcblisting}{commandshell={}}
 lowest factor of 42 is 2
 73 is prime
 \end{tcblisting}
 
-The optional class allows us to easily return the optional value and easily test for a value.
-
 \subsubsection{How to do it…}
 
-In this recipe, we'll look at some examples of how to use the optional class:
+这个示例中，来看一些如何使用optional类的例子:
 
 \begin{itemize}
 \item 
-The optional class is quite simple. We construct an optional value using standard template notation:
+optional类非常简单。我们使用标准模板表示法构造一个optional值:
 
 \begin{lstlisting}[style=styleCXX]
 optional<int> a{ 42 };
 cout << *a << '\n';
 \end{lstlisting}
 
-We access the value of the optional with the * pointer dereference operator.
+使用指针的解引用操作符访问可选对象的值。
 
-Output:
+输出为:
 
 \begin{tcblisting}{commandshell={}}
 42
 \end{tcblisting}
 
 \item 
-We test if the optional has a value using its bool operator:
+使用bool操作符来测试optional是否有值:
 
 \begin{lstlisting}[style=styleCXX]
 if(a) cout << *a << '\n';
 else cout << "no value\n";
 \end{lstlisting}
 
-If a were constructed without a value:
+若构造a时不带值:
 
 \begin{lstlisting}[style=styleCXX]
 optional<int> a{};
 \end{lstlisting}
 
-The output would reflect the else condition:
+输出将输出else的内容:
 
 \begin{tcblisting}{commandshell={}}
 no value
 \end{tcblisting}
 
 \item 
-We can further simplify this by declaring a type alias:
+我们可以通过声明类型别名来进一步简化:
 
 \begin{lstlisting}[style=styleCXX]
 using oint = std::optional<int>;
@@ -110,7 +108,7 @@ oint b{ 73 };
 \end{lstlisting}
 
 \item 
-If we want to operate on oint objects, with oint objects as the result, we can provide operator overloads:
+若想对oint对象进行操作，可以对操作符进行重载:
 
 \begin{lstlisting}[style=styleCXX]
 oint operator+(const oint& a, const oint& b) {
@@ -123,7 +121,7 @@ oint operator+(const oint& a, const int b) {
 }
 \end{lstlisting}
 
-Now, we can operate on the oint objects directly:
+现在，可以直接操作oint对象:
 
 \begin{lstlisting}[style=styleCXX]
 auto sum{ a + b };
@@ -134,20 +132,20 @@ if(sum) {
 }
 \end{lstlisting}
 
-Output:
+输出为:
 
 \begin{lstlisting}[style=styleCXX]
 42 + 73 = 115
 \end{lstlisting}
 
 \item 
-Suppose we declare b with the default constructor:
+假设用默认构造函数声明b:
 
 \begin{lstlisting}[style=styleCXX]
 oint b{};
 \end{lstlisting}
 
-Now, we get the else branch output:
+现在，可得到else分支的输出:
 
 \begin{lstlisting}[style=styleCXX]
 NAN
@@ -157,34 +155,34 @@ NAN
 
 \subsubsection{How it works…}
 
-The std::optional class is made for simplicity. It provides operator overloads for many common functions. It also includes member functions for further flexibility.
+std::optional类是为了简单而创建的，其为许多常用函数提供操作符重载。还包括成员函数，可提供更进一步的灵活性。
 
-The optional class provides an operator bool overload for determining if the object has a value:
+optional类提供了一个操作符bool重载，用于确定对象是否有值:
 
 \begin{lstlisting}[style=styleCXX]
 optional<int> n{ 42 };
 if(n) ... // has a value
 \end{lstlisting}
 
-Or, you may use the has\_value() member function:
+或者，可以使用has\_value()成员函数:
 
 \begin{lstlisting}[style=styleCXX]
 if(n.has_value()) ... // has a value
 \end{lstlisting}
 
-To access the value, you may use the operator* overload:
+要访问该值，可以使用解引用操作符的重载:
 
 \begin{lstlisting}[style=styleCXX]
 x = *n; // * retruns the value
 \end{lstlisting}
 
-Or, you may use the value() member function:
+或者，可以使用value()成员函数:
 
 \begin{lstlisting}[style=styleCXX]
 x = n.value(); // * retruns the value
 \end{lstlisting}
 
-The reset() member function destroys the value and resets the state of the optional object:
+reset()成员函数可以销毁该值，并重置可选对象的状态:
 
 \begin{lstlisting}[style=styleCXX]
 n.reset(); // no longer has a value
@@ -193,7 +191,7 @@ n.reset(); // no longer has a value
 
 \subsubsection{There's more…}
 
-The optional class provides exception support with the value() method:
+optional类通过value()方法提供异常支持:
 
 \begin{lstlisting}[style=styleCXX]
 b.reset();
@@ -204,14 +202,14 @@ try {
 }
 \end{lstlisting}
 
-Output:
+输出为:
 
 \begin{tcblisting}{commandshell={}}
 b.value(): bad optional access
 \end{tcblisting}
 
 \begin{tcolorbox}[colback=webgreen!5!white,colframe=webgreen!75!black,title=Note]
-Only the value() method throws an exception. The behavior of the * operator is undefined for an invalid value.
+只有value()方法会抛出异常。对于无效值，解引用操作符的行为未定义。
 \end{tcolorbox}
 
 

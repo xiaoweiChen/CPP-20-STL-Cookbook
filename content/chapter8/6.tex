@@ -1,11 +1,11 @@
 
-The std::tuple class is essentially a more complex, and less convenient, struct. The interface for tuple is cumbersome, although class template argument deduction and structured binding have made it somewhat easier.
+tuple类本质上是一个更复杂、不方便的结构体。tuple的接口很麻烦，尽管类模板参数推断和结构化绑定使它变得简单。
 
-I tend to use struct before tuple for most applications, with one significant exception: the one real advantage of tuple is that it can be used with fold expressions in a variadic context.
+对于大多数应用程序，我倾向于在使用tuple之前使用struct，但有一个例外:tuple的一个真正优势是，可以在可变的上下文中与折叠表达式一起使用。
 
-\subsubsection{Fold expressions}
+\subsubsection{折叠表达式}
 
-Designed to make it easier to expand a variadic parameter pack, fold expressions are a new feature with C++17. Prior to fold expressions, expanding a parameter pack required a recursive function:
+折叠表达式是C++17的一个新特性，设计目的是为了更容易地展开可变参数包。在折叠表达式之前，展开参数包需要一个递归函数:
 
 \begin{lstlisting}[style=styleCXX]
 template<typename T>
@@ -22,13 +22,13 @@ int main() {
 }
 \end{lstlisting}
 
-Output:
+输出为:
 
 \begin{tcblisting}{commandshell={}}
 hello 47 world
 \end{tcblisting}
 
-Using a fold expression, this is much simpler:
+使用折叠表达式后，这就会简单许多了:
 
 \begin{lstlisting}[style=styleCXX]
 template<typename... Args>
@@ -38,49 +38,49 @@ void f(Args... args) {
 }
 \end{lstlisting}
 
-Output:
+输出为:
 
 \begin{tcblisting}{commandshell={}}
 hello 47 world
 \end{tcblisting}
 
-There are four types of fold expressions:
+折叠表达式有四种类型:
 
 \begin{itemize}
 \item 
-Unary right fold: (args op ...)
+一元右折叠: (args op ...)
 
 \item 
-Unary left fold: (... op args)
+一元左折叠: (... op args)
 
 \item 
-Binary right fold: (args op ... op init)
+二元右折叠: (args op ... op init)
 
 \item 
-Binary left fold: (init op ... op args)
+二元左折叠: (init op ... op args)
 \end{itemize}
 
-The expression in the example above is a binary left fold:
+上面例子中的表达式是一个二进制左折叠:
 
 \begin{lstlisting}[style=styleCXX]
 (cout << ... << args);
 \end{lstlisting}
 
-This expands to:
+可扩展为:
 
 \begin{lstlisting}[style=styleCXX]
 cout << "hello" << ' ' << 47 << ' ' << "world";
 \end{lstlisting}
 
-Fold expressions are a great convenience for many purposes. Let's look at how we can use them with tuples.
+折叠表达式对于很多目的来说都是非常方便的，来看看如何在tuple中使用它们。
 
 \subsubsection{How to do it…}
 
-In this recipe, we'll create a template function that operates on a tuple with varying numbers and types of elements:
+在这个示例中，我们将创建一个模板函数，该函数对具有不同数量和类型元素的元组进行操作:
 
 \begin{itemize}
 \item 
-The heart of this recipe is a function that takes a tuple of unknown size and type and prints each element with format():
+这示例的核心是一个函数，其接受一个未知大小和类型的元组，并使用format()打印每个元素:
 
 \begin{lstlisting}[style=styleCXX]
 template<typename... T>
@@ -99,12 +99,12 @@ constexpr void print_t(const tuple<T...>& tup) {
 }
 \end{lstlisting}
 
-The heart of this function is in the lambda expression. It uses the index\_sequence object to generate a parameter pack of index values. We then use a fold expression to call get<I> with each index value. The templated lambda requires C++20.
+这个函数的核心在lambda表达式中。它使用index\_sequence对象生成索引值的参数包。然后使用折叠表达式对每个下标值调用get<I>。模板化的lambda需要编译器支持C++20。
 
-You could use a separate function in place of the lambda, but I like keeping it in a single scope.
+可以使用一个单独的函数来代替lambda，但我更喜欢将它保持在一个作用域中。
 
 \item 
-We can now call this from main() with a variety of tuples:
+现在可以在main()中使用，使用各种tuple:
 
 \begin{lstlisting}[style=styleCXX]
 int main() {
@@ -118,7 +118,7 @@ int main() {
 }
 \end{lstlisting}
 
-Output:
+输出为:
 
 \begin{tcblisting}{commandshell={}}
 ID, Name, Scale
@@ -130,15 +130,15 @@ ID, Name, Scale
 
 \subsubsection{How it works…}
 
-The challenge with tuple is its restrictive interface. You can retrieve elements with std::tie(), with structured bindings, or the std::get<> function. None of these techniques are useful if you don't know the number and type of elements in the tuple.
+使用tuple的挑战在于它的限制性接口。可以使用std::tie()、结构化绑定或std::get<>函数检索元素。若不知道tuple中元素的数量和类型，这些技术都没啥用。
 
-We get around this limitation by using the index\_sequence class. index\_sequence is a specialization of integer\_sequence that provides a parameter pack of the size\_t elements, which we can use to index our tuple. We call our lambda function with make\_index\_sequence to set up a parameter pack in the lambda:
+可以使用index\_sequence类来解决这个限制。index\_sequence是一个integer\_sequence的特化，它提供了一个size\_t的参数包，可以用它来索引tuple。我们使用make\_index\_sequence调用lambda函数在lambda中设置一个参数包:
 
 \begin{lstlisting}[style=styleCXX]
 lpt(std::make_index_sequence<sizeof...(T)>());
 \end{lstlisting}
 
-The templated lambda is constructed with a parameter pack of size\_t indexes for the get() function:
+模板化的lambda是用get()函数size\_t索引的参数包构造的:
 
 \begin{lstlisting}[style=styleCXX]
 [&tup] <size_t... I> (std::index_sequence<I...>) constexpr {
@@ -146,20 +146,20 @@ The templated lambda is constructed with a parameter pack of size\_t indexes for
 };
 \end{lstlisting}
 
-The get() function takes the index value as a template parameter. We use a unary left fold expression to call get<I>():
+get()函数将索引值作为模板形参，这里可以使用一元左折叠表达式调用get<I>():
 
 \begin{lstlisting}[style=styleCXX]
 (..., ( cout << format("{} ", std::get<I>(tup))));
 \end{lstlisting}
 
-The fold expression takes each element of the function's parameter pack and applies the comma operator. The right-hand side of the comma has a format() function that prints each element of the tuple.
+折叠表达式接受函数参数包中的每个元素，并应用逗号操作符。逗号的右边有一个format()函数，输出元组的每个元素。
 
-This makes it possible to deduce the number of elements in the tuple, which makes it useable in a variadic context. Keep in mind that, as with template functions in general, the compiler will generate a separate specialization of this function for each combination of tuple parameters.
+这使得推断tuple中元素的数量成为可能，这使得它可以在可变的上下文中使用。记住，与一般的模板函数一样，编译器将为每个tuple形参组合生成该函数的特化版本。
 
 
 \subsubsection{There's more…}
 
-We can use this technique for other tasks. For example, here's a function that returns the sum of all the int values in a tuple of unknown size:
+也可以将这种技术用于其他任务。例如，这里有一个函数，它返回大小未知的元组中所有int值的和:
 
 \begin{lstlisting}[style=styleCXX]
 template<typename... T>
@@ -178,7 +178,7 @@ constexpr int sum_t(const tuple<T...>& tup) {
 }
 \end{lstlisting}
 
-We can call this with several tuple objects of varying numbers of int values:
+可以用几个不同数量int值的元组对象调用这个函数:
 
 \begin{lstlisting}[style=styleCXX]
 tuple ti1{ 1, 2, 3, 4, 5 };
@@ -192,7 +192,7 @@ cout << format("sum of ti2: {}\n", sum2);
 cout << format("sum of ti3: {}\n", sum3);
 \end{lstlisting}
 
-Output:
+输出为:
 
 \begin{tcblisting}{commandshell={}}
 sum of ti1: 15

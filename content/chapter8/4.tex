@@ -1,11 +1,11 @@
 
-Introduced with C++17, the std::variant class may hold different values, one at a time, where each value must fit in the same allocated memory space. It's useful for holding alternative types for use in a single context.
+C++17中引入的std::variant类可以保存不同的值，每次一个，其中每个值必须适合相同的分配内存空间。它对于保存可供在单个上下文中使用的替代类型非常有用。
 
-\subsubsection{Differences from the primitive union structure}
+\subsubsection{与union的区别}
 
-The variant class is a tagged union. It differs from the primitive union structure in that only one type may be in effect at a time.
+variant类是一个带标记的联合。它与原始union结构的不同之处在于，一次只能有一种类型起作用。
 
-The primitive union type, inherited from C, is a structure where the same datum may be accessed as different types. For example:
+原始union类型继承自C，是一种结构，在这种结构中，相同的数据可以作为不同的类型访问。例如:
 
 \begin{lstlisting}[style=styleCXX]
 union ipv4 {
@@ -20,24 +20,24 @@ cout << format("ip addr dotted quad: {}.{}.{}.{}\n",
 cout << format("ip addr int32 (LE): {:08X}\n", addr.int32);
 \end{lstlisting}
 
-Output:
+输出为:
 
 \begin{tcblisting}{commandshell={}}
 ip addr dotted quad: 192.168.5.42
 ip addr int32 (LE): 2A05A8C0
 \end{tcblisting}
 
-In this example, the union has two members, types struct and uint32\_t, where struct has four uint8\_t members. This gives us two different perspectives of the same 32-bit memory space. We can view the same ipv4 address as either a 32-bit unsigned integer (Little Endian or LE) or four 8-bit unsigned integers in the common dotted quad notation. This provides a bitwise polymorphy that can be useful at the systems level.
+这个例子中，union有两个成员，类型是struct和uint32\_t，其中struct有四个uint8\_t成员。这为我们提供了相同32位内存空间的两种不同视角，可以将相同的ipv4地址视为一个32位无符号整数(Little Endian或LE)或四个8位无符号整数。这提供了在系统级别的位多态。
 
-variant doesn't work like that. The variant class is a tagged union, where each datum is tagged with its type. If we store a value as uint32\_t, we may only access it as uint32\_t. This makes variant type safe but not a replacement for union.
+variant不是这样的。variant类是一个带标记的union，其中每个数据都带有其类型的标记。若将一个值存储为uint32\_t，只能以uint32\_t的形式访问它。这使得variant类型是安全的，但不是union的替代品。
 
 \subsubsection{How to do it…}
 
-In this recipe, we demonstrate the use of std::variant with a small catalogue of household pets of various species.
+这个示例中，我们将展示std::variant的使用方式。
 
 \begin{itemize}
 \item 
-We'll start with a simple class to hold an Animal:
+我们将从一个简单的类开始，先来保存一个Animal:
 
 \begin{lstlisting}[style=styleCXX]
 class Animal {
@@ -56,10 +56,10 @@ public:
 }
 \end{lstlisting}
 
-The name of the animal and the sound that the animal makes are passed in the constructor.
+动物的名字和动物发出的声音被传递到构造函数中。
 
 \item 
-Individual species classes inherit from Animal:
+个体物种类继承自Animal:
 
 \begin{lstlisting}[style=styleCXX]
 class Cat : public Animal {
@@ -76,19 +76,19 @@ class Wookie : public Animal {
 };
 \end{lstlisting}
 
-Each of these classes set the sound for their specific species by calling the parent constructor.
+这些类中的每一个都通过调用父构造函数，来为它们的特定种类设置声音。
 
 \item 
-Now, we can define our variant type in an alias:
+现在，可以在别名中定义变量类型:
 
 \begin{lstlisting}[style=styleCXX]
 using v_animal = std::variant<Cat, Dog, Wookie>;
 \end{lstlisting}
 
-This variant can hold any of the types, Cat, Dog, or Wookie.
+这个变体可以容纳任何类型，猫，狗或伍基。
 
 \item 
-In main(), we create a list using our v\_animal alias as the type:
+在main()中，使用v\_animal别名作为类型创建了一个列表:
 
 \begin{lstlisting}[style=styleCXX]
 int main() {
@@ -99,12 +99,12 @@ int main() {
 	...
 \end{lstlisting}
 
-Each element in the list is of a type included in the variant definition.
+列表中的每个元素都是变量定义中包含的类型。
 
 \item 
-The variant class provides several different ways to access elements. First, we'll look at the visit() function.
+variant类提供了几种访问元素的不同方法。首先，来看看visit()函数。
 
-visit() calls a functor with the object currently contained in the variant. First, let's define a functor that accepts any of our pets:
+visit()调用带有当前包含在变体中的对象的函子。首先，定义一个接受宠物的函子:
 
 \begin{lstlisting}[style=styleCXX]
 struct animal_speaks {
@@ -115,7 +115,7 @@ struct animal_speaks {
 };
 \end{lstlisting}
 
-This is a simple functor class with overloads for each of the Animal sub-classes. We call it with visit(), with each of our list elements:
+这是一个简单的函子类，每个Animal子类都有重载。我们使用visit()调用它，并使用列表的每个元素:
 
 \begin{lstlisting}[style=styleCXX]
 for (const v_animal& a : pets) {
@@ -123,7 +123,7 @@ for (const v_animal& a : pets) {
 }
 \end{lstlisting}
 
-We get this output:
+会得到这样的输出:
 
 \begin{tcblisting}{commandshell={}}
 Hobbes says meow
@@ -133,7 +133,7 @@ Chewie says grrraarrgghh!
 \end{tcblisting}
 
 \item 
-The variant class also provides an index() method:
+variant类还提供了一个index()方法:
 
 \begin{lstlisting}[style=styleCXX]
 for(const v_animal &a : pets) {
@@ -144,7 +144,7 @@ for(const v_animal &a : pets) {
 }
 \end{lstlisting}
 
-We get this output:
+可以得到这样的输出:
 
 \begin{tcblisting}{commandshell={}}
 Hobbes says meow
@@ -153,10 +153,10 @@ Max says meow
 Chewie says grrraarrgghh!
 \end{tcblisting}
 
-Each variant object is indexed, based on the order in which the types were declared in the template arguments. Our v\_animal type was defined with std::variant<Cat, Dog, Wookie>, and these types are indexed as 0 – 2, in that order.
+每个变量对象都根据模板参数中声明类型的顺序建立索引。我们的v\_animal类型定义为std::variant<Cat, Dog, Wookie>，这些类型的索引顺序为0 - 2。
 
 \item 
-The get\_if<T>() function tests a given element against a type:
+get\_if<T>()函数的作用是:根据类型测试给定元素:
 
 \begin{lstlisting}[style=styleCXX]
 for (const v_animal& a : pets) {
@@ -170,7 +170,7 @@ for (const v_animal& a : pets) {
 }
 \end{lstlisting}
 
-Output:
+输出为:
 
 \begin{tcblisting}{commandshell={}}
 Hobbes says meow
@@ -179,10 +179,10 @@ Max says meow
 Chewie says grrraarrgghh!
 \end{tcblisting}
 
-The get\_if<T>() function returns a pointer if the type of the element matches T; otherwise, it returns nullptr.
+get\_if<T>()函数的作用是:若元素类型与T匹配，则返回一个指针;否则，返回nullptr。
 
 \item 
-Finally, the holds\_alternative<T>() function returns true or false. We can use this to test a type against an element, without returning the element:
+最后，hold\_alternative <T>()函数返回true或false。可以使用this来测试一个类型是否对应一个元素，而不返回该元素:
 
 \begin{lstlisting}[style=styleCXX]
 size_t n_cats{}, n_dogs{}, n_wookies{};
@@ -197,7 +197,7 @@ cout << format("there are {} cat(s), "
 				n_cats, n_dogs, n_wookies);
 \end{lstlisting}
 
-Output:
+输出为:
 
 \begin{tcblisting}{commandshell={}}
 there are 2 cat(s), 1 dog(s), and 1 wookie(s)
@@ -206,27 +206,27 @@ there are 2 cat(s), 1 dog(s), and 1 wookie(s)
 
 \subsubsection{How it works…}
 
-The std::variant class is a single-object container. An instance of variant<X, Y, Z> must hold exactly one object of type X, Y, or Z. It holds both the value and the type of its current object.
+std::variant类是一个单对象容器。variant<X, Y, Z>实例的类型，必须是X, Y或Z对象类型的其中之一，并可以同时保存当前对象的值和类型。
 
-The index() method tells us the type of the current object:
+index()方法告诉我们当前对象的类型:
 
 \begin{lstlisting}[style=styleCXX]
 if(v.index() == 0) // if variant is type X
 \end{lstlisting}
 
-The holds\_alternative<T>() non-member function returns true if T is the type of the current object:
+hold \_alternative<T>()非成员函数如果T是当前对象的类型，则返回true:
 
 \begin{lstlisting}[style=styleCXX]
 if(holds_alternative<X>(v)) // if current variant obj is type X
 \end{lstlisting}
 
-We can retrieve the current object with the get() non-member function:
+可以使用get()非成员函数检索当前对象:
 
 \begin{lstlisting}[style=styleCXX]
 auto o{ get<X>(v) }; // current variant obj must be type X
 \end{lstlisting}
 
-We can combine the test for type and retrieval with the get\_if() non-member function:
+可以将类型和检索测试与get\_if()非成员函数结合起来:
 
 \begin{lstlisting}[style=styleCXX]
 auto* p{ get_if<X>(v) }; // nullptr if current obj not type X
@@ -238,7 +238,7 @@ The visit() non-member function invokes a callable object with the current varia
 visit(f, v); // calls f(v) with current variant obj
 \end{lstlisting}
 
-The visit() function is the only way to retrieve an object without testing its type. In combination with a functor that can handle each type, this can be very flexible:
+visit()函数是在不测试对象类型的情况下，检索对象的唯一方法。结合一个可以处理每种类型的函子，就非常灵活了:
 
 \begin{lstlisting}[style=styleCXX]
 struct animal_speaks {
@@ -253,7 +253,7 @@ main() {
 }
 \end{lstlisting}
 
-Output:
+输出为:
 
 \begin{tcblisting}{commandshell={}}
 Hobbes says meow

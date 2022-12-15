@@ -1,41 +1,41 @@
-Concurrency and parallelism refer to the ability to run code in separate threads of execution.
+并发性和并行性指的是在不同的执行线程中运行代码的能力。
 
-More specifically, concurrency is the ability to run threads in the background, and parallelism is the ability to run threads simultaneously in separate cores of a processor.
+更具体地说，并发性是在后台运行线程的能力，并行性是在处理器的不同内核中同时运行线程的能力。
 
-The run-time library, along with the host operating system, will choose between concurrent and parallel execution models for a given thread on a given hardware environment.
+运行时库以及主机操作系统，将为给定硬件环境中的线程，在并发和并行执行模型之间进行选择。
 
-In a modern multi-tasking operating system, the main() function already represents a thread of execution. When a new thread is started, it's said to be spawned by an existing thread. A group of threads may be called a swarm.
+在现代多任务操作系统中，main()函数已经代表了一个执行线程。当一个新线程启动时，可由现有的线程派生。
 
-In the C++ standard library, the std::thread class provides the basic unit of threaded execution. Other classes build upon thread to provide locks, mutexes, and other concurrency patterns. Depending on system architecture, execution threads may run concurrently on one processor, or in parallel on separate cores.
+C++标准库中，std::thread类提供了线程执行的基本单元。其他类构建在线程之上，以提供锁、互斥和其他并发模式。根据系统架构的不同，执行线程可以在一个处理器上并发运行，也可以在不同的内核上并行运行。
 
 
-In this chapter, we will cover these tools and more in the following recipes:
+本章中，我们将在介绍以下工具，以及其更多内容:
 
 \begin{itemize}
 \item 
-Sleep for a specific amount of time
+休眠一定的时间
 
 \item 
-Use std::thread for concurrency
+std::thread——实现并发
 
 \item 
-Use std::async for concurrency
+std::async——实现并发
 
 \item 
-Run STL algorithms in parallel with execution policies
+STL算法与执行策略
 
 \item 
-Share data safely with mutex and locks
+互斥锁和锁——安全地共享数据
 
 \item 
-Share flags and values with std::atomic
+std::atomic——共享标志和值
 
 \item 
-Initialize threads with std::call\_once
+std::call\_once——初始化线程
 
 \item 
-Use std::condition\_variable to resolve the producer-consumer problem
+std::condition\_variable——解决生产者-消费者问题
 
 \item 
-Implement multiple producers and consumers
+实现多个生产者和消费者
 \end{itemize}

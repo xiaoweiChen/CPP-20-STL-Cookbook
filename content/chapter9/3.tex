@@ -1,17 +1,17 @@
 
-A thread is a unit of concurrency. The main() function may be thought of as the main thread of execution. Within the context of the operating system, the main thread runs concurrently with other threads owned by other processes.
+线程是并发的单位，main()函数可以看作是执行的主线程。在操作系统上下文中，主线程与其他进程拥有的其他线程并发运行。
 
-The std::thread class is the root of concurrency in the STL. All other concurrency features are built on the foundation of the thread class.
+thread类是STL中并发性的根本，所有其他并发特性都建立在线程类的基础上。
 
-In this recipe, we will examine the basics of std::thread and how join() and detach() determine its execution context.
+本节中，我们将了解std::thread的基础知识，以及join()和detach()如何确定其执行上下文。
 
 \subsubsection{How to do it…}
 
-In this recipe, we create some std::thread objects and experiment with their execution options.
+在这个示例中，我们创建了一些std::thread对象，并试验了它们的执行选项。
 
 \begin{itemize}
 \item 
-We start with a convenience function for sleeping a thread, in milliseconds:
+从线程休眠函数开始，单位是毫秒:
 
 \begin{lstlisting}[style=styleCXX]
 void sleepms(const unsigned ms) {
@@ -20,10 +20,10 @@ void sleepms(const unsigned ms) {
 }
 \end{lstlisting}
 
-The sleep\_for() function takes a duration object and blocks execution of the current thread for the specified duration. This sleepms() function serves as a convenience wrapper that takes an unsigned value for the number of milliseconds to sleep.
+sleep\_for()函数接受一个duration对象，并在指定的时间内阻塞当前线程的执行。sleepms()函数作为一个方便的包装器，其接受一个unsigned值，表示休眠的毫秒数。
 
 \item 
-Now, we need a function for our thread. This function sleeps for a variable number of milliseconds, based on an integer parameter:
+现在，需要线程的一个函数。这个函数休眠的毫秒数是可变的，基于一个整数参数:
 
 \begin{lstlisting}[style=styleCXX]
 void fthread(const int n) {
@@ -36,10 +36,10 @@ void fthread(const int n) {
 }
 \end{lstlisting}
 
-fthread() calls sleepms() five times, sleeping each time for 100 * n milliseconds.
+fthread()调用sleepms() 5次，每次休眠100 * n毫秒。
 
 \item 
-We can run this in a separate thread with std::thread from main():
+可以在一个单独的线程中(比如主线程)运行std::thread:
 
 \begin{lstlisting}[style=styleCXX]
 int main() {
@@ -48,18 +48,18 @@ int main() {
 }
 \end{lstlisting}
 
-It compiles but we get this error when we run it:
+可以编译，但运行时会有错误:
 
 \begin{tcblisting}{commandshell={}}
 terminate called without an active exception Aborted
 \end{tcblisting}
 
-(Your error message will vary. This is the error message on Debian with GCC.) 
+(错误信息会有所不同。这是在Debian和GCC上的错误信息。)
 
-The problem is that the operating system doesn't know what to do with the thread object when it goes out of scope. We must specify if the caller waits for the thread, or if it's detached and runs independently.
+问题在于，当线程对象超出作用域时，操作系统不知道该如何处理。我们必须指定调用者是否等待线程，或者它是否分离并独立运行。
 
 \item 
-We use the join() method to indicate that the caller will wait for the thread to finish:
+使用join()来指示调用者将等待线程完成:
 
 \begin{lstlisting}[style=styleCXX]
 int main() {
@@ -69,7 +69,7 @@ int main() {
 }
 \end{lstlisting}
 
-Output:
+输出为:
 
 \begin{tcblisting}{commandshell={}}
 This is t1
@@ -82,24 +82,24 @@ Finishing t1
 end of main()
 \end{tcblisting}
 
-Now, main() waits for the thread to finish.
+现在，main()会等待线程完成。
 
 \item 
-If we call detach() instead of join(), then main() doesn't wait, and the program ends before the thread can run:
+若使用detach()，那么main()不会等待，程序在线程运行之前就结束了:
 
 \begin{lstlisting}[style=styleCXX]
 thread t1(fthread, 1);
 t1.detach();
 \end{lstlisting}
 
-Output:
+输出为:
 
 \begin{tcblisting}{commandshell={}}
 end of main()
 \end{tcblisting}
 
 \item 
-When the thread is detached, we need to give it time to run:
+当线程分离后，需要给它一些运行的时间:
 
 \begin{lstlisting}[style=styleCXX]
 thread t1(fthread, 1);
@@ -108,7 +108,7 @@ cout << "main() sleep 2 sec\n";
 sleepms(2000);
 \end{lstlisting}
 
-Output:
+输出为:
 
 \begin{tcblisting}{commandshell={}}
 main() sleep 2 sec
@@ -123,7 +123,7 @@ end of main()
 \end{tcblisting}
 
 \item 
-Let's start and detach a second thread and see what happens:
+分离第二个线程，看看会发生什么:
 
 \begin{lstlisting}[style=styleCXX]
 int main() {
@@ -137,7 +137,7 @@ int main() {
 }
 \end{lstlisting}
 
-Output:
+输出为:
 
 \begin{tcblisting}{commandshell={}}
 main() sleep 2 sec
@@ -158,10 +158,10 @@ Finishing t2
 end of main()
 \end{tcblisting}
 
-Because our fthread() function uses its parameter as a multiplier for sleepms(), the second thread runs a bit slower than the first. We can see the timers interlaced in the output.
+因为fthread()函数使用它的形参作为sleepms()的乘法器，所以第二个线程比第一个线程运行得慢一些。我们可以看到计时器在输出中交错。
 
 \item 
-If we do this with join() instead of detatch(), we get a similar result:
+若使用join()，而不是detatch()来执行此操作，会得到类似的结果:
 
 \begin{lstlisting}[style=styleCXX]
 int main() {
@@ -173,7 +173,7 @@ int main() {
 }
 \end{lstlisting}
 
-Output:
+输出为:
 
 \begin{tcblisting}{commandshell={}}
 This is t1
@@ -193,44 +193,44 @@ Finishing t2
 end of main()
 \end{tcblisting}
 
-Because join() waits for the thread to finish, we no longer need the 2-second sleepms() in main() to wait for the threads to finish.
+因为join()等待线程完成，所以不再需要main()中2秒的sleepms()来等待线程完成。
 \end{itemize}
 
 \subsubsection{How it works…}
 
-A std::thread object represents a thread of execution. There is a one-to-one relationship between object and thread. One thread object represents one thread, and one thread is represented by one thread object. A thread object cannot be copied or assigned, but it can be moved.
+std::thread对象表示一个执行线程，对象和线程之间是一对一的关系。一个线程对象表示一个线程，一个线程由一个线程对象表示。线程对象不能复制或赋值，但可以移动。
 
-The thread constructor looks like this:
+其构造函数是这样:
 
 \begin{lstlisting}[style=styleCXX]
 explicit thread( Function&& f, Args&&… args );
 \end{lstlisting}
 
-A thread is constructed with a function pointer and zero or more arguments. The function is called immediately with the arguments provided:
+线程是用一个函数指针和零个或多个参数构造的。函数会立即调用:
 
 \begin{lstlisting}[style=styleCXX]
 thread t1(fthread, 1);
 \end{lstlisting}
 
-This creates the object t1 and immediately calls the function fthread(int) with the literal value 1 as the argument.
+这将创建对象t1，并立即以字面值1作为参数调用函数fthread(int)。
 
-After creating the thread, we must use either join() or detach() on the thread:
+创建线程后，必须在线程上使用join()或detach():
 
 \begin{lstlisting}[style=styleCXX]
 t1.join();
 \end{lstlisting}
 
-The join() method blocks execution of the calling thread until the t1 thread has completed:
+join()方法阻塞调用线程的执行，直到t1线程完成:
 
 \begin{lstlisting}[style=styleCXX]
 t1.detach();
 \end{lstlisting}
 
-The detach() method allows the calling thread to continue independently of the t1 thread.
+detach()方法允许调用线程独立于t1线程继续运行。
 
 \subsubsection{There's more…}
 
-C++20 provides std::jthread, which automatically joins the caller at the end of its scope:
+C++20提供了std::jthread，其会自动在作用域的末尾汇入创建线程:
 
 \begin{lstlisting}[style=styleCXX]
 int main() {
@@ -239,7 +239,7 @@ int main() {
 }
 \end{lstlisting}
 
-Output:
+输出为:
 
 \begin{tcblisting}{commandshell={}}
 end of main()
@@ -252,7 +252,7 @@ t1: 5
 Finishing t1
 \end{tcblisting}
 
-This allows the t1 thread to execute independently and then automatically join the main() thread at the end of its scope.
+t1线程可以独立执行，然后在其作用域的末尾会自动汇入main()线程。
 
 
 

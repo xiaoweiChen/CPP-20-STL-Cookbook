@@ -1,13 +1,13 @@
 
-The simplest version of the producer-consumer problem is where you have one process that produces data and another that consumes data, using one buffer or container to hold the data. This requires coordination between the producer and consumer to manage the buffer and prevent unwanted side effects.
+生产者-消费者问题的最简单版本是，一个进程生产数据，另一个进程消费数据，使用一个缓冲区或容器保存数据。这需要生产者和消费者之间的协调来管理缓冲区并防止不必要的副作用。
 
 \subsubsection{How to do it…}
 
-In this recipe, we consider a simple solution to the producer-consumer problem using std::condition\_variable to coordinate the processes:
+本节中，我们考虑了一个简单的解决方案，使用std::condition\_variable来协调这个过程:
 
 \begin{itemize}
 \item 
-We begin with some namespace and alias declarations for convenience:
+方便起见，我们从一些命名空间和别名声明开始说起:
 
 \begin{lstlisting}[style=styleCXX]
 using namespace std::chrono_literals;
@@ -16,20 +16,20 @@ using guard_t = std::lock_guard<std::mutex>;
 using lock_t = std::unique_lock<std::mutex>;
 \end{lstlisting}
 
-The lock\_guard and unique\_lock aliases make it easier to use these types without error.
+lock\_guard和unique\_lock的别名，可以更容易的使用这些类型而不会出错。
 
 \item 
-We use a couple of constants:
+有几个常量:
 
 \begin{lstlisting}[style=styleCXX]
 constexpr size_t num_items{ 10 };
 constexpr auto delay_time{ 200ms };
 \end{lstlisting}
 
-Keeping these in one place makes it safer and easier to experiment with different values.
+可以把它们放在一个地方可以更安全、更容易地试验不同的值。
 
 \item 
-We're using these global variables for coordinating the data store:
+可以使用这些全局变量来协调数据存储:
 
 \begin{lstlisting}[style=styleCXX]
 std::deque<size_t> q{};
@@ -38,14 +38,14 @@ std::condition_variable cond{};
 bool finished{};
 \end{lstlisting}
 
-We're using deque to hold the data as a First-In-First-Out (FIFO) queue.
+可以使用deque将数据保存在先进先出(FIFO)队列中。
 
-mutex is used with the condition\_variable to coordinate the movement of data from producer to consumer.
+mutex与condition\_variable一起使用，以协调数据从生产者到消费者的转移。
 
-The finished flag indicates that there is no more data.
+finished标志表示没有更多数据。
 
 \item 
-The producer thread will use this function:
+生产者线程将使用这个函数:
 
 \begin{lstlisting}[style=styleCXX]
 void producer() {
@@ -61,16 +61,16 @@ void producer() {
 }
 \end{lstlisting}
 
-The producer() function loops num\_items iterations and pushes a number onto the deque each time through the loop.
+producer()函数循环num\_items迭代，并在每次循环中将一个数字压入deque。
 
-We include a sleep\_for() call to simulate a delay in producing each value.
+这里，包括一个sleep\_for()调用来模拟产生每个值的延迟。
 
-The conditional\_variable requires a mutex lock to operate. We use lock\_guard (via the guard\_t alias) to obtain the lock, then push the value onto the deque, and then call notify\_all() on the conditional\_variable. This tells the consumer thread that there is a new value available.
+conditional\_variable需要一个互斥锁来操作，可以使用lock\_guard(通过guard\_t别名)来获取锁，然后将值推到deque上，然后在conditional\_variable上调用notify\_all()。这将告诉使用者线程有一个可用的新值。
 
-When the loop completes, we set the finished flag and notify the consumer thread that the producer is completed.
+当循环完成时，可以设置finished标志，并通知消费者线程生产者已经完成。
 
 \item 
-The consumer thread waits for each value from the producer, displays it on the console, and waits for the finished flag:
+消费者线程等待来自生产者的每个值，将其显示在控制台上，并等待finished标志:
 
 \begin{lstlisting}[style=styleCXX]
 void consumer() {
@@ -87,12 +87,12 @@ void consumer() {
 }
 \end{lstlisting}
 
-The wait() method waits to be notified by the producer. It uses the lambda as a predicate to continue waiting until the deque is not empty or the finished flag is set.
+wait()方法等待生产者通知，使用lambda作为谓词继续等待，直到deque不为空或设置了finished标志。
 
-When we get a value, we display it and then pop it from the deque.
+当我们获取到一个值时，我们显示它，然后将其从deque中弹出。
 
 \item 
-We run this in main() with simple thread objects:
+在main()中运行简单的线程对象:
 
 \begin{lstlisting}[style=styleCXX]
 int main() {
@@ -104,7 +104,7 @@ int main() {
 }
 \end{lstlisting}
 
-Output:
+输出为:
 
 \begin{tcblisting}{commandshell={}}
 Got 0 from the queue
@@ -120,21 +120,21 @@ Got 9 from the queue
 finished!
 \end{tcblisting}
 
-Notice that there's a 200 ms delay between each line. This tells us that the producerconsumer coordination is working as expected.
+注意，每一行之间有200毫秒的延迟，所以生产者和消费者之间的协调正在按照预期的方式工作。
 
 \end{itemize}
 
 \subsubsection{How it works…}
 
-The producer-consumer problem requires coordination between writing and reading a buffer or container. In this example, our container is a deque<size\_t>:
+生产者-消费者问题需要在写入和读取缓冲区或容器之间进行协调。在这个例子中，容器是一个deque<size\_t>:
 
 \begin{lstlisting}[style=styleCXX]
 std::deque<size_t> q{};
 \end{lstlisting}
 
-The condition\_variable class can block a thread, or multiple threads, while a shared variable is modified. It may then notify other threads that the value is available.
+当一个共享变量修改时，conditional\_variable类可以阻塞一个线程或多个线程。然后，通知其他线程该值可用。
 
-condition\_variable requires a mutex to perform the lock:
+condition\_variable需要一个mutex来执行锁定操作:
 
 \begin{lstlisting}[style=styleCXX]
 std::lock_guard x{ mtx };
@@ -142,9 +142,9 @@ q.push_back(i);
 cond.notify_all();
 \end{lstlisting}
 
-The std::lock\_guard acquires a lock, so we can push a value onto our deque.
+std::lock\_guard会获取锁，从而可以将一个值推入到deque中。
 
-The wait() method on condition\_variable is used to block the current thread until it receives a notification:
+condition\_variable上的wait()方法用于阻塞当前线程，直到它收到通知:
 
 \begin{lstlisting}[style=styleCXX]
 void wait( std::unique_lock<std::mutex>& lock );
@@ -152,7 +152,7 @@ void wait( std::unique_lock<std::mutex>& lock,
 	Pred stop_waiting );
 \end{lstlisting}
 
-The predicate form of wait() is equivalent to:
+wait()的谓词形式相当于:
 
 \begin{lstlisting}[style=styleCXX]
 while (!stop_waiting()) {
@@ -160,28 +160,28 @@ while (!stop_waiting()) {
 }
 \end{lstlisting}
 
-The predicate form is used to prevent spurious waking while waiting for a specific condition. We use it with a lambda in our example:
+谓词形式用于防止在等待特定条件时出现伪唤醒。我们的例子中，它将与lambda一起使用:
 
 \begin{lstlisting}[style=styleCXX]
 cond.wait(lck, []{ return !q.empty() || finished; });
 \end{lstlisting}
 
-This prevents our consumer from waking until the deque has data or the finished flag is set.
+这可以防止消费者在deque有数据或finished标志设置之前醒来。
 
-The condition\_variable class has two notification methods:
+condition\_variable类有两个通知方法:
 
 \begin{itemize}
 \item 
-notify\_one() unblocks one waiting thread
+notify\_one()解除一个等待线程的阻塞
 
 \item 
-notify\_all() unblocks all waiting threads
+notify\_all()解除所有等待线程的阻塞
 \end{itemize}
 
-We used notify\_all() in our example. Because there is only one consumer thread, either notification method would work the same.
+我们在示例中使用了notify\_all()。因为只有一个使用者线程，所以任何一种通知方法的工作方式都是一样的。
 
 \begin{tcolorbox}[colback=webgreen!5!white,colframe=webgreen!75!black,title=Note]
-Note that unique\_lock is the only form of lock that supports the wait() method on a condition\_variable object.
+注意，unique\_lock是唯一在condition\_variable对象上支持wait()的锁。
 \end{tcolorbox}
 
 

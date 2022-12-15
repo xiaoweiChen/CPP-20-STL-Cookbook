@@ -1,20 +1,19 @@
 
-The std::atomic class encapsulates a single object and guarantees it to be atomic.
+std::atomic类封装了单个对象，并保证对其的操作是原子的。
 
-Writing to the atomic object is controlled by memory-order policies and reads may occur simultaneously. It's typically used to synchronize access among different threads.
-std::atomic defines an atomic type from its template type. The type must be trivial.
+写入原子对象由内存顺序策略控制，读取可能同时发生。通常用于同步不同线程之间的访问，std::atomic从模板类型定义原子类型。类型必须普通。
 
-A type is trivial if it occupies contiguous memory, has no user-defined constructor, and has no virtual member functions. All primitive types are trivial.
+若类型占用连续的内存，没有用户定义的构造函数，也没有虚成员函数，那就是普通类型。所有的基本类型都是普通类型。
 
-While it is possible to construct a trivial type, std::atomic is most often used with simple primitive types, such as bool, int, long, float, and double.
+虽然可以构造普通类型，但std::atomic最常用于简单的基本类型，如bool、int、long、float和double。
 
 \subsubsection{How to do it…}
 
-This recipe uses a simple function that loops over a counter to demonstrate sharing atomic objects. We will spawn a swarm of these loops as threads that share atomic values:
+这个示例使用一个简单的函数，循环计数器来演示共享原子对象。我们将生成一群这样的循环，作为共享原子值的线程:
 
 \begin{itemize}
 \item 
-Atomic objects are often placed in a global namespace. They must be accessible to all the threads that need to share its value:
+原子对象通常放置在全局命名空间中，可以让线程访问:
 
 \begin{lstlisting}[style=styleCXX]
 std::atomic<bool> ready{};
@@ -22,24 +21,24 @@ std::atomic<uint64_t> g_count{};
 std::atomic_flag winner{};
 \end{lstlisting}
 
-The ready object is a bool type that gets set to true when all the threads are ready to start counting.
+ready对象是一个bool类型，当所有线程都准备好开始计数时，该类型设置为true。
 
-The g\_count object is a global counter. It is incremented by each of the threads.
+g\_count对象是一个全局计数器，由每个线程进行递增。
 
-The winner object is a special atomic\_flag type. It is used to indicate which thread finishes first.
+winner对象是一个特殊的atomic\_flag类型，用于指示哪个线程先完成。
 
 \item 
-We use a couple of constants to control the number of threads and the number of loops for each thread:
+我们使用几个常量来控制线程数和每个线程的循环数:
 
 \begin{lstlisting}[style=styleCXX]
 constexpr int max_count{1000 * 1000};
 constexpr int max_threads{100};
 \end{lstlisting}
 
-I've set it to run 100 threads and count 1,000,000 iterations in each thread.
+我将它设置为运行100个线程，并在每个线程中计算1,000,000次迭代。
 
 \item 
-The countem() function is spawned for each thread. It loops max\_count times and increments g\_count for each iteration of the loop. This is where we use our atomic values:
+countem()函数为每个线程生成，循环max\_count次，并在每次循环迭代时增加g\_count。这是我们使用原子值的地方:
 
 \begin{lstlisting}[style=styleCXX]
 void countem (int id) {
@@ -52,14 +51,14 @@ void countem (int id) {
 };
 \end{lstlisting}
 
-The ready atomic value is used to synchronize the threads. Each thread will call yield() until the ready value is set true. The yield() function yields execution to other threads.
+ready原子值用于同步线程。每个线程将调用yield()，直到就绪值设置为true。yield()函数的作用是:将执行传递给其他线程。
 
-Each iteration of the for loop increments the g\_count atomic value. The final value should be equal to max\_count * max\_threads.
+for循环的每次迭代都会增加g\_count原子值。最终值应该等于max\_count * max\_threads。
 
-After the loop is complete, the test\_and\_set() method of the winner object is used to report the winning thread. test\_and\_set() is a method of the atomic\_flag class. It sets the flag and returns the bool value from before it is set.
+循环完成后，获胜者对象的test\_and\_set()方法用于报告获胜线程。test \_and\_set()是atomic\_flag类的一个方法，设置标志并返回设置之前的bool值。
 
 \item 
-We've used the make\_commas() function before. It displays a number with thousands of separators:
+我们以前使用过make\_comma()函数，可以显示一个带有数千个分隔符的数字:
 
 \begin{lstlisting}[style=styleCXX]
 string make_commas(const uint64_t& num) {
@@ -72,7 +71,7 @@ string make_commas(const uint64_t& num) {
 \end{lstlisting}
 
 \item 
-The main() function spawns the threads and reports the results:
+main()函数生成线程并显示结果:
 
 \begin{lstlisting}[style=styleCXX]
 int main() {
@@ -91,13 +90,13 @@ int main() {
 
 \end{itemize}
 
-Here, we create a vector<std::thread> object to hold the threads.
+在这里，创建一个vector<std::thread>对象来保存线程。
 
-In the for loop, we use emplace\_back() to create each thread in the vector.
+for循环中，使用emplace\_back()在vector中创建线程。
 
-Once the threads have been spawned, we set the ready flag so that the threads may start their loops.
+线程生成后，设置ready标志，以便线程可以开始循环。
 
-Output:
+输出为:
 
 \begin{tcblisting}{commandshell={}}
 spawn 100 threads
@@ -105,16 +104,15 @@ thread 67 won!
 global count: 100,000,000
 \end{tcblisting}
 
-Every time you run it, a different thread will win.
+每次运行时，都会有不同的线程获胜。
 
 \subsubsection{How it works…}
 
-The std::atomic class encapsulates an object to synchronize access among multiple threads.
+std::atomic类封装了一个对象来同步多个线程之间的访问。
 
-The encapsulated object must be a trivial type, which means it occupies contiguous memory, has no user-defined constructor, and has no virtual member functions.
-All primitive types are trivial.
+封装的对象必须是普通类型，必须使用连续的内存，没有用户定义的构造函数，也没有虚成员函数。所有的基本类型都是普通类型。
 
-It is possible to use a simple struct with atomic:
+atomic可以使用一个简单的结构体:
 
 \begin{lstlisting}[style=styleCXX]
 struct Trivial {
@@ -124,44 +122,44 @@ struct Trivial {
 std::atomic<Trivial> triv1;
 \end{lstlisting}
 
-While this usage is possible, it's not practical. Anything beyond setting and retrieving compound values loses the benefits of the atomicity and ends up requiring a mutex. The atomic class is best suited for scalar values.
+虽然这种用法是可能的，但并不实际。除了设置和检索复合值之外，并没有体现原子性的价值，最终需要一个互斥锁。并且，原子类最适合用于标量值。
 
 \noindent
-\textbf{Specializations}
+\textbf{特化}
 
-There are specializations of the atomic class for a few different purposes:
+原子类的专门化有以下几个不同的目的:
 
 \begin{itemize}
 \item 
-Pointers and smart pointers: The std::atomic<U*> specialization includes support for atomic pointer arithmetic operations, including fetch\_add() for addition and fetch\_sub() for subtraction.
+指针和智能指针:std::atomic<U*>特化包括对原子指针算术操作的支持，包括用于加法的fetch\_add()和用于减法的fetch\_sub()。
 
 \item 
-Floating-point types: When used with the floating-point types float, double, and long double, std::atomic includes support for atomic floating-point arithmetic operations, including fetch\_add() for addition and fetch\_sub() for subtraction.
+浮点类型:当与浮点类型float、double和long double一起使用时，std::atomic包括对原子浮点算术操作的支持，包括用于加法的fetch\_add()和用于减法的fetch\_sub()。
 
 \item 
-Integral types: When used with one of the integral types, std::atomic provides support for additional atomic operations, including fetch\_add(), fetch\_sub(), fetch\_and(), fetch\_or(), and fetch\_xor().
+整型类型:当与整型类型一起使用时，std::atomic提供了对其他原子操作的支持，包括fetch\_add()、fetch\_sub()、fetch\_and()、fetch\_or()和fetch\_xor()。
 
 \end{itemize}
 
 
 \noindent
-\textbf{Standard aliases}
+\textbf{标准的别名}
 
-The STL provides type aliases for all the standard scalar integral types. This means that instead of these declarations in our code:
+STL为所有标准标量整型提供类型别名。所以在我们的代码中，不是这些声明:
 
 \begin{lstlisting}[style=styleCXX]
 std::atomic<bool> ready{};
 std::atomic<uint64_t> g_count{};
 \end{lstlisting}
 
-We could use:
+我们可以用:
 
 \begin{lstlisting}[style=styleCXX]
 std::atomic_bool ready{};
 std::atomic_uint64_t g_count{};
 \end{lstlisting}
 
-There are 46 standard aliases, one for each of the standard integral types:
+有46个标准的别名，每一个代表标准的整型:
 
 \begin{table}[H]
 \centering
@@ -194,76 +192,76 @@ atomic\_int64\_t  & atomice\_uintmax\_t      \\ \hline
 \end{table}
 
 \noindent
-\textbf{Lock-free variations}
+\textbf{无锁版本}
 
-Most modern architectures provide atomic CPU instructions for performing atomic operations. std::atomic should use hardware support for atomic instructions where supported by your hardware. Some atomic types may not be supported on some hardware. std::atomic may use a mutex to ensure thread-safe operations for those specializations, causing threads to block while waiting for other threads to complete operations. Specializations that use hardware support are said to be lock-free because they don't require a mutex.
+大多数现代体系结构为执行原子操作提供了原子CPU指令，原子指令应该在硬件支持的情况下使用硬件支持。某些硬件可能不支持某些原子类型，std::atomic可以使用互斥来确保那些特化的线程安全操作，导致线程在等待其他线程完成操作时阻塞。使用硬件支持的特化因为它们不需要互斥锁，所以称为无锁式方法。
 
-The is\_lock\_free() method checks whether a specialization is lock-free:
+is\_lock\_free()方法检查特化是否无锁:
 
 \begin{lstlisting}[style=styleCXX]
 cout << format("is g_count lock-free? {}\n",
 	g_count.is_lock_free());
 \end{lstlisting}
 
-Output:
+输出为:
 
 \begin{tcblisting}{commandshell={}}
 is g_count lock-free? true
 \end{tcblisting}
 
-This result will be true for most modern architectures.
+这个结果对于大多数现代架构都可以正常处理。
 
-There are a few guaranteed lock-free variations of std::atomic available. These specializations guarantee the use of the most efficient hardware atomic operations for each purpose:
+有一些保证std::atomic的无锁版本可用。这些特化保证为每个目的使用最有效的硬件原子操作:
 
 \begin{itemize}
 \item 
-std::atomic\_signed\_lock\_free is an alias for the most efficient lock-free specialization of a signed integral type.
+std::atomic\_signed\_lock\_free 有符号整型最有效的无锁特化的别名。
 
 \item 
-std::atomic\_unsigned\_lock\_free is an alias for the most efficient lock-free specialization of an unsigned integral type.
+std::atomic\_unsigned\_lock\_free 是无符号整型最有效的无锁特化的别名。
 
 \item 
-The std::atomic\_flag class provides a lock-free atomic Boolean type.
+The std::atomic\_flag 类提供了一个无锁原子布尔类型。
 \end{itemize}
 
-\begin{tcolorbox}[colback=webgreen!5!white,colframe=webgreen!75!black,title=Important Note]
-Current Windows systems don't support 64-bit hardware integers, even on 64-bit systems. When testing this code on one of these systems in my lab, replacing std::atomic<uint64\_t> with std::atomic\_unsigned\_lock\_free resulted in a 3x performance improvement. Performance was unchanged on 64-bit Linux and Mac systems.
+\begin{tcolorbox}[colback=webgreen!5!white,colframe=webgreen!75!black,title=重要的Note]
+当前Windows系统不支持64位硬件整数，即使在64位系统上也是如此。当在我的实验室中的一个系统上测试这段代码时，将std::atomic<uint64\_t>替换为std::atomic\_unsigned\_lock\_free，性能提高了3倍。在64位Linux和Mac系统上，性能没什么变化。
 \end{tcolorbox}
 
 \subsubsection{There's more…}
 
-When multiple threads read and write variables simultaneously, one thread may observe the changes in a different order than they were written. std::memory\_order specifies how memory accesses are ordered around an atomic operation.
+当多个线程同时读写变量时，线程可能以不同于写入变量的顺序观察变化。memory\_order指定内存访问如何围绕原子操作排序。
 
-std::atomic provides methods for accessing and changing its managed value. Unlike the associated operators, these access methods provide arguments for memory\_order to be specified. For example:
+std::atomic提供了访问和更改其托管值的方法。与关联操作符不同，这些访问方法为要指定的memory\_order提供参数。例如:
 
 \begin{lstlisting}[style=styleCXX]
 g_count.fetch_add(1, std::memory_order_seq_cst);
 \end{lstlisting}
 
-In this case, memory\_order\_seq\_cst specifies sequentially consistent ordering. So, this call to fetch\_add() will add 1 to the value of g\_count with sequentially consistent ordering.
+这种情况下，memory\_order\_seq\_cst指定顺序一致的排序。因此，对fetch\_add()的调用将按顺序一致地将g\_count的值加1。
 
-The possible memory\_order constants are:
+可能的memory\_order常量是:
 
 \begin{itemize}
 \item 
-memory\_order\_relaxed: This is a relaxed operation. No synchronization or ordering constraints are imposed; only the operation's atomicity is guaranteed.
+memory\_order\_relaxed: 这是一个松散的操作。没有同步或排序约束，只有操作的原子性得到保证。
 
 \item 
-memory\_order\_consume: This is a consume operation. Access in the current thread that is dependent on the value cannot be reordered before this load. This only affects compiler optimization.
+memory\_order\_consume: 这是一个消费型操作。在此加载之前，不能对依赖于该值的当前线程中的访问进行重排序。这只会影响编译器优化。
 
 \item 
-memory\_order\_acquire: This is an acquire operation. Access cannot be reordered before this load.
+memory\_order\_acquire: 这是一个获取型操作。在此加载之前，访问不能重新排序。
 
 \item 
-memory\_order\_release: This is a store operation. Access in the current thread cannot be reordered after this store.
+memory\_order\_release: 这是一个存储型操作。当前线程中的访问不能在此存储之后重新排序。
 
 \item 
-memory\_order\_acq\_rel: This is both acquire and release. Access in the current thread cannot be reordered before or after this store.
+memory\_order\_acq\_rel: 这既是获取型，也是释放型。当前线程中的访问不能在此存储之前或之后重新排序。
 
 \item 
-memory\_order\_seq\_cst: This is sequentially consistent ordering, either acquire or release, depending on the context. A load performs acquire, a store performs release, and a read/write/modify performs both. All threads observe all modifications in the same order.
+memory\_order\_seq\_cst: 这是顺序一致的排序，根据上下文获取或释放。加载执行获取，存储执行释放，读/写/修改同时执行。所有线程以相同的顺序观察所有修改。
 
-If no memory\_order is specified, memory\_order\_seq\_cst is the default.
+若没有指定memory\_order，则memory\_order\_seq\_cst为默认值。
 \end{itemize}
 
 

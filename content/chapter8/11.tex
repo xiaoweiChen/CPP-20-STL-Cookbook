@@ -1,13 +1,13 @@
 
-The random library provides a selection of random number generators, each with different strategies and properties. In this recipe, we examine a function to compare the different options by creating a histogram of their output.
+随机库提供了选择的随机数生成器，每个生成器具有不同的策略和属性。在本节中，我们检查一个函数，通过创建输出的直方图来比较不同的选项。
 
 \subsubsection{How to do it…}
 
-In this recipe, we compare the different random number generators provided by the C++ random library:
+在这个示例中，我们比较了C++随机库提供的不同随机数生成器:
 
 \begin{itemize}
 \item 
-We start with some constants to provide uniform parameters for the random number generators:
+从一些常量开始，为随机数生成器提供统一参数:
 
 \begin{lstlisting}[style=styleCXX]
 constexpr size_t n_samples{ 1000 };
@@ -15,12 +15,12 @@ constexpr size_t n_partitions{ 10 };
 constexpr size_t n_max{ 50 };
 \end{lstlisting}
 
-n\_samples is the number of samples to examine, n\_partitions is the number of partitions in which to display the samples, and n\_max is the maximum size of a bar in the histogram (this will vary some due to rounding).
+n\_samples是要检查的样本数量，n\_partitions是用来显示样本的分区数量，n\_max是直方图中条形图的最大值(由于四舍五入的关系，这个值会有所变化)。
 
-These numbers provide a reasonable display of the differences between the engines. Increasing the ratio of samples versus partitions tends to smooth out the curves and obscure the differences between the engines.
+这些数字合理地显示了引擎之间的差异。增加样本与分区的比例往往会使曲线变得平滑，并模糊引擎之间的差异。
 
 \item 
-This is the function that collects random number samples and displays a histogram:
+这是一个收集随机数样本并显示直方图的函数:
 
 \begin{lstlisting}[style=styleCXX]
 template <typename RNG>
@@ -49,10 +49,10 @@ void histogram(const string_view& rng_name) {
 \end{lstlisting}
 
 
-In a nutshell, this function stores a histogram of collected samples in a vector. It then displays the histogram as a series of asterisks on the console.
+简而言之，这个函数将收集的样本的直方图存储在一个vector中。然后，在控制台上以星号的形式显示直方图。
 
 \item 
-We call histogram() from main(), like this:
+在main()使用histogram()，如下所示:
 
 \begin{lstlisting}[style=styleCXX]
 int main() {
@@ -71,43 +71,43 @@ int main() {
 }
 \end{lstlisting}
 
-Output:
+输出为:
 
 \begin{center}
-\includegraphics[width=0.8\textwidth]{content/chapter8/images/1.png}\\
-Figure 8.1 – A screenshot of output from the first two random number engines
+\includegraphics[width=0.6\textwidth]{content/chapter8/images/1.png}\\
+图8.1 前两个随机数引擎输出的截图
 \end{center}
 
-This screenshot shows histograms of the first two random number engines. Your output will vary.
+截图显示了前两个随机数引擎的直方图。
 
-If we raise the value of n\_samples to 100,000, you'll see that the variance between engines becomes more difficult to discern:
+若将n\_samples的值提高到100,000，会发现引擎之间的差异变得更难辨别:
 
 \begin{center}
-\includegraphics[width=0.8\textwidth]{content/chapter8/images/2.png}\\
-Figure 8.2 – A screenshot of output with 100,000 samples
+\includegraphics[width=0.6\textwidth]{content/chapter8/images/2.png}\\
+图8.2  100,000个样本的输出截图
 \end{center}
 
 \end{itemize}
 
 \subsubsection{How it works…}
 
-Each of the random number engines has a functor interface that returns the next random number in the sequence:
+每个随机数引擎都有一个函子接口，返回序列中的下一个随机数:
 
 \begin{lstlisting}[style=styleCXX]
 result_type operator()();
 \end{lstlisting}
 
-The functor returns a random value, evenly distributed between the min() and max() values. All the random number engines have this interface in common.
+函子会返回一个随机值，平均分布在min()和max()值之间。所有的随机数引擎都有这个接口。
 
-The histogram() function takes advantage of this uniformity by using the class of the random number engine in a template:
+histogram()函数可以通过在模板中使用随机数引擎类，来利用这种一致性:
 
 \begin{lstlisting}[style=styleCXX]
 template <typename RNG>
 \end{lstlisting}
 
-(RNG is a common abbreviation for Random Number Generator. The library documentation refers to these classes as engines, which is synonymous with RNG for our purposes.) 
+(RNG是随机数生成器(Random Number Generator)的缩写。标准库文档将这些类称为引擎，就我们的目的而言，这与RNG同义。)
 
-We instantiate an object with the RNG class and create a histogram in a vector:
+我们用RNG类实例化一个对象，并在vector中创建一个直方图:
 
 \begin{lstlisting}[style=styleCXX]
 RNG rng{};
@@ -117,14 +117,14 @@ for(size_t i{}; i < n_samples; ++i) {
 }
 \end{lstlisting}
 
-This allows us to easily compare the results of the various random number engines with this technique.
+使用这种方式，可以很容易地比较各种随机数引擎的结果。
 
 
 \subsubsection{There's more…}
 
-Each of the random number engines in the library have different methodologies and characteristics. When you run the histogram multiple times, you'll notice that most of the engines have the same distribution each time they're run. That's because they are deterministic – that is, they generate the same sequence of numbers each time. std::random\_device is non-deterministic on most systems. You can use it to seed one of the other engines if you need more variation. It is also common to seed an RNG with the current date and time.
+库中的每个随机数引擎都有不同的方法和特征。当多次运行直方图时，会注意到大多数引擎在每次运行时都具有相同的分布。这是因为它们是确定的——每次生成相同的数字序列。std::random\_device在大多数系统上是不确定的。若需要更多的变化，可以使用它为其他引擎生成随机种子。使用当前日期和时间为RNG种子的情况也很常见。
 
-The std::default\_random\_engine is a suitable choice for most purposes.
+std::default\_random\_engine对于多数情况来说都是一个合适的选择。
 
 
 

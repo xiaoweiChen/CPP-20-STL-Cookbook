@@ -1,25 +1,25 @@
 
-The C++ Standard Library provides a selection of random number distribution generators, each with its own properties. In this recipe, we examine a function to compare the different options by creating a histogram of their output.
+C++标准库提供了一系列随机数分布生成器，每个生成器都有自己的属性。在本节中，我们检查一个函数，通过创建输出的直方图来比较不同的选项。
 
 \subsubsection{How to do it…}
 
-Like the random number engines, the distribution generators have some common interface elements. Unlike the random number engines, the distribution generators have a variety of properties to set. We can create a template function to print a histogram of the various distributions, but the initializations of the various distribution generators vary significantly:
+与随机数引擎一样，分布生成器也有一些公共的接口元素。与随机数引擎不同，分布生成器有各种属性可以设置。可以创建一个模板函数来打印各种分布的直方图，但各种分布生成器的初始化差异很大:
 
 \begin{itemize}
 \item 
-We start with some constants:
+先从一些常数开始:
 
 \begin{lstlisting}[style=styleCXX]
 constexpr size_t n_samples{ 10 * 1000 };
 constexpr size_t n_max{ 50 };
 \end{lstlisting}
 
-The n\_samples constant is the number of samples to generate for each histogram – in this case, 10,000.
+n\_samples常数是为每个直方图生成的样本数量——在本例中为10,000。
 
-The n\_max constant is used as a divisor while generating our histograms.
+生成直方图时，n\_max常数作为除数。
 
 \item 
-Our histogram function takes a distribution generator as an argument and prints a histogram for that distribution algorithm:
+直方图函数以分布生成器作为参数，并打印该分布算法的直方图:
 
 \begin{lstlisting}[style=styleCXX]
 void dist_histogram(auto distro,
@@ -48,10 +48,10 @@ void dist_histogram(auto distro,
 }
 \end{lstlisting}
 
-The dist\_histogram() function uses a map to store the histogram. It then displays the histogram as a series of asterisks on the console.
+dist\_histogram()函数的作用是:使用map来存储直方图。然后，在控制台上以星号的形式显示直方图。
 
 \item 
-We call dist\_histogram() from main(), like this:
+在main()调用dist\_histogram()，如下所示:
 
 \begin{lstlisting}[style=styleCXX]
 int main() {
@@ -62,30 +62,30 @@ int main() {
 	...
 \end{lstlisting}
 
-Calling the dist\_histogram() function is more complex than it was for the random number generators. Each random distribution class has a different set of parameters, according to its algorithm.
+调用dist\_histogram()函数比调用随机数生成器要复杂得多。每个随机分布类别根据其算法有不同的参数集。
 
-For the full list, refer to the distribution.cpp file in the GitHub archive.
+要获得完整的列表，请参考GitHub库中的distribution.cpp文件。
 
-Output:
+输出为:
 
 \begin{center}
-\includegraphics[width=0.8\textwidth]{content/chapter8/images/3.png}\\
-Figure 8.3 – A screenshot of random distribution histograms
+\includegraphics[width=0.6\textwidth]{content/chapter8/images/3.png}\\
+图8.3 随机分布直方图的截图
 \end{center}
 
-Each of the distribution algorithms produces very different output. You will want to experiment with the different options for each random distribution generator.
+每种分布算法产生非常不同的输出，可以试一下每个随机分布生成器的不同选项。
 
 \end{itemize}
 
 \subsubsection{How it works…}
 
-Each of the distribution generators has a functor that returns the next value in the random distribution:
+每个分布生成器都有一个返回随机分布中下一个值的函子:
 
 \begin{lstlisting}[style=styleCXX]
 result_type operator()( Generator& g );
 \end{lstlisting}
 
-The functor takes a random number generator (RNG) object as an argument:
+函子以随机数生成器(RNG)对象作为参数:
 
 \begin{lstlisting}[style=styleCXX]
 std::default_random_engine rng{};
@@ -93,9 +93,9 @@ map<long, size_t> m;
 for (size_t i{}; i < n_samples; ++i) ++m[(long)distro(rng)];
 \end{lstlisting}
 
-For our purposes, we're using the std::default\_random\_engine for our RNG.
+现在，我们在RNG中使用std::default\_random\_engine。
 
-As with the RNG histogram, this is a useful tool to visualize the various random distribution algorithms available in the random library. You will want to experiment with the various parameters available for each algorithm.
+与RNG直方图一样，这是一个有用的工具，可以可视化随机库中可用的各种随机分布算法。可以对每种算法可用的各种参数进行试验。
 
 
 

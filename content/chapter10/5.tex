@@ -78,12 +78,9 @@ Our output has line numbers and strings for the matching lines:
 \begin{tcblisting}{commandshell={}}
 25: struct std::formatter<fs::path>:
 std::formatter<std::string> {
-27: auto format(const fs::path& p, FormatContext&
-ctx) {
-32: match_v matches(const fs::path& fpath, const regex&
-re) {
-34: std::ifstream instrm(fpath.string(), std::ios_
-base::in);
+27: auto format(const fs::path& p, FormatContext& ctx) {
+32: match_v matches(const fs::path& fpath, const regex& re) {
+34: std::ifstream instrm(fpath.string(), std::ios_base::in);
 62: constexpr const char * pattern{ "path" };
 64: fs::path fpath{ fn };
 66: auto regmatches{ matches(fpath, re) };

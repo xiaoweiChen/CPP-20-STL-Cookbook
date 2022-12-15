@@ -1,19 +1,19 @@
 
-The std::shared\_ptr class provides an aliasing constructor to share a pointer managed by another unrelated pointer:
+std::shared\_ptr类提供了一个别名构造函数，来共享由另一个不相关指针管理的指针:
 
 \begin{lstlisting}[style=styleCXX]
 shared_ptr( shared_ptr<Y>&& ref, element_type* ptr ) noexcept;
 \end{lstlisting}
 
-This returns an aliased shared\_ptr object that uses the resources of ref but returns a pointer to ptr. The use\_count is shared with ref. The deleter is shared with ref. But get() returns ptr. This allows us to share a member of a managed object without sharing the entire object, and without allowing the entire object to be deleted while we're still using the member.
+这将返回一个别名shared\_ptr对象，该对象使用ref的资源，但返回一个指向ptr的指针，use\_count和deleter与ref共享，但是get()返回ptr。这可以在不共享整个对象的情况下共享托管对象的一个成员，并且在仍然使用该成员时不允许删除对象。
 
 \subsubsection{How to do it…}
 
-In this recipe, we create a managed object and share members of that object:
+在这个示例中，我们创建了一个托管对象并共享该对象的成员:
 
 \begin{itemize}
 \item 
-We start with a class for the managed object:
+从托管对象的类开始:
 
 \begin{lstlisting}[style=styleCXX]
 struct animal {
@@ -29,10 +29,10 @@ struct animal {
 };
 \end{lstlisting}
 
-This class has two members, string types for name and sound of the animal object. We also have print statements for the constructor and the destructor.
+该类有两个成员，animal对象的名称和声音的字符串类型。构造函数和析构函数也有print语句。
 
 \item 
-Now, we need a function to create an animal but only share its name and sound:
+现在，需要一个函数来创建一个animal，但只分享它的名字和声音:
 
 \begin{lstlisting}[style=styleCXX]
 auto make_animal(const string& n, const string& s) {
@@ -43,10 +43,10 @@ auto make_animal(const string& n, const string& s) {
 }
 \end{lstlisting}
 
-This function creates shared\_ptr with an animal object, constructed with a name and a sound. We then create aliased shared\_ptr objects for the name and sound. When we return the name and sound pointers, the animal pointer goes out of scope. It is not deleted because the aliased pointers keep the use count from reaching zero.
+这个函数创建与动物对象shared\_ptr，由名称和声音构造。然后，为名称和声音创建别名shared\_ptr对象。当返回name和sound指针时，animal指针将超出作用域。因为别名指针可以防止使用计数达到零，所以它不会删除。
 
 \item 
-In our main() function, we call make\_animal() and inspect the results:
+main()函数中，使用make\_animal()并检查结果:
 
 \begin{lstlisting}[style=styleCXX]
 int main() {
@@ -58,7 +58,7 @@ int main() {
 }
 \end{lstlisting}
 
-Output:
+输出为:
 
 \begin{tcblisting}{commandshell={}}
 ctor: Velociraptor
@@ -67,39 +67,39 @@ Use count: name 2, sound 2
 dtor: Velociraptor
 \end{tcblisting}
 
-We can see that the aliased pointers each show a use\_count of 2. When the make\_animal() function creates the aliased pointers, they each increase the use count of the animal pointer. When the function ends, the animal pointer goes out of scope, leaving its use count at 2, which is reflected in the aliased pointers. The aliased pointers go out of scope at the end of main(), which allows the animal pointer to be destroyed.
+每个别名指针的use\_count值为2。当make\_animal()函数创建别名指针时，其会增加animal指针的使用次数。当函数结束时，animal指针超出作用域，使其使用计数为2，这反映在别名指针中。别名指针在main()的末尾超出了作用域，这可以销毁animal指针。
 
 \end{itemize}
 
 \subsubsection{How it works…}
 
-The aliased shared pointer seems a bit abstract, but it's simpler than it appears.
+别名共享指针看起来有点抽象，但它比看起来要简单。
 
-A shared pointer uses a control block to manage its resources. One control block is associated with one managed object and is shared among the pointers that share that object. The control block generally contains:
+共享指针使用一个控制块来管理它的资源。一个控制块与一个托管对象相关联，并在共享该对象的指针之间共享。控制块一般包含:
 
 \begin{itemize}
 \item 
-A pointer to the managed object
+指向管理对象的指针
 
 \item 
-The deleter
+删除器
 
 \item 
-The allocator
+分配器
 
 \item 
-The number of shared\_ptr objects that own the managed object (this is the use count)
+拥有托管对象的shared\_ptr对象的数量(这是使用计数)
 
 \item 
-The number of weak\_ptr objects that refer to the managed object
+引用管理对象的weak\_ptr对象的数量
 \end{itemize}
 
-In the case of an aliased shared pointer, the control block includes the pointer to the aliased object. Everything else remains the same.
+在使用别名共享指针的情况下，控制块包括指向别名对象的指针，其他不变。
 
-Aliased shared pointers participate in the use count, just like non-aliased shared pointers, preventing the managed object from being destroyed until the use count reaches zero. The deleter is not changed, so it destroys the managed object.
+别名共享指针参与使用计数，就像非别名共享指针一样，防止托管对象在使用计数为零之前被销毁。删除器没有改变，所以它会破坏管理对象。
 
-\begin{tcolorbox}[colback=webgreen!5!white,colframe=webgreen!75!black,title=Important Note]
-It is possible to use any pointer to construct an aliased shared pointer. Usually, the pointer refers to a member within the aliased object. If the aliased pointer does not refer to an element of the managed object, you will need to manage its construction and destruction separately.
+\begin{tcolorbox}[colback=webgreen!5!white,colframe=webgreen!75!black,title=重要的Note]
+可以使用任何指针来构造别名共享指针。通常，指针指向别名对象中的成员。若别名指针没有引用托管对象的元素，则需要分别管理其构造和销毁。
 \end{tcolorbox}
 
 

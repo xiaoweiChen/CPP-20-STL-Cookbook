@@ -1,27 +1,27 @@
 
-std::async() runs a target function asynchronously and returns a std::future object to carry the target function's return value. In this way, async() operates much like std::thread but allows return values.
+std::async()异步运行一个目标函数，并返回一个携带目标函数返回值的std::future对象。通过这种方式，async()的操作很像std::thread，但允许函数有返回值。
 
-Let's consider the use of std::async() with a few examples.
+通过几个例子来了解一下std::async()的使用。
 
 \subsubsection{How to do it…}
 
-In its simplest forms, the std::async() function performs much the same task as std::thread, without the need to call join() or detach() and while also allowing return values via a std::future object.
+在其最简单的形式中，std::async()函数执行与std::thread相同的任务，不需要调用join()或detach()，同时还允许通过std::future对象返回值。
 
-In this recipe, we'll use a function that counts the number of primes in a range. We'll use chrono::steady\_clock to time the execution of each thread.
+在这个示例中，将使用一个函数来计算一个范围内质数的数量。可以使用chrono::steady\_clock为每个线程的进行计时。
 
 \begin{itemize}
 \item 
-We'll start with a couple of convenience aliases:
+先从别名开始:
 
 \begin{lstlisting}[style=styleCXX]
 using launch = std::launch;
 using secs = std::chrono::duration<double>;
 \end{lstlisting}
 
-std::launch has launch policy constants, for use with the async() call. The secs alias is a duration class, for timing our prime number calculations.
+std::launch有启动策略常量，用于async()调用。secs别名是一个持续时间类，用于为质数计算计时。
 
 \item 
-Our target function counts prime numbers in a range. This is essentially a way to understand the execution policies by eating some clock cycles:
+我们的目标函数计算范围内的质数。这本质上是一种通过占用一些时钟周期，来理解执行策略的方法:
 
 \begin{lstlisting}[style=styleCXX]
 struct prime_time {
@@ -47,10 +47,10 @@ prime_time count_primes(const uint64_t& max) {
 }
 \end{lstlisting}
 
-The prime\_time structure is for the return value, with elements for duration and count. This allows us to time the loop itself. The isprime lambda returns true if a value is prime. We use steady\_clock to calculate the duration of the loop that counts primes.
+prime\_time结构用于返回值，可用于duration和count。这样就可以计算循环本身的时间。若一个值是质数，isprime返回true。我们使用steady\_clock来计算质数计数循环的持续时间。
 
 \item 
-In main(), we call our function and report its timing:
+在main()中，调用函数并报告其运行时间:
 
 \begin{lstlisting}[style=styleCXX]
 int main() {
@@ -61,14 +61,14 @@ int main() {
 }
 \end{lstlisting}
 
-Output:
+输出为:
 
 \begin{tcblisting}{commandshell={}}
 primes: 12252 1.88008s
 \end{tcblisting}
 
 \item 
-Now, we can run count\_primes() asynchronously with std::async():
+现在，可以用std::async()异步运行count\_primes():
 
 \begin{lstlisting}[style=styleCXX]
 int main() {
@@ -80,32 +80,32 @@ int main() {
 }
 \end{lstlisting}
 
-Here, we call async() with our count\_primes function and the MAX\_PRIME parameter. This runs count\_primes() in the background.
+这里，使用count\_primes函数和MAX\_PRIME参数调用async()，这count\_primes函数放在后台运行。
 
-async() returns a std::future object, which carries the return value of an asynchronous operation. The future object's get() method blocks until the asynchronous function has completed and then returns the return object from the function.
+async()返回std::future对象，该对象携带异步操作的返回值。future对象的get()是阻塞式的，会等到异步函数完成，获取该函数的返回对象。
 
-This runs with almost the same timing as we got without async():
+这与没有async()时运行的时间几乎相同:
 
 \begin{tcblisting}{commandshell={}}
 primes: 12252 1.97245s
 \end{tcblisting}
 
 \item 
-The async() function optionally takes execution policy flags as its first parameter:
+async()函数可选地将执行策略标志作为其第一个参数:
 
 \begin{tcblisting}{commandshell={}}
 auto primes1 = async(launch::async, count_primes, MAX_
 PRIME);
 \end{tcblisting}
 
-The choices are async or deferred. These flags are in the std::launch namespace.
+选择是异步或延迟的，这些标志位于std::launch命名空间中。
 
-The async flag enables asynchronous operation, and the deferred flag enables lazy evaluation. These flags are bitmapped and may be combined with the bitwise or | operator.
+async标志启用异步操作，deferred标志启用延迟计算。这些标志是位映设的，可以与按位或|操作符组合使用。
 
-The default is for both bits to be set, as if async | deferred was specified.
+默认情况下，这两个位都要设置，就和async|deferred一样。
 
 \item 
-We can run several instances of our function simultaneously with async():
+可以使用async()同时运行函数的几个实例:
 
 \begin{lstlisting}[style=styleCXX]
 int main() {
@@ -131,7 +131,7 @@ int main() {
 }
 \end{lstlisting}
 
-We know that async returns a future object. So, we can run 15 threads by storing the future objects in a container. Here's our output on a 6-core i7 running Windows:
+我们知道async返回一个future对象。因此，可以通过将未来对象存储在容器中来运行15个线程。以下是我们在运行Windows的6核i7上的输出:
 
 \begin{tcblisting}{commandshell={}}
 start parallel primes
@@ -153,11 +153,11 @@ primes(15): 12252 2.22414s
 total duration: 5.9461s
 \end{tcblisting}
 
-Even though the 6-core i7 is not able to run all the processes in separate cores, it still completes 15 instances in under 6 seconds.
+尽管，6核i7不能在不同的核中运行所有进程，但仍然可以在6秒内完成15个实例。
 
-It looks like it finishes the first 13 threads in about 4 seconds, and then takes another 2 seconds to finish the last 2 threads. It appears to take advantage of Intel's Hyper-Threading technology that allows 2 threads to run in one core under some circumstances.
+看起来它在4秒内完成了前13个线程，然后再花2秒完成最后2个线程。这似乎利用了Intel的超线程技术，该技术允许在某些情况下在一个核心中运行2个线程。
 
-When we run the same code on a 12-core Xeon, we get this result:
+当在12核Xeon上运行相同的代码时，会得到这样的结果:
 
 \begin{tcblisting}{commandshell={}}
 start parallel primes
@@ -179,17 +179,17 @@ primes(15): 12252 0.94122s
 total duration: 0.98166s
 \end{tcblisting}
 
-The 12-core Xeon gets through all 15 processes in under a second.
+12核的至强处理器可以在一秒钟内完成全部15个进程的任务。
 
 \end{itemize}
 
 \subsubsection{How it works…}
 
-The key to understanding std::async is in its use of std::promise and std::future.
+理解std::async的关键在于其对std::promise和std::future的使用。
 
-The promise class allows a thread to store an object that may later be retrieved asynchronously by a future object.
+promise类允许线程存储一个对象，以后可以由future对象进行异步检索。
 
-For example, let's say we have a function like this:
+例如，有一个这样的函数:
 
 \begin{lstlisting}[style=styleCXX]
 void f() {
@@ -197,7 +197,7 @@ void f() {
 }
 \end{lstlisting}
 
-We can run it with std::thread, like this:
+可以用std::thread运行:
 
 \begin{lstlisting}[style=styleCXX]
 int main() {
@@ -207,9 +207,9 @@ int main() {
 }
 \end{lstlisting}
 
-That works fine for a simple function with no return value. When we want to return a value from f(), we can use promise and future.
+这对于没有返回值的简单函数来说很好。当想从f()返回一个值时，我们可以使用promise和future。
 
-We set up the promise and future objects in the main() thread:
+我们在main()线程中设置了promise和future对象:
 
 \begin{lstlisting}[style=styleCXX]
 int main() {
@@ -223,7 +223,7 @@ int main() {
 }
 \end{lstlisting}
 
-And we pass the promise object to our function:
+然后，将promise对象传递给函数:
 
 \begin{lstlisting}[style=styleCXX]
 void f(std::promise<int> value) {
@@ -232,11 +232,11 @@ void f(std::promise<int> value) {
 }
 \end{lstlisting}
 
-Note that a promise object cannot be copied, so we need to use std::move to pass it to the function.
+注意，promise对象不能复制，因此需要使用std::move将其传递给函数。
 
-The promise object serves as a bridge to a future object, which allows us to retrieve the value when it becomes available.
+promise对象充当到future对象的桥梁，其允许在值可用的前提下，对其进行检索。
 
-std::async() is just a helper function to simplify the creation of the promise and future objects. With async(), we can do all of that like this:
+std::async()只是一个辅助函数，用于简化promise和future对象的创建。可以这样使用async():
 
 \begin{lstlisting}[style=styleCXX]
 int f() {
@@ -251,7 +251,7 @@ int main() {
 }
 \end{lstlisting}
 
-That's the value of async(). For many purposes, it makes the use of promise and future much easier.
+这就是async()的值。在很多情况下，它使promise和future的使用更容易。
 
 
 

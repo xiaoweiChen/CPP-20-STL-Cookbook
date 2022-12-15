@@ -1,15 +1,15 @@
 
-The producer-consumer problem is really a set of problems. Solutions will differ if the buffer is bounded or unbounded, or if there are multiple producers, multiple consumers, or both.
+生产者-消费者问题实际上是一组问题。若缓冲区是有界的或无界的，或者有多个生产者、多个消费者，或者两者都有，解决方案将有所不同。
 
-Let's consider a case with multiple producers, multiple consumers, and a bounded (limited capacity) buffer. This is a common condition.
+来考虑一个有多个生产者、多个消费者和一个有限(容量有限)缓冲区的情况。这是一种常见的情况。
 
 \subsubsection{How to do it…}
 
-In this recipe, we'll look at a case with multiple producers and consumers and a bounded buffer, using a variety of techniques we've covered in this chapter:
+在这个示例中，我们将看到一个有多个生产者和消费者的情况，以及一个有界缓冲区，并使用本章中介绍的各种技术:
 
 \begin{itemize}
 \item 
-We'll start with some constants for convenience and reliability:
+为了方便和可靠性，先从一些常量开始:
 
 \begin{lstlisting}[style=styleCXX]
 constexpr auto delay_time{ 50ms };
@@ -22,23 +22,23 @@ constexpr size_t num_consumers{ 5 };
 
 \begin{itemize}
 \item
-delay\_time is a duration object, used with sleep\_for().
+delay\_time是一个duration对象，与sleep\_for()一起使用。
 
 \item 
-consumer\_wait is a duration object, used with the consumer condition variable.
+consumer\_wait是一个持续时间对象，与消费者条件变量一起使用。
 
 \item 
-queue\_limt is the buffer limit – the maximum number of items in the deque.
+queue\_limit是缓冲区限制——deque中的最大容量值。
 
 \item 
-num\_items is the maximum number of items produced per producer.
+num\_items是每个生产者生产的最大产品目数。
 
 \item 
-num\_producers is the number of spawned consumers.
+num\_producers是消费者的数量。
 \end{itemize}
 
 \item 
-Now, we need some objects to control the process:
+现在，需要一些对象来控制这个过程:
 
 \begin{lstlisting}[style=styleCXX]
 deque<string> qs{};
@@ -50,26 +50,26 @@ bool production_complete{};
 
 \begin{itemize}
 \item 
-qs is a deque of string that holds the produced objects.
+qs是一个字符串deque，用于保存生成的对象。
 
 \item 
-q\_mutex controls access to deque.
+q\_mutex可以对deque的访问进行控制。
 
 \item 
-queue\_limt is the buffer limit – the maximum number of items in the deque.
+queue\_limt是缓冲区限制——deque中项目的最大容量。
 
 \item 
-cv\_producer is a condition variable that coordinates producers.
+cv\_producer是协调生产者的条件变量。
 
 \item 
-cv\_consumer is a condition variable that coordinates consumers.
+cv\_consumer是协调使用者的条件变量。
 
 \item 
-production\_complete is set true when all producer threads have finished.
+production\_complete当所有生产者线程完成时，将其设置为true。
 \end{itemize}
 
 \item 
-The producer() threads run this function:
+producer()线程运行这个函数:
 
 \begin{lstlisting}[style=styleCXX]
 void producer(const size_t id) {
@@ -85,18 +85,18 @@ void producer(const size_t id) {
 }
 \end{lstlisting}
 
-The passed value id is a sequential number used to identify the producer.
+传递值的id是一个用于标识生产者的连续数字。
 
-The main for loop repeats num\_item times. The sleep\_for() function is used to simulate some work required to produce an item.
+主for循环重复num\_item次。sleep\_for()函数用于模拟生成一个项所需的一些工作。
 
-Then we obtain a unique\_lock from q\_mutex and invoke wait() on cv\_producer, using a lambda that checks the size of the deque against the queue\_limit constant. If the deque has reached maximum size, the producer waits for consumer threads to reduce the size of the deque. This represents the bounded buffer limit on the producer.
+然后，从q\_mutex中获得一个唯一的\_lock，并在cv\_producer上调用wait()，使用lambda根据queue\_limit常量检查deque的大小。若deque已经达到上限，生产者等待消费者线程来减小deque的体积。这表示生成器的有界缓冲区限制。
 
-Once the condition is satisfied, we push an item onto the deque. The item is a formatted string with the producer's id, the size of qs, and an item number (i + 1) from the loop control variable.
+当条件满足，可以将一个产品推入deque。元素是一个格式化的字符串，包含生产者的id、qs的大小和来自循环控制变量的项目编号(i + 1)。
 
-Finally, we notify the consumers that new data is available, with notify\_all() on the cv\_consumer condition variable.
+最后，在cv\_consumer条件变量上使用notify\_all()通知消费者有新数据可用。
 
 \item 
-The consumer() threads run this function:
+consumer()线程运行这个函数:
 
 \begin{lstlisting}[style=styleCXX]
 void consumer(const size_t id) {
@@ -114,16 +114,16 @@ void consumer(const size_t id) {
 }
 \end{lstlisting}
 
-The passed id value is a sequential number used to identify the consumer.
+传递的id值是一个用于标识使用者的连续数字。
 
-The main while() loop continues until production\_complete is set.
+主while()循环继续进行，直到对production\_complete进行设置。
 
-We obtain unique\_lock from q\_mutex and invoke wait\_for() on cv\_consumer, with a timeout and a lambda that tests if the deque is empty. We need the timeout because it's possible for the producer threads to finish while some of the consumer threads are still running, leaving the deque empty.
+我们从q\_mutex中获得unique\_lock，并在cv\_consumer上调用wait\_for()，使用一个超时和一个lambda来测试deque是否为空。这里需要超时，是因为当一些消费者线程仍在运行时，生产者线程可能已经完成，可使deque为空。
 
-Once we have a non-empty deque, we can print (consume) an item and pop it off the deque.
+当有了一个非空的deque，就可以打印(消费)一个产品信息，并将其从deque中弹出。
 
 \item 
-In main(), we use async() to spawn the producer and consumer threads. async() conforms to the RAII pattern, so I'll usually prefer it over thread, where possible. async() returns a future object, so we'll keep a list of future<void> objects for process management:
+在main()中，使用async()来生成生产者线程和消费者线程。async()符合RAII模式，所以我通常更喜欢使用async。async()返回一个future对象，可以保留一个future<void>对象列表用于进程管理:
 
 \begin{lstlisting}[style=styleCXX]
 int main() {
@@ -138,10 +138,10 @@ int main() {
 	...
 \end{lstlisting}
 
-We use for loops to create producer and consumer threads.
+使用for循环来创建生产者和消费者线程。
 
 \item 
-Finally, we use list of future objects to determine when our producer and consumer threads are complete:
+最后，可以使用future对象的列表来确定生产者和消费者线程何时完成:
 
 \begin{lstlisting}[style=styleCXX]
 for(auto& f : producers) f.wait();
@@ -152,10 +152,10 @@ for(auto& f : consumers) f.wait();
 cout << "consumers done.\n";
 \end{lstlisting}
 
-We loop through our producers container, calling wait() to allow the producer threads to complete. Then, we can set the production\_complete flag. We likewise loop through the consumers container, calling wait() to allow the consumer threads to complete. We could perform any final analysis or completion processes here.
+循环生成器容器，调用wait()以允许生成器线程完成。然后，可以设置production\_complete标志。同样，循环遍历消费者容器，调用wait()以允许消费者线程完成。可以在这里执行最终的分析或完成过程。
 
 \item 
-The output is a bit long to show in its entirety:
+输出有点长，就不全部展示了:
 
 \begin{tcblisting}{commandshell={}}
 cid 0: pid 0, qs 0, item 01
@@ -177,14 +177,14 @@ consumers done.
 
 \subsubsection{How it works…}
 
-The heart of this recipe is in the use of two condition\_variable objects to control the producer and consumer threads asynchronously:
+这个配方的核心是使用两个condition\_variable对象来异步控制生产者和消费者线程:
 
 \begin{lstlisting}[style=styleCXX]
 condition_variable cv_producer{};
 condition_variable cv_consumer{};
 \end{lstlisting}
 
-In the producer() function, the cv\_producer object obtains a unique\_lock, waits for the deque to be available, and notifies the cv\_consumer object when an item has been produced:
+在producer()函数中，cv\_producer对象获得unique\_lock，等待deque可用，并在生成产品时通知cv\_consumer对象:
 
 \begin{lstlisting}[style=styleCXX]
 void producer(const size_t id) {
@@ -200,7 +200,7 @@ void producer(const size_t id) {
 }
 \end{lstlisting}
 
-Conversely, in the consumer() function, the cv\_consumer object obtains a unique\_lock, waits for the deque to have items, and notifies the cv\_producer object when an item has been consumed:
+相反，在consumer()函数中，cv\_consumer对象获得unqiue\_lock，等待deque中有产品，并在产品消费时通知cv\_producer对象:
 
 \begin{lstlisting}[style=styleCXX]
 void consumer(const size_t id) {
@@ -217,7 +217,7 @@ void consumer(const size_t id) {
 }
 \end{lstlisting}
 
-These complementary locks, waits, and notifications constitute the balance of coordination between multiple producers and consumers.
+这些锁、等待和通知，构成了多个生产者和消费者之间的动态平衡。
 
 
 

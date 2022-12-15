@@ -1,20 +1,20 @@
 
-Beginning with C++17, many of the standard STL algorithms can run with parallel execution. This feature allows an algorithm to split its work into sub-tasks to run simultaneously on multiple cores. These algorithms accept an execution policy object that specifies the kind of parallelism applied to the algorithm. This feature requires hardware support.
+从C++17开始，许多标准的STL算法可以并行执行。该特性允许算法将其工作拆分为子任务，以便在多个核上同时运行。这些算法接受一个执行策略对象，该对象指定应用于算法的并行度类型。该特性需要硬件支持。
 
 \subsubsection{How to do it…}
 
-Execution policies are defined in the <execution> header and in the std::execution namespace. In this recipe, we will test the available policies using the std::transform() algorithm:
+执行策略在<execution>头文件中和std:: Execution命名空间中定义。本节中，我们将使用std::transform()算法测试可用的策略:
 
 \begin{itemize}
 \item 
-For timing purposes, we'll use the duration object with the std::milli ratio so that we can measure in milliseconds:
+出于计时的目的，将使用带有std::milli比率的duration对象，这样我们就可以以毫秒为单位进行测量:
 
 \begin{lstlisting}[style=styleCXX]
 using dur_t = duration<double, std::milli>;
 \end{lstlisting}
 
 \item 
-For demonstration purposes, we'll start with a vector of int with 10 million random values:
+出于演示目的，将从一个具有1000万个随机值的vector<unsigned>开始:
 
 \begin{lstlisting}[style=styleCXX]
 int main() {
@@ -25,7 +25,7 @@ int main() {
 \end{lstlisting}
 
 \item 
-Now, we apply a simple transformation:
+现在，我们进行一个简单的变换:
 
 \begin{lstlisting}[style=styleCXX]
 auto mul2 = [](int n){ return n * 2; };
@@ -35,74 +35,74 @@ dur_t dur1 = steady_clock::now() - t1;
 cout << format("no policy: {:.3}ms\n", dur1.count());
 \end{lstlisting}
 
-The mul2 lambda simply multiplies a value by 2. The transform() algorithm applies mul2 to every member of the vector.
+mul2 lambda只是将一个值乘以2。transform()算法将mul2应用于vector的每个成员。
 
-This transformation does not specify an execution policy.
+此转换不指定执行策略。
 
-Output:
+输出为:
 
 \begin{tcblisting}{commandshell={}}
 no policy: 4.71ms
 \end{tcblisting}
 
 \item 
-We can specify an execution policy in the first argument of the algorithm:
+可以在算法的第一个参数中指定执行策略:
 
 \begin{lstlisting}[style=styleCXX]
 std::transform(execution::seq,
 	v.begin(), v.end(), v.begin(), mul2);
 \end{lstlisting}
 
-The seq policy means that the algorithm shall not be parallelized. This is the same as no execution policy.
+seq策略意味着算法不能并行化，这与没有执行策略一样。
 
-Output:
+输出为:
 
 \begin{tcblisting}{commandshell={}}
 execution::seq: 4.91ms
 \end{tcblisting}
 
-Notice that the duration is roughly the same as without a policy. It will never be exact because it varies each time it's run.
+注意，持续时间与没有策略时大致相同。因为它每次运行都会变化，所以永远不会是精确的。
 
 \item 
-The execution::par policy allows the algorithm to parallelize its workload:
+execution::par策略允许算法并行化其工作负载:
 
 \begin{lstlisting}[style=styleCXX]
 std::transform(execution::par,
 	v.begin(), v.end(), v.begin(), mul2);
 \end{lstlisting}
 
-Output:
+输出为:
 
 \begin{tcblisting}{commandshell={}}
 execution::par: 3.22ms
 \end{tcblisting}
 
-Notice that the algorithm runs somewhat faster with the parallel execution policy.
+注意，使用并行执行策略时，算法运行得稍微快一些。
 
 \item 
-The execution::par\_unseq policy allows unsequenced parallel execution of the workload:
+execute::par\_unseq策略允许工作负载的非排序并行执行:
 
 \begin{lstlisting}[style=styleCXX]
 std::transform(execution::par_unseq,
 	v.begin(), v.end(), v.begin(), mul2);
 \end{lstlisting}
 
-Output:
+输出为:
 
 \begin{tcblisting}{commandshell={}}
 execution::par_unseq: 2.93ms
 \end{tcblisting}
 
-Here, we notice another increase in performance with this policy.
+这里，我们注意到该策略的另一个性能提升。
 
-The execution::par\_unseq policy has tighter requirements of the algorithm. The algorithm must not perform operations that require concurrent or sequential operation.
+execution::par\_unseq策略对算法有更严格的要求。算法不能执行需要并发或需要顺序执行的操作。
 \end{itemize}
 
 \subsubsection{How it works…}
 
-The execution policies interface doesn't specify how the algorithm workloads are parallelized. It's designed to work with a diverse set of hardware and processors under varying loads and circumstances. It may be implemented entirely in the library or rely on compiler or hardware support.
+执行策略接口没有指定如何并行算法工作负载，其设计为在不同的负载和环境下使用不同的硬件和处理器。其可以完全在库中实现，也可以依赖于编译器或硬件支持。
 
-Parallelization will show the most improvement on algorithms that do more than O(n) work. For example, sort() shows a dramatic improvement. Here's a sort() with no parallelization:
+并行化将在运算量超过O(n)的算法上表现出最大的改进。例如，sort()显示了显著的改进。下面是一个没有并行化的sort():
 
 \begin{lstlisting}[style=styleCXX]
 auto t0 = steady_clock::now();
@@ -111,40 +111,40 @@ dur_t dur0 = steady_clock::now() - t0;
 cout << format("sort: {:.3}ms\n", dur0.count());
 \end{lstlisting}
 
-Output:
+输出为:
 
 \begin{tcblisting}{commandshell={}}
 sort: 751ms
 \end{tcblisting}
 
-With execution::par, we see significant performance gains:
+使用execution::par，就可以看到显著的性能提升:
 
 \begin{lstlisting}[style=styleCXX]
 std::sort(execution::par, v.begin(), v.end());
 \end{lstlisting}
 
-Output:
+输出为:
 
 \begin{tcblisting}{commandshell={}}
 sort: 163ms
 \end{tcblisting}
 
-The improvement with execution::par\_unseq is better still:
+execution::par\_unseq的改进会更好:
 
 \begin{lstlisting}[style=styleCXX]
 std::sort(execution::par_unseq, v.begin(), v.end());
 \end{lstlisting}
 
-Output:
+输出为:
 
 \begin{tcblisting}{commandshell={}}
 sort: 152ms
 \end{tcblisting}
 
-It's a good idea to do a lot of testing when using the parallelized algorithms. If your algorithm or predicates do not lend themselves well to parallelization, you may end up with minimal performance gains or unintended side effects.
+在使用并行算法时，做大量的测试是个好主意。若算法或谓词本身不能很好地用于并行化，那么最终可能会获得最小的性能增益，或出现意想不到的副作用。
 
 \begin{tcolorbox}[colback=webgreen!5!white,colframe=webgreen!75!black,title=Note]
-At the time of writing, execution policies are poorly supported in GCC and not yet supported by LLVM/Clang. This recipe was tested on a 6-core i7 running Windows 10 and a preview release of Visual C++.
+撰写本文时，GCC对执行策略的支持很差，LLVM/Clang也不支持。这个示例是在运行Windows 10和Visual c++预览版的6核i7上测试的。
 \end{tcolorbox}
 
 

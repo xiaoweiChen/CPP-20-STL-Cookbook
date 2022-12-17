@@ -1,13 +1,13 @@
 
-This is a simple utility that totals the size of every file in a directory and its sub-directories. It runs on both POSIX/Unix and Windows file systems.
+这是一个简单的程序，用于计算目录及其子目录中每个文件的大小，可以在POSIX/Unix和Windows文件系统上运行。
 
 \subsubsection{How to do it…}
 
-This recipe is a utility to report the size of every file in a directory and its sub-directories, along with a total. We'll re-use some of the functions we've used elsewhere in this chapter:
+这个示例是一个程序，用于报告目录及其子目录中每个文件的大小，以及总数。我们将重用在本章其他地方使用过的一些函数:
 
 \begin{itemize}
 \item 
-We start with a few convenience aliases:
+先从几个别名开始说起:
 
 \begin{lstlisting}[style=styleCXX]
 namespace fs = std::filesystem;
@@ -16,7 +16,7 @@ using de = fs::directory_entry;
 \end{lstlisting}
 
 \item 
-We also use our format specialization for fs::path objects:
+我们还对fs::path对象使用格式化特化:
 
 \begin{lstlisting}[style=styleCXX]
 template<>
@@ -30,7 +30,7 @@ std::formatter<std::string> {
 \end{lstlisting}
 
 \item 
-For reporting the size of the directory, we'll use this make\_commas() function:
+为了输出目录的大小，我们将使用make\_comma()函数:
 
 \begin{lstlisting}[style=styleCXX]
 string make_commas(const uintmax_t& num) {
@@ -42,10 +42,10 @@ string make_commas(const uintmax_t& num) {
 }
 \end{lstlisting}
 
-We've used this before. It inserts a comma before every third character from the end.
+我们以前用过这个，其从结尾开始，每三个字符前插入一个逗号。
 
 \item 
-To sort our directory, we'll need a lowercase string function:
+要对目录进行排序，需要一个小写字符串的函数:
 
 \begin{lstlisting}[style=styleCXX]
 string strlower(string s) {
@@ -61,7 +61,7 @@ string strlower(string s) {
 \end{lstlisting}
 
 \item 
-We need a comparison predicate for sorting directory\_entry objects by the lowercase of the path name:
+需要一个比较谓词，根据路径名的小写字母对directory\_entry对象进行排序:
 
 \begin{lstlisting}[style=styleCXX]
 bool dircmp_lc(const de& lhs, const de& rhs) {
@@ -72,7 +72,7 @@ bool dircmp_lc(const de& lhs, const de& rhs) {
 \end{lstlisting}
 
 \item 
-size\_string() returns abbreviated values for reporting file size in gigabytes, megabytes, kilobytes, or bytes:
+size\_string()返回用于报告文件大小的缩写值，单位为千兆字节、兆字节、千字节或字节:
 
 \begin{lstlisting}[style=styleCXX]
 string size_string(const uintmax_t fsize) {
@@ -91,7 +91,7 @@ string size_string(const uintmax_t fsize) {
 \end{lstlisting}
 
 \item 
-entry\_size() returns the size of a file or, if it's a directory, the recursive size of the directory:
+entry\_size()返回文件的大小，若是目录，则返回目录的递归大小:
 
 \begin{lstlisting}[style=styleCXX]
 uintmax_t entry_size(const fs::path& p) {
@@ -108,7 +108,7 @@ uintmax_t entry_size(const fs::path& p) {
 \end{lstlisting}
 
 \item 
-In main(), we start with declarations and test if we have a valid directory to search:
+main()中，从声明开始，并测试是否有一个有效的目录要搜索:
 
 \begin{lstlisting}[style=styleCXX]
 int main(const int argc, const char** argv) {
@@ -129,21 +129,21 @@ int main(const int argc, const char** argv) {
 	cout << format("{}:\n", absolute(dir));
 \end{lstlisting}
 
-For our directory path, dir, we use argv[1] if we have an argument; otherwise, we use current\_path() for the current directory. Then we set up an environment for our usage counter:
+对于我们的目录路径dir，若有参数，则使用argv[1]。否则，对当前目录使用current\_path()。然后，为我们的用法计数器设置一个环境:
 
 \begin{itemize}
 \item 
-The vector of directory\_entry objects is used for sorting our response.
+directory\_entry对象的vector用于排序。
 
 \item 
-accum is used to accumulate values for our final size total.
+accum用于累积最终总大小的值。
 
 \item 
-We make sure dir exists and is a directory before proceeding to examine the directory.
+在继续检查目录之前，需要确保dir存在，并且的确是一个目录。
 \end{itemize}
 
 \item 
-Next, a simple loop to populate the vector. Once populated, we sort entries using our dircmp\_lc() function as a comparison predicate:
+接下来，一个简单的循环填充vector。填充完成后，使用dircmp\_lc()函数作为比较谓词对条目进行排序:
 
 \begin{lstlisting}[style=styleCXX]
 for (const auto& e : dit{ dir }) {
@@ -153,7 +153,7 @@ std::sort(entries.begin(), entries.end(), dircmp_lc);
 \end{lstlisting}
 
 \item 
-Now that everything is set up, we can accumulate results from the sorted vector of directory\_entry objects:
+现在一切都设置好了，可以使用排序vector中，directory\_entry对象累积的结果了:
 
 \begin{lstlisting}[style=styleCXX]
 for (const auto& e : entries) {
@@ -171,13 +171,13 @@ cout << format("total bytes: {} ({})\n",
 	make_commas(accum), size_string(accum));
 \end{lstlisting}
 
-The call to entry\_size() returns the size of the file or directory represented in the directory\_entry object.
+对entry\_size()的调用返回directory\_entry对象中表示的文件或目录的大小。
 
-If the current entry is a directory (and not a symbolic link), we add a symbol to indicate it's a directory. I chose an inverted triangle. You may use anything here.
+若当前entry是一个目录(而不是一个符号链接)，就添加一个符号来表示它是一个目录。我选择了一个倒三角，你可以选择你喜欢的符号。[译者注：由于倒三角不好显示，这里选择了使用*表示]
 
-After the loop is complete, we display the accumulated size in both bytes with commas, and the abbreviated notation from size\_string().
+循环完成后，用逗号显示两个字节的累积大小，以及size\_string()的缩写符号。
 
-Our output:
+输出为:
 
 \begin{tcblisting}{commandshell={}}
 /home/billw/working/cpp-stl-wkbk/chap10:
@@ -201,15 +201,13 @@ Our output:
 total bytes: 1,484,398 (1M)
 \end{tcblisting}
 
-\item 
-
 \end{itemize}
 
 \subsubsection{How it works…}
 
-The fs::file\_size() function returns a uintmax\_t value that represents the size of the file as the largest natural unsigned integer on a given platform. While this is normally a 64-bit integer on most 64-bit systems, a notable exception is Windows, which uses a 32-bit integer. This means that while size\_t may work for this value on some systems, it fails to compile on Windows because it may try to promote a 64-bit value to a 32-bit value.
+fs::file\_size()函数的作用是:返回一个uintmax\_t值，该值表示文件的大小，为给定平台上最大的自然无符号整数。虽然，在大多数64位系统上这通常是一个64位整数，但Windows是一个例外，它使用32位整数。虽然，size\_t可能在某些系统上适用于这个值，但在Windows上无法编译，因为它可能试图将64位值提升为32位值。
 
-The entry\_size() function takes a path object and returns a uintmax\_t value:
+entry\_size()函数接受一个路径对象，并返回uintmax\_t值:
 
 \begin{lstlisting}[style=styleCXX]
 uintmax_t entry_size(const fs::path& p) {
@@ -224,9 +222,9 @@ uintmax_t entry_size(const fs::path& p) {
 }
 \end{lstlisting}
 
-The function checks for a regular file and returns the size of the file. Otherwise, it checks for a directory that is not also a symbolic link. We just want the size of the files in a directory, so we don't want to follow symbolic links. (Symbolic links may also cause reference loops, leading to a runaway condition.) 
+该函数检查常规文件并返回文件的大小。否则，将检查一个目录是否也是符号链接。我们只想知道目录中文件的大小，因此不希望有符号链接。(符号链接可能会出现引用循环)
 
-If we find a directory, we loop through it, calling entry\_size() for each file we encounter. This is a recursive loop, so we eventually end up with the size of the directory.
+若找到一个目录，就循环遍历它，为遇到的每个文件使用entry\_size()。这是一个递归循环，所以我们最终会得到整个目录的大小。
 
 
 

@@ -1,14 +1,14 @@
 
 
-This is a simple utility that renames files using regular expressions. It uses directory\_iterator to find the files in a directory and fs::rename() to rename them.
+这是一个使用正则表达式重命名文件的简单实用程序，可使用目录\_iterator查找目录中的文件，并使用fs::rename()重命名。
 
 \subsubsection{How to do it…}
 
-In this recipe, we create a file rename utility that uses regular expressions:
+在这个示例中，我们创建了一个使用正则表达式的文件重命名实用程序:
 
 \begin{itemize}
 \item 
-We start by defining a few convenience aliases:
+先从定义一些别名开始:
 
 \begin{lstlisting}[style=styleCXX]
 namespace fs = std::filesystem;
@@ -16,10 +16,10 @@ using dit = fs::directory_iterator;
 using pat_v = vector<std::pair<regex, string>>;
 \end{lstlisting}
 
-The pat\_v alias is a vector for use with our regular expressions.
+别名pat\_v是一个用于正则表达式的vector。
 
 \item 
-We also continue to use the formatter specialization for path objects:
+我们还继续为path对象使用格式化特化:
 
 \begin{lstlisting}[style=styleCXX]
 template<>
@@ -33,7 +33,7 @@ std::formatter<std::string> {
 \end{lstlisting}
 
 \item 
-We have a function for applying the regular expression replacement to filename strings:
+我们有一个函数用于对文件名字符串应用正则表达式替换:
 
 \begin{lstlisting}[style=styleCXX]
 string replace_str(string s, const pat_v& replacements) {
@@ -44,10 +44,10 @@ string replace_str(string s, const pat_v& replacements) {
 }
 \end{lstlisting}
 
-Notice that we loop through a vector of pattern/replacement pairs, applying the regular expressions successively. This allows us to stack our replacements.
+注意，我们循环遍历模式/替换对的vector，依次应用正则表达式。这使得我们可以堆叠替换。
 
 \item 
-In main(), we first check the command-line arguments:
+main()中，首先检查命令行参数:
 
 \begin{lstlisting}[style=styleCXX]
 int main(const int argc, const char** argv) {
@@ -61,10 +61,10 @@ int main(const int argc, const char** argv) {
 	}
 \end{lstlisting}
 
-The command line accepts one or more pairs of strings. Each pair of strings includes a regex (regular expression) followed by a replacement.
+命令行接受一个或多个字符串对。每对字符串都包含一个正则表达式(正则表达式)，后面跟着一个替换。
 
 \item 
-Now we populate the vector with regex and string objects:
+现在，用regex和string对象填充vector:
 
 \begin{lstlisting}[style=styleCXX]
 for(int i{ 1 }; i < argc; i += 2) {
@@ -72,10 +72,10 @@ for(int i{ 1 }; i < argc; i += 2) {
 }
 \end{lstlisting}
 
-The pair constructor constructs the regex and string objects in place, from the C-strings passed on the command line. These are added to the vector with the emplace\_back() method.
+pair构造函数根据在命令行上传递的C-string构造适当的regex和string对象，其通过emplace\_back()方法添加到vector中。
 
 \item 
-We search the current directory using a directory\_iterator object:
+使用directory\_iterator对象搜索当前目录:
 
 \begin{lstlisting}[style=styleCXX]
 for(const auto& entry : dit{fs::current_path()}) {
@@ -100,10 +100,10 @@ for(const auto& entry : dit{fs::current_path()}) {
 }
 \end{lstlisting}
 
-n this for loop, we call replace\_str() to get the replacement filename and then check that the new name is not a duplicate of a file in the directory. We use the replace\_filename() method on a path object to create a path with the new filename and use fs::rename() to rename the file.
+这个for循环中，调用replace\_str()来获取替换的文件名，然后检查新名称是不是目录中某个文件的副本。我们在path对象上使用replace\_filename()方法创建具有新文件名的路径，并使用fs::rename()重命名文件。
 
 \item 
-To test the utility, I've created a directory with a few files in it for renaming:
+为了测试这个工具，我创建了一个目录，里面有几个文件用于重命名:
 
 \begin{tcblisting}{commandshell={}}
 $ ls
@@ -112,7 +112,7 @@ path-ops.cpp working.cpp
 \end{tcblisting}
 
 \item 
-We can do something simple, like change .cpp to .Cpp:
+可以做一些简单的事情，比如把.cpp改成.Cpp:
 
 \begin{tcblisting}{commandshell={}}
 $ ../rerename .cpp .Cpp
@@ -123,7 +123,7 @@ working.cpp -> working.Cpp
 formatter.cpp -> formatter.Cpp
 \end{tcblisting}
 
-Let's change them back again:
+让我们再把它们改回来:
 
 \begin{tcblisting}{commandshell={}}
 $ ../rerename .Cpp .cpp
@@ -135,7 +135,7 @@ path-ops.Cpp -> path-ops.cpp
 \end{tcblisting}
 
 \item 
-Using standard regular expression syntax, I can add "bw" to the beginning of each of the filenames:
+使用标准的正则表达式语法，我可以在每个文件名的开头添加“bw”:
 
 \begin{tcblisting}{commandshell={}}
 $ ../rerename '^' bw
@@ -146,7 +146,7 @@ bwfoo.txt -> bwbwfoo.txt
 working.cpp -> bwworking.cpp
 \end{tcblisting}
 
-Notice that it even renamed the files that already had "bw" at the beginning. Let's have it not do that. First, we restore the filenames:
+注意，它重命名了开头已经有“bw”的文件。我们不想让它这样做。所以首先，先恢复文件名:
 
 \begin{tcblisting}{commandshell={}}
 $ ../rerename '^bw' ''
@@ -157,7 +157,7 @@ bwchrono.cpp -> chrono.cpp
 bwbwfoo.txt -> bwfoo.txt
 \end{tcblisting}
 
-Now we use a regex that checks if the filename already begins with "bw":
+现在，使用一个正则表达式来检查文件名是否已经以"bw"开头:
 
 \begin{tcblisting}{commandshell={}}
 $ ../rerename '^(?!bw)' bw
@@ -166,7 +166,7 @@ formatter.cpp -> bwformatter.cpp
 working.cpp -> bwworking.cpp
 \end{tcblisting}
 
-Because we use a vector of regex/replacement strings, we can stack several replacements:
+因为，使用了一个regex/replacement字符串的vector，所以可以堆叠几个替换:
 
 \begin{tcblisting}{commandshell={}}
 $ ../rerename foo bar '\.cpp$' '.xpp' grep grok
@@ -181,7 +181,7 @@ bwfoo.txt -> bwbar.txt
 
 \subsubsection{How it works…}
 
-The filesystem part of this recipe uses directory\_iterator to return a directory\_entry object for each file in the current directory:
+这个示例的文件系统部分使用directory\_iterator为当前目录中的每个文件，返回一个directory\_entry对象:
 
 \begin{lstlisting}[style=styleCXX]
 for(const auto& entry : dit{fs::current_path()}) {
@@ -190,28 +190,28 @@ for(const auto& entry : dit{fs::current_path()}) {
 }
 \end{lstlisting}
 
-We then construct a path object from the directory\_entry object to process the file.
+然后，我们从directory\_entry对象构造一个path对象来处理文件。
 
-We use the replace\_filename() method on a path object to create the destination for the rename operation:
+我们在path对象上使用replace\_filename()方法来创建重命名操作的目标:
 
 \begin{lstlisting}[style=styleCXX]
 fs::path rpath{ fpath };
 rpath.replace_filename(rname);
 \end{lstlisting}
 
-Here, we create a duplicate and change its name, giving us both sides for the rename operation:
+这里，我们创建一个副本并更改它的名称:
 
 \begin{lstlisting}[style=styleCXX]
 fs::rename(fpath, rpath);
 \end{lstlisting}
 
-On the regular expression side of the recipe, we use regex\_replace(), which uses regular expression syntax to perform substitutions in a string:
+示例的正则表达式部分，regex\_replace()使用正则表达式语法在字符串中执行替换:
 
 \begin{lstlisting}[style=styleCXX]
 s = regex_replace(s, pattern, repl);
 \end{lstlisting}
 
-Regular expression syntax is extremely powerful. It even allows replacements to include sections of the search string:
+正则表达式语法非常强大，允许替换包含搜索字符串的部分:
 
 \begin{tcblisting}{commandshell={}}
 $ ../rerename '(bw)(.*\.)(.*)$' '$3$2$1'
@@ -219,10 +219,7 @@ bwgrep.cpp -> cppgrep.bw
 bwfoo.txt -> txtfoo.bw
 \end{tcblisting}
 
-By using parentheses in the search pattern, I can easily rearrange parts of a filename.
+通过在搜索模式中使用括号，可以轻松地重新排列文件名的各个部分。
 
-\subsubsection{See also…}
-
-For more about regular expressions, see the recipe Parse strings with Regular Expressions in Chapter 7, Strings, Streams, and Formatting.
 
 

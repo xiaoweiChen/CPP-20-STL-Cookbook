@@ -1,13 +1,13 @@
 
-The filesystem library includes functions for manipulating the contents of path objects. In this recipe, we will consider a few of these tools.
+文件系统库包括用于操作路径对象内容的函数。本节中，我们将考虑其中的一些工具。
 
 \subsubsection{How to do it…}
 
-In this recipe, we examine some functions that manipulate the contents of path objects:
+这个示例中，我们检查了一些操作路径对象内容的函数:
 
 \begin{itemize}
 \item 
-We start with the namespace directive and our formatter specialization. We do this in every recipe in this chapter:
+从命名空间指令和格式化特化开始。本章的每个示例中都会这样做:
 
 \begin{lstlisting}[style=styleCXX]
 namespace fs = std::filesystem;
@@ -22,63 +22,63 @@ std::formatter<std::string> {
 \end{lstlisting}
 
 \item 
-We can get the current working directory with the current\_path() function, which returns a path object:
+可以使用current\_path()函数获取当前的工作目录，该函数返回一个路径对象:
 
 \begin{lstlisting}[style=styleCXX]
 cout << format("current_path: {}\n", fs::current_path());
 \end{lstlisting}
 
-Output:
+输出为:
 
 \begin{tcblisting}{commandshell={}}
 current_path: /home/billw/chap10
 \end{tcblisting}
 
 \item 
-The absolute() function returns an absolute path from a relative path:
+absolute()函数的作用是:从相对路径返回绝对路径:
 
 \begin{lstlisting}[style=styleCXX]
 cout << format("absolute(p): {}\n", fs::absolute(p));
 \end{lstlisting}
 
-Output:
+输出为:
 
 \begin{tcblisting}{commandshell={}}
 absolute(p): /home/billw/chap10/testdir/foo.txt
 \end{tcblisting}
 
-absolute() will also dereference symbolic links.
+absolute()也会解除对符号链接的引用。
 
 \item 
-The /= operator appends a string to the end of the path string and returns a new path object:
+/=操作符将一个字符串追加到路径字符串的末尾，并返回一个新的路径对象:
 
 \begin{lstlisting}[style=styleCXX]
 cout << format("append: {}\n",
 	fs::path{ "testdir" } /= "foo.txt");
 \end{lstlisting}
 
-Output:
+输出为:
 
 \begin{tcblisting}{commandshell={}}
 append: testdir/foo.txt
 \end{tcblisting}
 
 \item 
-The canonical() function returns the full canonical directory path:
+canonical()函数返回完整的规范目录路径:
 
 \begin{lstlisting}[style=styleCXX]
 cout << format("canonical: {}\n",
 	fs::canonical(fs::path{ "." } /= "testdir"));
 \end{lstlisting}
 
-Output:
+输出为:
 
 \begin{tcblisting}{commandshell={}}
 canonical: /home/billw/chap
 \end{tcblisting}
 
 \item 
-The equivalent() function tests if two relative paths resolve to the same file system entity:
+equivalent()函数测试两个相对路径，看是否解析到相同的文件系统示例:
 
 \begin{lstlisting}[style=styleCXX]
 cout << format("equivalent: {}\n",
@@ -86,14 +86,14 @@ cout << format("equivalent: {}\n",
 		"testdir/../testdir/foo.txt"));
 \end{lstlisting}
 
-Output:
+输出为:
 
 \begin{tcblisting}{commandshell={}}
 equivalent: true
 \end{tcblisting}
 
 \item 
-The filesystem library includes the filesystem\_error class for exception handling:
+文件系统库包含了filesystem\_error类用于异常处理:
 
 \begin{lstlisting}[style=styleCXX]
 try {
@@ -110,9 +110,9 @@ try {
 }
 \end{lstlisting}
 
-The filesystem\_error class includes methods for displaying the error message and for getting the path(s) involved in the error.
+filesystem\_error类包括用于显示错误消息和获取错误涉及的path方法。
 
-If we introduce an error into the equivalent() call, we can see the results of the fileystem\_error class:
+若在equivalent()中引入一个错误，可以看到fileystem\_error:
 
 \begin{lstlisting}[style=styleCXX]
 cout << format("equivalent: {}\n",
@@ -120,7 +120,7 @@ cout << format("equivalent: {}\n",
 		"testdir/../testdir/foo.txt/y"));
 \end{lstlisting}
 
-Output:
+输出为:
 
 \begin{tcblisting}{commandshell={}}
 filesystem error: cannot check file equivalence: No
@@ -130,12 +130,12 @@ path1: testdir/foo.txt/x
 path2: testdir/../testdir/foo.txt/y
 \end{tcblisting}
 
-This is the output on Debian with GCC.
+这是使用GCC在Debian上的输出。
 
-The filesystem\_error class provides additional detail through its path1() and path2() methods. These methods return path objects.
+filesystem\_error类通过其path1()和path2()方法提供了更多的细节。这些方法可以返回path对象。
 
 \item 
-You can also use std::error\_code with some of the filesystem functions:
+也可以将std::error\_code用于一些文件系统函数:
 
 \begin{lstlisting}[style=styleCXX]
 fs::path p{ fp };
@@ -145,7 +145,7 @@ cout << format("canonical: {}\n",
 cout << format("error: {}\n", e.message());
 \end{lstlisting}
 
-Output:
+输出为:
 
 \begin{tcblisting}{commandshell={}}
 canonical:
@@ -153,7 +153,7 @@ error: Not a directory
 \end{tcblisting}
 
 \item 
-Even though Windows uses a very different file system, this code still works as expected, using Windows file naming conventions:
+即使Windows使用了不同的文件系统，这段代码仍会按照预期工作，使用Windows文件命名约定:
 
 \begin{tcblisting}{commandshell={}}
 p: testdir/foo.txt
@@ -168,14 +168,14 @@ equivalent: true
 
 \subsubsection{How it works…}
 
-Most of these functions take a path object, an optional std::error\_code object, and return a path object:
+这些函数大多数接受一个path对象，一个可选的std::error\_code对象，并返回一个path对象:
 
 \begin{lstlisting}[style=styleCXX]
 path absolute(const path& p);
 path absolute(const path& p, std::error_code& ec);
 \end{lstlisting}
 
-The equivalent() function takes two path objects and returns a bool:
+equivalent()函数接受两个路径对象并返回bool类型:
 
 \begin{lstlisting}[style=styleCXX]
 bool equivalent( const path& p1, const path& p2 );
@@ -183,18 +183,18 @@ bool equivalent( const path& p1, const path& p2,
 	std::error_code& ec );
 \end{lstlisting}
 
-The path class has operators for concatenate and append. Both operators are destructive. They modify the path on the left-hand side of the operator:
+path类具有连接和追加操作符。这两个算子都是破坏性的，会修改运算符左边的path:
 
 \begin{lstlisting}[style=styleCXX]
 p1 += source; // concatenate
 p1 /= source; // append
 \end{lstlisting}
 
-For the right-hand side, these operators take either a path object, a string, a string\_view, a C-string, or a pair of iterators.
+对于右边，这些操作符接受一个路径对象、一个字符串、一个string\_view、一个C-string或一对迭代器。
 
-The concatenate operator adds the string from the right-hand side of the operator to the end of the p1 path string.
+连接操作符将操作符右侧的字符串，添加到p1路径字符串的末尾。
 
-The append operator adds a separator (e.g., / or \verb|\|), followed by the string from the right-hand side of the operator to the end of the p1 path string.
+append操作符添加分隔符(例如，/或\verb|\|)，后面跟着从操作符右侧到路径字符串p1末尾的字符串。
 
 
 

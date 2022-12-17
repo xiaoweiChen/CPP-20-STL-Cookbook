@@ -1,13 +1,13 @@
 
-To demonstrate traversing and searching directory structures, we create a simple utility that works like Unix grep. This utility uses recursive\_directory\_iterator to traverse nested directories and searches files for matches with a regular expression.
+为了演示遍历和搜索目录结构，创建了一个工作方式类似Unix grep的简单程序。这个程序使用recursive\_directory\_iterator遍历嵌套目录，并使用正则表达式搜索文件以查找匹配。
 
 \subsubsection{How to do it…}
 
-In this recipe, we write a simple grep utility that traverses directories to search files with a regular expression:
+在这个示例中，我们编写了一个简单的grep程序，可以遍历目录以使用正则表达式搜索文件:
 
 \begin{itemize}
 \item 
-We start with some convenience aliases:
+我们从一些别名开始:
 
 \begin{lstlisting}[style=styleCXX]
 namespace fs = std::filesystem;
@@ -16,10 +16,10 @@ using rdit = fs::recursive_directory_iterator;
 using match_v = vector<std::pair<size_t, std::string>>;
 \end{lstlisting}
 
-match\_v is a vector of regular expression match results.
+match\_v是一个正则表达式匹配结果的vector。
 
 \item 
-We continue using our formatter specialization for path objects:
+我们继续使用path对象的格式化特化:
 
 \begin{lstlisting}[style=styleCXX]
 template<>
@@ -33,7 +33,7 @@ std::formatter<std::string> {
 \end{lstlisting}
 
 \item 
-We have a simple function for getting regular expression matches from a file:
+我们有一个简单的函数，用于从文件中获取正则表达式匹配:
 
 \begin{lstlisting}[style=styleCXX]
 match_v matches(const fs::path& fpath, const regex& re) {
@@ -50,10 +50,10 @@ match_v matches(const fs::path& fpath, const regex& re) {
 }
 \end{lstlisting}
 
-In this function, we open the file with ifstream, read lines from the file with getline(), and match the regular expression with regex\_search(). Results are collected in the vector and returned.
+在这个函数中，我们使用ifstream打开文件，使用getline()从文件中读取行，并使用regex\_search()匹配正则表达式。在vector中收集结果并返回。
 
 \item 
-We can now call this function from main():
+现在可以在main()中使用这个函数:
 
 \begin{lstlisting}[style=styleCXX]
 int main() {
@@ -71,9 +71,9 @@ int main() {
 }
 \end{lstlisting}
 
-In this example, we use constants for the filename and the regular expression pattern. We create path and regex objects, call the matches() function, and print the results.
+在本例中，使用常量作为文件名和正则表达式模式。创建path和regex对象，调用matches()函数，并打印结果。
 
-Our output has line numbers and strings for the matching lines:
+输出行号和匹配行的字符串:
 
 \begin{tcblisting}{commandshell={}}
 25: struct std::formatter<fs::path>:
@@ -87,9 +87,9 @@ std::formatter<std::string> {
 \end{tcblisting}
 
 \item 
-Our utility needs to take command-line arguments for the regex pattern and filenames. It should be able to traverse directories or take a list of filenames (which may be the result of command-line wildcard expansion). This requires a bit of logic in the main() function.
+我们的程序需要接受regex模式和文件名的命令行参数，其能够遍历目录或获取文件名列表(这可能是命令行通配符展开的结果)。这需要main()函数中的一些逻辑处理。
 
-First, we need one more helper function:
+首先，我们还需要一个辅助函数:
 
 \begin{lstlisting}[style=styleCXX]
 size_t pmatches(const regex& re, const fs::path& epath,
@@ -111,10 +111,10 @@ const fs::path& search_path) {
 }
 \end{lstlisting}
 
-This function calls our matches() function and prints the results. It takes a regex object and two path objects. epath is the result of a directory search, and search\_path is the search directory itself. We'll set these in main().
+这个函数调用matches()函数并输出结果，其接受一个regex对象和两个path对象。epath是目录搜索的结果，而search\_path是搜索目录本身。我们将在main()中设置这些参数。
 
 \item 
-In main(), we use the argc and argv command-line arguments and we declare a few variables:
+在main()中，我们使用argc和argv命令行参数，并声明了几个变量:
 
 \begin{lstlisting}[style=styleCXX]
 int main(const int argc, const char** argv) {
@@ -125,24 +125,24 @@ int main(const int argc, const char** argv) {
 	...
 \end{lstlisting}
 
-The variables declared here are:
+这里需要声明的变量是:
 
 \begin{itemize}
 \item
-arg\_pat is for the regular expression pattern from the command line
+arg\_pat用于命令行中的正则表达式模式
 
 \item
-re is the regex object
+re是正则表达式对象
 
 \item
-search\_path is the command-line search path argument
+search\_path命令行搜索路径是参数
 
 \item
-matchcount is for counting the matched lines
+matchcount是用来计数匹配的行
 \end{itemize}
 
 \item 
-Continuing in main(), if we have no arguments, then we print a short usage string:
+若没有参数，则打印一个简短的用法字符串:
 
 \begin{lstlisting}[style=styleCXX]
 if(argc < 2) {
@@ -153,10 +153,10 @@ if(argc < 2) {
 }
 \end{lstlisting}
 
-argv[1] is always the invoking command from the command line. cmdname uses the filename() method to return a path with just the filename part of the invoking command path.
+argv[1]始终是来自命令行的调用命令。cmdname使用filename()方法，会返回只包含调用命令路径的文件名。
 
 \item 
-Next, we parse the regular expression. We use a try-catch block to capture any error from the regex parser:
+接下来，解析正则表达式。使用try-catch块来捕获来自正则表达式解析器的错误:
 
 \begin{lstlisting}[style=styleCXX]
 arg_pat = argv[1];
@@ -168,10 +168,10 @@ try {
 }
 \end{lstlisting}
 
-We use the icase flag to tell the regex parser to ignore case.
+使用icase标志告诉正则表达式解析器忽略大小写。
 
 \item 
-If argc == 2, we have just one argument, which we treat as the regular expression pattern, and we use the current directory for the search path:
+若argc == 2，我们只有一个参数，我们将其视为正则表达式模式，并且使用当前目录作为搜索路径:
 
 \begin{lstlisting}[style=styleCXX]
 if(argc == 2) {
@@ -184,10 +184,10 @@ if(argc == 2) {
 }
 \end{lstlisting}
 
-rdit is an alias for the recursive\_directory\_iterator class, which traverses the directory tree from the starting path, returning a directory\_entry object for each file it encounters. We then create a path object and call pmatches() to go through the file and print any regular expression matches.
+rdit是recursive\_directory\_iterator类的别名，该类从起始路径遍历目录树，为遇到的每个文件返回一个directory\_entry对象。然后创建一个path对象，并调用pmatches()遍历文件，从而打印所有正则表达式匹配项。
 
 \item 
-At this point in main(), we know that argc is >=2. Now, we handle cases where we have one or more file paths on the command line:
+此时在main()中，我们知道argc是>=2。现在，处理命令行上有一个或多个文件路径的情况:
 
 \begin{lstlisting}[style=styleCXX]
 int count{ argc - 2 };
@@ -208,12 +208,12 @@ while(count-- > 0) {
 }
 \end{lstlisting}
 
-The while loop handles one or more arguments past the search pattern on the command line. It checks each filename to ensure it exists. Then, if it's a directory, it uses the rdit alias for the recursive\_directory\_iterator class to traverse the directory and call pmatches() to print any pattern matches in the files.
+while循环处理命令行上搜索模式以外的一个或多个参数，其检查每个文件名以确保其存在。然后，若其是一个目录，将为recursive\_directory\_iterator类使用rdit别名，来遍历目录并调用pmatches()来打印文件中的模式匹配。
 
-If it's a single file, it calls pmatches() on that file.
+若是单个文件，则可在该文件上调用pmatches()。
 
 \item 
-We can run our grep clone with one argument as the search pattern:
+可以用一个参数作为搜索模式运行我们的grep副本:
 
 \begin{tcblisting}{commandshell={}}
 $ ./bwgrep using
@@ -227,7 +227,7 @@ formatter.cpp 13: using namespace std::filesystem;
 found 33 matches
 \end{tcblisting}
 
-We can run it with a second argument as a directory to search:
+可以用第二个参数作为目录来运行:
 
 \begin{tcblisting}{commandshell={}}
 $ ./bwgrep using ..
@@ -243,9 +243,9 @@ chap01/working.cpp 34: using std::vector;
 found 529 matches
 \end{tcblisting}
 
-Notice that it traverses the directory tree to find files in sub-directories.
+注意，这里通过遍历目录树来查找子目录中的文件。
 
-Or we can run it with a single file argument:
+或者，可以用一个文件参数运行它:
 
 \begin{tcblisting}{commandshell={}}
 $ ./bwgrep using bwgrep.cpp
@@ -264,13 +264,13 @@ found 9 matches
 
 \subsubsection{How it works…}
 
-While the main task of this utility is the regular expression matching, we're concentrating on the technique of recursively processing directories of files.
+虽然，这个程序的主要任务是正则表达式匹配，但我们主要关注递归处理文件目录的技术。
 
-The recursive\_directory\_iterator object is interchangeable with directory\_iterator, except recursive\_directory\_iterator operates recursively over all the entries of each sub-directory.
+recursive\_directory\_iterator对象可与directory\_iterator对象互换，不同的是recursive\_directory\_iterator对象对每个子目录的所有条目进行递归操作。
 
 \subsubsection{See also…}
 
-For more about regular expressions, see the recipe Parse strings with Regular Expressions in Chapter 7, Strings, Streams, and Formatting.
+有关正则表达式的更多信息，请参见第7章的相关章节。
 
 
 

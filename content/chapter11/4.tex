@@ -1,7 +1,7 @@
 
-The STL has a rich algorithm library. Yet, on occasion you may find it missing something you need. One common need is a split function.
+STL具有丰富的算法库。然而，有时可能会发现它缺少自己需要的东西。一个常见的需求是split函数。
 
-A split function splits a string on a character separator. For example, here's a Unix /etc/passwd file from a standard Debian installation:
+split函数在字符分隔符上拆分字符串。例如，下面是标准Debian安装的Unix /etc/passwd文件:
 
 \begin{tcblisting}{commandshell={}}
 root:x:0:0:root:/root:/bin/bash
@@ -11,41 +11,41 @@ sys:x:3:3:sys:/dev:/usr/sbin/nologin
 sync:x:4:65534:sync:/bin:/bin/sync
 \end{tcblisting}
 
-Each field is separated by a colon : character, where the fields are:
+每个字段用冒号:character分隔，其中字段为:
 
 
 \begin{enumerate}
 \item 
-Login name
+账号
 
 \item 
-Optional encrypted password
+可选加密的密码
 
 \item 
-User ID
+用户名
 
 \item 
-Group ID
+组名
 
 \item 
-Username or comment
+用户名或评论
 
 \item 
-Home directory
+主目录
 
 \item 
-Optional command interpreter
+可选命令解释器
 \end{enumerate}
 
-This is a standard file in POSIX-based operating systems, and there are others like it. Most scripting languages include a built-in function for splitting a string on a separator. There are simple ways to do this in C++. Still, std::string is just another container in the STL, and a generic algorithm that splits a container on a separator could be a useful addition to the toolbox. So, let's build one.
+这是基于POSIX的操作系统中的标准文件，还有其他类似的文件。大多数脚本语言都包含一个内置函数，用于在分隔符上分隔字符串。C++中有一些简单的方法可以做到这一点，但std::string只是STL中的另一个容器，在分隔符上分割容器的通用算法可能是有用补充。让我们来创建一个。
 
 \subsubsection{How to do it…}
 
-In this recipe, we build a generic algorithm that splits a container on a separator and puts the results in a target container.
+在这个示例中，我们构建了一个通用算法，它在分隔符上拆分容器，并将结果放入目标容器中。
 
 \begin{itemize}
 \item 
-Our algorithm is in the bw namespace, to avoid collisions with std:
+我们的算法在bw命名空间中，以避免与std冲突:
 
 \begin{lstlisting}[style=styleCXX]
 namespace bw {
@@ -71,42 +71,42 @@ namespace bw {
 };
 \end{lstlisting}
 
-The split() algorithm searches a container for separators and collects the separated slices into a new output container, where each slice is a container within the output container.
+split()算法在容器中搜索分隔符，并将分离的切片收集到新的输出容器中，其中每部分都是输出容器中的容器。
 
-We want the split() algorithm to be as generic as possible, just like those in the algorithm library. This means that all the parameters are templated, and the code will work with a comprehensive variety of parameter types.
+我希望split()算法尽可能通用，就像算法库中的算法一样。这样，所有的参数都是模板化的，代码可以处理各种各样的参数类型。
 
-First, let's look at the template parameters:
+首先，来看看模板参数:
 
 \begin{itemize}
 \item 
-It is the input iterator type for the source container.
+It是源容器的输入迭代器类型。
 
 \item 
-Oc is the output container type. This is a container of containers.
+Oc输出容器类型。这是容器中的容器。
 
 \item 
-V is the separator type.
+V分隔符类型。
 
 \item 
-Pred is for the predicate functor.
+Pred为谓词函数。
 \end{itemize}
 
-Our output type is a container of containers. It needs to hold containers of slices. It could be vector<string>, where the string values are slices, or vector<vector<int>{}>, where the inner vector<int> contains the slices. This means we need to derive the type of the inner container from the output container type. We do that with the using declaration in the body of the function.
+我们的输出类型是容器的容器。它需要容纳切片的容器。可以是vector<string>，其中字符串值是切片，也可以是vector<vector<int>{}>，其中内部的vector<int>包含切片，所以需要从输出容器类型派生内部容器的类型。我们通过函数体中的using声明来做到这一点。
 
 \begin{lstlisting}[style=styleCXX]
 using SliceContainer = typename Oc::value_type;
 \end{lstlisting}
 
-This is also why we cannot use an output iterator for the output parameter. By definition, an output iterator cannot determine the type of its contents and its value\_type is set to void.
+这也是为什么不能为输出形参使用输出迭代器的原因。根据定义，输出迭代器不能确定其内容的类型，并且将其value\_type设置为void。
 
-We use SliceContainer to define a temporary container that is added to the output container with the statement:
+我们使用SliceContainer定义一个临时容器，可以添加到输出容器中:
 
 \begin{lstlisting}[style=styleCXX]
 dest.push_back(dest_elm);
 \end{lstlisting}
 
 \item 
-The predicate is a binary operator that compares an input element with the separator. We include a default equality operator in the bw namespace:
+谓词是一个二进制操作符，用于比较输入元素和分隔符。在bw命名空间中包含了一个默认的相等操作符:
 
 \begin{lstlisting}[style=styleCXX]
 constexpr auto eq = [](const auto& el, const auto& sep) {
@@ -115,7 +115,7 @@ constexpr auto eq = [](const auto& el, const auto& sep) {
 \end{lstlisting}
 
 \item 
-We also include a specialization of split() that uses the eq operator by default:
+还包含了split()的特化，默认使用eq操作符:
 
 \begin{lstlisting}[style=styleCXX]
 template<typename It, typename Oc, typename V>
@@ -126,7 +126,7 @@ It split(It it, const It end_it, Oc& dest, const V& sep)
 \end{lstlisting}
 
 \item 
-Because splitting string objects is a common use case for this algorithm, we include a helper function for that specific purpose:
+因为分割字符串对象是这个算法的常见用例，我们包含了一个用于特定目的的辅助函数:
 
 \begin{lstlisting}[style=styleCXX]
 template<typename Cin, typename Cout, typename V>
@@ -138,7 +138,7 @@ Cout& strsplit(const Cin& str, Cout& dest, const V& sep)
 \end{lstlisting}
 
 \item 
-We test our split algorithm main(), starting with a string object:
+我们测试拆分算法main()，从一个字符串对象开始:
 
 \begin{lstlisting}[style=styleCXX]
 int main() {
@@ -154,14 +154,14 @@ int main() {
 }
 \end{lstlisting}
 
-We use a string from the /etc/passwd file to test our algorithm, with this result:
+使用/etc/passwd文件中的字符串来测试我们的算法，结果如下:
 
 \begin{tcblisting}{commandshell={}}
 [sync] [x] [4] [65534] [sync] [/bin] [/bin/sync]
 \end{tcblisting}
 
 \item 
-It's even simpler using our strsplit() helper function:
+使用strsplit()帮助函数会更简单:
 
 \begin{lstlisting}[style=styleCXX]
 vector<string> dest_vs2{};
@@ -170,16 +170,16 @@ for(const auto& e : dest_vs2) cout << format("[{}] ", e);
 cout << '\n';
 \end{lstlisting}
 
-Output:
+输出为:
 
 \begin{tcblisting}{commandshell={}}
 [sync] [x] [4] [65534] [sync] [/bin] [/bin/sync]
 \end{tcblisting}
 
-This would make it easy to parse the /etc/passwd file.
+这样就可以很容易地解析/etc/passwd文件。
 
 \item 
-Of course, we can use the same algorithm with any container:
+当然，可以对任何容器使用相同的算法:
 
 \begin{lstlisting}[style=styleCXX]
 constexpr int intsep{ -1 };
@@ -195,7 +195,7 @@ for(const auto& v : dest_vi) {
 cout << '\n';
 \end{lstlisting}
 
-Output:
+输出为:
 
 \begin{tcblisting}{commandshell={}}
 [1234] [5678] [9101112]
@@ -204,21 +204,21 @@ Output:
 
 \subsubsection{How it works…}
 
-The split algorithm itself is relatively simple. The magic in this recipe is in the use of templates to make it as generic as possible.
+split算法本身比较简单。这个示例的神奇之处在于使用模板使其尽可能通用。
 
-The derived type in the using declaration allows us to create a container for use with the output container:
+using声明中的派生类型，可以创建与输出容器一起使用的容器:
 
 \begin{lstlisting}[style=styleCXX]
 using SliceContainer = typename Oc::value_type;
 \end{lstlisting}
 
-This gives us a SliceContainer type that we can use to create a container for the slices:
+这里别名一个SliceContainer类型，可以用它来为切片创建容器:
 
 \begin{lstlisting}[style=styleCXX]
 SliceContainer dest_elm{};
 \end{lstlisting}
 
-This is a temporary container that is added to the output container for each slice:
+这是一个临时容器，可将每个切片添加到输出容器中:
 
 \begin{lstlisting}[style=styleCXX]
 dest.push_back(dest_elm);

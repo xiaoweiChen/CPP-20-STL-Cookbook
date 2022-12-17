@@ -1,25 +1,25 @@
 
-Given two similar vectors that differ only by quantization or resolution, we can use the inner\_product() algorithm to calculate an error sum, defined as:
+给定两个相似的向量，仅通过量化或分辨率不同，我们可以使用inner\_product()算法来计算误差和，定义为:
 
 \begin{equation*}
 e=\sum_{n}^{i=1}(a_i-b_i)^2
 \end{equation*}
 
 \begin{center}
-Figure 11.2 – Error sum definition
+图11.2 -误差和的定义
 \end{center}
 
-Where e is the error sum, the sum of the square of the difference between a series of points in two vectors.
+其中e为误差和，即两个向量中一系列点的差的平方和。
 
-We can use the inner\_product() algorithm, from the <numeric> header, to calculate the error sum between two vectors.
+可以使用<numeric>中的inner\_product()算法来计算两个向量之间的误差和。
 
 \subsubsection{How to do it…}
 
-In this recipe we define two vectors, each with a sine wave. One vector has values of type double and the other has type int. This gives us vectors that differ in quantization, because the int type cannot represent fractional values. We then use inner\_product() to calculate the error sum between the two vectors:
+在这个示例中，我们定义了两个向量，每个向量都有一个正弦波。一个vector的值是double类型，另一个是int类型。这给了我们量子化不同的向量，因为int类型不能表示分数值。然后我们使用inner\_product()来计算两个向量之间的误差和:
 
 \begin{itemize}
 \item 
-In our main() function we define our vectors and a handy index variable:
+在main()函数中，我们定义了vector和一个索引变量:
 
 \begin{lstlisting}[style=styleCXX]
 int main() {
@@ -30,9 +30,10 @@ int main() {
 	...
 \end{lstlisting}
 
-ds is the vector of double sine waves and is is the vector of int sine waves. Each vector has 100 elements to hold a sine wave. The index variable is used to initialize the vector objects.
+ds是双正弦波的vector，是int正弦波的vector。每个向量有100个元素来保存一个正弦波，index变量用于初始化vector对象。
 
-\item We generate the sine wave in the vector of double, using a loop and a lambda:
+\item 
+用一个循环和lambda在double vector中生成正弦波:
 
 \begin{lstlisting}[style=styleCXX]
 auto sin_gen = [&index]{
@@ -41,12 +42,12 @@ auto sin_gen = [&index]{
 for(auto& v : ds) v = sin_gen();
 \end{lstlisting}
 
-The lambda captures a reference to the index variable so it can be incremented.
+lambda捕获对索引变量的引用，因此可以对其进行递增。
 
-The pi constant is from the std::numbers library.
+pi常数来自std::numbers库。
 
 \item 
-We now have a double sine wave and we can use it to derive the int version:
+我们现在有了一个双正弦波，可以用它来推导int版本:
 
 \begin{lstlisting}[style=styleCXX]
 index = 0;
@@ -55,10 +56,10 @@ for(auto& v : is) {
 }
 \end{lstlisting}
 
-This takes each point from ds, rounds it, casts it to an int, and updates it in position in the is container.
+这将从ds中取每个点，四舍五入，将其转换为int类型，并更新它在is容器中的位置。
 
 \item 
-We display our sine waves with a simple loop:
+我们用一个简单的循环来显示正弦波:
 
 \begin{lstlisting}[style=styleCXX]
 for(const auto& v : ds) cout << format("{:-5.2f} ", v);
@@ -67,7 +68,7 @@ for(const auto& v : is) cout << format("{:-3d} ", v);
 cout << "\n\n";
 \end{lstlisting}
 
-Our output is the sine waves as data points in the two containers:
+输出是两个容器中作为数据点的正弦波:
 
 \begin{tcblisting}{commandshell={}}
 0.00 0.31 0.63 0.94 1.24 1.55 1.84 2.13 2.41
@@ -92,7 +93,7 @@ Our output is the sine waves as data points in the two containers:
 \end{tcblisting}
 
 \item 
-Now we calculate the error sum using inner\_product():
+现在使用inner\_product()计算误差和:
 
 \begin{lstlisting}[style=styleCXX]
 double errsum = inner_product(ds.begin(), ds.end(),
@@ -101,9 +102,9 @@ double errsum = inner_product(ds.begin(), ds.end(),
 cout << format("error sum: {:.3f}\n\n", errsum);
 \end{lstlisting}
 
-The lambda expression returns the (ai – bi)2 part of the formula. The std::plus() algorithm performs the sum operation.
+lambda表达式返回公式的$ (a_i - b_i)^2 $的部分。std::plus()算法执行求和运算。
 
-Output:
+输出为:
 
 \begin{tcblisting}{commandshell={}}
 error sum: 7.304
@@ -112,7 +113,7 @@ error sum: 7.304
 
 \subsubsection{How it works…}
 
-The inner\_product() algorithm computes a sum of products on the first input range. Its signature is:
+inner\_product()算法计算第一个输入范围内的乘积之和，其签名为:
 
 \begin{lstlisting}[style=styleCXX]
 T inner_product(InputIt1 first1, InputIt1 last1,
@@ -120,15 +121,15 @@ T inner_product(InputIt1 first1, InputIt1 last1,
 	BinaryOperator2 op2)
 \end{lstlisting}
 
-The function takes two binary operator functors, op1 and op2. The first op1 is for the sum and the second op2 is for the product. We use std::plus() as the sum operator, and a lambda as the product operator.
+该函数接受两个二元算子函子op1和op2。第一个op1用于求和，第二个op2用于乘积。使用std::plus()作为和运算符，lambda作为积运算符。
 
-The init parameter can be used as a starting value or bias. We pass it the literal value, 0.0.
+init参数可以用作起始值或偏置，将0.0传递给它。
 
-The return value is the accumulated sum of the products.
+返回值是产品的累计总和。
 
 \subsubsection{There's more…}
 
-We can calculate an accumulated error sum by putting inner\_product() in a loop:
+可以通过在循环中放入inner\_product()来计算累积的误差和:
 
 \begin{lstlisting}[style=styleCXX]
 cout << "accumulated error:\n";
@@ -141,7 +142,7 @@ for (auto it{ds.begin()}; it != ds.end(); ++it) {
 cout << '\n';
 \end{lstlisting}
 
-Output:
+输出为:
 
 \begin{tcblisting}{commandshell={}}
 accumulated error:
@@ -157,7 +158,7 @@ accumulated error:
 6.48 6.48 6.59 6.75 6.77 6.80 7.00 7.06 7.07 7.21
 \end{tcblisting}
 
-This may be useful in some statistical applications.
+这在某些统计应用中可能有用。
 
 
 

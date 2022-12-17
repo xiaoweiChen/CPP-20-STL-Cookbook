@@ -1,9 +1,9 @@
 
-gather() is an example of an algorithm that leverages existing algorithms.
+gather是一个利用现有算法的算法示例。
 
-The gather() algorithm takes a pair of container iterators and moves the elements that satisfy a predicate toward a pivot position within the sequence, returning a pair of iterators that contains the elements that satisfy the predicate.
+gather算法接受一对容器迭代器，并将满足谓词的元素移动到序列中的相应(枢轴)位置，返回一对包含满足谓词的元素的迭代器。
 
-For example, we could use a gather algorithm to sort all the even numbers to the mid-point of a vector:
+例如，可以使用收集算法将所有偶数排序到vector的中点:
 
 \begin{lstlisting}[style=styleCXX]
 vector<int> vint{ 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 };
@@ -11,23 +11,23 @@ gather(vint.begin(), vint.end(), mid(vint), is_even);
 for(const auto& el : vint) cout << el;
 \end{lstlisting}
 
-Our output is:
+输出为：
 
 \begin{tcblisting}{commandshell={}}
 1302468579
 \end{tcblisting}
 
-Notice that the even numbers are all in the middle of the output.
+注意，偶数都在输出的中间。
 
-In this recipe, we will implement a gather algorithm using standard STL algorithms.
+在这个示例中，我们将使用标准STL算法实现一个gather算法。
 
 \subsubsection{How to do it…}
 
-Our gather algorithm uses the std::stable\_partition() algorithm to move items before the pivot iterator and again to move items past the pivot.
+收集算法使用std::stable\_partition()算法，将项移动到枢轴迭代器之前，并再次将项移动到枢轴迭代器之后。
 
 \begin{itemize}
 \item 
-We put the algorithm in the bw namespace to avoid collisions.
+将算法放在bw命名空间中以避免冲突。
 
 \begin{lstlisting}[style=styleCXX]
 namespace bw {
@@ -44,10 +44,10 @@ namespace bw {
 };
 \end{lstlisting}
 
-The gather() algorithm returns a pair of iterators, returned from two calls to stable\_partition().
+gather()算法返回一对迭代器，由两次调用stable\_partition()返回。
 
 \item 
-We also include some helper lambdas:
+还包括了一些辅助lambda:
 
 \begin{lstlisting}[style=styleCXX]
 constexpr auto midit = [](auto& v) {
@@ -62,21 +62,21 @@ constexpr auto is_even_char = [](auto c) {
 };
 \end{lstlisting}
 
-These three lambdas are as follows:
+这三个lambda如下:
 
 \begin{itemize}
 \item 
-midit returns an iterator at the midpoint of a container, for use as a pivot point.
+midit返回容器中点的迭代器，用作枢轴点。
 
 \item 
-is\_even returns Boolean true if the value is even, for use as a predicate.
+is\_even如果值为偶数则返回布尔值true，用作谓词。
 
 \item 
-is\_even\_char returns Boolean true if the value is a character between '0' and '9' and is even, for use as a predicate.
+is\_even\_char如果值是'0'和'9'之间的字符，则返回布尔值true，并且是偶数，用于谓词。
 \end{itemize}
 
 \item 
-We call gather() from the main() function with a vector of int like this:
+可以在main()函数中调用gather()，使用int vector，如下所示:
 
 \begin{lstlisting}[style=styleCXX]
 int main() {
@@ -88,13 +88,13 @@ int main() {
 }
 \end{lstlisting}
 
-Our output shows that the even numbers have been gathered in the middle:
+输出显示偶数聚集在了中间:
 
 \begin{tcblisting}{commandshell={}}
 1302468579
 \end{tcblisting}
 
-The gather() function returns a pair of iterators that contain just the even values:
+gather()函数返回一对只包含偶数值的迭代器:
 
 \begin{lstlisting}[style=styleCXX]
 auto& [it1, it2] = gathered_even;
@@ -102,14 +102,14 @@ for(auto it{ it1 }; it < it2; ++it) cout << *it;
 cout << '\n';
 \end{lstlisting}
 
-Output:
+输出为:
 
 \begin{tcblisting}{commandshell={}}
 02468
 \end{tcblisting}
 
 \item 
-We can set the pivot point to the begin() or end() iterators:
+可以将枢轴点设置为begin()或end()迭代器:
 
 \begin{lstlisting}[style=styleCXX]
 bw::gather(vint.begin(), vint.end(), vint.begin(),
@@ -122,7 +122,7 @@ for(const auto& el : vint) cout << el;
 cout << '\n';
 \end{lstlisting}
 
-Output:
+输出为:
 
 \begin{tcblisting}{commandshell={}}
 0246813579
@@ -130,7 +130,7 @@ Output:
 \end{tcblisting}
 
 \item 
-Because gather() is iterator-based, we can use it with any container. Here's a string of character digits:
+因为gather()是基于迭代器的，所以可以将它用于任何容器。这是一串字符数字:
 
 \begin{lstlisting}[style=styleCXX]
 string jenny{ "867-5309" };
@@ -140,9 +140,9 @@ for(const auto& el : jenny) cout << el;
 cout << '\n';
 \end{lstlisting}
 
-This moves all the even digits to the end of the string:
+这将把所有偶数移动到字符串的末尾:
 
-Output:
+输出为：
 
 \begin{tcblisting}{commandshell={}}
 7-539860
@@ -152,9 +152,9 @@ Output:
 
 \subsubsection{How it works…}
 
-The gather() function uses the std::stable\_partition() algorithm to move the elements that match the predicate to the pivot point.
+gather()函数使用std::stable\_partition()算法将与谓词匹配的元素移动到枢轴点。
 
-gather() has two calls to stable\_partition(), one with the predicate, and one with the predicate negated:
+gather()有两个对stable\_partition()的调用，一个带有谓词，另一个使用谓词取反结果:
 
 \begin{lstlisting}[style=styleCXX]
 template <typename It, typename Pred>
@@ -164,7 +164,7 @@ pair<It, It> gather(It first, It last, It pivot, Pred pred) {
 }
 \end{lstlisting}
 
-The iterators returned from the two stable\_partition() calls are returned in the pair.
+从两个stable\_partition()调用返回的迭代器以pair形式返回。
 
 
 

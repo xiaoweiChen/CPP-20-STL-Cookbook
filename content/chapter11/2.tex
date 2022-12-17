@@ -1,36 +1,36 @@
 
-A trie, sometimes called a prefix tree, is a type of search tree, commonly used for predictive text and other search applications. A trie is a recursive structure designed for depth-first searches, where each node is both a key and another trie.
+trie，有时称为前缀树，是一种搜索树，通常用于预测文本和其他搜索应用程序。trie是为深度优先搜索设计的递归结构，其中每个节点既是一个键，又是另一个trie。
 
-A common use case is a trie of strings, where each node is a string in a sentence. For example:
+一个常见的用例是字符串的trie，其中每个节点都是句子中的字符串。例如:
 
 \begin{center}
 \includegraphics[width=0.8\textwidth]{content/chapter11/images/1.png}\\
-Figure 11.1 – A trie of strings
+图11.1 字符串trie
 \end{center}
 
-We often start a search at the head of a trie, looking for sentences that begin with a specific word. In this example, when I search for all, I get three nodes: you, the, and along.
-If I search for love, I get me and is.
+我们经常从树的头部开始搜索，寻找以特定单词开头的句子。在这个例子中，当我搜索all时，我得到了三个节点:you、the和along。
+若寻找love，我得到的是me和is。
 
-A string trie is commonly used for creating search suggestions. Here we will implement a string trie using std::map for the trie structure.
+字符串trie通常用于创建搜索建议。这里，我们将使用std::map来实现一个字符串trie结构。
 
 \subsubsection{How to do it…}
 
-In this recipe, we create a recursive trie class that stores nodes in a std::map container. It's a simple solution for a small in-memory trie. This is a rather large class, so we'll only show the important parts here.
+在这个示例中，我们创建了一个递归的trie类，将节点存储在std::map容器中。对于内存中的树来说，这是一个简单的解决方案。这是一个相当大的类，所以在这里只展示重要的部分。
 
-For the full class, please see the source code at \url{https://github.com/ PacktPublishing/CPP-20-STL-Cookbook/blob/main/chap11/trie.cpp}.
+要获得完整的类，请参阅源代码 \url{https://github.com/ PacktPublishing/CPP-20-STL-Cookbook/blob/main/chap11/trie.cpp}。
 
 \begin{itemize}
 \item 
-We have one convenience alias:
+起一个方便的别名:
 
 \begin{lstlisting}[style=styleCXX]
 using ilcstr = initializer_list<const char *>;
 \end{lstlisting}
 
-We use ilcstr in for searching the trie.
+使用ilcstr来搜索trie。
 
 \item 
-We'll put this class in a private namespace to avoid collisions:
+把这个类放在一个私有命名空间中以避免冲突:
 
 \begin{lstlisting}[style=styleCXX]
 namespace bw {
@@ -39,10 +39,10 @@ namespace bw {
 	using std::initializer_list;
 \end{lstlisting}
 
-We have a few using statements in this namespace for convenience.
+为了方便起见，在这个命名空间中使用一些using语句。
 
 \item 
-The class itself is called trie. It has three data members:
+类本身称为trie，其有三个数据成员:
 
 \begin{lstlisting}[style=styleCXX]
 class trie {
@@ -55,23 +55,23 @@ class trie {
 	mutable deque<string> prefix_dq{};
 \end{lstlisting}
 
-The trie class has a few local type aliases:
+trie类有一些私有类型别名:
 
 \begin{itemize}
 \item 
-get\_t is a deque of deque of string, used for string results.
+get\_t是字符串的deque的deque，用于字符串结果。
 
 \item 
-nodes\_t is a map of trie classes with string keys.
+nodes\_t是具有字符串键的trie类的map。
 
 \item 
-result\_t is an optional of a pointer to a trie, for returning search results. An empty trie is a valid result, so we use an optional value.
+result\_t是指向trie指针的可选参数，用于返回搜索结果。空trie也是一个有效的结果，所以可以使用一个optional值。
 \end{itemize}
 
-The nodes object is used for holding a recursive map of nodes, where each node on a trie is another trie.
+nodes对象用于保存节点的递归map，其中trie上的每个节点都是另一个trie。
 
 \item 
-The public interface often calls utility functions in the private interface. For example, the insert() method takes an initializer\_list object and calls the private function \_insert():
+公共接口经常调用私有接口中的实用函数。例如，insert()方法接受一个initializer\_list对象，并调用私有函数\_insert():
 
 \begin{lstlisting}[style=styleCXX]
 void insert(const ilcstr& il) {
@@ -79,7 +79,7 @@ void insert(const ilcstr& il) {
 }
 \end{lstlisting}
 
-The private \_insert() function does the work of inserting elements:
+私有函数\_insert()执行插入元素的工作:
 
 \begin{lstlisting}[style=styleCXX]
 template <typename It>
@@ -89,10 +89,10 @@ void _insert(It it, It end_it) {
 }
 \end{lstlisting}
 
-This facilitates the recursive function calls necessary to navigate the trie. Note that referencing a key that does not appear in a map creates an empty element with that key. So, the line that calls \_insert() on a nodes element creates an empty trie object if the element doesn't already exist.
+这方便了导航trie所需的递归函数调用。注意，引用一个不在map中出现的键，会创建一个带有该键的空元素。因此，若元素不存在，在nodes元素上使用\_insert()的那行代码，将创建一个空的trie对象。
 
 \item 
-The get() method returns a get\_t object, which is an alias for a deque of deque of string. This allows us to return multiple sets of results:
+get()方法返回一个get\_t对象，我是字符串队列的队列的别名。这就可以返回多组结果:
 
 \begin{lstlisting}[style=styleCXX]
 get_t& get() const {
@@ -103,7 +103,7 @@ get_t& get() const {
 }
 \end{lstlisting}
 
-The get() method calls the private \_get() function, which recursively traverses the trie:
+get()方法调用私有的\_get()函数，该函数递归遍历trie:
 
 \begin{lstlisting}[style=styleCXX]
 void _get(deque<string>& dq, get_t& r_dq) const {
@@ -119,7 +119,7 @@ void _get(deque<string>& dq, get_t& r_dq) const {
 \end{lstlisting}
 
 \item 
-The find\_prefix() function returns a deque with all matches to a partial string.
+find\_prefix()函数的作用是:返回一个deque对象，其中包含与部分字符串的所有匹配项。
 
 \begin{lstlisting}[style=styleCXX]
 deque<string>& find_prefix(const char * s) const {
@@ -128,7 +128,7 @@ deque<string>& find_prefix(const char * s) const {
 }
 \end{lstlisting}
 
-The public interface calls the private function \_find\_prefix():
+公共接口调用私有函数\_find\_prefix():
 
 \begin{lstlisting}[style=styleCXX]
 void _find_prefix(const string& s, auto& pre_dq) const {
@@ -142,7 +142,7 @@ void _find_prefix(const string& s, auto& pre_dq) const {
 }
 \end{lstlisting}
 
-The private \_find\_prefix() function traverses the trie recursively, comparing the prefix with beginning of each key. The starts\_with() method is new with C++20. With an older STL, you could use the find() method and check the return value for 0:
+私有\_find\_prefix()函数递归遍历trie，将前缀与每个键的开头进行比较。starts\_with()方法是C++20中的新方法。对于旧的STL，可以使用find()方法，并检查返回值是否为0:
 
 \begin{lstlisting}[style=styleCXX]
 if(k.find(s) == 0) {
@@ -150,7 +150,7 @@ if(k.find(s) == 0) {
 \end{lstlisting}
 
 \item 
-The search() function returns an optional<const trie*>, aliased as result\_t. It has two overloads:
+search()函数返回一个可选的<const trie*>，别名为result\_t。它有两个重载:
 
 \begin{lstlisting}[style=styleCXX]
 result_t search(const ilcstr& il) const {
@@ -162,7 +162,7 @@ result_t search(const string& s) const {
 }
 \end{lstlisting}
 
-These methods pass iterators to the private member function \_search(), which does the work of the search:
+这些方法将迭代器传递给私有成员函数\_search()，该函数执行搜索工作:
 
 \begin{lstlisting}[style=styleCXX]
 template <typename It>
@@ -174,10 +174,10 @@ result_t _search(It it, It end_it) const {
 }
 \end{lstlisting}
 
-The \_search() function searches recursively until it finds a match, then returns a node in the result\_t object. If it finds no match, it returns the non-value optional.
+\_search()函数递归搜索，直到找到匹配项，然后返回result\_t对象中的节点。若没有找到匹配项，则返回非值optional值。
 
 \item 
-We also have two overloads of a print\_trie\_prefix() function. This function prints the contents of a trie from a prefix, used as a search key. One version uses a string for the prefix, the other uses an initializer\_list of C-strings:
+还有两个print\_trie\_prefix()函数的重载。这个函数从一个用作搜索键的前缀打印trie的内容。一个版本使用字符串作为前缀，另一个版本使用C-strings的initializer\_list:
 
 \begin{lstlisting}[style=styleCXX]
 void print_trie_prefix(const bw::trie& t,
@@ -200,10 +200,10 @@ void print_trie_prefix(const bw::trie& t,
 }
 \end{lstlisting}
 
-These functions call the get() member function to retrieve the results from the trie.
+这些函数调用get()成员函数从trie中检索结果。
 
 \item 
-Now we can test the trie class in the main() function. First, we declare a trie and insert some sentences:
+现在，可以在main()函数中测试trie类。首先，声明一个trie，并插入一些句子:
 
 \begin{lstlisting}[style=styleCXX]
 int main() {
@@ -224,10 +224,10 @@ int main() {
 	...
 \end{lstlisting}
 
-The insert() calls pass an initializer\_list with all the strings of a sentence. Each of the strings of a sentence are inserted into the hierarchy of the trie.
+insert()调用传递一个包含句子所有字符串的initializer\_list，句子的每个字符串都会插入到树的层次结构中。
 
 \item 
-Now we can search the trie. Here's a simple search for the single string "love".
+现在，可以搜索这个trie。这里有一个简单的搜索单字符串“love”。
 
 \begin{lstlisting}[style=styleCXX]
 const auto prefix = {"love"};
@@ -237,9 +237,9 @@ if (auto st = ts.search(prefix); st.have_result) {
 cout << '\n';
 \end{lstlisting}
 
-This calls ts.search() with an initializer\_list of one C-string, called prefix. The result, along with the prefix, is then passed to the print\_trie\_prefix() function.
+调用ts.search()，initializer\_list为一个C字串，称为prefix。结果连同前缀一起传递给print\_trie\_prefix()函数。
 
-The output is:
+输出为：
 
 \begin{tcblisting}{commandshell={}}
 results for "love...":
@@ -249,7 +249,7 @@ love the one you're with
 \end{tcblisting}
 
 \item
-Here's a search for a two-string prefix:
+下面是一个搜索双字符串前缀的例子:
 
 \begin{lstlisting}[style=styleCXX]
 const auto prefix = {"all", "the"};
@@ -259,7 +259,7 @@ if (auto st = ts.search(prefix); st.have_result) {
 cout << '\n';
 \end{lstlisting}
 
-Output:
+输出为:
 
 \begin{tcblisting}{commandshell={}}
 results for "all the ...":
@@ -268,7 +268,7 @@ all the gold in california
 \end{tcblisting}
 
 \item
-And here's a search for a partial prefix, using the find\_prefix() function:
+下面是使用find\_prefix()函数搜索部分前缀:
 
 \begin{lstlisting}[style=styleCXX]
 const char * prefix{ "lo" };
@@ -282,7 +282,7 @@ for(const auto& s : prefix_dq) {
 cout << '\n';
 \end{lstlisting}
 
-Output:
+输出为:
 
 \begin{tcblisting}{commandshell={}}
 match: lo -> long
@@ -298,19 +298,19 @@ results for "loving...":
 loving you
 \end{tcblisting}
 
-The find\_prefix() search returned several results, each of which we passed to a search of its own, resulting in several results for each result.
+find\_prefix()搜索返回了几个结果，将每个结果传递给自己的一个搜索，每个结果产生几个结果。
 
 \end{itemize}
 
 \subsubsection{How it works…}
 
-The data for the trie class is stored in recursive map containers. Each node in the map contains another trie object, which in turn has its own map node.
+trie类的数据存储在递归map容器中。map中的每个节点都包含另一个trie对象，该对象又有自己的map节点。
 
 \begin{lstlisting}[style=styleCXX]
 using nodes_t = map<string, trie>
 \end{lstlisting}
 
-The \_insert() function takes begin and end iterators, and uses them to recursively call \_insert() on new nodes:
+\_insert()函数接受begin和end迭代器，并使用它们在新节点上递归调用\_insert():
 
 \begin{lstlisting}[style=styleCXX]
 template <typename It>
@@ -320,7 +320,7 @@ void _insert(It it, It end_it) {
 }
 \end{lstlisting}
 
-Likewise, the \_search() function recursively calls \_search() on the nodes it finds:
+同样，\_search()函数在它找到的节点上递归调用\_search():
 
 \begin{lstlisting}[style=styleCXX]
 template <typename It>
@@ -332,7 +332,7 @@ result_t _search(It it, It end_it) const {
 }
 \end{lstlisting}
 
-This recursive approach using std::map allows us to implement a trie class concisely and efficiently.
+这种使用std::map的递归方法可以简洁有效地实现一个trie类。
 
 
 

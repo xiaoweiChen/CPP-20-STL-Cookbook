@@ -1,14 +1,14 @@
 
 
-When receiving input from users, it's common to end up with excessive consecutive whitespace characters in your strings. This recipe presents a function for removing consecutive spaces, even when it includes tabs or other whitespace characters.
+当从用户接收输入时，通常会在字符串中出现过多的连续空格字符。本节提供了一个删除连续空格的函数，即使其中包含制表符或其他空白字符.
 
 \subsubsection{How to do it…}
 
-This function leverages the std::unique() algorithm to remove consecutive whitespace characters from a string.
+这个函数利用std::unique()算法，从字符串中移除连续的空白字符。
 
 \begin{itemize}
 \item 
-In the bw namespace, we start with a function to detect whitespace:
+bw命名空间中，先从一个检测空白的函数说起:
 
 \begin{lstlisting}[style=styleCXX]
 template<typename T>
@@ -21,10 +21,10 @@ bool isws(const T& c) {
 }
 \end{lstlisting}
 
-This templated isws() function should work with any character type.
+这个模板化的isws()函数应该适用于任何字符类型。
 
 \item 
-The delws() function uses std::unique() to erase consecutive whitespace in a string:
+delws()函数使用std::unique()来擦除字符串中连续的空格:
 
 \begin{lstlisting}[style=styleCXX]
 string delws(const string& s) {
@@ -39,10 +39,10 @@ string delws(const string& s) {
 }
 \end{lstlisting}
 
-delws() makes a copy of the input string, removes consecutive whitespace, and returns the new string.
+delws()复制输入字符串，删除连续的空格，并返回新字符串。
 
 \item 
-We call it with a string from main():
+可以使用main()中的字符串调用:
 
 \begin{lstlisting}[style=styleCXX]
 int main() {
@@ -54,7 +54,7 @@ int main() {
 }
 \end{lstlisting}
 
-Output:
+输出为:
 
 \begin{tcblisting}{commandshell={}}
 [big     bad                  wolf]
@@ -65,9 +65,9 @@ Output:
 
 \subsubsection{How it works…}
 
-This function uses the std::unique() algorithm with a comparison lambda to find consecutive whitespace in a string object.
+这个函数使用std::unique()算法和一个比较lambda来查找字符串对象中的连续空格。
 
-The comparison lambda calls our own isws() function to determine if we have found consecutive whitespace:
+比较lambda调用isws()函数来确定是否找到了连续的空格:
 
 \begin{lstlisting}[style=styleCXX]
 auto its = unique(outstr.begin(), outstr.end(),
@@ -76,4 +76,22 @@ auto its = unique(outstr.begin(), outstr.end(),
 	});
 \end{lstlisting}
 
-We could use the isspace() function from the standard library, but it's a standard C function that depends on a narrowing type conversion from int to char. This may issue warnings on some modern C++ compilers and is not guaranteed to work without an explicit cast. Our isws() function uses a templated type and should work on any system, and with any specialization of std::string.
+可以使用标准库中的isspace()函数，但它是一个标准C函数，依赖于从int到char的窄类型转换。这可能会在一些现代C++编译器上触发警告，并且不能保证在没有显式强制转换的情况下正常工作。我们的isws()函数使用了模板化的类型，应该适用于任何系统，以及std::string的任何特化。
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -1,7 +1,7 @@
 
-Over the course of my career, I've used a lot of programming languages. When learning a new language, I like to have a project to work on that exposes me to the nuances of the language. The numwords class is one of my favorite exercises for this purpose. I have written it in dozens of languages over the years, including several times in C and C++.
+在我的职业生涯中，使用过很多编程语言。在学习一门新语言时，我喜欢做一个项目，让我接触到语言的细微差别。numwords类是我为此目的最喜欢的练习之一。多年来，我用数十种语言编写了它，包括多次用C和C++进行练习。
 
-numwords is a class that spells out a number in words. It can be useful for banking and accounting applications. It looks like this in use:
+numwords是一个用单词拼写数字的类，可以用于银行和会计应用。它在使用中是这样的:
 
 \begin{lstlisting}[style=styleCXX]
 int main() {
@@ -24,7 +24,7 @@ int main() {
 }
 \end{lstlisting}
 
-Output:
+输出为:
 
 \begin{tcblisting}{commandshell={}}
 n is 3, three
@@ -42,24 +42,24 @@ n is 1000000000000000000, error
 
 \subsubsection{How to do it…}
 
-This recipe originated as an exercise in creating production-ready code. For that reason, it's in three different files:
+这个示例起源于创建“生产就绪”的代码练习。因此，它在三个不同的文件中:
 
 \begin{itemize}
 \item 
-numword.h is the header/interface file for the numwords class.
+numword.h是numwords类的头/接口文件。
 
 \item 
-numword.cpp is the implementation file for the numwords class.
+numword.cpp是numwords类的实现文件。
 
 \item 
-numword-test.cpp is the application file for testing the numword class.
+numword-test.cpp是用于测试数字词类的应用程序文件。
 \end{itemize}
 
-The class itself is about 180 lines of code so we'll just cover the highlights here. You can find the full source code at \url{https://github.com/PacktPublishing/CPP-20STL-Cookbook/tree/main/chap11/numword}.
+这个类本身大约有180行代码，所以我们在这里只讨论重点。你可以在这里找到完整的源代码，\url{https://github.com/PacktPublishing/CPP-20STL-Cookbook/tree/main/chap11/numword}。
 
 \begin{itemize}
 \item 
-In the numword.h file, we put the class in the bw namespace and start with some using statements:
+numword.h文件中，将类放在bw命名空间中，并以一些using语句开始:
 
 \begin{lstlisting}[style=styleCXX]
 namespace bw {
@@ -69,14 +69,14 @@ namespace bw {
 	using bufstr = std::unique_ptr<string>;
 \end{lstlisting}
 
-We use string and string\_view objects throughout the code.
+在整个代码中使用string和string\_view对象。
 
-uint64\_t is our primary integer type because it will hold very large numbers. Because the class is called numword, I like numnum for the integer type.
+uint64 \_t是我们的主要整数类型，因为这个类称为numword，所以我喜欢将numnum作为整数类型。
 
-\_bufstr is the main output buffer. It's a string wrapped in a unique\_ptr, which handles the memory management for automatic RAII compliance.
+\_bufstr是主要的输出缓冲区，一个包装在unique\_ptr中的字符串，遵从RAII的内存管理。
 
 \item 
-We also have a few constants for various purposes:
+也有一些用于不同目的的常量:
 
 \begin{lstlisting}[style=styleCXX]
 constexpr numnum maxnum = 999'999'999'999'999'999;
@@ -89,12 +89,12 @@ constexpr numnum hundred{ 100 };
 constexpr numnum thousand{ 1000 };
 \end{lstlisting}
 
-The maxnum constant translates to "nine hundred ninety-nine quadrillion nine hundred ninety-nine trillion nine hundred ninety-nine billion nine hundred ninetynine million nine hundred ninety-nine thousand nine hundred ninety-nine," which should be sufficient for most purposes.
+maxnum常数翻译为“九百九千亿九千九百九十亿九千九百九十亿九千九百九千九千九百九十九”，这对于大多数目的应该是足够的。
 
-The rest of the numnum constants are used to avoid literals in the code.
+numnum常量的其余部分用于避免在代码中使用文字。
 
 \item 
-The main data structures are constexpr arrays of string\_view objects, representing the words used in the output. The string\_view class is perfect for these constants, as it provides encapsulation with minimum overhead:
+主要的数据结构是string\_view对象的constexpr数组，表示输出中使用的单词。因为它提供了最小开销的封装，所以string\_view类非常适合这些常量:
 
 \begin{lstlisting}[style=styleCXX]
 constexpr string_view errnum{ "error" };
@@ -118,10 +118,10 @@ constexpr string_view _powers[] {
 };
 \end{lstlisting}
 
-The words are grouped into sections, useful in translating numbers to words. Many languages use a similar breakdown so this structure should translate easily to those languages.
+这些单词可以分成几个部分，在将数字转换成单词时很有用。许多语言使用类似的分解，所以这个结构应该很容易翻译到这些语言。
 
 \item 
-The numword class has a few private members:
+numword类有几个私有成员:
 
 \begin{lstlisting}[style=styleCXX]
 class numword {
@@ -132,17 +132,17 @@ class numword {
 
 \begin{itemize}
 \item 
-\_buf is the output string buffer. Its memory is managed by a unique\_ptr.
+\_buf是输出字符串缓冲区，内存由unique\_ptr管理。
 
 \item 
-\_num holds the current numeric value.
+\_num保存当前数值。
 
 \item 
-\_hyphen\_flag is used during the translation process to insert a hyphen between words, rather than a space character.
+\_hyphen\_flag在翻译过程中用于在单词之间插入连字符，而不是空格字符。
 \end{itemize}
 
 \item 
-These private methods are used to manipulate the output buffer.
+这些私有方法用于操作输出缓冲区。
 
 \begin{lstlisting}[style=styleCXX]
 void clearbuf();
@@ -153,16 +153,16 @@ void appendbuf(const char c);
 void appendspace();
 \end{lstlisting}
 
-There is also a pow\_i() private method used to calculate $x^y$ with numnum types:
+还有一个pow\_i()私有方法用于计算$x^y$:
 
 \begin{lstlisting}[style=styleCXX]
 numnum pow_i(const numnum n, const numnum p);
 \end{lstlisting}
 
-pow\_i() is used to discriminate parts of the numeric value for word output.
+pow\_i()用于区分字输出的数字值的各个部分。
 
 \item 
-The public interface includes constructors and various ways to call the words() method, which does the work of translating a numnum to a string of words:
+公共接口包括构造函数和调用words()方法的各种方法，该方法完成将numnum转换为单词字符串的工作:
 
 \begin{lstlisting}[style=styleCXX]
 numword(const numnum& num = 0) : _num(num) {}
@@ -178,7 +178,7 @@ const string& operator() (const numnum& num) {
 \end{lstlisting}
 
 \item 
-In the implementation file, numword.cpp, the bulk of the work is handled in the words() member function:
+实现文件numword.cpp中，大部分工作在words()成员函数中处理:
 
 \begin{lstlisting}[style=styleCXX]
 const string& numword::words( const numnum& num ) {
@@ -234,10 +234,10 @@ const string& numword::words( const numnum& num ) {
 }
 \end{lstlisting}
 
-Each part of the function peels off part of the number with a modulus of a power of ten, recursively in the case of the thousands, and appends strings from the string\_view constant arrays.
+该函数的每个部分以10的次幂的模量剥离数字的一部分，在千万的情况下递归，并从string\_view常量数组中追加字符串。
 
 \item 
-There are three overloads of appendbuf(). One appends a string:
+appendbuf()有三个重载。一个附加一个字符串:
 
 \begin{lstlisting}[style=styleCXX]
 void numword::appendbuf(const string& s) {
@@ -246,7 +246,7 @@ void numword::appendbuf(const string& s) {
 }
 \end{lstlisting}
 
-Another appends a string\_view:
+另一个添加一个string\_view:
 
 \begin{lstlisting}[style=styleCXX]
 void numword::appendbuf(const string_view& s) {
@@ -255,7 +255,7 @@ void numword::appendbuf(const string_view& s) {
 }
 \end{lstlisting}
 
-And the third appends a single character:
+第三个附加了单个字符:
 
 \begin{lstlisting}[style=styleCXX]
 void numword::appendbuf(const char c) {
@@ -263,7 +263,7 @@ void numword::appendbuf(const char c) {
 }
 \end{lstlisting}
 
-The appendspace() method appends a space character or a hyphen, depending on the context:
+appendspace()方法根据上下文附加一个空格字符或连字符:
 
 \begin{lstlisting}[style=styleCXX]
 void numword::appendspace() {
@@ -275,7 +275,7 @@ void numword::appendspace() {
 \end{lstlisting}
 
 \item 
-The numword-test.cpp file is the testing environment for bw::numword. It includes a formatter specialization:
+numword-test.cpp文件是bw::numword的测试环境，包括格式化特化:
 
 \begin{lstlisting}[style=styleCXX]
 template<>
@@ -291,10 +291,10 @@ std::formatter<unsigned> {
 };
 \end{lstlisting}
 
-This allows us to pass a bw::numword object directly to format().
+可以直接将bw::numword对象传递给format()。
 
 \item 
-There's also a print() function that sends formatter output directly to stdout, bypassing cout and the iostream library entirely:
+还有一个print()函数，绕过cout和iostream，直接将格式化输出发送到stdout:
 
 \begin{lstlisting}[style=styleCXX]
 namespace bw {
@@ -308,10 +308,10 @@ namespace bw {
 };
 \end{lstlisting}
 
-This allows us to use print("\{\}\verb|\|n", nw) instead of piping format() through cout. A function like this will be included in the C++23 standard. It's simple enough to include it like this for now.
+这就可以使用print("\{\}\verb|\|n"， nw)，而不是通过cout管道。C++23标准中会有这样一个函数。
 
 \item 
-In main(), we declare a bw::numword object and a uint64\_t for use in testing:
+main()中，声明了一个bw::numword对象和用于测试的uint64\_t:
 
 \begin{lstlisting}[style=styleCXX]
 int main() {
@@ -322,14 +322,14 @@ int main() {
 	...
 \end{lstlisting}
 
-The numword object is initialized to zero, giving us this output from our print() statement:
+numword对象初始化为0，从print()语句中得到如下输出:
 
 \begin{tcblisting}{commandshell={}}
 n is 0, zero
 \end{tcblisting}
 
 \item 
-We test a variety of ways to call numword:
+我们测试了多种调用numword的方法:
 
 \begin{lstlisting}[style=styleCXX]
 nw = 3; bw::print("n is {}, {}\n", nw.getnum(), nw);
@@ -349,7 +349,7 @@ n = 1000000000000000000; bw::print("n is {}, {}\n", n,
 nw(n));
 \end{lstlisting}
 
-Output:
+输出为:
 
 \begin{tcblisting}{commandshell={}}
 n is 3, three
@@ -375,13 +375,13 @@ n is 1000000000000000000, error
 
 \subsubsection{How it works…}
 
-This class is significantly driven by the data structures. By organizing string\_view objects into arrays, we can easily translate scalar values into corresponding words:
+这个类主要是由数据结构驱动的。通过将string\_view对象组织为数组，可以轻松地将标量值转换为相应的单词:
 
 \begin{lstlisting}[style=styleCXX]
 appendbuf(_tens[_n]); // e.g., _tens[5] = "fifty"
 \end{lstlisting}
 
-The rest of it is mostly the math:
+剩下的就是数学问题了:
 
 \begin{lstlisting}[style=styleCXX]
 numnum power{ pow_i(thousand, i) };
@@ -397,14 +397,14 @@ if (_n) {
 
 \subsubsection{There's more…}
 
-I also have a utility that uses the numwords class to tell time in words. Its output looks like this:
+我还有一个程序，使用numwords类以文字形式展示时间。其输出如下所示:
 
 \begin{tcblisting}{commandshell={}}
 $ ./saytime
 three past five
 \end{tcblisting}
 
-In test mode, it gives this output:
+在测试模式下，输出如下:
 
 \begin{tcblisting}{commandshell={}}
 $ ./saytime test
@@ -428,4 +428,21 @@ $ ./saytime test
 24:00 OOR
 \end{tcblisting}
 
-I leave its implementation as an exercise for the reader.
+我把它的实现留给读者们作为练习。
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -1,13 +1,13 @@
 
 若想格式化文本，可以使用传统的printf函数或STL iostream库，两者各有优缺点。
 
-printf函数继承自C语言，50多年来已经很高效、灵活和方便。就是格式语法看起来有点晦涩，但习惯过后，就觉得还是挺简单的。
+printf函数继承自C语言，50多年的发展，已让其很高效、灵活和方便。就是格式语法看起来有点晦涩，但习惯过后觉得还行。
 
 \begin{lstlisting}[style=styleCXX]
 printf("Hello, %s\n", c_string);
 \end{lstlisting}
 
-printf的弱点主要是弱类型安全。常见的printf()函数(及其相关函数)，使用C的可变参数模型将参数传递给格式化程序。这在正常情况下非常有效，但参数类型与其对应的格式说明符不匹配时，可能会导致严重的问题。现代编译器会尽可能多地进行类型检查，但编程模型本身存在缺陷，保护也只能到此为止。
+printf的缺点是弱类型安全。printf()函数(及其相关函数)，使用C的可变参数模型将参数传递给格式化程序。在正常情况下非常高效，但参数类型与其对应的格式说明符不匹配时，可能会产生严重的问题。现代编译器会尽可能地进行类型检查，但编程模型本身存在缺陷，保护也只能到此为止。
 
 STL的iostream库以可读性和运行时性能为代价确保了类型安全。iostream语法不常见，但很易懂。其重载按位左移操作符(<<)，以允许产生格式化输出一连串的对象、操作数和格式化操纵符。
 
@@ -15,19 +15,19 @@ STL的iostream库以可读性和运行时性能为代价确保了类型安全。
 cout << "Hello, " << str << endl;
 \end{lstlisting}
 
-iostream的弱点在于语法和实现方面的复杂性，构建格式化字符串可能会冗长而晦涩。许多格式操纵符在使用后必须重置，否则会产生难以调试的级联格式错误。该库本身庞大而复杂，导致代码比printf等效代码大得多，速度也慢很多。
+iostream的缺点在于语法和实现方面的复杂性，构建格式化字符串可能会冗长而晦涩。许多格式操纵符在使用后必须重置，否则会产生难以调试的级联格式错误。该库本身庞大而复杂，导致代码比printf等效代码大得多，速度也慢很多。
 
 这种令人沮丧的情况让C++程序员别无选择，只能在两个有缺陷的方法中选择其中一个。
 
 \subsubsection{How to do it…}
 
-新的格式库位于<format>头文件中。撰写本书时，其仅在MSVC(Microsoft)编译器中实现。当您阅在读本书时，应该可以在更多的编译器上实现了。如若不然，可以使用其参考实现进行理解fmt.dev (j.bw.org/fmt)。
+新格式库位于<format>头文件中。撰写本书时，其仅在MSVC(Microsoft)编译器中实现。当阅读本书时，应该在更多的编译器上实现了。如若不然，可以使用其参考实现进行理解fmt.dev(\url{j.bw.org/fmt})。
 
-格式库基于Python3中的str.format()方法建模。格式字符串基本上与Python中的格式字符串相同，通常是可互换的。来看一些简单的例子:
+格式库基于Python3中的str.format()方法建模。格式字符串基本上与Python中的格式字符串相同，通常可以互换。来看一些简单的例子:
 
 \begin{itemize}
 \item 
-最简单的方式，format()函数可以接受一个string\_view格式的字符串和一个可变参数参数包，并返回一个字符串。其函数签名是这样的:
+format()函数可以接受一个string\_view格式的字符串和一个可变参数参数包，并返回一个字符串。其函数签名为:
 
 \begin{lstlisting}[style=styleCXX]
 template<typename... Args>
@@ -35,7 +35,7 @@ string format(string_view fmt, const Args&... args);
 \end{lstlisting}
 
 \item 
-format()函数作用:返回类型或值的字符串表示形式。例如:
+format()返回类型或值的字符串表示形式。例如:
 
 \begin{lstlisting}[style=styleCXX]
 string who{ "everyone" };
@@ -47,10 +47,10 @@ format("Integer: {}\n ", ival); // Integer: 42
 format("π: {}\n", pi); // π: 3.141592653589793
 \end{lstlisting}
 
-格式化字符串使用大括号\{\}作为占位符。由于没有格式说明符，大括号实际上是一个类型安全的占位符，可以将任何兼容类型的值转换为合理的字符串表示形式。
+格式化字符串使用大括号\{\}作为类型安全的占位符，可以将任何兼容类型的值转换为合理的字符串表示形式。
 
 \item 
-可以在格式字符串中包含多个占位符，像这样:
+可以在格式字符串中包含多个占位符:
 
 \begin{lstlisting}[style=styleCXX]
 format("Hello {} {}", ival, who); // Hello 42
@@ -66,7 +66,7 @@ format("Hola {0} {1}", ival, who); // Hola 42 everyone
 \end{lstlisting}
 
 \item 
-这也可以进行对齐，左(<)、右(>)或中心(\^{})对齐，可以使用或不使用填充字符:
+这也可以进行对齐，左(<)、右(>)或中心(\^{})对齐，可以选择性使用填充字符:
 
 \begin{lstlisting}[style=styleCXX]
 format("{:.<10}", ival); // 42........
@@ -80,16 +80,13 @@ format("{:.^10}", ival); // ....42....
 \begin{lstlisting}[style=styleCXX]
 format("π: {:.5}", pi); // π: 3.1416
 \end{lstlisting}
-
-\item 
-等等
 \end{itemize}
 
 这是一个丰富而完整的格式化方式，具有iostream的类型安全，以及printf的性能和简单性，达到了鱼和熊掌兼得的目的。
 
 \subsubsection{How it works…}
 
-格式库不包括print()函数，这是C++23的计划。format()函数本身返回一个字符串对象。若想打印字符串，需要使用iostream或cstdio。:(
+格式库不包括print()函数，这是C++23计划的一部分。format()函数本身返回一个字符串对象。若想打印字符串，需要使用iostream或cstdio。:(
 
 可以使用iostream输出字符串:
 
@@ -120,11 +117,11 @@ void print(const string_view fmt_str, Args&&... args) {
 }
 \end{lstlisting}
 
-使用与format()函数相同的参数。第一个参数是格式字符串的string\_view对象，后面是作为参数的可变参数包。
+使用与format()函数相同的参数。第一个参数是格式字符串的string\_view对象，后面作为参数的可变参数包。
 
-make\_format\_args()函数的作用是:接受参数包并返回一个对象，该对象包含适合格式化的已擦除类型的值。然后，将该对象传递给vformat()，vformat()再返回适合打印的字符串。我们使用fputs()将值输出到控制台上(它比cout高效得多)。
+make\_format\_args()函数的作用:接受参数包并返回一个对象，该对象包含适合格式化的已擦除类型的值。然后，将该对象传递给vformat()，vformat()再返回适合打印的字符串。我们使用fputs()将值输出到控制台上(这比cout高效得多)。
 
-现在可以使用print()函数来代替cout << format()的组合:
+现在可以使用print()函数，来代替cout <{}< format()的组合:
 
 \begin{lstlisting}[style=styleCXX]
 print("Hello, {}!\n", who);
@@ -134,7 +131,7 @@ print("{:.^10}\n", ival);
 print("{:.5}\n", pi);
 \end{lstlisting}
 
-输出:
+输出为:
 
 \begin{tcblisting}{commandshell={}}
 Hello, everyone!
@@ -144,11 +141,11 @@ Hello everyone 42
 3.1416
 \end{tcblisting}
 
-当编译器支持C++23的print()时，简单地使用\texttt{std::print;}就能完成所有工作，并且所有print()调用也会正常工作。
+编译器支持C++23的print()时，使用\texttt{std::print;}就能完成所有工作，并且print()也会正常工作。
 
 \subsubsection{There's more…}
 
-能够格式化字符串和原语非常好，但是要使格式库具有完整的功能，就需要对其进行定制，以便可以与您自己的类一起工作。
+能够格式化字符串和原语已经非常好了，但是要使格式库具有完整的功能，就需要对其进行定制，以便与自定义的类一起工作。
 
 例如，这里有两个成员的简单结构体:分子和分母。将其输出为分数:
 
@@ -164,9 +161,9 @@ int main() {
 }
 \end{lstlisting}
 
-当我编译它时，它会导致一系列错误，例如：“没有定义的转换运算符…”。让我们来解决它!
+编译时，会出现一系列错误，例如：“没有定义的转换运算符…”。让我们来解决它!
 
-当格式系统遇到要转换的对象时，其会寻找具有相应类型的格式化程序对象的特化。标准的特化对于常见的对象，如字符串和数字等。对Frac类型进行特化非常简单:
+当格式系统遇到要转换的对象时，其会寻找具有相应类型的格式化程序对象的特化。标准的特化对于常见的对象，如字符串和数字等。Frac类型的特化非常简单:
 
 \begin{lstlisting}[style=styleCXX]
 template<>
@@ -184,19 +181,19 @@ struct std::formatter<Frac>
 };
 \end{lstlisting}
 
-格式化器的特化，是具有两个简短模板函数的类:
+格式化特化，是具有两个简短模板函数的类:
 
 \begin{itemize}
 \item 
-parse()函数解析格式字符串，从冒号之后(若没有冒号，则在开大括号之后)直到但不包括结束大括号(就是指定对象类型的部分)。其接受一个ParseContext对象，并返回一个迭代器。对于我们的目的，可以只返回begin()迭代器。因为我们的类型不需要新语法，所以无需在这里准备任何东西。
+parse()函数解析格式字符串，从冒号之后(若没有冒号，则在开大括号之后)直到但不包括结束大括号(就是指定对象类型的部分)。其接受一个ParseContext对象，并返回一个迭代器。这里，可以只返回begin()迭代器。因为我们的类型不需要新语法，所以无需准备任何东西。
 
 \item 
 format()函数接受一个Frac对象和一个FormatContext对象，返回结束迭代器。format\_to()函数可使这变得很容易，其可以接受一个迭代器、一个格式字符串和一个参数包。本例中，参数包是Frac类的两个属性，分子和分母。
 
-这里需要做的就是提供一个简单的格式字符串“\{0\}/\{1\}”以及分子和分母的值(0和1表示参数的位置)。
+需要做的就是提供一个简单的格式字符串“\{0\}/\{1\}”以及分子和分母的值(0和1表示参数的位置)。
 \end{itemize}
 
-现在我们有了Frac的特化，可以将对象传递给print()从而获得一个可读的结果:
+现在有了Frac的特化，可以将对象传递给print()从而获得一个可读的结果:
 
 \begin{lstlisting}[style=styleCXX]
 int main() {

@@ -1,10 +1,9 @@
 
-C++20允许在新的上下文中使用constexpr。因为这些可以在编译时计算，而非运行时，从而提高了效率。
-
+C++20允许在新的上下文中使用constexpr，这些语句可以在编译时计算，从而提高了效率。
 
 \subsubsection{How to do it…}
 
-其中包括在constexpr上下文中使用string和vector对象的能力。需要注意的是，这些对象本身可能不声明为constexpr，但可以在编译时上下文中使用:
+其中包括在constexpr上下文中使用string和vector对象的能力。所以，这些对象本身可能不声明为constexpr，但可以在编译时上下文中使用:
 
 \begin{lstlisting}[style=styleCXX]
 constexpr auto use_string() {
@@ -22,13 +21,13 @@ constexpr auto use_vector() {
 }
 \end{lstlisting}
 
-累加算法的结果在编译时和constexpr上下文中可用。
+累加算法的结果可在编译时和constexpr的上下文中可用。
 
 \subsubsection{How it works…}
 
-constexpr说明符声明了一个可以在编译时求值的变量或函数。在C++20之前，这仅限于用文字值初始化的对象，或在有限约束条件下的函数。C++17允许某种程度上的扩展，而C++20进一步对其进行了扩展。
+constexpr说明符声明了一个可以在编译时求值的变量或函数。C++20前，这仅限于用文字值初始化的对象，或在有限约束条件下的函数。C++17允许某种程度上的扩展，而C++20进行进一步的扩展。
 
-C++20开始，标准string和vector类具有限定的构造函数和析构函数，这是可在编译时使用的前提。所以分配给string或vector对象的内存，必须在编译时释放。
+C++20开始，标准string和vector类具有限定的构造函数和析构函数，这是可在编译时使用的前提。所以，分配给string或vector对象的内存，也必须在编译时释放。
 
 例如，constexpr函数返回一个vector，编译时不会出错:
 
@@ -48,9 +47,9 @@ int main() {
 }
 \end{lstlisting}
 
-因为在编译期间分配和释放了vector对象，所以该对象在运行时不再可用。
+因为在编译期间分配和释放了vector对象，所以该对象在运行时不可用。
 
-另外，可以在运行时使用一些vector对象的适配constexpr的方法，比如size():
+另外，在运行时使用一些vector对象的适配constexpr的方法，比如size():
 
 \begin{lstlisting}[style=styleCXX]
 int main() {

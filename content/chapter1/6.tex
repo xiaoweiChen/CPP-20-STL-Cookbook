@@ -1,5 +1,5 @@
 
-只要添加了新特性，C++就会提供了某种形式的特性测试宏。从C++20开始，这个过程进行了标准化，所有库特性测试宏都会添加到<version>头文件中。这将使测试代码中的新特性变得更加容易。
+只要添加了新特性，C++就会提供了某种形式的特性测试宏。C++20起这个过程标准化了，所有库特性的测试宏，都会放到<version>头文件中。这将使测试代码中的新特性变得更加容易。
 
 这是一个非常有用的功能，使用起来非常简单。
 
@@ -39,16 +39,16 @@ cout << "value is " << __cpp_lib_three_way_comparison << "\n"
 #endif
 \end{lstlisting}
 
-输出：
+输出为：
 
 \begin{tcblisting}{commandshell={}}
 $ ./working
 value is 201907
 \end{tcblisting}
 
-宏的值可能在一些模糊的情况下很有用，比如某个特性发生了变化，而程序会依赖于这些变化。通常，可以安全地忽略该值，只使用\#ifdef测试非零即可。
+宏的值可能在一些的情况下很有用，比如某个特性发生了变化，而程序会依赖于这些变化。通常，可以安全地忽略该值，只使用\#ifdef测试非零即可。
 
-一些网站维护功能测试宏的完整列表，这里推荐使用cppreference (\url{https://j.bw.org/cppfeature})。
+一些网站维护功能测试宏的完整列表，这里推荐cppreference(\url{https://j.bw.org/cppfeature})。
 
 
 

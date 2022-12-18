@@ -15,13 +15,13 @@ const char * n = "7";
 cout << "result is " << arg42(n) << "\n";
 \end{lstlisting}
 
-输出:
+输出为:
 
 \begin{tcblisting}{commandshell={}}
 Result is ion
 \end{tcblisting}
 
-这样编译和运行没有错误，但结果无法预测。事实上，该调用非常危险，很容易造成崩溃或成为漏洞。我更希望编译器生成一个错误消息，这样就可以提前修复代码。
+这样编译和运行没有错误，但结果无法预测。该调用非常危险，很容易造成崩溃或成为漏洞。我更希望编译器生成一个错误消息，这样就可以提前修复代码。
 
 有了概念后，就可以这样写:
 
@@ -33,7 +33,7 @@ T arg42(const T & arg) {
 }
 \end{lstlisting}
 
-require关键字是C++20的新特性，将约束应用于模板。Numeric是一个只接受整数和浮点类型的概念的名称。现在，当我用非数字参数编译这段代码时，就会得到了合理的编译器错误:
+require关键字是C++20的新特性，将约束应用于模板。Numeric是一个只接受整数和浮点类型的概念的名称。现在，当用非数字参数编译这段代码时，就会得到编译错误:
 
 \begin{tcblisting}{commandshell={}}
 error: 'arg42': no matching overloaded function found
@@ -43,7 +43,6 @@ error: 'arg42': the associated constraints are not satisfied
 这样的错误消息比大多数编译器错误有用得多。
 
 仔细看看如何在代码中使用概念和约束。
-
 
 \subsubsection{How to do it…}
 
@@ -76,11 +75,11 @@ requires floating_point<T>
 T pi{3.1415926535897932385L};
 \end{lstlisting}
 
-可以在任何模板上使用概念和约束。为了简单起见，我们将在这些示例中使用函数模板。
+可以在任何模板上使用概念和约束。简单起见，我们将在这些示例中使用函数模板。
 
 \begin{itemize}
 \item 
-约束可以使用概念或类型特征来评估类型的特征。可以使用<type\_traits>头文件中找到的任何类型特征，只要它返回bool类型。
+约束可以使用概念或类型特征来评估类型的特征。可以使用<type\_traits>头文件中找到的任何类型特征，只要可以返回bool类型。
 
 例如:
 
@@ -96,7 +95,7 @@ constexpr double avg(vector<T> const& vec) {
 \end{lstlisting}
 
 \item 
-require关键字是C++20中新出现的，为模板参数引入了一个约束。在本例中，约束表达式根据类型特征is\_integral测试模板参数。
+require关键字是C++20中新出现的，为模板参数引入了一个约束。本例中，约束表达式根据类型特征is\_integral测试模板参数。
 
 \item 
 可以使用<type\_traits>头文件中预定义的特性，或者自定义的特性，就像模板变量一样。为了在约束中使用，该变量必须返回constexpr bool。例如:
@@ -106,7 +105,7 @@ template<typename T>
 constexpr bool is_gt_byte{ sizeof(T) > 1 };
 \end{lstlisting}
 
-这定义了一个名为is\_gt\_byte的类型特征。该特性使用sizeof操作符来测试类型T是否大于1字节。
+这定义了一个名为is\_gt\_byte的类型特征，该特性使用sizeof操作符来测试类型T是否大于1字节。
 
 \item 
 概念只是一组命名的约束。例如:
@@ -117,7 +116,7 @@ concept Numeric = is_gt_byte<T> &&
 	(integral<T> || floating_point<T>);
 \end{lstlisting}
 
-这定义了一个名为Numeric的概念，使用is\_gt\_byte约束，以及<concepts>头文件中的floating\_point和integral概念。我们可以用它来约束模板，使其只接受大于1字节的数字类型。
+这定义了一个名为Numeric的概念，使用is\_gt\_byte约束，以及<concepts>头文件中的floating\_point和integral概念。可以用它来约束模板，使其只接受大于1字节的数字类型。
 
 \begin{lstlisting}[style=styleCXX]
 template<Numeric T>
@@ -145,7 +144,6 @@ T arg42(const T & arg) {
 }
 \end{lstlisting}
 
-
 \item 
 可以在模板声明中使用概念:
 
@@ -167,7 +165,7 @@ T arg42(const T & arg) requires Numeric<T> {
 \end{lstlisting}
 
 \item 
-可以在一个参数列表中使用概念来简化函数模板:
+可以在参数列表中使用概念来简化函数模板:
 
 \begin{lstlisting}[style=styleCXX]
 auto arg42(Numeric auto & arg) {
@@ -176,7 +174,7 @@ auto arg42(Numeric auto & arg) {
 \end{lstlisting}
 \end{itemize}
 
-如何进行选择，可能就只是偏好问题。在某些情况下，一种选择可能会比另一种更好。
+如何进行选择，可能就只是偏好问题。
 
 \subsubsection{There's more…}
 
@@ -200,7 +198,7 @@ Template <typename T>
 concept Numeric = integral<T> || floating_point<T>;
 \end{lstlisting}
 
-若||运算符的任意一边满足，则析取满足。从左到右求值。连接的操作数是短路的，若左边的约束得到满足，右边的约束就不会求值。
+若||运算符的任意一边满足，则析取条件满足。从左到右求值。连接的操作数是短路的，若左边的约束得到满足，右边的约束就不会求值。
 
 原子约束是返回bool类型的表达式，不能进一步分解。换句话说，不是一个连接或析取。
 
@@ -218,7 +216,7 @@ concept is_byte = !is_gt_byte<T>;
 
 果然，!运算符将bool表达式的值颠倒到!的右侧。
 
-当然，可以将所有这些表达式类型组合成一个更大的表达式。我们可以在下面的例子中看到这些约束表达式的例子:
+当然，可以将所有这些表达式类型组合成一个更大的表达式。可以在下面的例子中看到这些约束表达式的例子:
 
 \begin{lstlisting}[style=styleCXX]
 template<typename T>
@@ -230,7 +228,7 @@ concept Numeric = is_gt_byte<T> &&
 
 子表达式(integral<T> || floating\_point<T>)是一个析取。子表达式is\_gt\_byte<T> \&\&(…)是一个连接。每个子表达式integral<T>，float \_point<T>和is\_gt\_byte<T>，都是原子表达式。
 
-这些区别主要是为了描述的目的。虽然了解细节是很好的习惯，但在编写代码时，可以将它们视为简单的逻辑||，\&\&和!操作符。
+这些区别主要是为了描述的目的。虽然了解细节是很好的习惯，但在编写代码时，可将它们视为逻辑||，\&\&和!操作符。
 
 概念和约束是C++标准的一个很受欢迎的补充，非常期待在未来的项目中使用到它们。
 

@@ -1,11 +1,11 @@
 
-范围库是C++20中添加的重要特性之一，可为过滤和处理容器提供了一种新的范例。范围为更有效和可读的代码提供了清晰和直观的构建块。
+范围库是C++20中添加的重要特性，可为过滤和处理容器提供了一种新的范例。范围为更有效和可读的代码提供了清晰和直观的构建块。
 
 先来定义几个术语:
 
 \begin{itemize}
 \item 
-“范围”是一个可以迭代的对象的集合，任何支持begin()和end()迭代器的结构都是范围。这包括大多数STL容器。
+“范围”是一个可以迭代的对象的集合，支持begin()和end()迭代器的结构都是范围。这包括大多数STL容器。
 
 \item 
 “视图”是转换另一个基础范围的范围。视图是惰性的，只在范围迭代时操作。视图从底层范围返回数据，不拥有任何数据。视图的运行时间复杂度是O(1)。
@@ -15,19 +15,19 @@
 \end{itemize}
 
 \begin{tcolorbox}[colback=webgreen!5!white,colframe=webgreen!75!black,title=Note]
-<ranges>中定义了std::ranges和std::ranges::view命名空间。这貌似有些复杂，标准包含了std::ranges::view的别名，即std::view。我还是觉得那很麻烦。对于这个示例，我将使用以下别名，以节省空间，我觉得这种方式更优雅:
+<ranges>中定义了std::ranges和std::ranges::view命名空间。这貌似有些复杂，标准包含了std::ranges::view的别名，即std::view。我还是觉得那很麻烦。对于这个示例，将使用以下别名，我觉得这种方式更优雅:
 
 \begin{lstlisting}[style=styleCXX]
 namespace ranges = std::ranges; // save the fingers!
 namespace views = std::ranges::views;
 \end{lstlisting}
 
-这适用于本节中的所有代码。
+这适用于本节中的代码。
 \end{tcolorbox}
 
 \subsubsection{How to do it…}
 
-范围和视图类在<ranges>头文件中，来看看如何使用:
+范围和视图类在<ranges>头文件中，看看如何使用它们:
 
 \begin{itemize}
 \item 
@@ -39,7 +39,7 @@ auto result = ranges::take_view(nums, 5);
 for (auto v: result) cout << v << " ";
 \end{lstlisting}
 
-输出:
+输出为:
 
 \begin{tcblisting}{commandshell={}}
 1 2 3 4 5
@@ -54,7 +54,7 @@ auto result = nums | views::take(5);
 for (auto v: result) cout << v << " ";
 \end{lstlisting}
 
-输出:
+输出为:
 
 \begin{tcblisting}{commandshell={}}
 1 2 3 4 5
@@ -70,7 +70,7 @@ const vector<int> nums{ 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
 auto result = nums | views::take(5) | views::reverse;
 \end{lstlisting}
 
-输出:
+输出为:
 
 \begin{tcblisting}{commandshell={}}
 5 4 3 2 1
@@ -84,7 +84,7 @@ auto result = nums |
 	views::filter([](int i){ return 0 == i % 2; });
 \end{lstlisting}
 
-输出:
+输出为:
 
 \begin{tcblisting}{commandshell={}}
 2 4 6 8 10
@@ -98,14 +98,14 @@ auto result = nums |
 	views::transform([](int i){ return i * i; });
 \end{lstlisting}
 
-输出:
+输出为:
 
 \begin{tcblisting}{commandshell={}}
 1 4 9 16 25 36 49 64 81 100
 \end{tcblisting}
 
 \item 
-当然，这些视图和适配器可适用于任何范围:
+视图和适配器可适用于任何范围:
 
 \begin{lstlisting}[style=styleCXX]
 cosnt vector<string>
@@ -113,7 +113,7 @@ words{ "one", "two", "three", "four", "five" };
 auto result = words | views::reverse;
 \end{lstlisting}
 
-输出:
+输出为:
 
 \begin{tcblisting}{commandshell={}}
 five four three two one
@@ -126,20 +126,20 @@ five four three two one
 auto rnums = views::iota(1, 10);
 \end{lstlisting}
 
-输出:
+输出为:
 
 \begin{tcblisting}{commandshell={}}
 1 2 3 4 5 6 7 8 9
 \end{tcblisting}
 
 \item 
-iota(value, bound)函数的作用是:生成一个从value开始，到bound之前结束的序列。若省略了bound，则序列为无穷大:
+iota(value, bound)函数的作用是:生成一个从value开始，到bound之前结束的序列。若省略了bound，序列则为无穷大:
 
 \begin{lstlisting}[style=styleCXX]
 auto rnums = views::iota(1) | views::take(200);
 \end{lstlisting}
 
-输出:
+输出为:
 
 \begin{tcblisting}{commandshell={}}
 1 2 3 4 5 6 7 8 9 10 11 12 […] 196 197 198 199 200
@@ -150,9 +150,9 @@ auto rnums = views::iota(1) | views::take(200);
 
 \subsubsection{How it works…}
 
-为了满足范围的基本要求，对象必须至少有两个迭代器begin()和end()，其中end()迭代器是一个哨兵，用于确定Range的端点。大多数STL容器都符合范围的要求，包括string、vector、array、map等，值得注意的是，容器适配器除外，如stack和queue，因为它们没有开始迭代器和结束迭代器。
+为了满足范围的基本要求，对象必须至少有两个迭代器begin()和end()，其中end()迭代器是一个哨兵，用于确定Range的端点。大多数STL容器都符合范围的要求，包括string、vector、array、map等。不过，容器适配器除外，如stack和queue，因为它们没有起始迭代器和结束迭代器。
 
-视图是一个对象，操作一个范围并返回一个修改后的范围。视图是惰性操作的，不包含自己的数据。它不保留底层数据的副本，只是根据需要返回底层元素的迭代器。来看一下这个代码段:
+视图是一个对象，操作一个范围并返回一个修改后的范围。视图为惰性操作的，不包含自己的数据。不保留底层数据的副本，只是根据需要返回底层元素的迭代器。来看个代码段:
 
 \begin{lstlisting}[style=styleCXX]
 vector<int> vi { 0, 1, 2, 3, 4, 5 };
@@ -163,13 +163,13 @@ for(int i : tv) {
 cout << "\n";
 \end{lstlisting}
 
-输出:
+输出为:
 
 \begin{tcblisting}{commandshell={}}
 0 1
 \end{tcblisting}
 
-本例中，take\_view对象接受两个参数，一个范围(在本例中是vector<int>对象)和一个计数。结果是一个包含vector中第一个count对象的视图。在求值时，在for循环的迭代过程中，take\_view对象只根据需要返回指向vector对象元素的迭代器。
+本例中，take\_view对象接受两个参数，一个范围(在本例中是vector<int>对象)和一个计数，结果是一个包含vector中第一个count对象的视图。在for循环的迭代过程求值时，take\_view对象会根据需要返回指向vector对象元素的迭代器。
 
 在此过程中不修改vector对象。
 
@@ -184,13 +184,13 @@ for(int i : tview) {
 cout << "\n";
 \end{lstlisting}
 
-输出:
+输出为:
 
 \begin{tcblisting}{commandshell={}}
 0 1
 \end{tcblisting}
 
-正如预期的那样，|操作符从左到右求值。因为范围适配器的结果是另一个范围，所以这些适配器表达式可以链接起来:
+如预期的那样，|操作符从左到右求值。因为范围适配器的结果是另一个范围，所以这些适配器表达式可以链接起来:
 
 \begin{lstlisting}[style=styleCXX]
 vector<int> vi { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 };
@@ -201,13 +201,13 @@ for(int i : tview) {
 cout << "\n";
 \end{lstlisting}
 
-输出:
+输出为:
 
 \begin{tcblisting}{commandshell={}}
 9 8 7 6 5
 \end{tcblisting}
 
-标准库包括一个过滤器视图，用于定义简单的过滤器:
+标准库包括一个过滤视图，用于定义简单的过滤器:
 
 \begin{lstlisting}[style=styleCXX]
 vector<int> vi { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 };
@@ -215,7 +215,7 @@ auto even = [](long i) { return 0 == i % 2; };
 auto tview = vi | views::filter(even);
 \end{lstlisting}
 
-输出:
+输出为:
 
 \begin{tcblisting}{commandshell={}}
 0 2 4 6 8
@@ -230,7 +230,7 @@ auto x2 = [](auto i) { return i * 2; };
 auto tview = vi | views::filter(even) | views::transform(x2);
 \end{lstlisting}
 
-输出:
+输出为:
 
 \begin{tcblisting}{commandshell={}}
 0 4 8 12 16
@@ -240,9 +240,9 @@ auto tview = vi | views::filter(even) | views::transform(x2);
 
 \subsubsection{There's more…}
 
-从C++20开始，<algorithm>头文件中的大多数算法都会基于范围。这些版本在<algorithm>头文件中，但是在std::ranges命名空间中。这将它们与传统算法区别开来。
+从C++20开始，<algorithm>头文件中的大多数算法都会基于范围。这些版本在<algorithm>头文件中，但是在std::ranges命名空间中，这将它们与传统算法区别开来。
 
-从而，无需再调用带有两个迭代器的算法:
+所以，无需再调用带有两个迭代器的算法:
 
 \begin{lstlisting}[style=styleCXX]
 sort(v.begin(), v.end());
@@ -256,13 +256,13 @@ ranges::sort(v);
 
 这当然更方便，但它真正意义在哪里呢?
 
-回想一下，要对vectore的一部分排序时的情况。可以用老方法来做:
+回想一下，要对vector的一部分排序时的情况。可以用老方法来做:
 
 \begin{lstlisting}[style=styleCXX]
 sort(v.begin() + 5, v.end());
 \end{lstlisting}
 
-这将对向量的前5个元素进行排序。范围版本中，可以使用视图来跳过前5个元素:
+这将对vector的前5个元素进行排序。范围版本中，可以使用视图来跳过前5个元素:
 
 \begin{lstlisting}[style=styleCXX]
 ranges::sort(views::drop(v, 5));
@@ -286,7 +286,7 @@ ranges::sort(v | views::reverse | views::drop(5));
 ranges::sort(v.rbegin() + 5, v.rend());
 \end{lstlisting}
 
-虽然这当然更简单，也很好理解，但我觉得范围适配器版本的会更直观。
+虽然这更简单，也很好理解，但我觉得范围适配器版本的会更直观。
 
 可以在cppreference(\url{https://j.bw.org/algoranges})上找到限制使用范围的完整算法列表。
 

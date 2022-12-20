@@ -9,7 +9,7 @@ auto [this, that] = things_pair;
 cout << format("{} {}\n", this, that);
 \end{lstlisting}
 
-输出:
+输出为:
 
 \begin{tcblisting}{commandshell={}}
 47 9
@@ -27,15 +27,15 @@ auto [ a, b, c, d, e ] = nums;
 cout << format("{} {} {} {} {}\n", a, b, c, d, e);
 \end{lstlisting}
 
-输出:
+输出为:
 
 \begin{tcblisting}{commandshell={}}
 1 2 3 4 5
 \end{tcblisting}
 
-因为结构化绑定使用自动类型推断，所以它的类型必须是auto。各个变量的名称都在方括号内，[a, b, c, d, e]。
+因为结构化绑定使用自动类型推断，所以类型必须是auto。各个变量的名称都在方括号内，[a, b, c, d, e]。
 
-在这个例子中，int型c数组nums包含五个值。使用结构化绑定将这五个值赋给变量(a、b、c、d和e)。
+这个例子中，int型c数组nums包含五个值。使用结构化绑定将这五个值赋给变量(a、b、c、d和e)。
 
 \item 
 这也适用于STL数组对象:
@@ -46,14 +46,14 @@ auto [ a, b, c, d, e ] = nums;
 cout << format("{} {} {} {} {}\n", a, b, c, d, e);
 \end{lstlisting}
 
-输出:
+输出为:
 
 \begin{tcblisting}{commandshell={}}
 1 2 3 4 5
 \end{tcblisting}
 
 \item 
-或者可以将它与tuple一起使用:
+或者将它与tuple一起使用:
 
 \begin{lstlisting}[style=styleCXX]
 tuple<int, double, string> nums{ 1, 2.7, "three" };
@@ -61,7 +61,7 @@ auto [ a, b, c ] = nums;
 cout << format("{} {} {}\n", a, b, c);
 \end{lstlisting}
 
-输出:
+输出为:
 
 \begin{tcblisting}{commandshell={}}
 1 2.7 three
@@ -77,14 +77,14 @@ auto [ a, b, c ] = nums;
 cout << format("{} {} {}\n", a, b, c);
 \end{lstlisting}
 
-输出:
+输出为:
 
 \begin{tcblisting}{commandshell={}}
 1 2.7 three
 \end{tcblisting}
 
 \item 
-可以使用带有结构化绑定的引用，可以修改绑定容器中的值，同时避免重复数据复制:
+可以使用带有结构化绑定的引用，可以修改绑定容器中的值，同时避免数据复制:
 
 \begin{lstlisting}[style=styleCXX]
 array<int,5> nums { 1, 2, 3, 4, 5 };
@@ -94,7 +94,7 @@ c = 47;
 cout << format("{} {}\n", nums[2], c);
 \end{lstlisting}
 
-输出:
+输出为:
 
 \begin{tcblisting}{commandshell={}}
 3 3
@@ -124,18 +124,18 @@ c = 47; // this is also an error
 
 \subsubsection{How it works…}
 
-结构化绑定使用自动类型推断将结构解压缩到变量中。其独立地确定每个值的类型，并为每个变量分配相应的类型。
+结构化绑定使用auto类型推断将结构解压缩到变量中。其独立地确定每个值的类型，并为每个变量分配相应的类型。
 
 \begin{itemize}
 \item 
-因为结构化绑定使用自动类型推断，所以不能为绑定指定类型，必须使用auto。若尝试使用一个类型进行绑定，会得到相应的错误信息:
+因为结构化绑定使用auto类型推断，所以不能为绑定指定类型，必须使用auto。若使用一个类型进行绑定，会得到相应的错误信息:
 
 \begin{lstlisting}[style=styleCXX]
 array<int,5> nums { 1, 2, 3, 4, 5 };
 int [ a, b, c, d, e ] = nums;
 \end{lstlisting}
 
-输出:
+输出为:
 
 \begin{tcblisting}{commandshell={}}
 error: structured binding declaration cannot have type 'int'
@@ -169,14 +169,14 @@ int main() {
 }
 \end{lstlisting}
 
-输出:
+输出为:
 
 \begin{tcblisting}{commandshell={}}
 quotient: 9, remainder 2
 \end{tcblisting}
 
 \item 
-因为map容器类为每个元素返回一对，所以使用结构化绑定来检索键/值对就很方便:
+因为map容器类为每个元素返回一个pair，所以使用结构化绑定来检索键/值对就很方便:
 
 \begin{lstlisting}[style=styleCXX]
 map<string, uint64_t> inhabitants {
@@ -203,7 +203,7 @@ int main() {
 }
 \end{lstlisting}
 
-输出:
+输出为:
 
 \begin{tcblisting}{commandshell={}}
 there are 1,086,881,528 cats

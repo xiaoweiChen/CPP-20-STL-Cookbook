@@ -23,7 +23,7 @@ int main() {
 }
 \end{lstlisting}
 
-输出:
+输出为:
 
 \begin{tcblisting}{commandshell={}}
 T is int
@@ -56,7 +56,7 @@ int main() {
 }
 \end{lstlisting}
 
-输出:
+输出为:
 
 \begin{tcblisting}{commandshell={}}
 T1 T2: int long
@@ -67,7 +67,7 @@ T1 T2: double char const *
 这里编译器同时推导出了T1和T2的类型。
 
 \item 
-注意，类型必须与模板兼容。例如，不能从字面量中获取引用:
+注意，类型必须与模板兼容。例如，不能从字面量获取类型:
 
 \begin{lstlisting}[style=styleCXX]
 template<typename T>
@@ -82,14 +82,14 @@ int main() {
 \end{lstlisting}
 
 \item 
-C++17起，还可以对类使用模板参数推断:
+C++17起，可以对类使用模板参数推导:
 
 \begin{lstlisting}[style=styleCXX]
 pair p(47, 47.0); // deduces to pair<int, double>
 tuple t(9, 17, 2.5); // deduces to tuple<int, int, double>
 \end{lstlisting}
 
-这消除了对std::make\_pair()和std::make\_tuple()的需求，现在可以直接初始化这些类，而无需显式的模板参数。std::make\_*工厂函数则保持向后兼容性可用。
+这消除了对std::make\_pair()和std::make\_tuple()的需求，现在可以直接初始化这些类，无需显式的模板参数。std::make\_*工厂函数则保持向后兼容性可用。
 \end{itemize}
 
 \subsubsection{How it works…}
@@ -137,7 +137,7 @@ Things thing1{1, 47.0, "three" }
 cout << thing1.print();
 \end{lstlisting}
 
-输出:
+输出为:
 
 \begin{tcblisting}{commandshell={}}
 int, double, char const *
@@ -160,7 +160,7 @@ public:
 };
 \end{lstlisting}
 
-注意构造函数中的折叠表达式(values + …)。这是C++17的一个特性，它将操作符应用于一个形参包的所有成员。本例中，将v初始化为参数包的和。
+注意构造函数中的折叠表达式(values + …)。这是C++17的特性，可将操作符应用于一个参数包的所有成员。本例中，将v初始化为参数包的和。
 
 该类的构造函数接受任意数量的形参，其中每个形参可以是不同的类。可以这样调用:
 
@@ -183,7 +183,7 @@ template <typename... Ts>
 Sum(Ts&& ... ts) -> Sum<std::common_type_t<Ts...>>;
 \end{lstlisting}
 
-这告诉编译器使用std::common\_type\_t的特征，试图为包中的所有参数找到一个公共类型。现在我们的参数推导工作了，可以看到其确切的类型:
+这告诉编译器使用std::common\_type\_t的特征，试图为包中的所有参数找到一个公共类型。现在，参数推导工作了，可以看到确切的类型:
 
 \begin{lstlisting}[style=styleCXX]
 Sum s1 { 1u, 2.0, 3, 4.0f }; // unsigned, double, int,
@@ -196,7 +196,7 @@ cout << format("s1 is {} {}, s2 is {} {}",
 		typeid(v1).name(), v1, typeid(v2).name(), v2);
 \end{lstlisting}
 
-输出:
+输出为:
 
 \begin{tcblisting}{commandshell={}}
 s1 is double 10, s2 is class std::string abcdef

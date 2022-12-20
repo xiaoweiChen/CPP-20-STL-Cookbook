@@ -1,5 +1,5 @@
 
-if constexpr(condition)语句用于根据编译时条件执行代码的地方。条件可以是bool类型的constexpr表达式。
+if constexpr(condition)语句用于根据编译时条件执行代码的地方，条件可以是bool类型的constexpr表达式。
 
 \subsubsection{How to do it…}
 
@@ -24,7 +24,7 @@ int main() {
 }
 \end{lstlisting}
 
-输出:
+输出为:
 
 \begin{tcblisting}{commandshell={}}
 value is 47
@@ -47,7 +47,7 @@ if constexpr (std::is_pointer_v<T>) {
 
 is\_pointer\_v<T>会测试模板参数，该参数在运行时不可用。当模板形参<T>可用时，constexpr关键字会告诉编译器这个if语句需要在编译时求值。
 
-这将使许多元编程情况变得更加容易，if constexpr语句在C++17及更高版本中可用。
+这将使元编程更加容易，if constexpr语句可在C++17及更高版本中使用。
 
 
 

@@ -1,9 +1,9 @@
 
-对于C++20来说，std::span类是一个简单的包装器，它在连续的对象序列上创建一个视图。span没有属于自己的数据，其引用底层结构中的数据。可以把它看作C数组的string\_view，底层结构可以是C数组、vector或STL array。
+对于C++20，std::span类是一个包装器，可在连续的对象序列上创建视图。span没有属于自己的数据，其引用底层结构中的数据。可以把它看作C数组的string\_view，底层结构可以是C数组、vector或STL array。
 
 \subsubsection{How to do it…}
 
-可以从兼容的连续存储结构创建一个span，最常见的的是C数组。例如，试图将一个C数组传递给函数，该数组将降级为指针，并且函数没有办法直接了解数组的大小:
+可以使用兼容的连续存储结构创建span，最常见的的是C数组。例如，将一个C数组传递给函数，该数组将降级为指针，并且函数没有办法直接了解数组的长度:
 
 \begin{lstlisting}[style=styleCXX]
 void parray(int * a); // loses size information
@@ -30,7 +30,7 @@ int main() {
 }
 \end{lstlisting}
 
-输出:
+输出为:
 
 \begin{tcblisting}{commandshell={}}
 number of elements: 10
@@ -42,7 +42,7 @@ span的目的是封装原始数据，并以最小的开销保证安全性和实�
 
 \subsubsection{How it works…}
 
-span类本身不拥有数据，数据属于底层数据结构。span本质上是底层数据的视图，其还提供了一些有用的成员函数。
+span类本身不拥有数据，数据属于底层数据结构。span本质上是底层数据的视图，并提供了一些有用的成员函数。
 
 <span>头文件中定义的span类看起来像这样:
 
@@ -58,7 +58,7 @@ class span {
 
 Extent参数是一个constexpr size\_t类型的常量，在编译时计算。其要么是底层数据中的元素数量，要么是std::dynamic\_extent常量，这表明其大小可变。这允许span使用底层结构(如vector)，但大小并不总是相同。
 
-所有成员函数都是constexpr和const限定的。成员功能包括:
+所有成员函数都是constexpr和const限定的。成员函数包括:
 
 \begin{table}[H]
 \centering
@@ -94,6 +94,6 @@ bool empty()           & 空为真                                 \\ \hline
 \end{table}
 
 \begin{tcolorbox}[colback=webgreen!5!white,colframe=webgreen!75!black,title=重要的Note]
-span类只是一个简单的包装器，不执行边界检查。若尝试访问n个元素中的元素n+1，结果就是未定义的，这很“糟糕”，不要这样做。
+span类只是一个简单的包装器，不执行边界检查。若尝试访问n个元素中的元素n+1，结果就是未定义的，所以最好不要这样做。
 \end{tcolorbox}
 

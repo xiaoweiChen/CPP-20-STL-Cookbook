@@ -1,7 +1,7 @@
 
 map类是保存键-值对的关联容器，其中键在容器内必须唯一。
 
-填充map容器的方法有很多种。考虑这样定义的map:
+填充map容器的方法有很多种，可以这样定义的map:
 
 \begin{lstlisting}[style=styleCXX]
 map<string, string> m;
@@ -32,12 +32,12 @@ m.emplace("Krupa", "Drums");
 为了解决这个问题，C++17提供了新的try\_emplace()函数，该函数只在需要时构造值对象，这对于大型对象尤为重要。
 
 \begin{tcolorbox}[colback=webgreen!5!white,colframe=webgreen!75!black,title=Note]
-map的每个元素都是一个键值对，其中元素命名为first和second，但在映射中是键和值。我倾向于将值对象视为有效负载。要搜索一个现有的键，try\_emplace()函数必须构造键对象，但它不需要构造有效负载对象，除非需要插入到map中。
+map的每个元素都是一个键值对，其中元素命名为first和second，但在map中是键和值。我倾向于将值对象视为有效负载。要搜索一个现有的键，try\_emplace()函数必须构造键对象，但不需要构造有效负载对象，除非需要插入到map中。
 \end{tcolorbox}
 
 \subsubsection{How to do it…}
 
-新的try\_emplace()函数避免了构造有效负载对象的开销，除非必需。这在键值碰撞的情况下效率很高，特别是在大有效载荷的情况下。让我们一起来看看:
+新的try\_emplace()函数避免了构造有效负载对象的开销，这在键值碰撞的情况下效率很高，特是在大有效载荷的情况下。
 
 \begin{itemize}
 \item 
@@ -55,10 +55,10 @@ using Mymap = map<string, BigThing>;
 
 这个BigThing类只有一个成员函数——构造函数，在构造对象时显示一条消息。我们将使用它来跟踪BigThing对象的构造频率。实际中，这个类会更大，使用更多的资源。
 
-每个map元素将由一对对象组成，一个std::string用于键，一个BigThing对象用于负载。Mymap只是一个别名。这使我们能够专注于功能而非形式。
+每个map元素将由pair对象组成，一个std::string用于键，一个BigThing对象用于负载。这里，Mymap只是一个别名，只是为了让我们能够更专注于功能。
 
 \item 
-我们还将创建一个printm()函数来打印map的内容:
+再创建一个printm()函数来打印map的内容:
 
 \begin{lstlisting}[style=styleCXX]
 void printm(Mymap& m) {
@@ -69,10 +69,10 @@ void printm(Mymap& m) {
 }
 \end{lstlisting}
 
-这使用C++20 format()函数打印map，这样就可以在插入元素时观察它们了。
+使用C++20的format()函数打印map，就可以在插入元素时观察它们了。
 
 \item 
-在main()函数中，我们创建了map对象并插入了一些元素:
+main()函数中，创建了map对象并插入了一些元素:
 
 \begin{lstlisting}[style=styleCXX]
 int main() {
@@ -86,7 +86,7 @@ int main() {
 }
 \end{lstlisting}
 
-输出:
+输出为:
 
 \begin{tcblisting}{commandshell={}}
 BigThing constructed Trumpet
@@ -98,10 +98,10 @@ BigThing constructed Piano
 [Miles:Trumpet] [Zappa:Guitar]
 \end{tcblisting}
 
-我们的输出显示了每个有效负载对象的构造，然后是printm()函数调用的输出。
+输出显示了每个有效负载对象的构造，然后是printm()函数的输出。
 
 \item 
-使用emplace()函数将元素添加到map中，每个有效负载元素只构造一次。这里也可以使用try\_emplace()函数，结果相同:
+使用emplace()函数将元素添加到map中，每个有效负载元素只构造一次。这里，也可以使用try\_emplace()函数，结果相同:
 
 \begin{lstlisting}[style=styleCXX]
 Mymap m;
@@ -113,7 +113,7 @@ m.try_emplace("Liszt", "Piano");
 printm(m);
 \end{lstlisting}
 
-输出:
+输出为:
 
 \begin{tcblisting}{commandshell={}}
 BigThing constructed Trumpet
@@ -136,7 +136,7 @@ m.try_emplace("Zappa", "Composer");
 printm(m);
 \end{lstlisting}
 
-输出:
+输出为:
 
 \begin{tcblisting}{commandshell={}}
 emplace(Hendrix)
@@ -153,7 +153,7 @@ emplace()函数尝试添加一个具有重复键的元素(“Hendrix”)。但�
 
 \subsubsection{How it works…}
 
-try\_emplace()函数签名与emplace()函数签名相似，因此对历史代码进行改造应该很容易。下面是try\_emplace()函数签名:
+try\_emplace()函数签名与emplace()函数签名相似，因此对代码的修改应该很容易。下面是try\_emplace()函数签名:
 
 \begin{lstlisting}[style=styleCXX]
 pair<iterator, bool> try_emplace( const Key& k,
@@ -173,7 +173,7 @@ m.emplace("Miles", "Trumpet");
 m.try_emplace("Miles", "Trumpet");
 \end{lstlisting}
 
-try\_emplace()的返回值与emplace()的返回值相同，是一个表示迭代器和bool的对:
+try\_emplace()的返回值与emplace()的返回值相同，是一个表示迭代器和bool的pair:
 
 \begin{lstlisting}[style=styleCXX]
 const char * key{"Zappa"};
@@ -186,7 +186,7 @@ if(auto [it, success] = m.try_emplace(key, payload);
 printm(m);
 \end{lstlisting}
 
-输出:
+输出为:
 
 \begin{tcblisting}{commandshell={}}
 update
@@ -195,9 +195,9 @@ BigThing constructed Composer
 [Zappa:Composer]
 \end{tcblisting}
 
-这里使用了结构化绑定(auto [it, success] =)和if初始化语句来测试返回值，并有条件地更新有效负载。注意，它仍然只构造了一次有效负载对象。
+这里使用了结构化绑定(auto [it, success] =)和if初始化语句来测试返回值，并有条件地更新有效负载。注意，这仍然构造了有效负载对象。
 
-值得注意的是，try\_emplace()函数也适用于unordered\_map。我们改变了别名，除了无序之外其都一样:
+try\_emplace()函数也适用于unordered\_map:
 
 \begin{lstlisting}[style=styleCXX]
 using Mymap = unordered_map<string, BigThing>;

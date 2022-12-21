@@ -1,5 +1,5 @@
 
-有序任务列表(或待办事项列表)是一种常见的计算应用程序，它是一个与优先级相关的任务列表，按反向数字顺序排序。
+有序任务列表(或待办事项列表)是一种常见的计算应用程序，是一个与优先级相关的任务列表，按反向数字顺序排序。
 
 读者可能倾向于使用priority\_queue，因为它已经按照优先级(反向数字)顺序排序了。priority\_queue的缺点是没有迭代器，因此若不从队列中推入或弹出项，就很难对其进行操作。
 
@@ -20,7 +20,7 @@ using todomap = multimap<int, string>;
 todomap是一个具有int键和字符串的multimap。
 
 \item 
-这里有一个小函数来倒序打印todomap:
+这里有一个小函数以倒序输出todomap:
 
 \begin{lstlisting}[style=styleCXX]
 void rprint(todomap& todo) {
@@ -33,7 +33,7 @@ void rprint(todomap& todo) {
 }
 \end{lstlisting}
 
-可以使用反向迭代器来打印todomap。
+可以使用反向迭代器来输出todomap。
 
 \item 
 main()函数很简单:
@@ -51,7 +51,7 @@ int main()
 }
 \end{lstlisting}
 
-我们用任务初始化todomap。请注意，任务没有任何特定的顺序，但在键中确实有优先级。rprint()函数可以按优先级顺序打印它们。
+我们用任务初始化todomap。任务没有任何特定的顺序，但在键中确实有优先级。rprint()函数可以按优先级顺序打印它们。
 
 \item 
 输出如下所示:

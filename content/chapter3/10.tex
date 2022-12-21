@@ -42,10 +42,10 @@ inserter()函数用于将元素插入到set容器中:
 copy(it, end, inserter(words, words.end()));
 \end{lstlisting}
 
-我们使用std::copy()方便地从输入流中复制单词。
+使用std::copy()可以从输入流中复制单词。
 
 \item 
-现在可以打印集合来查看结果:
+现在可以打印set来查看结果:
 
 \begin{lstlisting}[style=styleCXX]
 for(const string & w : words) {
@@ -55,7 +55,7 @@ cout << '\n';
 \end{lstlisting}
 
 \item 
-可以通过将一堆单词作为输入来运行程序:
+通过将一堆单词作为输入来运行程序:
 
 \begin{tcblisting}{commandshell={}}
 $ echo "a a a b c this that this foo foo foo" | ./
@@ -68,7 +68,7 @@ a b c foo that this
 
 \subsubsection{How it works…}
 
-set容器是这示例的核心，其只保存唯一的元素。当插入重复元素时，该插入将失败。所以，最终将得到了一个由每个唯一元素组成的有序列表。
+set容器是这示例的核心，其只保存唯一的元素。当插入重复元素时，插入将失败。所以，最终将得到了一个由每个唯一元素组成的有序列表。
 
 但这并不是这个示例唯一有趣的地方。
 

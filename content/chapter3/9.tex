@@ -1,5 +1,5 @@
 
-对于有序map，键的类型必须是可排序的，必须至少支持小于<比较操作符。假设希望使用具有不可排序的自定义类型的关联容器。例如，一个向量(0,1)既不大于也不小于(1,0)，只是指向不同的方向。在这种情况下，可以使用unordered\_map类型。
+对于有序map，键的类型必须是可排序的，必须至少支持小于比较操作符。假设希望使用具有不可排序的自定义类型的关联容器。例如，一个向量(0,1)既不大于也不小于(1,0)，只是指向不同的方向。这种情况下，可以使用unordered\_map类型。
 
 \subsubsection{How to do it…}
 
@@ -7,7 +7,7 @@
 
 \begin{itemize}
 \item 
-首先，将为坐标定义一个结构体:
+首先，将为坐标定义为一个结构体:
 
 \begin{lstlisting}[style=styleCXX]
 struct Coord {
@@ -16,7 +16,7 @@ struct Coord {
 };
 \end{lstlisting}
 
-这是一个简单的结构，有两个元素，x和y，作为坐标。
+有两个元素，x和y，作为坐标。
 
 \item 
 map将使用Coord结构作为键，并使用int作为值:
@@ -39,7 +39,7 @@ bool operator==(const Coord& lhs, const Coord& rhs) {
 这是一个很简单的函数，用来比较x元素和y元素。
 
 \item 
-还需要一个std::hash类特化，这就可以使用键检索map元素:
+还需要一个特化的std::hash类，这就可以使用键检索map元素了:
 
 \begin{lstlisting}[style=styleCXX]
 namespace std {
@@ -56,7 +56,7 @@ namespace std {
 这为std::unordered\_map类使用的默认哈希类提供了特化，必须在std命名空间中。
 
 \item 
-还将编写一个print函数来打印Coordmap对象:
+还需要一个print函数来打印Coordmap对象:
 
 \begin{lstlisting}[style=styleCXX]
 void print_Coordmap(const Coordmap& m) {
@@ -68,10 +68,10 @@ void print_Coordmap(const Coordmap& m) {
 }
 \end{lstlisting}
 
-这使用C++ 20 format()函数来打印x/y键和值。注意使用双大括号\{\{和\}\}来打印单个大括号。
+这使用C++20的format()函数来打印x/y键和值。注意使用双大括号\{\{和\}\}来打印单个大括号。
 
 \item 
-现在有了所有的支持函数，就可以编写main()函数了。
+现在有了所有的辅助函数，就可以编写main()函数了。
 
 \begin{lstlisting}[style=styleCXX]
 int main() {
@@ -84,7 +84,7 @@ int main() {
 }
 \end{lstlisting}
 
-输出:
+输出为:
 
 \begin{tcblisting}{commandshell={}}
 { (2, 1): 3 } { (0, 1): 2 } { (0, 0): 1 }
@@ -101,7 +101,7 @@ cout << format("{{ ({}, {}): {} }}\n", k.x, k.y,
 m.at(k));
 \end{lstlisting}
 
-输出:
+输出为:
 
 \begin{tcblisting}{commandshell={}}
 { (0, 1): 2 }
@@ -119,7 +119,7 @@ unordered\_map类依赖于哈希类从键中查找元素，通常会这样实例
 std::unordered_map<key_type, value_type> my_map;
 \end{lstlisting}
 
-因为我们没有创建哈希类，所以其使用了默认的哈希类。unordered\_map类的完整模板类型定义如下:
+因为没有创建哈希类，所以其使用了默认的哈希类。unordered\_map类的完整模板类型定义如下:
 
 \begin{lstlisting}[style=styleCXX]
 template<
@@ -132,9 +132,9 @@ template<
 > class unordered_map;
 \end{lstlisting}
 
-该模板为Hash、KeyEqual和Allocator提供了默认值，因此通常不会在定义中包含它们。在示例中，为默认std::hash类提供了特化。
+该模板为Hash、KeyEqual和Allocator提供了默认值。在示例中，为默认的std::hash类提供了特化。
 
-STL包含std::hash对大多数标准类型的特化，如string、int等。为了与我们的类一起工作，其需要特化。
+STL包含std::hash对大多数标准类型的特化，如string、int等。为了与我们的类一起工作，其需要进行特化。
 
 可以向模板形参传递一个函数:
 
@@ -142,7 +142,7 @@ STL包含std::hash对大多数标准类型的特化，如string、int等。为�
 std::unordered_map<coord, value_type, my_hash_type> my_map;
 \end{lstlisting}
 
-这会有用。但在我看来，特化会更通用。
+但在我看来，特化方式会更通用。
 
 
 

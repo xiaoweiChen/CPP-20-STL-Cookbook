@@ -1,13 +1,13 @@
 
-vector是一个顺序容器，其按照插入元素的顺序保存元素。并不对元素进行排序，也不以任何方式改变其顺序。其他容器，如set和map，会将元素排序，但这些容器不可随机访问。不过，只需要稍加处理，vector也可以保持有序。
+vector是一个顺序容器，会按照插入元素的顺序保存元素。并不对元素进行排序，也不以任何方式改变其顺序。其他容器，如set和map，会将元素排序，但这些容器不可随机访问。不过，只需要稍加处理，vector也可以保持有序。
 
 \subsubsection{How to do it…}
 
-这个示例的思想是创建一个简单的函数insert\_sorted()，将一个元素插入到vector中的正确位置，以保持vector的排序。
+这个示例是创建一个简单的函数insert\_sorted()，将一个元素插入到vector中的正确位置，以保持vector元素的顺序。
 
 \begin{itemize}
 \item 
-方便起见，我们将从string vector的类型别名开始:
+先从string vector类型的别名开始:
 
 \begin{lstlisting}[style=styleCXX]
 using Vstr = std::vector<std::string>;
@@ -16,7 +16,7 @@ using Vstr = std::vector<std::string>;
 这里我喜欢使用类型别名，因为vector的确切细节并不重要。
 
 \item 
-然后，可以定义几个支持函数:
+然后，可以定义几个辅助函数:
 
 \begin{lstlisting}[style=styleCXX]
 // print a vector
@@ -35,12 +35,12 @@ void psorted(const Vstr& v) {
 }
 \end{lstlisting}
 
-printv()函数非常简单，其将向量的元素打印在一行上。
+printv()函数非常简单，其将vector的元素打印在一行上。
 
-psorted()函数使用is\_sorted()算法的范围版本来告诉我们vector是否已排序。然后调用printv()来打印向量。
+psorted()函数使用is\_sorted()算法的范围版本，确定vector是否已排序。然后，使用printv()来输出vector。
 
 \item 
-现在可以在main()函数中初始化一个Vstr vector:
+可以在main()函数中初始化一个Vstr vector:
 
 \begin{lstlisting}[style=styleCXX]
 int main() {
@@ -55,23 +55,23 @@ int main() {
 }
 \end{lstlisting}
 
-输出:
+输出为:
 
 \begin{tcblisting}{commandshell={}}
 unsorted: Miles Hendrix Beatles Zappa Shostakovich
 \end{tcblisting}
 
-在这一点上，我们有一个Vstr vector与一些有趣的音乐家的名字，并没有特定的顺序。
+这里，我们有一个Vstr vector与一些有趣的音乐家的名字，但并没有进行排序。
 
 \item 
-让我们使用sort()算法的范围版本对vector排序。
+使用sort()算法的范围版本对vector排序。
 
 \begin{lstlisting}[style=styleCXX]
 std::ranges::sort(v);
 psorted(v);
 \end{lstlisting}
 
-输出:
+输出为:
 
 \begin{tcblisting}{commandshell={}}
 sorted: Beatles Hendrix Miles Shostakovich Zappa
@@ -90,14 +90,14 @@ void insert_sorted(Vstr& v, const string& s) {
 insert\_sorted()函数使用lower\_bound()算法的范围版本来获取insert()函数的迭代器，该迭代器保持vector的排序。
 
 \item 
-现在可以使用insert\_sorted()函数，将更多的音乐家名字插入到vector中:
+可以使用insert\_sorted()函数，将更多的音乐家名字插入到vector中:
 
 \begin{lstlisting}[style=styleCXX]
 insert_sorted(v, "Ella");
 insert_sorted(v, "Stones");
 \end{lstlisting}
 
-输出:
+输出为:
 
 \begin{tcblisting}{commandshell={}}
 sorted: Beatles Ella Hendrix Miles Shostakovich Stones Zappa
@@ -131,7 +131,7 @@ void insert_sorted(C& c, const E& e) {
 }
 \end{lstlisting}
 
-请记住，std::sort()算法(及其衍生算法)需要支持随机访问的容器，并不是所有的STL容器都满足这个要求。值得注意的是，std::list不支持随机访问。
+std::sort()算法(及其衍生算法)需要支持随机访问的容器，并不是所有的STL容器都满足这个要求。值得注意的是，std::list不支持随机访问。
 
 
 

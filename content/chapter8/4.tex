@@ -1,9 +1,9 @@
 
-C++17中引入的std::variant类可以保存不同的值，每次一个，其中每个值必须适合相同的分配内存空间。它对于保存可供在单个上下文中使用的替代类型非常有用。
+C++17中引入的std::variant类可以保存不同的值，每次一个，其中每个值必须适合相同的分配内存空间。对于保存可供在单个上下文中使用的替代类型非常有用。
 
 \subsubsection{与union的区别}
 
-variant类是一个带标记的联合。它与原始union结构的不同之处在于，一次只能有一种类型起作用。
+variant类是一个带标记的联合，其与原始union结构的不同之处在于，一次只能有一种类型起作用。
 
 原始union类型继承自C，是一种结构，在这种结构中，相同的数据可以作为不同的类型访问。例如:
 
@@ -29,11 +29,11 @@ ip addr int32 (LE): 2A05A8C0
 
 这个例子中，union有两个成员，类型是struct和uint32\_t，其中struct有四个uint8\_t成员。这为我们提供了相同32位内存空间的两种不同视角，可以将相同的ipv4地址视为一个32位无符号整数(Little Endian或LE)或四个8位无符号整数。这提供了在系统级别的位多态。
 
-variant不是这样的。variant类是一个带标记的union，其中每个数据都带有其类型的标记。若将一个值存储为uint32\_t，只能以uint32\_t的形式访问它。这使得variant类型是安全的，但不是union的替代品。
+variant不是这样的。variant类是一个带标记的union，其中每个数据都带有其类型的标记。若将一个值存储为uint32\_t，只能以uint32\_t的形式访问。这使得variant类型安全，但并不是union的替代品。
 
 \subsubsection{How to do it…}
 
-这个示例中，我们将展示std::variant的使用方式。
+示例中，将展示std::variant的使用方式。
 
 \begin{itemize}
 \item 
@@ -59,7 +59,7 @@ public:
 动物的名字和动物发出的声音被传递到构造函数中。
 
 \item 
-个体物种类继承自Animal:
+不同的物种类继承自Animal:
 
 \begin{lstlisting}[style=styleCXX]
 class Cat : public Animal {
@@ -76,7 +76,7 @@ class Wookie : public Animal {
 };
 \end{lstlisting}
 
-这些类中的每一个都通过调用父构造函数，来为它们的特定种类设置声音。
+这些类中的每一个都通过调用父构造函数，来为其物种类设置声音。
 
 \item 
 现在，可以在别名中定义变量类型:
@@ -102,7 +102,7 @@ int main() {
 列表中的每个元素都是变量定义中包含的类型。
 
 \item 
-variant类提供了几种访问元素的不同方法。首先，来看看visit()函数。
+variant类提供了几种访问元素的不同方法，先来看看visit()。
 
 visit()调用带有当前包含在变体中的对象的函子。首先，定义一个接受宠物的函子:
 
@@ -115,7 +115,7 @@ struct animal_speaks {
 };
 \end{lstlisting}
 
-这是一个简单的函子类，每个Animal子类都有重载。我们使用visit()调用它，并使用列表的每个元素:
+这是一个简单的函子类，每个Animal子类都有重载。使用visit()调用它，并使用列表的每个元素:
 
 \begin{lstlisting}[style=styleCXX]
 for (const v_animal& a : pets) {
@@ -153,7 +153,7 @@ Max says meow
 Chewie says grrraarrgghh!
 \end{tcblisting}
 
-每个变量对象都根据模板参数中声明类型的顺序建立索引。我们的v\_animal类型定义为std::variant<Cat, Dog, Wookie>，这些类型的索引顺序为0 - 2。
+每个变量对象都根据模板参数中声明类型的顺序建立索引。av\_animal类型定义为std::variant<Cat, Dog, Wookie>，这些类型的索引顺序为0 - 2。
 
 \item 
 get\_if<T>()函数的作用是:根据类型测试给定元素:
@@ -214,7 +214,7 @@ index()方法告诉我们当前对象的类型:
 if(v.index() == 0) // if variant is type X
 \end{lstlisting}
 
-hold \_alternative<T>()非成员函数如果T是当前对象的类型，则返回true:
+holds\_alternative<T>()非成员函数如果T是当前对象的类型，则返回true:
 
 \begin{lstlisting}[style=styleCXX]
 if(holds_alternative<X>(v)) // if current variant obj is type X
@@ -232,7 +232,7 @@ auto o{ get<X>(v) }; // current variant obj must be type X
 auto* p{ get_if<X>(v) }; // nullptr if current obj not type X
 \end{lstlisting}
 
-The visit() non-member function invokes a callable object with the current variant object as its single parameter:
+visit()非成员函数使用一个可调用对象，将当前变量对象作为其唯一形参:
 
 \begin{lstlisting}[style=styleCXX]
 visit(f, v); // calls f(v) with current variant obj

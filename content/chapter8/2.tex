@@ -1,7 +1,7 @@
 
 C++17引入的std::optional类保存了一个可选值。
 
-假设有一个函数，它可能返回值，也可能不返回值——例如，一个函数检查一个数字是否是质数，但若存在第一个因数，则返回第一个因数。此函数应返回值或bool状态。我们可以创建一个同时包含值和状态的结构体:
+假设有一个函数，它可能返回值，也可能不返回值——例如，一个函数检查一个数字是否是质数，但若存在第一个因数，则返回第一个因数。此函数应返回值或bool状态。可以创建一个同时包含值和状态的结构体:
 
 \begin{lstlisting}[style=styleCXX]
 struct factor_t {
@@ -24,7 +24,7 @@ factor_t factor(long n) {
 
 这是一个笨拙的解决方案，但它是有效的，而且很常见。
 
-optional类可以让这个任务变得简单很多:
+optional类可以让这个任务变得简单:
 
 \begin{lstlisting}[style=styleCXX]
 optional<long> factor(long n) {
@@ -50,7 +50,7 @@ if(y) cout << format("lowest factor of {} is {}\n", b, *y);
 else cout << format("{} is prime\n", b);
 \end{lstlisting}
 
-输出是:
+输出为:
 
 \begin{tcblisting}{commandshell={}}
 lowest factor of 42 is 2
@@ -59,11 +59,11 @@ lowest factor of 42 is 2
 
 \subsubsection{How to do it…}
 
-这个示例中，来看一些如何使用optional类的例子:
+这个示例中，来看看如何使用optional类的例子:
 
 \begin{itemize}
 \item 
-optional类非常简单。我们使用标准模板表示法构造一个optional值:
+optional类非常简单。使用标准模板表示法构造一个optional:
 
 \begin{lstlisting}[style=styleCXX]
 optional<int> a{ 42 };

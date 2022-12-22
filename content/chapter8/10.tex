@@ -9,7 +9,7 @@ shared_ptr( shared_ptr<Y>&& ref, element_type* ptr ) noexcept;
 
 \subsubsection{How to do it…}
 
-在这个示例中，我们创建了一个托管对象并共享该对象的成员:
+这个示例中，我们创建了一个托管对象并共享该对象的成员:
 
 \begin{itemize}
 \item 
@@ -32,7 +32,7 @@ struct animal {
 该类有两个成员，animal对象的名称和声音的字符串类型。构造函数和析构函数也有print语句。
 
 \item 
-现在，需要一个函数来创建一个animal，但只分享它的名字和声音:
+现在，需要函数来创建animal，但只分享名字和声音:
 
 \begin{lstlisting}[style=styleCXX]
 auto make_animal(const string& n, const string& s) {
@@ -43,7 +43,7 @@ auto make_animal(const string& n, const string& s) {
 }
 \end{lstlisting}
 
-这个函数创建与动物对象shared\_ptr，由名称和声音构造。然后，为名称和声音创建别名shared\_ptr对象。当返回name和sound指针时，animal指针将超出作用域。因为别名指针可以防止使用计数达到零，所以它不会删除。
+这个函数创建与动物对象shared\_ptr，由名字和声音构造。然后，为名字和声音创建别名shared\_ptr对象。当返回name和sound指针时，animal指针将超出作用域。因为别名指针可以防止使用计数达到零，所以不会删除。
 
 \item 
 main()函数中，使用make\_animal()并检查结果:
@@ -67,7 +67,7 @@ Use count: name 2, sound 2
 dtor: Velociraptor
 \end{tcblisting}
 
-每个别名指针的use\_count值为2。当make\_animal()函数创建别名指针时，其会增加animal指针的使用次数。当函数结束时，animal指针超出作用域，使其使用计数为2，这反映在别名指针中。别名指针在main()的末尾超出了作用域，这可以销毁animal指针。
+每个别名指针的use\_count值为2。当make\_animal()函数创建别名指针时，其会增加animal指针的使用次数。当函数结束时，animal指针超出作用域，使其使用计数为2，这反映在别名指针中。别名指针在main()的末尾超出了作用域，可以销毁animal指针。
 
 \end{itemize}
 
@@ -75,7 +75,7 @@ dtor: Velociraptor
 
 别名共享指针看起来有点抽象，但它比看起来要简单。
 
-共享指针使用一个控制块来管理它的资源。一个控制块与一个托管对象相关联，并在共享该对象的指针之间共享。控制块一般包含:
+共享指针使用一个控制块来管理资源。一个控制块与一个托管对象相关联，并在共享该对象的指针之间共享。控制块一般包含:
 
 \begin{itemize}
 \item 
@@ -88,15 +88,15 @@ dtor: Velociraptor
 分配器
 
 \item 
-拥有托管对象的shared\_ptr对象的数量(这是使用计数)
+拥有托管对象的shared\_ptr对象的数量(使用计数)
 
 \item 
 引用管理对象的weak\_ptr对象的数量
 \end{itemize}
 
-在使用别名共享指针的情况下，控制块包括指向别名对象的指针，其他不变。
+使用别名共享指针的情况下，控制块包括指向别名对象的指针，其他不变。
 
-别名共享指针参与使用计数，就像非别名共享指针一样，防止托管对象在使用计数为零之前被销毁。删除器没有改变，所以它会破坏管理对象。
+别名共享指针参与使用计数，就像非别名共享指针一样，防止托管对象在使用计数为零之前销毁。删除器没有改变，所以它会破坏管理对象。
 
 \begin{tcolorbox}[colback=webgreen!5!white,colframe=webgreen!75!black,title=重要的Note]
 可以使用任何指针来构造别名共享指针。通常，指针指向别名对象中的成员。若别名指针没有引用托管对象的元素，则需要分别管理其构造和销毁。

@@ -1,5 +1,5 @@
 
-std::chrono库提供了用于测量和报告时间和间隔的工具。
+std::chrono库提供了用于测量、报告时间和间隔的工具。
 
 这些类和函数中的许多都是在C++11中引入的，但在C++20中已经有了重大的变化和更新。在撰写本文时，许多更新还没有在我测试的系统上实现。
 
@@ -11,7 +11,7 @@ system\_clock类用于报告当前日期和时间。steady\_clock和high\_resolu
 
 \begin{itemize}
 \item 
-因为这些名字可能又长又不方便，所以在整个示例中使用一些类型别名:
+因为这些名字可能又长又不方便，在整个示例中使用一些类型别名:
 
 \begin{lstlisting}[style=styleCXX]
 using std::chrono::system_clock;
@@ -34,7 +34,7 @@ auto t = system_clock::now();
 cout << format("system_clock::now is {:%F %T}\n", t);
 \end{lstlisting}
 
-system\_clock::now()函数的作用是:返回一个time\_point对象。<chrono>库包含了time\_point的format()专门化，该特化使用strftime()格式说明符。
+system\_clock::now()函数的作用是:返回一个time\_point对象。<chrono>库包含了time\_point的format()特化，该特化使用strftime()格式说明符。
 
 输出为:
 
@@ -51,7 +51,7 @@ cout << "system_clock::now is "
 	<< '\n';
 \end{lstlisting}
 
-put\_time()接受一个指向C风格time\_t*值的指针。System \_clock::to\_time\_t转换time\_point对象为time\_t。
+put\_time()接受一个指向C风格time\_t*值的指针。system\_clock::to\_time\_t转换time\_point对象为time\_t。
 
 这与format()示例的输出相同:
 
@@ -98,10 +98,10 @@ seconds timer(uint64_t(*f)()) {
 }
 \end{lstlisting}
 
-这个函数接受一个函数f，并返回duration<double>。这里使用system\_clock::now()来标记调用f()前后的时间。我们取两个时间之间的差值，并在duration对象中返回。
+这个函数接受一个函数f，并返回duration<double>。这里使用system\_clock::now()来标记调用f()前后的时间。取两个时间之间的差值，并在duration对象中返回。
 
 \item 
-可以在main()中使用timer()，如下所示:
+可以在main()中使用timer():
 
 \begin{lstlisting}[style=styleCXX]
 int main() {
@@ -111,7 +111,7 @@ int main() {
 	...
 \end{lstlisting}
 
-这将把count\_primes()函数传递给timer()并以秒为单位存储持续时间对象。
+这将把count\_primes()函数传递给timer()，并以秒为单位存储持续时间对象。
 
 输出为:
 
@@ -122,10 +122,10 @@ time elapsed: 3.573 seconds
 
 duration对象上的count()方法返回指定单位的持续时间——本例中为double，表示持续时间的秒数。
 
-这是在一个运行Debian和GCC的VM上运行的。具体的时间在不同的系统上会有所不同。
+这是在一个运行Debian和GCC的VM上运行的，具体的时间在不同的系统上会有所不同。
 
 \item 
-system\_clock类设计用来提供当前挂钟时间。虽然它的频率可能支持计时目的，但不保证单调。换句话说，它可能不能提供一致的计时间隔。
+system\_clock类设计用来提供当前挂钟时间。虽然其频率可能支持计时目的，但不保证单调。换句话说，它可能不能提供一致的计时间隔。
 
 chrono库在steady\_clock中提供了一个更合适的时钟。它具有与system\_clock相同的接口，但为计时目的提供了更可靠的计时间隔:
 
@@ -145,7 +145,7 @@ steady\_clock设计用于提供可靠一致的单调，适用于计时事件。�
 
 另一个选项是high\_resolution\_clock，在给定系统上提供最短的计时间隔期，但在不同的实现中实现不一致。其可能是system\_clock或steady\_clock的别名，可能是单调的，也可能不是。
 
-high\_resolution\_clock 不建议用于通用用途。
+high\_resolution\_clock不建议通用。
 
 \item 
 timer()函数返回seconds，是duration<double>的别名:

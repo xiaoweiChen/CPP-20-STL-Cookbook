@@ -66,7 +66,7 @@ make\_shared()函数分配内存并构造一个Thing对象。
 
 weak\_ptr<Thing>声明构造了一个weak\_ptr对象，但没有分配shared\_ptr。因此，当检查过期标志时，其为真，表明并没有相关的shared\_ptr。
 
-get\_weak\_thing()函数不能获得锁，因为没有shared\_ptr可用。
+因为没有shared\_ptr可用，所以get\_weak\_thing()函数不能获得锁。
 
 \item 
 将shared\_ptr分配给weak\_ptr时，可以使用weak\_ptr来访问托管对象:
@@ -82,7 +82,7 @@ get_weak_thing(wp1);
 Thing 1: count 2
 \end{tcblisting}
 
-get\_weak\_thing()函数现在可以获取锁并访问托管对象。lock()方法返回一个shared\_ptr，use\_count()反映了现在有第二个shared\_ptr管理Thing对象的事实。
+get\_weak\_thing()函数现在可以获取锁并访问托管对象。lock()方法返回一个shared\_ptr，use\_count()反映了现在有第二个shared\_ptr管理Thing对象的情况。
 
 新shared\_ptr在get\_weak\_thing()作用域的末尾销毁。
 
@@ -100,7 +100,7 @@ get_weak_thing(wp2);
 Thing 1: count 2
 \end{tcblisting}
 
-use\_count()再次为2。记住，之前的shared\_ptr在其封闭的get\_weak\_thing()作用域结束时销毁。
+use\_count()再次为2，之前的shared\_ptr在其封闭的get\_weak\_thing()作用域结束时销毁。
 
 \item 
 重置shared\_ptr时，其关联的weak\_ptr对象将过期:
@@ -125,7 +125,7 @@ reset()后，使用计数为零，管理对象销毁，内存释放。
 
 \subsubsection{How it works…}
 
-weak\_ptr对象是一个观察者，其对shared\_ptr对象属于非所有引用。weak\_ptr会观察shared\_ptr，这样就知道托管对象什么时候可用，什么时候不可用。这允许在您可能不总是知道托管对象是否处于活动状态的情况下，使用shared\_ptr。
+weak\_ptr对象是一个观察者，其对shared\_ptr对象属于非所有引用。weak\_ptr会观察shared\_ptr，这样就知道托管对象什么时候可用，什么时候不可用。这允许在您不需要知道托管对象是否处于活动状态的情况下，使用shared\_ptr。
 
 weak\_ptr类有一个use\_count()函数，返回shared\_ptr的使用计数，若管理对象已删除，则返回0:
 
@@ -139,7 +139,7 @@ weak\_ptr还有一个expired()函数，会报告托管对象是否已删除:
 bool expired() const noexcept;
 \end{lstlisting}
 
-lock()函数是访问shared\_ptr的首选方法，其检查expired()以查看管理对象是否可用。若是，它将返回一个新的shared\_ptr，该shared\_ptr与管理对象共享所有权。否则，会返回一个空的shared\_ptr。这些会作为一个原子操作完成:
+lock()函数是访问shared\_ptr的首选方法，其检查expired()以查看管理对象是否可用。若可用，将返回一个新的shared\_ptr，该shared\_ptr与管理对象共享所有权。否则，会返回一个空的shared\_ptr。这些会作为一个原子操作完成:
 
 \begin{lstlisting}[style=styleCXX]
 std::shared_ptr<T> lock() const noexcept;
@@ -182,7 +182,7 @@ end of main()
 
 因为对象维护着相互引用的共享指针，所以使用计数永远不会达到零，并且托管对象永远不会销毁。
 
-我们可以通过更改其中一个类来使用weak\_ptr来解决这个问题:
+可以通过更改其中一个类来使用weak\_ptr来解决这个问题:
 
 \begin{lstlisting}[style=styleCXX]
 struct circB {
@@ -199,7 +199,7 @@ dtor A
 dtor B
 \end{tcblisting}
 
-通过将一个shared\_ptr更改为weak\_ptr，我们已经解决了循环引用，并且现在在对象作用域的末尾，就可以正确地销毁对象了。
+通过将一个shared\_ptr更改为weak\_ptr，解决了循环引用，并且现在在对象作用域的末尾，可以正确地销毁对象了。
 
 
 

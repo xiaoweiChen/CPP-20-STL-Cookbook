@@ -1,7 +1,7 @@
 
 智能指针是管理已分配堆内存的优秀工具。
 
-堆内存由C函数malloc()和free()在最低层进行管理。malloc()从堆中分配一块内存，free()将它返回给堆。这些函数不执行初始化，也不调用构造函数或析构函数。若未能通过调用free()将已分配的内存返回给堆，则该行为是未定义的，通常会导致内存泄漏和安全漏洞。
+堆内存由C函数malloc()和free()在最低层进行管理。malloc()从堆中分配一块内存，free()将内存返还给堆。这些函数不执行初始化，也不调用构造函数或析构函数。若未能通过调用free()将已分配的内存返回给堆，则该行为是未定义的，通常会导致内存泄漏和安全漏洞。
 
 C++提供了new和delete操作符来分配和释放堆内存，用以取代malloc()和free()。new和delete操作符调用对象构造函数和析构函数，但仍然不管理内存。若使用new分配内存，而未能使用delete释放它，还是会泄漏内存。
 
@@ -30,7 +30,7 @@ unique\_ptr是一个智能指针，只允许一个指针实例。它可以移动
 
 \subsubsection{How to do it…}
 
-在这个示例中，我们用一个演示类检查std::unique\_ptr，当使用它的构造函数和析构函数时输出:
+在这个示例中，用一个演示类检查std::unique\_ptr，当使用构造函数和析构函数时输出:
 
 \begin{itemize}
 \item 
@@ -51,7 +51,7 @@ struct Thing {
 };
 \end{lstlisting}
 
-该类有一个默认构造函数、一个参数化构造函数和一个析构函数。每一个都有一个简单的打印语句告诉我们调用了什么。
+该类有一个默认构造函数、一个参数化构造函数和一个析构函数。每一个都有打印语句，告诉我们调用了什么。
 
 \item 
 当只构造一个unique\_ptr时，不会分配内存或构造一个托管对象:
@@ -110,7 +110,7 @@ end of main()
 dtor: unk
 \end{tcblisting}
 
-make\_unique()工厂函数负责内存分配并返回unique\_ptr对象。这是构造unique\_ptr的推荐方法。
+make\_unique()工厂函数负责内存分配并返回unique\_ptr对象，这是构造unique\_ptr的推荐方法。
 
 \item 
 传递给make\_unique()的参数都将用于构造目标对象:
@@ -133,7 +133,7 @@ dtor: Thing 1
 参数化构造函数将值赋给thname，因此Thing对象现在是“Thing 1”。
 
 \item 
-让我们创建一个函数，其有一个unique\_ptr<Thing>参数:
+创建一个函数，其有一个unique\_ptr<Thing>参数:
 
 \begin{lstlisting}[style=styleCXX]
 void process_thing(unique_ptr<Thing> p) {

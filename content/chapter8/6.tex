@@ -1,5 +1,5 @@
 
-tuple类本质上是一个更复杂、不方便的结构体。tuple的接口很麻烦，尽管类模板参数推断和结构化绑定使它变得简单。
+tuple类本质上是一个更复杂、不方便的结构体。tuple的接口很麻烦，类模板参数推导和结构化绑定可以使这个过程变得简单。
 
 对于大多数应用程序，我倾向于在使用tuple之前使用struct，但有一个例外:tuple的一个真正优势是，可以在可变的上下文中与折叠表达式一起使用。
 
@@ -72,15 +72,15 @@ hello 47 world
 cout << "hello" << ' ' << 47 << ' ' << "world";
 \end{lstlisting}
 
-折叠表达式对于很多目的来说都是非常方便的，来看看如何在tuple中使用它们。
+折叠表达式对于很多目的来说都是非常方便的，来看看如何在tuple中使用。
 
 \subsubsection{How to do it…}
 
-在这个示例中，我们将创建一个模板函数，该函数对具有不同数量和类型元素的元组进行操作:
+这个示例中，我们将创建一个模板函数，该函数对具有不同数量和类型元素的tuple进行操作:
 
 \begin{itemize}
 \item 
-这示例的核心是一个函数，其接受一个未知大小和类型的元组，并使用format()打印每个元素:
+这示例的核心是一个函数，其接受一个未知大小和类型的tuple，并使用format()打印每个元素:
 
 \begin{lstlisting}[style=styleCXX]
 template<typename... T>
@@ -99,12 +99,12 @@ constexpr void print_t(const tuple<T...>& tup) {
 }
 \end{lstlisting}
 
-这个函数的核心在lambda表达式中。它使用index\_sequence对象生成索引值的参数包。然后使用折叠表达式对每个下标值调用get<I>。模板化的lambda需要编译器支持C++20。
+这个函数的核心在lambda表达式中，使用index\_sequence对象生成索引值的参数包。然后，使用折叠表达式对每个下标值调用get<I>。模板化的lambda需要编译器支持C++20。
 
 可以使用一个单独的函数来代替lambda，但我更喜欢将它保持在一个作用域中。
 
 \item 
-现在可以在main()中使用，使用各种tuple:
+现在可以在main()中使用各种tuple:
 
 \begin{lstlisting}[style=styleCXX]
 int main() {

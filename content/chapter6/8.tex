@@ -43,7 +43,7 @@ std::mt19937 rng(rd());
 std::normal_distribution<> dist{ mean, dev };
 \end{lstlisting}
 
-random\_device对象提供对硬件随机数生成器的访问。mt19937类是Mersenne Twister随机数算法的实现，这是一种高质量的算法，在我们所使用的这种大小的数据集的大多数系统上都能很好地执行。正态分布类提供了均值附近的随机数分布，并提供了标准偏差。
+random\_device对象提供对硬件随机数生成器的访问。mt19937类是Mersenne Twister随机数算法的实现，这是一种高质量的算法，在我们所使用的这种大小的数据集的大多数系统上都能很好地执行。正态分布类提供了均值附近的随机数分布，并提供了标准差。
 
 \item 
 现在可以用n\_data个数的随机int值填充一个数组:
@@ -66,7 +66,7 @@ sample(data.begin(), data.end(), samples.begin(),
 	n_samples, rng);
 \end{lstlisting}
 
-我们定义另一个数组对象来保存样本。这个的大小是n\_samples。然后，使用sample()算法用n\_samples随机数据点填充数组。
+我们定义另一个数组对象来保存样本，这个的大小是n\_samples。然后，使用sample()算法用n\_samples随机数据点填充数组。
 
 \item 
 我们创建一个直方图来分析样本。map结构是完美的，可以很容易地映射每个值的频率:
@@ -138,7 +138,7 @@ OutIter sample(SourceIter, SourceIter, OutIter,
 
 前两个参数是包含完整数据集的容器上的begin()和end()迭代器。第三个参数是用于示例目标的迭代器。第四个参数是样本大小，最后一个参数是随机数生成器函数。
 
-sample()算法采用均匀分布，因此每个数据点采样的概率相同。
+sample()算法采用均匀分布，因此每个数据点的采样概率相同。
 
 
 

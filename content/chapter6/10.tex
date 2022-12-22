@@ -7,7 +7,7 @@ merge()算法接受两个已排序的序列，并创建第三个已合并并排�
 
 \begin{itemize}
 \item 
-从一个简单的函数开始打印容器的内容:
+从打印容器内容函数开始:
 
 \begin{lstlisting}[style=styleCXX]
 void printc(const auto& c, string_view s = "") {
@@ -51,7 +51,7 @@ printc(vs1, "vs1 sorted");
 printc(vs2, "vs2 sorted");
 \end{lstlisting}
 
-输出:
+输出为:
 
 \begin{tcblisting}{commandshell={}}
 vs1 sorted: cat dog velociraptor
@@ -67,7 +67,7 @@ merge(vs1.begin(), vs1.end(), vs2.begin(), vs2.end(),
 printc(dest, "dest");
 \end{lstlisting}
 
-输出:
+输出为:
 
 \begin{tcblisting}{commandshell={}}
 dest: cat dog kirk spock sulu velociraptor

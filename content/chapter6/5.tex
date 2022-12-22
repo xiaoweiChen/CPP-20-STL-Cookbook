@@ -1,13 +1,13 @@
 
-std::transform()函数非常强大和灵活，是库中最常用的算法之一，它将函数或lambda应用于容器中的每个元素，将结果存储在另一个容器中，同时保留原始的元素。
+std::transform()函数非常强大和灵活，是库中最常用的算法之一。它将函数或lambda应用于容器中的每个元素，将结果存储在另一个容器中，同时保留原始的元素。
 
 \subsubsection{How to do it…}
 
-在这个示例中，将探索std::transform()函数的一些使用方式:
+这个示例中，将探索std::transform()函数的某些使用方式:
 
 \begin{itemize}
 \item 
-我们将从一个打印容器内容的简单函数开始:
+从一个打印容器内容的函数开始:
 
 \begin{lstlisting}[style=styleCXX]
 void printc(auto& c, string_view s = "") {
@@ -49,7 +49,7 @@ printc(v2, "v2");
 
 transform()函数有四个参数。前两个是源范围的begin()和end()迭代器，第三个参数是目标范围的begin()迭代器。本例中，使用back\_inserter()算法将结果插入到v2中。第四个参数是变换函数，我们使用lambda来对值进行平方。
 
-输出:
+输出为:
 
 \begin{tcblisting}{commandshell={}}
 squares:
@@ -57,7 +57,7 @@ v2: 1 4 9 16 25 36 49 64 81 100
 \end{tcblisting}
 
 \item 
-当然，我们可以对任何类型使用transform()，下面是一个将字符串对象的向量转换为小写的例子。首先，需要一个函数来返回字符串的小写值:
+当然，可以对任何类型使用transform()，下面是一个将字符串对象的向量转换为小写的例子。首先，需要一个函数来返回字符串的小写值:
 
 \begin{lstlisting}[style=styleCXX]
 string str_lower(const string& s) {
@@ -111,7 +111,7 @@ printc(view1, "view1");
 
 \subsubsection{How it works…}
 
-std::transform()函数的工作原理与std::copy()非常相似，只不过增加了用户提供的函数。输入范围内的每个元素都传递给函数，函数的返回值会复制赋值给目标迭代器。
+std::transform()函数的工作原理与std::copy()相似，只不过增加了用户提供的函数。输入范围内的每个元素都传递给函数，函数的返回值会复制赋值给目标迭代器。
 
 值得注意的是，transform()并不保证元素将按顺序处理。若需要确保转换的顺序，需要使用for循环:
 
@@ -121,7 +121,7 @@ for(auto e : v1) v2.push_back(e * e);
 printc(v2, "v2");
 \end{lstlisting}
 
-输出:
+输出为:
 
 \begin{tcblisting}{commandshell={}}
 v2: 1 4 9 16 25 36 49 64 81 100

@@ -1,5 +1,5 @@
 
-有时，库中没有现成的算法来完成任务。我们可以使用迭代器，使用与算法库相同的方式，编写一个迭代器。
+有时，库中没有现成的算法来完成任务。可以使用迭代器，使用与算法库相同的方式，编写一个迭代器。
 
 例如，需要使用分隔符将容器中的元素连接到一个字符串中。常见的解决方案是使用简单的for()循环:
 
@@ -16,7 +16,7 @@ for(auto v : greek) cout << v << ", ";
 cout << '\n';
 \end{lstlisting}
 
-输出:
+输出为:
 
 \begin{tcblisting}{commandshell={}}
 alpha, beta, gamma, delta, epsilon,
@@ -45,11 +45,11 @@ alphabetagammadeltaepsilon
 
 我们需要在元素之间设置一个适当的分隔符。
 
-由于算法库没有满足需求的函数，就需要我们自己编写一个。
+由于算法库没有满足需求的函数，就需要自己编写一个。
 
 \subsubsection{How to do it…}
 
-这个示例中，我们将一个容器的元素用分隔符连接成一个字符串:
+这个示例中，将一个容器的元素用分隔符连接成一个字符串:
 
 \begin{itemize}
 \item 
@@ -64,7 +64,7 @@ int main() {
 \end{lstlisting}
 
 \item 
-现在，来编写一个简单的join()函数，使用ostream对象用分隔符连接元素:
+现在，来写一个简单的join()函数，使用ostream对象用分隔符连接元素:
 
 \begin{lstlisting}[style=styleCXX]
 namespace bw {
@@ -78,7 +78,7 @@ namespace bw {
 }
 \end{lstlisting}
 
-我把它放在我自己的bw名称空间中，以避免名称冲突。
+我把它放在bw命名空间中，以避免名称冲突。
 
 可以这样与cout一起使用:
 
@@ -95,7 +95,7 @@ alpha, beta, gamma, delta, epsilon
 \end{tcblisting}
 
 \item 
-这里通常需要一个字符串，而不是直接写入到cout。对于返回string对象的版本，所以可以重载此函数:
+这里通常需要一个字符串，而不是直接写入到cout。对于返回string的版本，可以重载此函数:
 
 \begin{lstlisting}[style=styleCXX]
 template<typename I>
@@ -115,7 +115,7 @@ string s = bw::join(greek.begin(), greek.end(), ", ");
 cout << s << '\n';
 \end{lstlisting}
 
-输出:
+输出为:
 
 \begin{tcblisting}{commandshell={}}
 alpha, beta, gamma, delta, epsilon
@@ -130,14 +130,14 @@ string join(const auto& c, string_view sep = "") {
 }
 \end{lstlisting}
 
-这个版本只需要一个容器和一个分隔符，这应该可以很好地满足大多数用例:
+这个版本只需要一个容器和一个分隔符，就可以满足大多数用例:
 
 \begin{lstlisting}[style=styleCXX]
 string s = bw::join(greek, ", ");
 cout << s << '\n';
 \end{lstlisting}
 
-输出:
+输出为:
 
 \begin{tcblisting}{commandshell={}}
 alpha, beta, gamma, delta, epsilon
@@ -160,7 +160,7 @@ namespace bw {
 }
 \end{lstlisting}
 
-分隔符在第一个元素之后，在每个连续元素之间，并在最后一个元素之前停止。所以可以在每个元素之前添加分隔符，跳过第一个，也可以在每个元素之后添加分隔符，跳过最后一个。若测试并跳过第一个元素，逻辑会更简单。我们在while()循环之前的那行代码中这样做:
+分隔符在第一个元素之后，在每个连续元素之间，并在最后一个元素之前停止。所以可以在每个元素之前添加分隔符，跳过第一个，也可以在每个元素之后添加分隔符，跳过最后一个。若测试并跳过第一个元素，逻辑会更简单。我们在while()循环之前的代码可以这样做:
 
 \begin{lstlisting}[style=styleCXX]
 if(it != end_it) o << *it++;
@@ -172,13 +172,13 @@ if(it != end_it) o << *it++;
 while(it != end_it) o << sep << *it++;
 \end{lstlisting}
 
-为了方便起见，我们返回ostream对象。这允许用户轻松地向流中添加换行符或其他对象:
+方便起见，返回ostream对象。这允许用户可以向流中添加换行符或其他对象:
 
 \begin{lstlisting}[style=styleCXX]
 bw::join(greek.begin(), greek.end(), cout, ", ") << '\n';
 \end{lstlisting}
 
-输出:
+输出为:
 
 \begin{tcblisting}{commandshell={}}
 alpha, beta, gamma, delta, epsilon
@@ -186,7 +186,7 @@ alpha, beta, gamma, delta, epsilon
 
 \subsubsection{There's more…}
 
-与任何标准库算法一样，join()函数将适用于支持前向迭代器的容器。例如，下面是数字库中的double常量列表:
+与标准库算法一样，join()函数将适用于支持前向迭代器的容器。例如，下面是数字库中的double常量列表:
 
 \begin{lstlisting}[style=styleCXX]
 namespace num = std::numbers;
@@ -194,7 +194,7 @@ list<double> constants { num::pi, num::e, num::sqrt2 };
 cout << bw::join(constants, ", ") << '\n';
 \end{lstlisting}
 
-输出:
+输出为:
 
 \begin{tcblisting}{commandshell={}}
 3.14159, 2.71828, 1.41421
@@ -206,7 +206,7 @@ cout << bw::join(constants, ", ") << '\n';
 cout << bw::join(greek_view, ":") << '\n';
 \end{lstlisting}
 
-输出:
+输出为:
 
 \begin{tcblisting}{commandshell={}}
 a:l:p:h:a:b:e:t:a:g:a:m:m:a:d:e:l:t:a:e:p:s:i:l:o:n

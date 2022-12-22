@@ -1,7 +1,7 @@
 
-如何高效地对可比元素进行排序的问题，早已经解决。对于大多数应用程序，没有理由重新发明这个轮子。STL通过std::sort()算法提供了一个优秀的排序解决方案。虽然标准没有指定排序算法，但当应用于具有n个元素的范围时，最差情况的时间复杂度为O(nlog(n))。
+我们早已经解决了“如何高效地对可比元素进行排序“的问题，对于大多数应用程序，没有理由重新发明这个轮子。STL通过std::sort()算法提供了一个优秀的排序解决方案。虽然标准没有指定排序算法，但当应用于具有n个元素的范围时，最差情况的时间复杂度为O(nlog(n))。
 
-就在几十年前，快速排序算法被认为是大多数用途的一个很好的折衷，通常比其他可比算法更快。现在，我们有混合算法，可以根据情况在不同的方法之间进行选择，经常在运行中切换算法。目前大多数C++库都使用一种混合方法，将插入排序和插入排序相结合。std::sort()通常具有出色的性能。
+几十年前，快速排序算法被认为是大多数用途的一个很好的折衷，通常比其他可比算法更快。现在，我们有混合算法，可以根据情况在不同的方法之间进行选择，经常在运行中切换算法。目前大多数C++库都使用一种混合方法，将插入排序和插入排序相结合。通常，std::sort()也具有出色的性能。
 
 \subsubsection{How to do it…}
 
@@ -70,13 +70,13 @@ randomize(v);
 printc(v);
 \end{lstlisting}
 
-输出:
+输出为:
 
 \begin{tcblisting}{commandshell={}}
 unsorted: 6 3 4 8 10 1 2 5 9 7
 \end{tcblisting}
 
-当然，因为它是随机的，每个人的输出可能都会不同。事实上，我每次运行它，都会得到不同的结果:
+因为它是随机的，每个人的输出可能都会不同。事实上，我每次运行它，也会得到不同的结果:
 
 \begin{lstlisting}[style=styleCXX]
 for(int i{3}; i; --i) {
@@ -85,7 +85,7 @@ for(int i{3}; i; --i) {
 }
 \end{lstlisting}
 
-输出:
+输出为:
 
 \begin{tcblisting}{commandshell={}}
 unsorted: 3 1 8 5 10 2 7 9 6 4
@@ -101,13 +101,13 @@ std::sort(v.begin(), v.end());
 printc(v);
 \end{lstlisting}
 
-输出:
+输出为:
 
 \begin{tcblisting}{commandshell={}}
 sorted: 1 2 3 4 5 6 7 8 9 10
 \end{tcblisting}
 
-默认情况下，sort()算法使用<操作符对提供的迭代器指定范围内的元素进行排序。
+默认情况下，sort()算法使用小于操作符对提供的迭代器指定范围内的元素进行排序。
 
 \item 
 partial\_sort()算法将对容器的一部分进行排序:
@@ -126,7 +126,7 @@ partial\_sort()接受三个迭代器:起始、中间和末尾。它对容器进�
 unsorted: 1 2 3 4 5 10 7 6 8 9
 \end{tcblisting}
 
-注意，前五个元素是有序的，其余的没有。
+注意，前五个元素是有序的。
 
 \item 
 partition()算法不进行任何排序，其会重新排列容器，使某些元素出现在容器的前面:
@@ -139,16 +139,16 @@ partition(v.begin(), v.end(), [](int i)
 printc(v);
 \end{lstlisting}
 
-第三个参数是谓词lambda，决定将哪些元素移到前面。
+第三个参数是谓词lambda，将决定哪些元素会移到前面。
 
-输出:
+输出为:
 
 \begin{tcblisting}{commandshell={}}
 unsorted: 4 6 8 1 9 5 2 7 3 10
 unsorted: 10 6 8 7 9 5 2 1 3 4
 \end{tcblisting}
 
-注意，>5的值会移动到容器的前面。
+注意，小于5的值会移动到容器的前面。
 
 \item 
 sort()算法支持可选的比较函数，该函数可用于非标准比较。例如，给定一个名为things的类:
@@ -191,14 +191,14 @@ std::sort(vthings.begin(), vthings.end(),
 print_things(vthings);
 \end{lstlisting}
 
-输出:
+输出为:
 
 \begin{tcblisting}{commandshell={}}
 (hamburger, 20) (button, 40) (science, 60) (page, 100)
 (blog, 1000)
 \end{tcblisting}
 
-注意比较函数在i\_成员上排序，所以结果是按i\_排序的。我们可以对s\_成员进行排序:
+注意比较函数在i\_成员上排序，所以结果是按i\_排序的，可以对s\_成员进行排序:
 
 \begin{lstlisting}[style=styleCXX]
 std::sort(vthings.begin(), vthings.end(),
@@ -221,7 +221,7 @@ print_things(vthings);
 
 sort()函数的工作原理是对由两个迭代器指示的元素范围应用排序算法，用于该范围的开始和结束。
 
-通常，这些算法使用<操作符来比较元素。当然，也可以使用比较函数，通常以lambda形式提供:
+通常，这些算法使用小于操作符来比较元素。当然，也可以使用比较函数，通常以lambda形式提供:
 
 \begin{lstlisting}[style=styleCXX]
 std::sort(vthings.begin(), vthings.end(),
@@ -230,13 +230,13 @@ std::sort(vthings.begin(), vthings.end(),
 });
 \end{lstlisting}
 
-比较函数接受两个参数并返回bool类型，其签名相当于:
+比较函数接受两个参数，并返回bool类型，其签名相当于:
 
 \begin{lstlisting}[style=styleCXX]
 bool cmp(const Type1& a, const Type2& b);
 \end{lstlisting}
 
-sort()函数使用std::swap()来移动元素。这在计算周期和内存使用方面都很高效，这减轻了为读写排序对象分配空间的需要。这也是为什么partial\_sort()和partition()函数，不能保证未排序元素的顺序的原因。
+sort()函数使用std::swap()来移动元素。这在计算周期和内存使用方面都很高效，这减轻了为读写排序对象分配空间的需要。这也是为什么partial\_sort()和partition()函数，不能保证未排序元素顺序的原因。
 
 
 

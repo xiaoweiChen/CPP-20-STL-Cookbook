@@ -68,7 +68,7 @@ do {
 } while (next_permutation(vs.begin(), vs.end()));
 \end{lstlisting}
 
-输出:
+输出为:
 
 \begin{tcblisting}{commandshell={}}
 velociraptor dog cat
@@ -76,7 +76,7 @@ velociraptor dog cat
 
 虽然术语lexicographically意味着字母顺序，但实现使用标准比较操作符，因此其适用于任何可排序的值。
 
-同样，若集合中的值重复，则仅根据字典顺序对它们进行计数。这里有一个int类型的vector，其有两个五个值的重复序列:
+同样，若集合中的值重复，则仅根据字典序对它们进行计数。这里有一个int类型的vector，其有两个五个值的重复序列:
 
 \begin{lstlisting}[style=styleCXX]
 vector<int> vi{ 1, 2, 3, 4, 5, 1, 2, 3, 4, 5 };
@@ -89,7 +89,7 @@ do {
 cout << format("number of permutations: {}\n", count);
 \end{lstlisting}
 
-输出:
+输出为:
 
 \begin{tcblisting}{commandshell={}}
 Vi sorted: 1 1 2 2 3 3 4 4 5 5

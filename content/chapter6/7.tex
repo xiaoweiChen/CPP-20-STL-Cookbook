@@ -1,5 +1,5 @@
 
-C++17中添加了std::clamp()函数，可将标量数值的范围限制在最小值和最大值之间。该函数经过优化，可以使用move语义，以获得最大的速度和效率。
+C++17中添加了std::clamp()函数，可将标量数值的范围限制在最小值和最大值之间。该函数经过优化，可以使用移动语义，以获得最大的速度和效率。
 
 \subsubsection{How to do it…}
 
@@ -30,7 +30,7 @@ int main() {
 }
 \end{lstlisting}
 
-对于使用clamp()来说，这是一个很好的值范围。
+对于使用clamp()来说，这是一个值的范围。
 
 \item 
 先来定义一些常数作为极值:
@@ -113,7 +113,7 @@ constexpr const T& clamp( const T& v, const T& lo,
 }
 \end{lstlisting}
 
-若v的值小于lo，则返回lo。若hi小于v，则返回hi。功能简单高效。
+若v的值小于lo，则返回lo。若hi小于v，则返回hi。
 
 我们的例子中，可以使用for循环对容器应用clamp():
 
@@ -128,6 +128,6 @@ transform(loi.begin(), loi.end(), loi.begin(),
 	[=](auto v){ return clamp(v, ilow, ihigh); });
 \end{lstlisting}
 
-实验中，两个版本给出了相同的结果，并且都从GCC编译器生成了类似的代码。编译的大小略有不同(使用for循环的版本更小，正如预期的那样)，性能上的差异可以忽略不计。
+示例中，两个版本给出了相同的结果，并且都从GCC编译器生成了类似的代码。编译的大小略有不同(使用for循环的版本更小，正如预期的那样)，性能上的差异可以忽略不计。
 
-我更喜欢for循环，但transform()版本在其他应用程序中可能更灵活。
+我更喜欢for循环，但transform()版本在其他应用中可能更灵活。

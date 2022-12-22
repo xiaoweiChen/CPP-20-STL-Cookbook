@@ -8,7 +8,7 @@ long sum{};
 for( int i : x ) sum += i; // sum is 15
 \end{lstlisting}
 
-或者用一个算法:
+或者一个算法:
 
 \begin{lstlisting}[style=styleCXX]
 vector<int> x { 1, 2, 3, 4, 5 };
@@ -22,9 +22,9 @@ deque<int> x { 1, 2, 3, 4, 5 };
 auto sum = accumulate(x.begin(), x.end(), 0); // sum is 15
 \end{lstlisting}
 
-算法版本不一定更短，但更易于阅读和维护。而且算法通常比等效循环更有效。
+算法版本不一定更短，但更易于阅读和维护，而且算法通常比等效循环更有效。
 
-C++20起，范围库提供了一组操作范围和视图的替代算法。本书将在适当的地方演示这些替代方案。有关范围和视图的更多信息，请参阅本书第1章中的示例。
+C++20起，范围库提供了一组操作范围和视图的替代算法。本书将在适当的地方演示这些替代方案，有关范围和视图的更多信息，请参阅本书第1章中的示例。
 
 大多数算法都在算法头中。一些数值算法，特别是accumulate()，在<numeric>头文件中，而一些与内存相关的算法在<memory>头文件中。
 
@@ -38,25 +38,25 @@ C++20起，范围库提供了一组操作范围和视图的替代算法。本书
 将容器元素连接到一个字符串中
 
 \item 
-使用std::sort对容器进行排序
+std::sort——排序容器元素
 
 \item 
-使用std::transform修改容器内容
+std::transform——修改容器内容
 
 \item 
-在容器中查找特定项
+查找特定项
 
 \item 
-将容器的值限制在std::clamp的范围内
+将容器的元素值限制在std::clamp的范围内
 
 \item 
-使用std::sample的样本数据集
+std::sample——采集样本数据集
 
 \item 
-生成数据序列的排列
+生成有序数据序列
 
 \item 
-合并已排序的容器
+合并已排序容器
 \end{itemize}
 
 

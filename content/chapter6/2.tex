@@ -1,14 +1,14 @@
 
-复制算法通常用于从容器复制到容器，但若它们与迭代器一起工作，则要灵活得多。
+复制算法通常用于从容器复制到容器，若与迭代器一起工作，则要灵活得多。
 
 
 \subsubsection{How to do it…}
 
-在这个示例中，将使用std::copy和std::copy\_n进行实验，以便更好地理解其是如何工作的:
+这个示例中，将使用std::copy和std::copy\_n进行实验，以便更好地理解其工作原理:
 
 \begin{itemize}
 \item 
-先从一个打印容器的函数开始:
+从一个打印容器的函数开始:
 
 \begin{lstlisting}[style=styleCXX]
 void printc(auto& c, string_view s = "") {
@@ -37,14 +37,14 @@ v1: [alpha] [beta] [gamma] [delta] [epsilon]
 \end{tcblisting}
 
 \item 
-现在，创建一个有足够空间复制第一个vector的第二个vector:
+现在，创建第二个vector，使其有足够空间复制第一个vector:
 
 \begin{lstlisting}[style=styleCXX]
 vector<string> v2(v1.size());
 \end{lstlisting}
 
 \item 
-可以使用std::copy()算法将v1复制到v2:
+使用std::copy()算法将v1复制到v2:
 
 \begin{lstlisting}[style=styleCXX]
 std::copy(v1.begin(), v1.end(), v2.begin());
@@ -61,7 +61,7 @@ v2: [alpha] [beta] [gamma] [delta] [epsilon]
 \end{tcblisting}
 
 \item 
-copy()算法不为目标分配空间。因此，v2必须已经有用于复制的空间。或者，可以使用back\_inserter()迭代器适配器将元素插入到vector的后面:
+copy()算法不为目标分配空间。因此，v2必须已经有用于复制的空间。或者，使用back\_inserter()迭代器适配器将元素插入到vector的后面:
 
 \begin{lstlisting}[style=styleCXX]
 vector<string> v2{};
@@ -69,7 +69,7 @@ std::copy(v1.begin(), v1.end(), back_inserter(v2))
 \end{lstlisting}
 
 \item 
-也可以使用ranges::copy()算法来复制整个范围。容器对象作为一个范围，因此可以使用v1作为源。这里，仍然使用目标迭代器:
+也可以使用ranges::copy()算法来复制整个范围。容器对象作为一个范围，因此可以使用v1作为源。这里，仍然使用目标容器的迭代器:
 
 \begin{lstlisting}[style=styleCXX]
 vector<string> v2(v1.size());
@@ -83,7 +83,7 @@ vector<string> v2{};
 ranges::copy(v1, back_inserter(v2));
 \end{lstlisting}
 
-输出:
+输出为:
 
 \begin{tcblisting}{commandshell={}}
 v2: [alpha] [beta] [gamma] [delta] [epsilon]
@@ -105,7 +105,7 @@ v3: [alpha] [beta] [gamma]
 \end{tcblisting}
 
 \item 
-还有一个copy\_if()算法，其使用一个布尔谓词函数来确定要复制哪些元素:
+还有一个copy\_if()算法，其使用布尔谓词函数来确定要复制哪些元素:
 
 \begin{lstlisting}[style=styleCXX]
 vector<string> v4{};
@@ -149,7 +149,7 @@ alpha beta gamma delta epsilon
 
 \subsubsection{How it works…}
 
-std::copy()算法非常简单，等价的函数是这样的:
+std::copy()算法非常简单，等价的函数为:
 
 \begin{lstlisting}[style=styleCXX]
 template<typename Input_it, typename Output_it>
@@ -164,7 +164,7 @@ Output_it bw_copy(Input_it begin_it, Input_it end_it,
 
 copy()函数使用目标迭代器的赋值操作符，从输入迭代器复制到输出迭代器，直到到达输入范围的末尾。
 
-这个算法还有一个版本叫做std::move()，其移动元素而不是复制它们:
+这个算法还有一个版本叫做std::move()，其移动元素而不是复制:
 
 \begin{lstlisting}[style=styleCXX]
 std::move(v1.begin(), v1.end(), v2.begin());

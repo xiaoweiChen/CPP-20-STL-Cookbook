@@ -15,7 +15,7 @@ class basic_string<char, std::char_traits<char>>;
 
 \begin{itemize}
 \item 
-首先，需要一个函数将字符转换为通用大小写。这里我们将使用小写字母，但这是一个随意的选择。大写的也可以:
+首先，需要一个函数将字符转换为通用大小写。这里使用小写字母，大写的也可以，这是一个随意的选择:
 
 \begin{lstlisting}[style=styleCXX]
 constexpr char char_lower(const char& c) {
@@ -36,7 +36,7 @@ class ci_traits : public std::char_traits<char> {
 };
 \end{lstlisting}
 
-继承允许我们只重载需要的函数。
+继承允许重载需要的函数。
 
 \item 
 比较函数在小于时称为lt()，在等于时称为eq():
@@ -55,7 +55,7 @@ noexcept {
 注意，这里比较了字符的小写版本。
 
 \item 
-还有一个compare()函数，用于比较两个c字符串。大于则返回+1，小于则返回-1，等于则返回0。我们可以使用三向比较操作符<=>:
+还有一个compare()函数，用于比较两个c字符串。大于则返回+1，小于则返回-1，等于则返回0。还可以使用三向比较操作符<=>:
 
 \begin{lstlisting}[style=styleCXX]
 static constexpr int compare(const char_type* s1,
@@ -102,7 +102,7 @@ int main() {
 \end{lstlisting}
 
 \item 
-想用cout打印它们，但这行不通:
+想用cout打印它们，但现在还不行:
 
 \begin{lstlisting}[style=styleCXX]
 cout << "string: " << s << '\n';
@@ -165,12 +165,12 @@ found: pos 4 char B
 \end{itemize}
 
 \begin{tcolorbox}[colback=webgreen!5!white,colframe=webgreen!75!black,title=Note]
-注意format()函数不需要特化，这是用fmt.dev参考实现测试的。它不能与MSVC的format()预览版一起工作，即使是特化也不行。希望在未来的版本中可以修复这个问题。
+注意format()函数不需要特化，这是用fmt.dev参考实现测试的，不能与MSVC的format()预览版一起工作，即使是特化也不行。希望在未来的版本中可以修复这个问题。
 \end{tcolorbox}
 
 \subsubsection{How it works…}
 
-这个配方的工作方式是将字符串类的模板特化中的std::char\_traits类替换为我们的ci\_traits类。basic\_string类使用特征类来实现其基本的特定于字符的函数，比如比较和搜索。当用我们自己的类来代替它时，可以改变这些基本行为。
+这个配方的工作方式是将字符串类的模板特化中的std::char\_traits类替换为我们的ci\_traits类。basic\_string类使用特征类，来实现其基本的特定于字符的函数，比如：比较和搜索。当用我们自己的类来代替它时，可以改变这些基本行为。
 
 \subsubsection{There's more…}
 

@@ -1,9 +1,9 @@
 
-输入流的一个优点是能够解析文本文件中不同类型的数据，并将它们转换为相应的基本类型。下面是一个使用输入流将数据导入结构容器的简单技术。
+输入流的优点是能够解析文本文件中不同类型的数据，并将它们转换为相应的基本类型。下面是一个使用输入流将数据导入结构容器的简单技术。
 
 \subsubsection{How to do it…}
 
-这个示例中，我们将获取一个数据文件，并将其不同的字段导入到struct对象的向量中。数据文件表示城市及其人口和地图坐标:
+这个示例中，我们将获取一个数据文件，并将其不同的字段导入到struct对象的vector中。数据文件表示城市，及其人口和地图坐标:
 
 \begin{itemize}
 \item 
@@ -102,7 +102,7 @@ Sydney......... pop 5,312,000 coords -33.8688, 151.2093
 \end{tcblisting}
 
 \item 
-make\_comma()函数也在第2章中使用，接受一个数值并返回一个字符串对象，为了可读性，添加了逗号:
+make\_comma()函数也在第2章中使用，接受一个数值并返回一个字符串对象。为了可读性，添加了逗号:
 
 \begin{lstlisting}[style=styleCXX]
 string make_commas(const unsigned long num) {
@@ -139,7 +139,7 @@ infile >> c;
 
 \subsubsection{There's more…}
 
-当在Windows系统上运行这段代码时，会注意到第一行的第一个单词损坏了。这是因为Windows总是在任何UTF-8文件的开头包含一个字节顺序标记(BOM)。因此，当在Windows上读取文件时，BOM将包含在读取的第一个对象中。BOM是不合时宜的，但在撰写本文时，没有办法阻止Windows使用它。
+在Windows系统上运行这段代码时，会注意到第一行的第一个单词损坏了。这是因为Windows总是在任何UTF-8文件的开头包含一个字节顺序标记(BOM)。因此，当在Windows上读取文件时，BOM将包含在读取的第一个对象中。BOM是不合时宜的，但在撰写本文时，没有办法阻止Windows使用它。
 
 解决方案是调用一个函数来检查文件的前三个字节的BOM。UTF-8的BOM是EF BB BF。下面是一个搜索并跳过UTF-8 BOM的函数:
 
@@ -156,7 +156,7 @@ void skip_bom(auto& fs) {
 }
 \end{lstlisting}
 
-这将读取文件的前三个字节，并检查是否为UTF-8 BOM签名。若这三个字节中的任何一个不匹配，会将输入流重置到文件的开头。若文件没有BOM，则不有任何问题。
+这将读取文件的前三个字节，并检查是否为UTF-8 BOM签名。若这三个字节中的一个不匹配，会将输入流重置到文件的开头。若文件没有BOM，则不有任何问题。
 
 只需在开始读取文件之前调用这个函数:
 
@@ -177,7 +177,7 @@ int main() {
 这将确保BOM不包含在文件的第一个字符串中。
 
 \begin{tcolorbox}[colback=webgreen!5!white,colframe=webgreen!75!black,title=Note]
-因为cin输入流不可定位，所以skip\_bom()函数将不能在cin流上工作，其只适用于可搜索的文本文件。
+因为cin输入流不可定位，所以skip\_bom()函数将不能在cin流上工作，只适用于可搜索的文本文件。
 \end{tcolorbox}
 
 

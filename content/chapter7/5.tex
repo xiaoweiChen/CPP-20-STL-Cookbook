@@ -1,9 +1,9 @@
 
-string类是一个连续容器，很像vector或数组。它支持contiguous\_iterator和所有相应的算法。
+string类是一个连续容器，很像vector或数组，并且支持contiguous\_iterator和所有算法。
 
 string类是具有char类型的basic\_string的特化，所以容器的元素是char类型的。其他特化也可用，但字符串是最常见的。
 
-因为其本质上是一个连续的char元素容器，所以string可以与transform()算法或任何其他使用contiguous\_iterator的技术一起使用。
+其本质上是一个连续的char元素容器，所以string可以与transform()算法或其他使用contiguous\_iterator的技术一起使用。
 
 \subsubsection{How to do it…}
 
@@ -11,7 +11,7 @@ string类是具有char类型的basic\_string的特化，所以容器的元素是
 
 \begin{itemize}
 \item 
-我们将从几个谓词函数开始，谓词函数接受一个转换元素并返回一个相关元素。例如，这是一个返回大写字符的简单谓词:
+我们将从几个谓词函数开始，谓词函数接受一个转换元素并返回一个相关元素。例如，这是一个返回大写字符的谓词:
 
 \begin{lstlisting}[style=styleCXX]
 char char_upper(const char& c) {
@@ -30,7 +30,7 @@ char char_lower(const char& c) {
 \end{lstlisting}
 
 \item 
-rot13()函数是一个有趣的转换谓词，用于演示目的。这是一个简单的替换密码，不适合加密，但通常用于做模糊处理:
+用于演示目的，rot13()函数是一个简单的转换谓词。这是一个简单的替换密码，不适合真正的加密，可以用于做模糊处理:
 
 \begin{lstlisting}[style=styleCXX]
 char rot13(const char& x) {
@@ -56,7 +56,7 @@ main() {
 	...
 \end{lstlisting}
 
-transform()函数对s中的每个元素调用char\_upper()，将结果放回s并将所有字符转换为大写:
+transform()函数对s中的每个元素调用char\_upper()，将结果放回s，并将所有字符转换为大写:
 
 \begin{tcblisting}{commandshell={}}
 hello jimi
@@ -78,7 +78,7 @@ URYYB WVZV
 \end{tcblisting}
 
 \item 
-rot13密码的有趣之处在于它可以快速破解。因为ASCII字母表中有26个字母，旋转13然后再旋转13会得到原始字符串。让我们再次转换为小写字母和rot13来恢复我们的字符串:
+rot13密码的有趣之处在于可以快速破解。因为ASCII字母表中有26个字母，旋转13然后再旋转13会得到原始字符串。让我们再次转换为小写字母和rot13来恢复我们的字符串:
 
 \begin{lstlisting}[style=styleCXX]
 for(auto& c : s) c = rot13(char_lower(c));

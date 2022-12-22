@@ -1,5 +1,5 @@
 
-string\_view类提供了string类的轻量级替代方案。string\_view不维护自己的数据存储，而是对C-string的视图进行操作。这使得string\_view比std::string更小，更高效。它在需要字符串对象，但不需要更多内存，对于计算密集型的std::string很有用。
+string\_view类提供了string类的轻量级替代方案。string\_view不维护自己的数据存储，而是对C-string的视图进行操作。这使得string\_view比std::string更小、更高效。在需要字符串对象，但不需要更多内存，对于计算密集型的std::string很有用。
 
 \subsubsection{How to do it…}
 
@@ -16,13 +16,13 @@ text[0] = 'J';
 cout << text << ' ' << greeting << '\n';
 \end{lstlisting}
 
-输出:
+输出为:
 
 \begin{tcblisting}{commandshell={}}
 Jello hello
 \end{tcblisting}
 
-当修改数组时，字符串不会改变。这是因为string构造函数创建了自己的底层数据副本。
+当修改数组时，字符串不会改变，因为string构造函数创建了底层数据副本。
 
 \item 
 当对string\_view执行同样的操作时，会得到不同的结果:
@@ -34,7 +34,7 @@ text[0] = 'J';
 cout << text << ' ' << greeting << '\n';
 \end{lstlisting}
 
-输出:
+输出为:
 
 \begin{tcblisting}{commandshell={}}
 Jello Jello
@@ -68,7 +68,7 @@ string_view greeting{ str };
 cout << greeting << '\n';
 \end{lstlisting}
 
-输出:
+输出为:
 
 \begin{tcblisting}{commandshell={}}
 hello
@@ -84,7 +84,7 @@ cout << "hello"sv.substr(1, 4) << '\n';
 
 这构造了一个constexpr的string\_view对象，并调用substr()来获得从索引1开始的4个值。
 
-输出:
+输出为:
 
 \begin{tcblisting}{commandshell={}}
 ello
@@ -95,11 +95,11 @@ ello
 
 string\_view类实际上是一个连续字符序列上的迭代器适配器。实现通常有两个成员:一个const CharT *和一个size\_t。工作原理是在源数据周围包装一个contiguous\_iterator。
 
-可以像std::string那样使用它，但有一些区别:
+可以像std::string那样使用，但有一些区别:
 
 \begin{itemize}
 \item 
-复制构造函数不复制数据，当复制一个string\_view时，复制操作都会对相同的底层数据进行:
+复制构造函数不复制数据，当复制string\_view时，复制操作都会对相同的底层数据进行:
 
 \begin{lstlisting}[style=styleCXX]
 char text[]{ "hello" };
@@ -112,7 +112,7 @@ text[0] = 'J';
 cout << format("{} {} {} {}\n", sv1, sv2, sv3, sv4);
 \end{lstlisting}
 
-输出:
+输出为:
 
 \begin{tcblisting}{commandshell={}}
 hello hello hello hello
@@ -120,7 +120,7 @@ Jello Jello Jello Jello
 \end{tcblisting}
 
 \item 
-记住，将string\_view传递给函数时，它会使用复制构造函数:
+将string\_view传递给函数时，会使用复制构造函数:
 
 \begin{lstlisting}[style=styleCXX]
 void f(string_view sv) {
@@ -142,7 +142,7 @@ int main() {
 }
 \end{lstlisting}
 
-输出:
+输出为:
 
 \begin{tcblisting}{commandshell={}}
 sv1: 0x7ffd80fa7b2a hello
@@ -150,12 +150,12 @@ f(sv): 0x7ffd80fa7b2a Jello
 sv1: 0x7ffd80fa7b2a Jello
 \end{tcblisting}
 
-因为复制构造函数不会对底层数据进行复制，底层数据的地址(由data()成员函数返回)对于string\_view的所有实例都相同。尽管string\_view成员指针是const限定的，但仍然可以取消const限定符。但不建议这样做，因为可能会导致意想不到的副作用。但需要注意的是，数据永远不会进行复制。
+因为复制构造函数不会对底层数据进行复制，底层数据的地址(由data()成员函数返回)对于string\_view的所有实例都相同。尽管string\_view成员指针是const限定的，但可以取消const限定符。但不建议这样做，因为可能会导致意想不到的副作用。但需要注意的是，数据永远不会进行复制。
 
 \item 
 string\_view类缺少直接操作底层字符串的方法。在string中支持的append()、operator+()、push\_back()、pop\_back()、replace()和resize()等方法在string\_view中不支持。
 
-若需要用+操作符连接字符串，需要使用std::string。例如，这对string\_view不起作用:
+若需要用加法操作符连接字符串，需要使用std::string。例如，这对string\_view不起作用:
 
 \begin{lstlisting}[style=styleCXX]
 sv1 = sv2 + sv3 + sv4; // does not work
@@ -173,7 +173,7 @@ str1 = str2 + str3 + str4; // works
 cout << str1 << '\n';
 \end{lstlisting}
 
-输出:
+输出为:
 
 \begin{tcblisting}{commandshell={}}
 JelloJelloJello

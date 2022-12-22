@@ -1,4 +1,4 @@
-STL字符串类是一个功能强大的全功能工具，用于存储、操作和显示基于字符的数据。它具有在高级脚本语言中可以找到的许多便利、快速和敏捷。
+STL字符串类是一个功能强大的全功能工具，用于存储、操作和显示基于字符的数据。在高级脚本语言中，可以找到的许多字符串相关的便利、快速和敏捷的功能。
 
 string类基于basic\_string，这是一个连续的容器类，可以用字符类型实例化。其类签名是这样的:
 
@@ -23,15 +23,15 @@ for(size_t i{0}; i < s.size(); ++i) {
 cout << '\n';
 \end{lstlisting}
 
-输出:
+输出为:
 
 \begin{tcblisting}{commandshell={}}
 h e l l o
 \end{tcblisting}
 
-data()成员函数返回一个指向底层字符数组的CharT*。从c++ 11开始，data()返回的数组以空结束，使得data()等价于c\_str()。
+data()成员函数返回一个指向底层字符数组的CharT*。从C++11起，data()返回的数组以空结束，使得data()等价于c\_str()。
 
-basic\_string类包含许多在其他连续存储类中可以找到的方法，包括insert()、erase()、push\_back()、pop\_back()等。这些方法操作底层的CharT数组。
+basic\_string类包含许多在其他连续存储类中可以找到的方法，包括insert()、erase()、push\_back()、pop\_back()等，这些方法可以操作底层的CharT数组。
 
 std::string是std::basic\_string<char>类型的别名:
 

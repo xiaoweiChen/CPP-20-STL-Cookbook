@@ -21,7 +21,7 @@ regex库是在C++11中首次引入STL的，其对于在文本文件中查找模�
 我们的示例文件名为the-end.html。它来自我的网站(\url{https://bw.org/end/})，并包含在GitHub存储库中:
 
 \begin{lstlisting}[style=styleCXX]
-const char * fn{ "the-end.html" };
+const char *fn{ "the-end.html" };
 \end{lstlisting}
 
 \item 
@@ -132,7 +132,7 @@ sregex_token_iterator it{ in.begin(), in.end(), link_re, {1, 2}
 
 子匹配项从1开始编号。子匹配0是一个特殊值，表示整个匹配。
 
-要支持迭代器，就可以像这样使用它:
+要支持迭代器，就可以像这样使用:
 
 \begin{lstlisting}[style=styleCXX]
 for(It end_it{}; it != end_it; ) {
@@ -143,7 +143,7 @@ for(It end_it{}; it != end_it; ) {
 }
 \end{lstlisting}
 
-这只是通过regex迭代器逐步遍历结果，给我们格式化的输出如下所示:
+这只是通过regex迭代器逐步遍历结果，格式化的输出如下所示:
 
 \begin{tcblisting}{commandshell={}}
 Bill Weinman............ https://bw.org/

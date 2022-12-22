@@ -1,7 +1,7 @@
 
 STL使用std::cin对象从标准输入流提供基于字符的输入。cin对象是一个全局单例对象，可从控制台读取输入作为istream输入流。
 
-默认情况下，cin每次读取一个单词，直到它到达流的末尾:
+默认情况下，cin每次读取一个单词，直到流的末尾:
 
 \begin{lstlisting}[style=styleCXX]
 string word{};
@@ -41,7 +41,7 @@ bool prompt(const string_view s, const string_view s2 = "") {
 }
 \end{lstlisting}
 
-调用count .flush()函数确保立即显示输出。有时，输出不包括换行符时，输出流可能不会自动刷新。
+调用count.flush()确保立即显示输出。有时，输出不包括换行符时，输出流可能不会自动刷新。
 
 \item 
 cin类有一个getline()方法，从输入流中获取一行文本，并将其放入C-string数组中:
@@ -103,7 +103,7 @@ getline(basic_istream&& in, string& str, char delim );
 
 若未指定，分隔符默认为换行符'\verb|\|n'字符。
 
-我感觉，getline()比cin.getline()方法更方便。
+我感觉getline()比cin.getline()方法更方便。
 
 \item 
 可以使用cin从输入流中获取特定的类型。要做到这一点，必须能够处理错误条件。
@@ -172,7 +172,7 @@ word: [other]
 
 因为这段代码是在数字代码之后运行的，并且因为cin是混乱的，所以缓冲区中可能仍然有结束的行。while(line.empty())循环将有选择地获取空行。
 
-使用一个stringstream对象来处理单词，所以不必使用cin。所以可以使用getline()来获取一行，而无需等待文件结束状态。
+使用一个stringstream对象来处理单词，所以不必使用cin。可以使用getline()来获取一行，而无需等待文件结束状态。
 
 然后，在stringstream对象上调用getline()来解析用逗号分隔的单词。这给了我们带有前导空格的单词。我们使用本章中的trimstr()函数来清理空白字符。
 \end{itemize}

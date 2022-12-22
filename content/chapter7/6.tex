@@ -36,7 +36,7 @@ Hex: 2f Octal: 57 Decimal 47
 本示例展示了如何将format()函数，用于一些常见的字符串格式化解决方案。
 
 \begin{tcolorbox}[colback=webgreen!5!white,colframe=webgreen!75!black,title=Note]
-本章是使用Windows 10上的Microsoft Visual C++编译器预览版开发的。在撰写本文时，这是唯一完全支持C++ 20 <format>库的编译器。最终的实现可能在某些细节上有所不同。
+本章是使用Windows 10上的Microsoft Visual C++编译器预览版开发的。撰写本文时，这是唯一完全支持C++20 <format>库的编译器。最终的实现可能在某些细节上有所不同。
 \end{tcolorbox}
 
 \subsubsection{How to do it…}
@@ -82,7 +82,7 @@ All vulcans are welcome here
 cout << format("Hello {}\n", human);
 \end{lstlisting}
 
-这是format()函数的最简单形式。格式字符串有一个占位符\{\}和一个对应的变量human。输出结果为:
+这是format()函数的最简单形式，格式字符串有一个占位符\{\}和一个对应的变量human。输出结果为:
 
 \begin{tcblisting}{commandshell={}}
 Hello earthlings
@@ -152,7 +152,7 @@ Hello vulcans we are earthlings
 
 注意，参数保持不变。只有大括号中的位置值发生了变化。位置索引是从零开始的，就像[]操作符一样。
 
-这个特性对于国际化(或本地化)非常有用，因为不同的语言在句子中使用不同的词性顺序。
+这个特性对于国际化(或本地化)非常有用，因为不同的语言在句子中，可以使用不同的顺序。
 
 \item 
 数字有很多格式化选项:
@@ -280,7 +280,7 @@ print("{:>8}: [{:04X}]\n", "Hex", inta);
 \begin{tcolorbox}[colback=gray!5!white,colframe=gray!75!black,title=Tip]
 默认情况下，Windows使用不常见的字符编码。最新版本可能默认为UTF-16或UTF-8 BOM。旧版本可能默认为“代码页”1252，这是ISO 8859-1 ASCII标准的超集。Windows系统默认为更常见的UTF-8 (No BOM)。
 
-默认情况下，Windows不会显示标准UTF-8 π字符。要使Windows兼容UTF-8编码(以及其他编码)，请在测试时使用编译器开关/ UTF-8并在命令行上发出命令chcp 65001。现在，你也可以得到π并使用它。
+默认情况下，Windows不会显示标准UTF-8 π字符。要使Windows兼容UTF-8编码(以及其他编码)，请在测试时使用编译器开关/utf-8并在命令行上发出命令chcp 65001。现在，你也可以得到π并使用它。
 \end{tcolorbox}
 	
 \end{itemize}
@@ -334,7 +334,7 @@ std::ostream& operator<<(std::ostream& os, const Frac<T>& f) {
 Frac: 3/5
 \end{tcblisting}
 
-为了为我们的自定义类提供format()支持，需要创建一个特化的格式化器对象，如下所示:
+为了为我们的自定义类提供format()支持，需要创建一个特化的格式化器对象:
 
 \begin{lstlisting}[style=styleCXX]
 template <typename T>
@@ -346,7 +346,7 @@ struct std::formatter<Frac<T>> : std::formatter<unsigned> {
 };
 \end{lstlisting}
 
-formatter类的特化重载了它的format()方法。为了简单起见，我们继承了formatter<unsigned>特化。format()方法使用Context对象调用，该对象为格式化的字符串提供输出上下文。再将ctx.out传入format\_to()函数，将返回一个正常格式字符串。
+formatter类的特化重载了它的format()方法。简单起见，我们继承了formatter<unsigned>特化。format()方法使用Context对象调用，该对象为格式化的字符串提供输出上下文。再将ctx.out传入format\_to()函数，将返回一个正常格式字符串。
 
 现在，可以在Frac类中使用print()函数:
 

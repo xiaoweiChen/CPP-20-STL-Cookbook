@@ -86,7 +86,7 @@ auto is_div_by(int divisor) {
 
 该函数从捕获上下文返回一个带除数的谓词lambda。
 
-然后，可以使用count\_if()这个谓词
+然后，count\_if()可以使用这个谓词
 
 \begin{lstlisting}[style=styleCXX]
 for( int i : { 3, 4, 5 } ) {
@@ -99,7 +99,7 @@ for( int i : { 3, 4, 5 } ) {
 
 每次调用is\_div\_by()都会返回一个与i除数不同的谓词。
 
-现在得到这样的输出:
+现在可得到这样的输出:
 
 \begin{tcblisting}{commandshell={}}
 numbers divisible by 3: 2
@@ -110,7 +110,7 @@ numbers divisible by 5: 2
 
 \subsubsection{How it works…}
 
-函数指针的类型表示为后跟函数调用函数操作符的指针:
+函数指针的类型表示，为调用函数操作符的指针:
 
 \begin{lstlisting}[style=styleCXX]
 void (*)()
@@ -134,7 +134,7 @@ lambda表达式具有与函数指针相同的类型:
 void (*fp)() = []{ cout << "foo\n"; };
 \end{lstlisting}
 
-这意味着无论在哪里使用具有特定签名的函数指针，都可以使用具有相同签名的lambda。这使得函数指针、函子和lambda的工作方式一致:
+无论在哪里使用具有特定签名的函数指针，都可以使用具有相同签名的lambda。这使得函数指针、函子和lambda的工作方式一致:
 
 \begin{lstlisting}[style=styleCXX]
 bool (*fp)(int) = is_div4;
@@ -143,7 +143,7 @@ bool (*fp)(int) = [](int i){ return i % 4 == 0; };
 
 由于这种等价性，像count\_if()这样的算法接受函数、函子或lambda(在这些函数中期望具有特定函数签名的谓词)。
 
-这适用于任何使用谓词的算法。
+这适用于所有使用谓词的算法。
 
 
 

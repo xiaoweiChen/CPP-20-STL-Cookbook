@@ -1,10 +1,10 @@
 
-当希望从用户或其他输入中选择操作时，跳转表是一种有用的模式。跳转表通常在if/else或switch结构中实现。在这个示例中，我们将只使用STL map和匿名lambdas构建一个简洁的跳转表。
+当希望从用户或其他输入中选择操作时，跳转表是一种有用的模式，跳转表通常在if/else或switch结构中实现。在这个示例中，我们将只使用STL map和匿名lambda构建一个简洁的跳转表。
 
 
 \subsubsection{How to do it…}
 
-从map和lambda构建简单的跳转表很容易。映射提供了简单的索引导航，lambda可以存储为有效负载。
+从map和lambda构建简单的跳转表很容易。map提供了简单的索引导航，lambda可以存储为有效负载。
 
 \begin{itemize}
 \item 
@@ -92,7 +92,7 @@ if(it != jumpmap.end()) it->second();
 else cout << "Invalid response\n";
 \end{lstlisting}
 
-这是一个简单而优雅的解决方案，否则只能使用令人尴尬的分支代码。
+这是一个简单而优雅的解决方案，否则只能使用尴尬的分支代码了。
 
 
 

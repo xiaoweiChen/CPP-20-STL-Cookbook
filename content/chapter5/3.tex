@@ -3,7 +3,7 @@ Lambda表达式可以定义和存储供后续使用，也可以作为参数传�
 
 \subsubsection{How to do it…}
 
-从一个简单的程序开始，我们用其来测试lambda表达式的各种设置:
+从一个简单的程序开始，可用其来测试lambda表达式的各种设置:
 
 \begin{itemize}
 \item 
@@ -34,7 +34,7 @@ cout << format("{}\n", two());
 \end{lstlisting}
 
 \item 
-许多情况下，编译器可以通过自动类型推断确定返回类型。否则，可以使用->操作符指定返回类型:
+通常，编译器可以通过自动类型推断确定返回类型。否则，可以使用->操作符指定返回类型:
 
 \begin{lstlisting}[style=styleCXX]
 auto one = []() -> const char * { return "one"; };
@@ -74,7 +74,7 @@ lambda call lambda
 \end{tcblisting}
 
 \item 
-若需要将参数传递给一个匿名的lambda，可以将其放在lambda表达式后的括号中:
+若需要将参数传递给匿名的lambda，可以将其放在lambda表达式后的括号中:
 
 \begin{lstlisting}[style=styleCXX]
 << [](auto l, auto r){ return l + r; }(47, 73)
@@ -92,7 +92,7 @@ p([num]{ return num; });
 \end{lstlisting}
 
 \item 
-或者可以通过引用来捕获它们:
+或者通过引用来捕获它们:
 
 \begin{lstlisting}[style=styleCXX]
 int num{0};
@@ -124,13 +124,13 @@ for (size_t i{0}; i < 5; ++i) {
 cout << '\n';
 \end{lstlisting}
 
-输出:
+输出为:
 
 \begin{tcblisting}{commandshell={}}
 1, 2, 3, 4, 5,
 \end{tcblisting}
 
-可变说明符允许lambda修改它的捕获，lambda默认为const-限定。
+可变说明符允许lambda修改它的捕获，lambda默认限定为const。
 
 与尾部返回类型一样，任何说明符都需要参数圆括号。
 
@@ -189,7 +189,7 @@ lambda表达式唯一需要的部分是捕获列表和函数体，函数体可�
 []{}
 \end{lstlisting}
 
-这是最简单的lambda表达式。它什么也没捕捉到，什么也没做。
+这是最简单的lambda表达式，什么也没捕捉到，什么也没做。
 
 来了解一下表达式的每一部分。
 
@@ -198,7 +198,7 @@ lambda表达式唯一需要的部分是捕获列表和函数体，函数体可�
 
 捕获列表指定我们捕获什么(如果有的话)。不能省略，但可以是空的。可以使用[=]通过复制来捕获所有变量，或者使用[\&]通过引用来捕获lambda范围内的所有变量。
 
-可以通过在括号中列出单个变量来捕获它们:
+可以通过在括号中列出单个变量来捕获:
 
 \begin{lstlisting}[style=styleCXX]
 [a, b]{ return a + b; }
@@ -234,7 +234,7 @@ lambda表达式唯一需要的部分是捕获列表和函数体，函数体可�
 \noindent
 \textbf{可变修饰符(可选)}
 
-lambda表达式默认为const限定的，除非指定了可变修饰符。这允许它在const上下文中使用，但不能修改复制捕获的变量。例如:
+lambda表达式默认为const限定的，除非指定了可变修饰符。这允许在const上下文中使用，但不能修改复制捕获的变量。例如:
 
 \begin{lstlisting}[style=styleCXX]
 [a]{ return ++a; };
@@ -267,7 +267,7 @@ error: increment of read-only variable 'a'
 \noindent
 \textbf{尾部的返回类型(可选)}
 
-默认情况下，lambda返回类型是从return语句中推导出来的，就像它是一个自动返回类型一样。可以选择使用->操作符指定一个尾部返回类型:
+默认情况下，lambda返回类型是从return语句中推导出来的，就像是一个wuto返回类型一样。可以选择使用->操作符指定一个尾部返回类型:
 
 \begin{lstlisting}[style=styleCXX]
 [](int a, int b) -> long { return a + b; };
@@ -276,7 +276,7 @@ error: increment of read-only variable 'a'
 若使用可选说明符或尾部？返回类型，则必须使用参数括号。
 
 \begin{tcolorbox}[colback=webgreen!5!white,colframe=webgreen!75!black,title=Note]
-包括GCC在内的一些编译器允许省略空参数括号，即使有说明符或尾随返回类型。这是不正确的。根据规范，当包含参数、说明符和尾部返回类型都是lambda-声明器的一部分时，都需要括号。这在C++的未来版本中可能会改变。
+包括GCC在内的一些编译器允许省略空参数括号，即使有说明符或尾随返回类型。这是不正确的！根据规范，当包含参数、说明符和尾部返回类型都是lambda声明器的一部分时，都需要括号。这在C++的未来版本中可能会改变。
 \end{tcolorbox}
 
 

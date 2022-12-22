@@ -25,7 +25,7 @@ const auto lb = [](auto a){ return a(); };
 cout << lb(la);
 \end{lstlisting}
 
-输出:
+输出为
 
 \begin{tcblisting}{commandshell={}}
 Hello
@@ -40,7 +40,7 @@ cout << lb([]{ return "Hello\n"; });
 
 \subsubsection{闭包}
 
-闭包这个术语通常应用于任何匿名函数。严格地说，闭包是一个允许在自己的词法范围之外使用符号的函数。
+闭包这个术语通常应用于匿名函数。严格地说，闭包是一个允许在自己的词法范围之外使用符号的函数。
 
 可能已经注意到lambda定义中的方括号:
 
@@ -56,7 +56,7 @@ const auto la = []{ return greeting; };
 cout << la();
 \end{lstlisting}
 
-当尝试用GCC编译这个时，得到了以下的错误:
+当尝试用GCC编译这个时，会得到了以下的错误:
 
 \begin{tcblisting}{commandshell={}}
 In lambda function:
@@ -73,7 +73,7 @@ const auto la = [greeting]{ return greeting; };
 cout << la();
 \end{lstlisting}
 
-现在程序就能按预期编译和运行:
+现在，程序就能按预期编译和运行:
 
 \begin{tcblisting}{commandshell={}}
 $ ./working

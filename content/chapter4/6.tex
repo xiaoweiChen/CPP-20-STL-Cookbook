@@ -1,5 +1,5 @@
 
-生成器是生成自己的值序列的迭代器。它不使用容器。它动态地创建值，根据需要一次返回一个值。并且，C++生成器可以独立运行。
+生成器是生成自己的值序列的迭代器，不使用容器。它动态地创建值，根据需要一次返回一个值。并且，C++生成器可以独立运行。
 
 本节示例中，我们将为斐波那契数列构建一个生成器。这是一个数列，其中每个数字都是数列中前两个数字的和，从0和1开始:
 
@@ -33,7 +33,7 @@ void printc(const auto & v, const string_view s = "") {
 之前使用过这个printc()函数，可打印一个可迭代范围，以及一个描述字符串。
 
 \item 
-我们的类从一个类型别名和一些对象变量开始，所有这些都在private部分中。
+我们的类从一个类型别名和一些对象变量开始，所有这些都在private部分中定义。
 
 \begin{lstlisting}[style=styleCXX]
 class fib_generator {
@@ -44,10 +44,10 @@ class fib_generator {
 	fib_t b_ { 1 };
 \end{lstlisting}
 
-stop\_变量将在后面用作前哨，设置为要生成的值的数量。count\_用于跟踪生成了多少个值。a\_和b\_是前两个序列值，用于计算下一个值。
+stop\_变量将在后面用作哨兵，设置为要生成的值的数量。count\_用于跟踪生成了多少个值。a\_和b\_是前两个序列值，用于计算下一个值。
 
 \item 
-仍然在私有部分，有一个简单的函数来计算斐波那契数列中的下一个值。
+private部分，有一个简单的函数来计算斐波那契数列中的下一个值。
 
 \begin{lstlisting}[style=styleCXX]
 	constexpr void do_fib() {
@@ -58,7 +58,7 @@ stop\_变量将在后面用作前哨，设置为要生成的值的数量。count
 \end{lstlisting}
 
 \item 
-现在在public部分，有一个简单的构造函数，它有一个默认值:
+public部分，有一个简单的构造函数，有一个默认值:
 
 \begin{lstlisting}[style=styleCXX]
 public:
@@ -114,7 +114,7 @@ printc():
 这将创建一个匿名的fib\_generator对象传递给printc()函数。
 
 \item 
-用前10个斐波那契数(不包括零)得到如下输出:
+用前10个斐波那契数(不包括零)可得到如下输出:
 
 \begin{tcblisting}{commandshell={}}
 1 1 2 3 5 8 13 21 34 55
@@ -138,7 +138,7 @@ public:
 };
 \end{lstlisting}
 
-就基于范围的for循环而言，这是一个迭代器(因为它看起来像一个迭代器)。
+就基于范围的for循环而言，这是一个迭代器(看起来像一个迭代器)。
 
 该值在do\_fib()函数中计算:
 
@@ -152,7 +152,7 @@ constexpr void do_fib() {
 
 这只是简单地添加了b\_ += a\_，将结果存储在b\_中，将旧的b\_存储在a\_中，为下一次迭代保存必要的值。
 
-解引用操作符*返回b\_的值，是序列中的下一个值:
+解引用操作符返回b\_的值，是序列中的下一个值:
 
 \begin{lstlisting}[style=styleCXX]
 fib_t operator*() const { return b_; }
@@ -168,7 +168,7 @@ const fib_generator end() const {
 }
 \end{lstlisting}
 
-现在相等比较操作符可以很容易地检测序列的结束:
+现在，相等比较操作符可以很容易地检测序列的结束:
 
 \begin{lstlisting}[style=styleCXX]
 bool operator==(const fib_generator&o) const {

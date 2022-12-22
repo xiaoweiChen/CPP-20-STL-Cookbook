@@ -1,9 +1,9 @@
 
-许多STL算法要求迭代器符合某些特征。但这些要求在编译器、系统和C++版本之间不一致。
+许多STL算法要求迭代器符合某些特征,但这些要求在编译器、系统和C++版本之间并不一致。
 
 出于学习的目的，我们将使用之前的例子来说明这个问题。
 
-main()中，若添加对minmax\_element()算法的调用:
+main()中，添加对minmax\_element()算法的使用:
 
 \begin{lstlisting}[style=styleCXX]
 Seq<int> r{ 100, 110 };
@@ -11,17 +11,17 @@ auto [min_it, max_it] = minmax_element(r.begin(), r.end());
 cout << format("{} - {}\n", *min_it, *max_it);
 \end{lstlisting}
 
-这将无法编译。错误消息是十分模糊，但仔细观察，会发现迭代器不满足与此算法兼容的要求。
+这将无法通过编译。错误消息也是十分模糊，但仔细观察，会发现迭代器不满足与此算法兼容的要求。
 
 好吧，让我们来解决这个问题。
 
 \subsubsection{How to do it…}
 
-我们需要对迭代器做一些简单的处理，使其与算法兼容。我们的迭代器需要满足前向迭代器的最低要求，先从这里开始:
+首先，需要对迭代器做一些简单的处理，使其与算法兼容。我们的迭代器需要满足前向迭代器的最低要求，先从这里开始:
 
 \begin{itemize}
 \item 
-这里几乎有了前向迭代器所需的所有操作符，唯一缺少的是相等比较运算符==。可以很容易地使用operator==()重载将其添加到迭代器中:
+目前已经有了前向迭代器所需的其他操作符，唯一缺少的是相等比较运算符。可以使用operator==()重载将其添加到迭代器中:
 
 \begin{lstlisting}[style=styleCXX]
 bool operator==(const iterator& other) const {
@@ -29,14 +29,14 @@ bool operator==(const iterator& other) const {
 }
 \end{lstlisting}
 
-有趣的是，这会使代码在某些系统上编译和运行，但在Clang上不行，在Clang上会得到错误消息:
+有趣的是，这会使代码在某些系统上编译和运行，但在Clang上不行，Clang会给出这样的错误消息:
 
 \begin{tcblisting}{commandshell={}}
 No type named 'value_type' in 'std::iterator_
 traits<Seq<int>::iterator>'
 \end{tcblisting}
 
-说明，需要在迭代器中设置特性。
+说明需要在迭代器中设置特性。
 
 \item 
 iterator\_traits类在迭代器类中查找一组类型定义(使用别名实现):
@@ -44,23 +44,22 @@ iterator\_traits类在迭代器类中查找一组类型定义(使用别名实现
 \begin{lstlisting}[style=styleCXX]
 public:
 	using iterator_concept = std::forward_iterator_tag;
-	using iterator_category =
-	std::forward_iterator_tag;
+	using iterator_category =	std::forward_iterator_tag;
 	using value_type = std::remove_cv_t<T>;
 	using difference_type = std::ptrdiff_t;
 	using pointer = const T*;
 	using reference = const T&;
 \end{lstlisting}
 
-我倾向于把它们放在迭代器类的public:部分的顶部，在那里更容易看到。
+我倾向于把它们放在迭代器类public的顶部，会更容易看到。
 
-现在我们有了一个完全符合前向迭代器的类，代码可以在我当前所有的编译器上运行。
+现在就有了一个完全符合前向迭代器的类，代码可以在我当前拥有的编译器上运行。
 
 \end{itemize}
 
 \subsubsection{How it works…}
 
-using语句是用于定义迭代器可以执行哪些功能的特性。分别来看一下:
+using语句是用于定义迭代器可以执行哪些功能的特性，来看一下:
 
 \begin{lstlisting}[style=styleCXX]
 using iterator_concept = std::forward_iterator_tag;
@@ -69,7 +68,7 @@ using iterator_category = std::forward_iterator_tag;
 
 前两个是category和concept，都设置为forward\_iterator\_tag。该值表示迭代器符合前向迭代器规范。
 
-有些代码不查看这些值，而是查找单独的设置和功能:
+有些代码不查看这些值，而是查找设置和功能:
 
 \begin{lstlisting}[style=styleCXX]
 using value_type = std::remove_cv_t<T>;
@@ -82,13 +81,13 @@ value\_type是std::remove\_cv\_t<T>的别名，这是值的类型，可以删除
 
 difference\_type是std::ptrdiff\_t的别名，作为指针地址差异的特殊类型。
 
-指针和引用别名分别设置为指针和引用的const限定版本。
+指针和引用别名分别设置为，指针和引用的const限定版本。
 
 定义这些类型别名是大多数迭代器的基本要求。
 
 \subsubsection{There's more…}
 
-值得注意的是，定义这些特征允许我们在迭代器中使用概念受限的模板。例如:
+值得注意的是，定义这些特征允许在迭代器中使用概念受限的模板。例如:
 
 \begin{lstlisting}[style=styleCXX]
 template<typename T>
@@ -111,7 +110,7 @@ auto [min_it, max_it] = ranges::minmax_element(r);
 
 这使得迭代器使用起来更加方便。
 
-我们可以用静态断言的方式来测试forward\_range的兼容性:
+可以用静态断言的方式来测试forward\_range的兼容性:
 
 \begin{lstlisting}[style=styleCXX]
 static_assert(ranges::forward_range<Seq<int>>);

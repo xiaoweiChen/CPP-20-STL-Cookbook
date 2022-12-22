@@ -55,7 +55,7 @@ public:
 
 value\_变量由迭代器维护，可以解引用指针返回一个值。
 
-支持基于范围的for循环的最低要求是解引用操作符*、前自增操作符++和不等比较操作符!=。
+支持基于范围的for循环的最低要求是解引用操作符、前自增操作符和不等比较操作符。
 
 \item 
 现在可以写一个main()函数来测试序列生成器:
@@ -84,7 +84,7 @@ $ ./seq
 
 \subsubsection{How it works…}
 
-这个示例的重点是制作一个序列生成器，它与基于范围的for循环一起工作。我们首先考虑基于范围的for循环的等效代码:
+这个示例的重点是制作一个序列生成器，与基于范围的for循环一起工作。我们首先考虑基于范围的for循环的等效代码:
 
 \begin{lstlisting}[style=styleCXX]
 {
@@ -104,13 +104,13 @@ $ ./seq
 具有begin()和end()迭代器
 
 \item 
-迭代器支持不相等的比较!=操作符
+迭代器支持不相等的比较操作符
 
 \item 
-迭代器支持前缀自增++运算符
+迭代器支持前缀自增运算符
 
 \item 
-迭代器支持解引用*操作符
+迭代器支持解引用操作符
 \end{itemize}
 
 主Seq类接口只有三个公共成员函数:构造函数、begin()和end()迭代器:
@@ -143,7 +143,7 @@ bool operator!=(const iterator& other) const {
 }
 \end{lstlisting}
 
-这就是基于范围的for循环所需要的:
+就是基于范围的for循环所需的:
 
 \begin{lstlisting}[style=styleCXX]
 Seq<int> r{ 100, 110 };
@@ -154,7 +154,7 @@ for (auto v : r) {
 
 \subsubsection{There's more…}
 
-通常，将迭代器定义为容器的成员类，但不是必需的。这允许迭代器类型从属于容器类型:
+通常，会将迭代器定义为容器的成员类，但不是必需的。这允许迭代器类型从属于容器类型:
 
 \begin{lstlisting}[style=styleCXX]
 Seq<int>::iterator it = r.begin();

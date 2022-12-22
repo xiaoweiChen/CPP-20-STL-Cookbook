@@ -1,18 +1,18 @@
 
 本节中是一个全功能连续/随机访问迭代器的例子，这是容器最完整的迭代器类型。随机访问迭代器包括所有其他类型的容器迭代器的所有特性，以及它的随机访问功能。
 
-虽然在本章中包含一个完整的迭代器很重要，但这个示例的代码超过700行，比本书中的其他示例要大一些。我将在这里介绍代码的基本组件。请在此处查看完整的源代码 \url{https://github.com/PacktPublishing/CPP-20-STL-Cookbook/blob/main/ chap04/container-iterator.cpp}。
+虽然在本章中包含一个完整的迭代器很重要，但这个示例的代码超过700行，比本书中的其他示例要大一些。我将在这里介绍代码的基本组件。请在此处查看完整的源代码\url{https://github.com/PacktPublishing/CPP-20-STL-Cookbook/blob/main/ chap04/container-iterator.cpp}。
 
 
 \subsubsection{How to do it…}
 
-迭代器需要一个容器。我们将为此使用一个简单的数组，并将其称为Container。迭代器类嵌套在Container类中。
+迭代器需要一个容器。我们将使用一个简单的数组，并将其称为Container。迭代器类嵌套在Container类中。
 
 所有这些设计会与STL容器的接口一致。
 
 \begin{itemize}
 \item 
-容器定义为模板类，私有部分只有两个元素:
+容器定义为模板类，private部分只有两个元素:
 
 \begin{lstlisting}[style=styleCXX]
 template<typename T>
@@ -24,7 +24,7 @@ class Container {
 我们为数据使用unique\_pointer，让智能指针管理内存。这减少了对~Container()析构函数的需求。n\_elements\_变量保留了容器的大小。
 
 \item 
-在public部分中，有构造函数:
+public部分中，有构造函数:
 
 \begin{lstlisting}[style=styleCXX]
 Container(initializer_list<T> l) : n_elements_{l.size()}
@@ -82,7 +82,7 @@ T& at(const size_t index) const {
 }
 \end{lstlisting}
 
-这与STL的用法是一致的，at()函数是首选。
+这与STL的用法一致，at()函数是首选。
 
 \item 
 begin()和end()函数使用容器数据的地址调用迭代器构造函数。
@@ -113,13 +113,13 @@ class iterator {
 iterator(T* ptr = nullptr) : ptr_{ptr} {}
 \end{lstlisting}
 
-因为标准需要一个默认构造函数，所以这里提供一个默认值。
+因为标准需要一个默认构造函数，所以这里有一个默认值。
 \end{itemize}
 
 \noindent
 \textbf{运算符重载}
 
-此迭代器为以下操作符提供操作符重载:++，后缀++，--，后缀--，[]，默认比较<=>(C++20)， ==， *， ->， +，非成员+，数字-，对象-，+=和-=。我们将在这里介绍几个值得注意的重载，具体请参阅这些重载的源代码。
+此迭代器为以下操作符提供操作符重载:前缀++，后缀++，前缀--，后缀--，[]，默认比较<=>(C++20)， ==， *， ->， +，非成员+，数字-，对象-，+=和-=。我们将在这里介绍几个值得注意的重载，具体请参阅这些重载的源代码。
 
 \begin{itemize}
 \item 
@@ -131,7 +131,7 @@ const auto operator<=>(const iterator& o) const {
 }
 \end{lstlisting}
 
-这是C++20的一个特性，所以需要一个兼容的编译器和库。
+这是C++20的特性，所以需要支持C++20的编译器和库。
 
 \item 
 有两个+操作符重载，支持it + n和n + it操作。
@@ -161,7 +161,7 @@ const size_t operator-(const iterator& o) {
 }
 \end{lstlisting}
 
-这允许it - n和it - it运算。不需要非成员函数，因为(n -)并不是一个有效的操作。
+这允许it - n和it - it运算。不需要非成员函数，因为(n -)并不是有效的操作。
 
 \end{itemize}
 
@@ -169,7 +169,7 @@ const size_t operator-(const iterator& o) {
 \noindent
 \textbf{验证}
 
-C++20规范§23.3.4.13要求一个有效的随机访问迭代器有一组特定的操作和结果。我在源代码中包含了一个unit\_tests()函数来验证这些需求。
+C++20规范§23.3.4.13要求一个有效的随机访问迭代器有一组特定的操作和结果，我在源代码中写了一个unit\_tests()函数来验证这些需求。
 
 main()函数创建一个Container对象并执行一些简单的验证函数。
 
@@ -201,7 +201,7 @@ for(auto e : x) {
 cout << '\n';
 \end{lstlisting}
 
-输出:
+输出为:
 
 \begin{tcblisting}{commandshell={}}
 Container x:
@@ -223,7 +223,7 @@ cout << format("element begin += 5: {}\n",
 	*(x.begin() += 5));
 \end{lstlisting}
 
-输出:
+输出为:
 
 \begin{tcblisting}{commandshell={}}
 direct access elements:
@@ -244,7 +244,7 @@ for(auto v : result) cout << format("{} ", v);
 cout << '\n';
 \end{lstlisting}
 
-输出:
+输出为:
 
 \begin{tcblisting}{commandshell={}}
 views pipe reverse:
@@ -263,7 +263,7 @@ for(auto e : y) {
 cout << '\n';
 \end{lstlisting}
 
-输出:
+输出为:
 
 \begin{tcblisting}{commandshell={}}
 Container y size: 10
@@ -278,5 +278,5 @@ Container y size: 10
 
 容器本身由智能指针管理。这是因为它是一个“平面”数组，所以不需要展开或压缩。
 
-当然，STL提供了一个平面std::array类，以及其他更复杂的数据结构。不过，要揭开一个迭代器类的工作原理的神秘面纱，还是挺有趣的。
+当然，STL提供了一个std::array类，以及其他更复杂的数据结构。不过，揭开一个迭代器类的神秘面纱，还是挺有趣的。
 

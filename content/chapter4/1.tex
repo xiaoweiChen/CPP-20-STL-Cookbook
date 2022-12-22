@@ -1,6 +1,6 @@
 
 
-STL使用迭代器来导航其容器类的元素，大多数容器都包含begin()和end()迭代器。它们通常实现为返回迭代器对象的成员函数。begin()迭代器指向容器的初始元素，end()迭代器指向最终元素之后的元素:
+STL使用迭代器来导航其容器类的元素，大多数容器都包含begin()和end()迭代器，通常实现为返回迭代器对象的成员函数。begin()迭代器指向容器的初始元素，end()迭代器指向最终元素之后的元素:
 
 \hspace*{\fill} \\ %插入空行
 \begin{center}
@@ -33,7 +33,7 @@ std::vector<int> v;
 std::vector<int>::iterator v_it;
 \end{lstlisting}
 
-可以看到这是多么复杂。若有一个向量string的vector
+可以看到这是多么复杂。若有一个string的vector
 
 \begin{lstlisting}[style=styleCXX]
 std::vector<std::vector<int, std::string>> v;
@@ -53,7 +53,7 @@ for(auto v_it = v.begin(); v_it != v.end(); ++v_it) {
 }
 \end{lstlisting}
 
-注意使用解引用操作符*从迭代器中访问元素，这和解引用指针的语法一样:
+注意使用解引用操作符从迭代器中访问元素，这和解引用指针的语法一样:
 
 \begin{lstlisting}[style=styleCXX]
 const int a[]{ 1, 2, 3, 4, 5 };
@@ -63,7 +63,7 @@ for(const int* p = a; count > 0; ++p, --count) {
 }
 \end{lstlisting}
 
-所以可以使用一个基于范围的for循环和一个原生数组:
+可以使用一个基于范围的for循环和一个原生数组:
 
 \begin{lstlisting}[style=styleCXX]
 const int a[]{ 1, 2, 3, 4, 5 };
@@ -105,7 +105,7 @@ for(auto e : arr) {
 }
 \end{lstlisting}
 
-输出:
+输出为:
 
 \begin{tcblisting}{commandshell={}}
 1 2 3 4 5
@@ -155,7 +155,7 @@ C++20之前，迭代器根据其功能分为以下几类:
 \end{tabular}
 \end{table}
 
-这些类别是分层级的，功能较强的迭代器继承功能较弱的迭代器的功能。换句话说，输入迭代器只能读取和递增一次。前向迭代器具有输入迭代器的功能，并且可以多次递增。双向迭代器具有这些功能，还可以自减。一次类推下。
+这些类别是分层级的，功能较强的迭代器继承功能较弱的迭代器的功能，输入迭代器只能读取和递增一次。前向迭代器具有输入迭代器的功能，并且可以多次递增。双向迭代器具有这些功能，还可以自减。
 
 输出迭代器可以写入和递增一次。若其他迭代器也可以写入，则是可变迭代器。
 
@@ -172,7 +172,7 @@ C++20起，STL用概念而不是类别来定义迭代器。这些概念都在std
 \textbf{概念} &
 \textbf{描述} \\ \hline
 indirectly\_readable &
-\begin{tabular}[c]{@{}l@{}}迭代器可以由解引用操作符*读取。\\ 这包括指针、智能指针和输入迭代器。\end{tabular} \\ \hline
+\begin{tabular}[c]{@{}l@{}}迭代器可以由解引用操作符读取。\\ 这包括指针、智能指针和输入迭代器。\end{tabular} \\ \hline
 indirectly\_writeable &
 迭代器的对象引用是可写的。 \\ \hline
 weakly\_incrementable &
@@ -221,7 +221,7 @@ void printc(const T & c) {
 }
 \end{lstlisting}
 
-这个函数需要一个random\_access\_iterator。若用非随机访问容器的列表使用时，编译器会给报出错误:
+函数需要一个random\_access\_iterator。若用非随机访问容器的列表使用时，编译器会报错:
 
 \begin{lstlisting}[style=styleCXX]
 int main()
@@ -231,7 +231,7 @@ int main()
 }
 \end{lstlisting}
 
-列表迭代器类型不支持random\_access\_iterator概念。所以，编译器又报出了一个错误:
+list迭代器类型不支持random\_access\_iterator概念。所以，编译器又报出了一个错误:
 
 \begin{tcblisting}{commandshell={}}
 error: no matching function for call to 'printc(std::__

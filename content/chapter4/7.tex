@@ -3,7 +3,7 @@
 
 \subsubsection{How to do it…}
 
-STL中的大多数双向容器都包含一个反向迭代器适配器。其他容器，如原始C数组，则没有。让我们来看一些例子:
+STL中的大多数双向容器都包含一个反向迭代器适配器。其他容器则没有，如原始C数组。来看一些例子:
 
 \begin{itemize}
 \item 
@@ -29,7 +29,7 @@ int main() {
 }
 \end{lstlisting}
 
-我们会得到这样的输出:
+会得到这样的输出:
 
 \begin{tcblisting}{commandshell={}}
 c-array: 1 2 3 4 5
@@ -46,14 +46,14 @@ while (it != end_it) {
 }
 \end{lstlisting}
 
-for循环的输出:
+for循环的输出为:
 
 \begin{tcblisting}{commandshell={}}
 1 2 3 4 5
 \end{tcblisting}
 
 \item 
-或者可以使用rbegin()和rend()反向迭代器适配器为C数组创建反向迭代器:
+或者使用rbegin()和rend()反向迭代器适配器为C数组创建反向迭代器:
 
 \begin{lstlisting}[style=styleCXX]
 auto it = std::rbegin(array);
@@ -70,7 +70,7 @@ while (it != end_it) {
 \end{tcblisting}
 
 \item 
-甚至可以创建一个printc()的修改版本，反向打印:
+甚至可以创建另一个printr()，进行反向打印:
 
 \begin{lstlisting}[style=styleCXX]
 void printr(const auto & c, const string_view s = "") {
@@ -84,7 +84,7 @@ void printr(const auto & c, const string_view s = "") {
 }
 \end{lstlisting}
 
-当用C数组调用它时:
+当用C数组使用时:
 
 \begin{lstlisting}[style=styleCXX]
 printr(array, "rev c-array");
@@ -97,7 +97,7 @@ rev c-array: 5 4 3 2 1
 \end{tcblisting}
 
 \item 
-当然，这也适用于任何双向STL容器:
+当然，这也适用于双向STL容器:
 
 \begin{lstlisting}[style=styleCXX]
 vector<int> v{ 1, 2, 3, 4, 5 };
@@ -105,7 +105,7 @@ printc(v, "vector");
 printr(v, "rev vector");
 \end{lstlisting}
 
-输出:
+输出为:
 
 \begin{tcblisting}{commandshell={}}
 vector: 1 2 3 4 5
@@ -116,7 +116,7 @@ rev vector: 5 4 3 2 1
 
 \subsubsection{How it works…}
 
-一个普通的迭代器类有一个begin()迭代器指向第一个元素，还有一个end()迭代器指向最后一个元素之后:
+普通的迭代器类有一个begin()迭代器指向第一个元素，还有一个end()迭代器指向最后一个元素之后:
 
 \hspace*{\fill} \\ %插入空行
 \begin{center}
@@ -128,7 +128,7 @@ rev vector: 5 4 3 2 1
 \draw[line width=2pt][-latex] (1.6,-1.0) -- (1.6,-0.2);
 \draw[line width=2pt][-latex] (6.7,-1.0) -- (6.7,-0.2);
 
-\node[text width=3cm, font=\large] at (2.5,-1.4) {begin()++};
+\node[text width=3cm, font=\large] at (2.5,-1.4) {begin()\texttt{++}};
 \node[text width=3cm, font=\large] at (7.8,-1.4) {end()};
 
 \draw[line width=2pt][-latex] (3,-1.4) -- (6.0,-1.4);
@@ -137,9 +137,9 @@ rev vector: 5 4 3 2 1
 图4.3 前向迭代器
 \end{center}
 
-通过使用++操作符递增begin()迭代器来迭代容器，直到end()迭代器的值。
+通过使用自加操作符递增begin()迭代器来迭代容器，直到end()迭代器的值。
 
-反向迭代器适配器拦截迭代器接口并将其反转，使begin()迭代器指向最后一个元素，end()迭代器指向第一个元素之前。++和--操作符也是颠倒的:
+反向迭代器适配器拦截迭代器接口，并将其反转。使begin()迭代器指向最后一个元素，end()迭代器指向第一个元素之前。++和--操作符也是颠倒的:
 
 \hspace*{\fill} \\ %插入空行
 \begin{center}
@@ -152,7 +152,7 @@ rev vector: 5 4 3 2 1
 \draw[line width=2pt][-latex] (5.7,-1.0) -- (5.7,-0.2);
 
 \node[text width=3cm, font=\large] at (2.0,-1.4) {rend()};
-\node[text width=3cm, font=\large] at (7.0,-1.4) {rbegin()++};
+\node[text width=3cm, font=\large] at (7.0,-1.4) {rbegin()\texttt{++}};
 
 \draw[line width=2pt][-latex] (5.0,-1.4) -- (2,-1.4);
 \end{tikzpicture}
@@ -161,7 +161,7 @@ rev vector: 5 4 3 2 1
 \end{center}
 
 
-反向迭代器中，++操作符递减，--操作符递增。
+反向迭代器中，++操作符递减，-{}-操作符递增。
 
 大多数双向STL容器已经包含了一个反向迭代器适配器，可以通过成员函数rbegin()和rend()访问:
 

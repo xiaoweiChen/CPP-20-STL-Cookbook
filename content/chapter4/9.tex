@@ -1,7 +1,7 @@
 
-许多脚本语言都包含一个将两个序列压缩在一起的函数，zip操作就可以接受两个输入序列，并为两个输入中的每个位置返回一对值:
+许多脚本语言都具有一个将两个序列压缩在一起的函数，zip操作就可以接受两个输入序列，并为两个输入中的每个位置返回一对值:
 
-考虑两个序列的情况——它们可以是容器、迭代器或初始化列表:
+考虑两个序列的情况——可以是容器、迭代器或初始化列表:
 
 \hspace*{\fill} \\ %插入空行
 \begin{center}
@@ -69,15 +69,15 @@
 图4.7  Zip操作
 \end{center}
 
-在本节示例中，我们将使用迭代器适配器来完成这项任务。
+示例中，将使用迭代器适配器来完成这项任务。
 
 \subsubsection{How to do it…}
 
-这个方法中，将构建一个zip迭代器适配器，接受两个相同类型的容器，并将值压缩到std::pair对象中:
+这个示例中，将构建一个zip迭代器适配器，接受两个相同类型的容器，并将值压缩到std::pair对象中:
 
 \begin{itemize}
 \item 
-main()函数中，可以想用两个vector来调用适配器:
+main()函数中，可以用两个vector来调用适配器:
 
 \begin{lstlisting}[style=styleCXX]
 int main()
@@ -111,8 +111,6 @@ class zip_iterator {
 	using ret_t = std::pair<val_t, val_t>;
 	using it_t = typename T::iterator;
 \end{lstlisting}
-
-这允许我们方便地定义对象和函数。
 
 \item 
 迭代器中不存储数据，只存储目标容器的begin()和end()迭代器的副本:
@@ -241,7 +239,7 @@ zipped: [Bob, Dylan] [John, Williams] [Joni, Mitchell]
 
 \subsubsection{How it works…}
 
-压缩迭代器适配器是迭代器抽象可以多么灵活的一个例子，可以获取两个容器的迭代器，并在一个聚合迭代器中使用。来看看这是如何工作的。
+压缩迭代器适配器是迭代器抽象可以多么灵活的一个例子，可以获取两个容器的迭代器，并在一个聚合迭代器中使用。
 
 zip\_iterator类的主构造函数接受两个容器对象。为了便于讨论，我们将这些对象称为目标对象。
 
@@ -258,7 +256,7 @@ zip_iterator(T& a, T& b) :
 
 构造函数从目标begin()迭代器初始化ita\_和itb\_变量，这些将用于导航目标对象。目标begin()和end()迭代器也会保存以供后续使用。
 
-这些变量在私有部分中定义:
+这些变量在private部分定义:
 
 \begin{lstlisting}[style=styleCXX]
 it_t ita_{};
@@ -278,7 +276,7 @@ using ret_t = std::pair<val_t, val_t>;
 using it_t = typename T::iterator;
 \end{lstlisting}
 
-其他别名类型是val\_t，表示目标值的类型，ret\_t表示返回值对。在整个类中使用这些类型定义是为了方便使用。
+其他别名类型是val\_t，表示目标值的类型，ret\_t表示返回值对，整个类中使用这些类型定义是为了方便使用。
 
 begin()和end()函数使用只初始化ita\_和itb\_值的私有构造函数:
 
@@ -296,7 +294,7 @@ zip_iterator end() const
 zip_iterator(it_t ita, it_t itb) : ita_{ita}, itb_{itb} {}
 \end{lstlisting}
 
-这是一个使用it\_t迭代器作为参数的构造函数，只初始化ita\_和itb\_，以便它们可以在比较操作符重载中使用。
+这是一个使用it\_t迭代器作为参数的构造函数，只初始化ita\_和itb\_，以便在比较操作符重载中使用。
 
 类的其余部分就像普通的迭代器一样，但操作的是目标类的迭代器:
 
@@ -324,7 +322,7 @@ ret_t operator*() const {
 
 \subsubsection{There's more…}
 
-zip\_iterator适配器可以用来轻松地将对象压缩到map中:
+zip\_iterator适配器可以用来将对象压缩到map中:
 
 \begin{lstlisting}[style=styleCXX]
 map<string, string> name_map{};

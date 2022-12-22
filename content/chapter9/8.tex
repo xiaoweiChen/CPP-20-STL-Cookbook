@@ -77,7 +77,7 @@ void call_once(once_flag& flag, Callable&& f, Args&&... args);
 
 可调用的f只调用了一次。即使call\_once在多个线程中并发使用，f仍然只调用了一次。
 
-这需要一个std::once\_flag对象进行协调。once\_flag构造函数将其状态设置为指示可调用对象尚未调用。
+这需要一个std::once\_flag对象进行协调，once\_flag构造函数将其状态设置为指示可调用对象尚未调用。
 
 当call\_once调用可调用对象时，对同一个once\_flag的其他调用都将阻塞，直到可调用对象返回。可调用对象返回后，可以设置once\_flag，从而使后面的call\_once直接返回，而不在调用f。
 

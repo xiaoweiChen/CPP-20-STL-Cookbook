@@ -7,7 +7,7 @@ thread类是STL中并发性的根本，所有其他并发特性都建立在线�
 
 \subsubsection{How to do it…}
 
-在这个示例中，我们创建了一些std::thread对象，并试验了它们的执行选项。
+在这个示例中，我们创建了一些std::thread对象，并测试了它们的执行选项。
 
 \begin{itemize}
 \item 
@@ -56,7 +56,7 @@ terminate called without an active exception Aborted
 
 (错误信息会有所不同。这是在Debian和GCC上的错误信息。)
 
-问题在于，当线程对象超出作用域时，操作系统不知道该如何处理。我们必须指定调用者是否等待线程，或者它是否分离并独立运行。
+问题在于，当线程对象超出作用域时，操作系统不知道该如何处理。必须指定调用者是否等待线程，或者是否分离并独立运行。
 
 \item 
 使用join()来指示调用者将等待线程完成:
@@ -252,7 +252,7 @@ t1: 5
 Finishing t1
 \end{tcblisting}
 
-t1线程可以独立执行，然后在其作用域的末尾会自动汇入main()线程。
+t1线程可以独立执行，在其作用域的末尾会自动汇入main()线程。
 
 
 

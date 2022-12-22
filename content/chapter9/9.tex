@@ -63,7 +63,7 @@ void producer() {
 
 producer()函数循环num\_items迭代，并在每次循环中将一个数字压入deque。
 
-这里，包括一个sleep\_for()调用来模拟产生每个值的延迟。
+这里，包括使用sleep\_for()来模拟产生每个值的延迟。
 
 conditional\_variable需要一个互斥锁来操作，可以使用lock\_guard(通过guard\_t别名)来获取锁，然后将值推到deque上，然后在conditional\_variable上调用notify\_all()。这将告诉使用者线程有一个可用的新值。
 
@@ -89,7 +89,7 @@ void consumer() {
 
 wait()方法等待生产者通知，使用lambda作为谓词继续等待，直到deque不为空或设置了finished标志。
 
-当我们获取到一个值时，我们显示它，然后将其从deque中弹出。
+当我们获取到一个值时显示它，然后将其从deque中弹出。
 
 \item 
 在main()中运行简单的线程对象:
@@ -126,15 +126,15 @@ finished!
 
 \subsubsection{How it works…}
 
-生产者-消费者问题需要在写入和读取缓冲区或容器之间进行协调。在这个例子中，容器是一个deque<size\_t>:
+生产者-消费者问题需要在写入和读取缓冲区或容器之间进行协调。在这个例子中，容器是deque<size\_t>:
 
 \begin{lstlisting}[style=styleCXX]
 std::deque<size_t> q{};
 \end{lstlisting}
 
-当一个共享变量修改时，conditional\_variable类可以阻塞一个线程或多个线程。然后，通知其他线程该值可用。
+当共享变量修改时，conditional\_variable类可以阻塞一个线程或多个线程。然后，通知其他线程该值可用。
 
-condition\_variable需要一个mutex来执行锁定操作:
+condition\_variable需要mutex来执行锁定操作:
 
 \begin{lstlisting}[style=styleCXX]
 std::lock_guard x{ mtx };
@@ -144,7 +144,7 @@ cond.notify_all();
 
 std::lock\_guard会获取锁，从而可以将一个值推入到deque中。
 
-condition\_variable上的wait()方法用于阻塞当前线程，直到它收到通知:
+condition\_variable上的wait()方法用于阻塞当前线程，直到收到通知:
 
 \begin{lstlisting}[style=styleCXX]
 void wait( std::unique_lock<std::mutex>& lock );
@@ -160,7 +160,7 @@ while (!stop_waiting()) {
 }
 \end{lstlisting}
 
-谓词形式用于防止在等待特定条件时出现伪唤醒。我们的例子中，它将与lambda一起使用:
+谓词形式用于防止在等待特定条件时出现伪唤醒。我们的例子中，将和lambda一起使用:
 
 \begin{lstlisting}[style=styleCXX]
 cond.wait(lck, []{ return !q.empty() || finished; });
@@ -178,7 +178,7 @@ notify\_one()解除一个等待线程的阻塞
 notify\_all()解除所有等待线程的阻塞
 \end{itemize}
 
-我们在示例中使用了notify\_all()。因为只有一个使用者线程，所以任何一种通知方法的工作方式都是一样的。
+示例中使用了notify\_all()。因为只有一个使用者线程，所以任何一种通知方法的工作方式都是一样的。
 
 \begin{tcolorbox}[colback=webgreen!5!white,colframe=webgreen!75!black,title=Note]
 注意，unique\_lock是唯一在condition\_variable对象上支持wait()的锁。

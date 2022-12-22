@@ -1,7 +1,7 @@
 
 <thread>头文件提供了两个使线程进入休眠状态的函数，sleep\_for()和sleep\_until()。这两个函数都在std::this\_thread命名空间中。
 
-本节探讨了这些函数的使用，因为我们将在本章后面使用它们。
+本节探讨了这些函数的使用，我们将在本章后面使用它们。
 
 \subsubsection{How to do it…}
 
@@ -9,7 +9,7 @@
 
 \begin{itemize}
 \item 
-与休眠相关的函数在std::this\_thread命名空间中。因为它只有几个符号，可以为std::this\_thread和std::chrono\_literals使用using指令:
+与休眠相关的函数在std::this\_thread命名空间中。只有几个符号，可以为std::this\_thread和std::chrono\_literals使用using指令:
 
 \begin{lstlisting}[style=styleCXX]
 using namespace std::this_thread;
@@ -52,7 +52,7 @@ total duration: 3.3005s
 
 sleep\_for(duration)和sleep\_until(time\_point)函数在指定的时间内暂停当前线程的执行，或者直到到达time\_point。若支持的话，sleep\_for()函数将使用steady\_clock实现。
 
-否则，持续时间可能会有所调整。由于调度或资源延迟，这两个功能可能会阻塞更长时间。
+否则，持续时间可能会有所调整。由于调度或资源延迟，这两个功能可能会阻塞更长的时间。
 
 \subsubsection{There's more…}
 

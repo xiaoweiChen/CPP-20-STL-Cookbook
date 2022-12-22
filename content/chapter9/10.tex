@@ -1,7 +1,7 @@
 
 生产者-消费者问题实际上是一组问题。若缓冲区是有界的或无界的，或者有多个生产者、多个消费者，或者两者都有，解决方案将有所不同。
 
-来考虑一个有多个生产者、多个消费者和一个有限(容量有限)缓冲区的情况。这是一种常见的情况。
+来考虑一个有多个生产者、多个消费者和一个有限(容量有限)缓冲区的情况。
 
 \subsubsection{How to do it…}
 
@@ -38,7 +38,7 @@ num\_producers是消费者的数量。
 \end{itemize}
 
 \item 
-现在，需要一些对象来控制这个过程:
+需要一些对象来控制这个过程:
 
 \begin{lstlisting}[style=styleCXX]
 deque<string> qs{};
@@ -85,7 +85,7 @@ void producer(const size_t id) {
 }
 \end{lstlisting}
 
-传递值的id是一个用于标识生产者的连续数字。
+传递值的id0用于标识生产者的连续数字。
 
 主for循环重复num\_item次。sleep\_for()函数用于模拟生成一个项所需的一些工作。
 
@@ -114,11 +114,11 @@ void consumer(const size_t id) {
 }
 \end{lstlisting}
 
-传递的id值是一个用于标识使用者的连续数字。
+传递的id值是用于标识使用者的连续数字。
 
 主while()循环继续进行，直到对production\_complete进行设置。
 
-我们从q\_mutex中获得unique\_lock，并在cv\_consumer上调用wait\_for()，使用一个超时和一个lambda来测试deque是否为空。这里需要超时，是因为当一些消费者线程仍在运行时，生产者线程可能已经完成，可使deque为空。
+我们从q\_mutex中获得unique\_lock，并在cv\_consumer上调用wait\_for()，使用一个超时和一个lambda来测试deque是否为空。这里需要超时，因为当一些消费者线程仍在运行时，生产者线程可能已经完成，可使deque为空。
 
 当有了一个非空的deque，就可以打印(消费)一个产品信息，并将其从deque中弹出。
 
@@ -152,7 +152,7 @@ for(auto& f : consumers) f.wait();
 cout << "consumers done.\n";
 \end{lstlisting}
 
-循环生成器容器，调用wait()以允许生成器线程完成。然后，可以设置production\_complete标志。同样，循环遍历消费者容器，调用wait()以允许消费者线程完成。可以在这里执行最终的分析或完成过程。
+循环生成器容器，调用wait()以允许生成器线程完成。然后，可以设置production\_complete标志。同样，循环遍历消费者容器，调用wait()以允许消费者线程完成。并且，可以在这里执行最终的分析或完成过程。
 
 \item 
 输出有点长，就不全部展示了:

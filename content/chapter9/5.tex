@@ -1,5 +1,5 @@
 
-从C++17开始，许多标准的STL算法可以并行执行。该特性允许算法将其工作拆分为子任务，以便在多个核上同时运行。这些算法接受一个执行策略对象，该对象指定应用于算法的并行度类型。该特性需要硬件支持。
+从C++17开始，许多标准的STL算法可以并行执行。该特性允许算法将其工作拆分为子任务，以便在多个核上同时运行。这些算法接受一个执行策略对象，该对象指定应用于算法的并行度类型，该特性需要硬件支持。
 
 \subsubsection{How to do it…}
 
@@ -7,7 +7,7 @@
 
 \begin{itemize}
 \item 
-出于计时的目的，将使用带有std::milli比率的duration对象，这样我们就可以以毫秒为单位进行测量:
+出于计时的目的，将使用带有std::milli比率的duration对象，这样就可以以毫秒为单位进行测量:
 
 \begin{lstlisting}[style=styleCXX]
 using dur_t = duration<double, std::milli>;
@@ -25,7 +25,7 @@ int main() {
 \end{lstlisting}
 
 \item 
-现在，我们进行一个简单的变换:
+现在，进行一个简单的变换:
 
 \begin{lstlisting}[style=styleCXX]
 auto mul2 = [](int n){ return n * 2; };
@@ -95,7 +95,7 @@ execution::par_unseq: 2.93ms
 
 这里，我们注意到该策略的另一个性能提升。
 
-execution::par\_unseq策略对算法有更严格的要求。算法不能执行需要并发或需要顺序执行的操作。
+execution::par\_unseq策略对算法有更严格的要求，算法不能执行需要并发或需要顺序执行的操作。
 \end{itemize}
 
 \subsubsection{How it works…}
@@ -144,7 +144,7 @@ sort: 152ms
 在使用并行算法时，做大量的测试是个好主意。若算法或谓词本身不能很好地用于并行化，那么最终可能会获得最小的性能增益，或出现意想不到的副作用。
 
 \begin{tcolorbox}[colback=webgreen!5!white,colframe=webgreen!75!black,title=Note]
-撰写本文时，GCC对执行策略的支持很差，LLVM/Clang也不支持。这个示例是在运行Windows 10和Visual c++预览版的6核i7上测试的。
+撰写本文时，GCC对执行策略的支持很差，LLVM/Clang也不支持。这个示例是在运行Windows 10和Visual C++预览版的6核i7上测试的。
 \end{tcolorbox}
 
 

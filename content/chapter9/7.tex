@@ -38,7 +38,7 @@ constexpr int max_threads{100};
 我将它设置为运行100个线程，并在每个线程中计算1,000,000次迭代。
 
 \item 
-countem()函数为每个线程生成，循环max\_count次，并在每次循环迭代时增加g\_count。这是我们使用原子值的地方:
+countem()函数为每个线程生成，循环max\_count次，并在每次循环迭代时增加g\_count。这是使用原子值的地方:
 
 \begin{lstlisting}[style=styleCXX]
 void countem (int id) {
@@ -53,9 +53,9 @@ void countem (int id) {
 
 ready原子值用于同步线程。每个线程将调用yield()，直到就绪值设置为true。yield()函数的作用是:将执行传递给其他线程。
 
-for循环的每次迭代都会增加g\_count原子值。最终值应该等于max\_count * max\_threads。
+for循环的每次迭代都会增加g\_count原子值，最终值应该等于max\_count * max\_threads。
 
-循环完成后，获胜者对象的test\_and\_set()方法用于报告获胜线程。test \_and\_set()是atomic\_flag类的一个方法，设置标志并返回设置之前的bool值。
+循环完成后，获胜者对象的test\_and\_set()方法用于报告获胜线程。test\_and\_set()是atomic\_flag类的一个方法，设置标志并返回设置之前的bool值。
 
 \item 
 我们以前使用过make\_comma()函数，可以显示一个带有数千个分隔符的数字:
@@ -90,11 +90,7 @@ int main() {
 
 \end{itemize}
 
-在这里，创建一个vector<std::thread>对象来保存线程。
-
-for循环中，使用emplace\_back()在vector中创建线程。
-
-线程生成后，设置ready标志，以便线程可以开始循环。
+这里，创建一个vector<std::thread>对象来保存线程。for循环中，使用emplace\_back()在vector中创建线程。线程生成后，设置ready标志，以便线程开始循环。
 
 输出为:
 
@@ -127,7 +123,7 @@ std::atomic<Trivial> triv1;
 \noindent
 \textbf{特化}
 
-原子类的专门化有以下几个不同的目的:
+原子类的特化有以下几个不同的目的:
 
 \begin{itemize}
 \item 
@@ -145,7 +141,7 @@ std::atomic<Trivial> triv1;
 \noindent
 \textbf{标准的别名}
 
-STL为所有标准标量整型提供类型别名。所以在我们的代码中，不是这些声明:
+STL为所有标准标量整型提供类型别名。所以在代码中，不需要这些声明:
 
 \begin{lstlisting}[style=styleCXX]
 std::atomic<bool> ready{};

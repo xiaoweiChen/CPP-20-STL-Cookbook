@@ -7,7 +7,7 @@ std::async()异步运行一个目标函数，并返回一个携带目标函数�
 
 在其最简单的形式中，std::async()函数执行与std::thread相同的任务，不需要调用join()或detach()，同时还允许通过std::future对象返回值。
 
-在这个示例中，将使用一个函数来计算一个范围内质数的数量。可以使用chrono::steady\_clock为每个线程的进行计时。
+这个示例中，将使用一个函数来计算一个范围内质数的数量。可以使用chrono::steady\_clock为每个线程的进行计时。
 
 \begin{itemize}
 \item 
@@ -47,7 +47,7 @@ prime_time count_primes(const uint64_t& max) {
 }
 \end{lstlisting}
 
-prime\_time结构用于返回值，可用于duration和count。这样就可以计算循环本身的时间。若一个值是质数，isprime返回true。我们使用steady\_clock来计算质数计数循环的持续时间。
+prime\_time结构用于返回值，可用于duration和count，这样就可以计算循环本身的时间。若一个值是质数，isprime返回true。我们使用steady\_clock，来计算质数计数循环的持续时间。
 
 \item 
 在main()中，调用函数并报告其运行时间:
@@ -131,7 +131,7 @@ int main() {
 }
 \end{lstlisting}
 
-我们知道async返回一个future对象。因此，可以通过将未来对象存储在容器中来运行15个线程。以下是我们在运行Windows的6核i7上的输出:
+我们知道async返回一个future对象。因此，可以通过将未来对象存储在容器中来运行15个线程。以下是我运行在Windows设备(6核i7)上的输出:
 
 \begin{tcblisting}{commandshell={}}
 start parallel primes
@@ -189,7 +189,7 @@ total duration: 0.98166s
 
 promise类允许线程存储一个对象，以后可以由future对象进行异步检索。
 
-例如，有一个这样的函数:
+例如，有这样一个函数:
 
 \begin{lstlisting}[style=styleCXX]
 void f() {
@@ -207,9 +207,9 @@ int main() {
 }
 \end{lstlisting}
 
-这对于没有返回值的简单函数来说很好。当想从f()返回一个值时，我们可以使用promise和future。
+这对于没有返回值的简单函数来说很好。当想从f()返回一个值时，可以使用promise和future。
 
-我们在main()线程中设置了promise和future对象:
+在main()线程中设置了promise和future对象:
 
 \begin{lstlisting}[style=styleCXX]
 int main() {
@@ -232,7 +232,7 @@ void f(std::promise<int> value) {
 }
 \end{lstlisting}
 
-注意，promise对象不能复制，因此需要使用std::move将其传递给函数。
+promise对象不能复制，因此需要使用std::move将其传递给函数。
 
 promise对象充当到future对象的桥梁，其允许在值可用的前提下，对其进行检索。
 
@@ -251,7 +251,7 @@ int main() {
 }
 \end{lstlisting}
 
-这就是async()的值。在很多情况下，它使promise和future的使用更容易。
+这就是async()的值。在很多情况下，promise与future的组合使用起来更容易。
 
 
 

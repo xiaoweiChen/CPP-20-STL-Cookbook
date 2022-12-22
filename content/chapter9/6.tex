@@ -6,7 +6,7 @@ STL在<mutex>头文件中提供了mutex和lock类。
 
 \subsubsection{How to do it…}
 
-在这个示例中，我们将使用一个简单的Animal类来实验锁定和解锁互斥量:
+这个示例中，我们将使用一个简单的Animal类来实验锁定和解锁互斥量:
 
 \begin{itemize}
 \item 
@@ -16,7 +16,7 @@ STL在<mutex>头文件中提供了mutex和lock类。
 std::mutex animal_mutex;
 \end{lstlisting}
 
-互斥锁是在全局作用域中声明的，因此所有相关对象都可以访问它。
+互斥锁是在全局作用域中声明的，因此相关对象都可以访问它。
 
 \item 
 我们的Animal类有一个名字和一个朋友列表:
@@ -135,7 +135,7 @@ int main() {
 \end{lstlisting}
 
 \item 
-使用async()在对象上调用add\_friends()，在不同的线程中运行它们:
+使用async()在对象上调用add\_friends()，在不同的线程中运行:
 
 \begin{lstlisting}[style=styleCXX]
 auto a1 = std::async([&]{ cat1->add_friend(*tiger1); });
@@ -193,7 +193,7 @@ Animal: Felix, friends: Hobbes
 Animal: Bugs, friends: Astro
 \end{tcblisting}
 
-这个输出有点混乱。每次运行都是不同的。有时候可能没问题，但你要清醒，这可能有问题。我们需要添加一些互斥锁来控制对数据的访问。
+这个输出有点混乱。每次运行都是不同的。有时候可能没问题，但这就可能是问题。我们需要添加一些互斥锁来控制对数据的访问。
 
 \item 
 使用互斥的一种方法是使用它的lock()和unlock()方法，可以将其添加到add\_friend()函数中:
@@ -351,11 +351,11 @@ Animal: Bugs, friends: Astro
 
 当一个线程用lock()或lock\_guard锁住一个互斥量时，就说这个线程拥有这个互斥量。其他试图锁定同一个互斥锁的线程都将阻塞，直到锁的所有者将其解锁。
 
-互斥对象在被任何线程拥有时不能被销毁。同样，当线程拥有互斥时，它不能销毁。与RAII兼容的包装器，如lock\_ guard，将有助于确保这种情况不会发生。
+互斥对象在被任何线程拥有时不能被销毁。同样，当线程拥有互斥时，不能销毁。与RAII兼容的包装器，比如lock\_guard，将确保这种情况不会发生。
 
 \subsubsection{There's more…}
 
-虽然，std::mutex提供了一个适用于许多目的的排他性互斥锁，但STL确实提供了一些其他选择:
+虽然，std::mutex提供了一个适用于许多排他性互斥锁，但STL确实提供了一些其他选择:
 
 \begin{itemize}
 \item 

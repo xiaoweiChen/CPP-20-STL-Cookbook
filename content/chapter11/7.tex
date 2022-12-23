@@ -1,7 +1,7 @@
 
-在我的职业生涯中，使用过很多编程语言。在学习一门新语言时，我喜欢做一个项目，让我接触到语言的细微差别。numwords类是我为此目的最喜欢的练习之一。多年来，我用数十种语言编写了它，包括多次用C和C++进行练习。
+在我的职业生涯中，使用过很多编程语言。学习一门新语言时，我喜欢做一个项目，让我接触到语言的细微差别。numwords类是我为此目的最喜欢的练习之一。多年来，我用数十种语言编写过它，包括多次用C和C++进行练习。
 
-numwords是一个用单词拼写数字的类，可以用于银行和会计应用。它在使用中是这样的:
+numwords是一个用单词拼写数字的类，可以用于银行和会计应用。使用起来像这样:
 
 \begin{lstlisting}[style=styleCXX]
 int main() {
@@ -42,7 +42,7 @@ n is 1000000000000000000, error
 
 \subsubsection{How to do it…}
 
-这个示例起源于创建“生产就绪”的代码练习。因此，它在三个不同的文件中:
+这个示例起源于创建“生产就绪”的代码练习。因此，由三个不同的文件组成:
 
 \begin{itemize}
 \item 
@@ -55,7 +55,7 @@ numword.cpp是numwords类的实现文件。
 numword-test.cpp是用于测试数字词类的应用程序文件。
 \end{itemize}
 
-这个类本身大约有180行代码，所以我们在这里只讨论重点。你可以在这里找到完整的源代码，\url{https://github.com/PacktPublishing/CPP-20STL-Cookbook/tree/main/chap11/numword}。
+这个类本身大约有180行代码。我们在这里只讨论重点代码段，读者们可以在这里找到完整的源代码，\url{https://github.com/PacktPublishing/CPP-20STL-Cookbook/tree/main/chap11/numword}。
 
 \begin{itemize}
 \item 
@@ -69,9 +69,9 @@ namespace bw {
 	using bufstr = std::unique_ptr<string>;
 \end{lstlisting}
 
-在整个代码中使用string和string\_view对象。
+整个代码中使用string和string\_view对象。
 
-uint64 \_t是我们的主要整数类型，因为这个类称为numword，所以我喜欢将numnum作为整数类型。
+uint64\_t是我们的主要整数类型，因为这个类称为numword，所以我喜欢将numnum作为整数类型。
 
 \_bufstr是主要的输出缓冲区，一个包装在unique\_ptr中的字符串，遵从RAII的内存管理。
 
@@ -89,12 +89,10 @@ constexpr numnum hundred{ 100 };
 constexpr numnum thousand{ 1000 };
 \end{lstlisting}
 
-maxnum常数翻译为“九百九千亿九千九百九十亿九千九百九十亿九千九百九千九千九百九十九”，这对于大多数目的应该是足够的。
-
-numnum常量的其余部分用于避免在代码中使用文字。
+maxnum常数对于大多数目的应该是足够的，其余部分用于避免在代码中使用文字。
 
 \item 
-主要的数据结构是string\_view对象的constexpr数组，表示输出中使用的单词。因为它提供了最小开销的封装，所以string\_view类非常适合这些常量:
+主要的数据结构是string\_view对象的constexpr数组，表示输出中使用的单词。因为其提供了最小开销的封装，所以string\_view类非常适合这些常量:
 
 \begin{lstlisting}[style=styleCXX]
 constexpr string_view errnum{ "error" };
@@ -118,7 +116,7 @@ constexpr string_view _powers[] {
 };
 \end{lstlisting}
 
-这些单词可以分成几个部分，在将数字转换成单词时很有用。许多语言使用类似的分解，所以这个结构应该很容易翻译到这些语言。
+这些单词可以分成几个部分，在将数字转换成单词时很有用。许多语言使用类似的分解，所以这个结构应该很适用于语言翻译。
 
 \item 
 numword类有几个私有成员:
@@ -138,7 +136,7 @@ class numword {
 \_num保存当前数值。
 
 \item 
-\_hyphen\_flag在翻译过程中用于在单词之间插入连字符，而不是空格字符。
+\_hyphen\_flag在翻译过程中，用于在单词之间插入连字符，而不是空格字符。
 \end{itemize}
 
 \item 
@@ -237,7 +235,7 @@ const string& numword::words( const numnum& num ) {
 该函数的每个部分以10的次幂的模量剥离数字的一部分，在千万的情况下递归，并从string\_view常量数组中追加字符串。
 
 \item 
-appendbuf()有三个重载。一个附加一个字符串:
+appendbuf()有三个重载。一个添加字符串:
 
 \begin{lstlisting}[style=styleCXX]
 void numword::appendbuf(const string& s) {
@@ -246,7 +244,7 @@ void numword::appendbuf(const string& s) {
 }
 \end{lstlisting}
 
-另一个添加一个string\_view:
+另一个添加string\_view:
 
 \begin{lstlisting}[style=styleCXX]
 void numword::appendbuf(const string_view& s) {
@@ -255,7 +253,7 @@ void numword::appendbuf(const string_view& s) {
 }
 \end{lstlisting}
 
-第三个附加了单个字符:
+第三个添加单个字符:
 
 \begin{lstlisting}[style=styleCXX]
 void numword::appendbuf(const char c) {
@@ -404,7 +402,7 @@ $ ./saytime
 three past five
 \end{tcblisting}
 
-在测试模式下，输出如下:
+测试模式下，输出如下所示:
 
 \begin{tcblisting}{commandshell={}}
 $ ./saytime test
@@ -428,7 +426,7 @@ $ ./saytime test
 24:00 OOR
 \end{tcblisting}
 
-我把它的实现留给读者们作为练习。
+我把其的实现留给读者们，作为本书最后的家庭作业。
 
 
 

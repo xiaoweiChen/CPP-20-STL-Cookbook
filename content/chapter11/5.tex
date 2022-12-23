@@ -62,7 +62,7 @@ constexpr auto is_even_char = [](auto c) {
 };
 \end{lstlisting}
 
-这三个lambda如下:
+这三个lambda的解释如下:
 
 \begin{itemize}
 \item 
@@ -76,7 +76,7 @@ is\_even\_char如果值是'0'和'9'之间的字符，则返回布尔值true，�
 \end{itemize}
 
 \item 
-可以在main()函数中调用gather()，使用int vector，如下所示:
+可以在main()函数中调用gather()，使用int的vector:
 
 \begin{lstlisting}[style=styleCXX]
 int main() {
@@ -130,7 +130,7 @@ cout << '\n';
 \end{tcblisting}
 
 \item 
-因为gather()是基于迭代器的，所以可以将它用于任何容器。这是一串字符数字:
+因为gather()是基于迭代器的，所以可以用于任何容器。这是一串字符数字:
 
 \begin{lstlisting}[style=styleCXX]
 string jenny{ "867-5309" };
@@ -140,9 +140,7 @@ for(const auto& el : jenny) cout << el;
 cout << '\n';
 \end{lstlisting}
 
-这将把所有偶数移动到字符串的末尾:
-
-输出为：
+这将把所有偶数移动到字符串的末尾，输出为：
 
 \begin{tcblisting}{commandshell={}}
 7-539860
@@ -152,9 +150,7 @@ cout << '\n';
 
 \subsubsection{How it works…}
 
-gather()函数使用std::stable\_partition()算法将与谓词匹配的元素移动到枢轴点。
-
-gather()有两个对stable\_partition()的调用，一个带有谓词，另一个使用谓词取反结果:
+gather()函数使用std::stable\_partition()算法将与谓词匹配的元素移动到枢轴点。gather()有两个对stable\_partition()的调用，一个带有谓词，另一个使用谓词取反结果:
 
 \begin{lstlisting}[style=styleCXX]
 template <typename It, typename Pred>
@@ -164,7 +160,7 @@ pair<It, It> gather(It first, It last, It pivot, Pred pred) {
 }
 \end{lstlisting}
 
-从两个stable\_partition()调用返回的迭代器以pair形式返回。
+从两个stable\_partition()调用返回的迭代器以pair的形式返回。
 
 
 

@@ -9,13 +9,14 @@ trie，有时称为前缀树，是一种搜索树，通常用于预测文本和�
 \end{center}
 
 我们经常从树的头部开始搜索，寻找以特定单词开头的句子。在这个例子中，当我搜索all时，我得到了三个节点:you、the和along。
+
 若寻找love，我得到的是me和is。
 
 字符串trie通常用于创建搜索建议。这里，我们将使用std::map来实现一个字符串trie结构。
 
 \subsubsection{How to do it…}
 
-在这个示例中，我们创建了一个递归的trie类，将节点存储在std::map容器中。对于内存中的树来说，这是一个简单的解决方案。这是一个相当大的类，所以在这里只展示重要的部分。
+在这个示例中，创建了一个递归的trie类，将节点存储在std::map容器中。对于内存中的树来说，这是一个简单的解决方案。这是一个相当大的类，所以在这里只展示重要的部分。
 
 要获得完整的类，请参阅源代码 \url{https://github.com/ PacktPublishing/CPP-20-STL-Cookbook/blob/main/chap11/trie.cpp}。
 
@@ -39,7 +40,7 @@ namespace bw {
 	using std::initializer_list;
 \end{lstlisting}
 
-为了方便起见，在这个命名空间中使用一些using语句。
+方便起见，在这个命名空间中使用一些using语句。
 
 \item 
 类本身称为trie，其有三个数据成员:
@@ -89,7 +90,7 @@ void _insert(It it, It end_it) {
 }
 \end{lstlisting}
 
-这方便了导航trie所需的递归函数调用。注意，引用一个不在map中出现的键，会创建一个带有该键的空元素。因此，若元素不存在，在nodes元素上使用\_insert()的那行代码，将创建一个空的trie对象。
+这方便了导航trie所需的递归函数调用。注意，引用一个不在map中出现的键，会创建一个带有该键的空元素。因此，若元素不存在，在nodes元素上使用\_insert()的那行代码，将创建空trie对象。
 
 \item 
 get()方法返回一个get\_t对象，我是字符串队列的队列的别名。这就可以返回多组结果:
@@ -150,7 +151,7 @@ if(k.find(s) == 0) {
 \end{lstlisting}
 
 \item 
-search()函数返回一个可选的<const trie*>，别名为result\_t。它有两个重载:
+search()函数返回一个可选的<const trie*>，别名为result\_t。有两个重载:
 
 \begin{lstlisting}[style=styleCXX]
 result_t search(const ilcstr& il) const {
@@ -298,7 +299,7 @@ results for "loving...":
 loving you
 \end{tcblisting}
 
-find\_prefix()搜索返回了几个结果，将每个结果传递给自己的一个搜索，每个结果产生几个结果。
+find\_prefix()搜索返回了几个结果，将每个结果传递给自己的搜索，每个结果产生几个结果。
 
 \end{itemize}
 
@@ -332,7 +333,7 @@ result_t _search(It it, It end_it) const {
 }
 \end{lstlisting}
 
-这种使用std::map的递归方法可以简洁有效地实现一个trie类。
+这种使用std::map的递归方法可以有效地实现一个trie类。
 
 
 

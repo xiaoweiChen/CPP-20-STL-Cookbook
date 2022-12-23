@@ -6,7 +6,7 @@ e=\sum_{n}^{i=1}(a_i-b_i)^2
 \end{equation*}
 
 \begin{center}
-图11.2 -误差和的定义
+图11.2 误差和的定义
 \end{center}
 
 其中e为误差和，即两个向量中一系列点的差的平方和。
@@ -15,7 +15,7 @@ e=\sum_{n}^{i=1}(a_i-b_i)^2
 
 \subsubsection{How to do it…}
 
-在这个示例中，我们定义了两个向量，每个向量都有一个正弦波。一个vector的值是double类型，另一个是int类型。这给了我们量子化不同的向量，因为int类型不能表示分数值。然后我们使用inner\_product()来计算两个向量之间的误差和:
+在这个示例中，定义了两个向量，每个向量都有一个正弦波。一个vector的值是double类型，另一个是int类型。这给了我们量子化不同的向量，因为int类型不能表示分数值。然后我们使用inner\_product()来计算两个向量之间的误差和:
 
 \begin{itemize}
 \item 
@@ -33,7 +33,7 @@ int main() {
 ds是双正弦波的vector，是int正弦波的vector。每个向量有100个元素来保存一个正弦波，index变量用于初始化vector对象。
 
 \item 
-用一个循环和lambda在double vector中生成正弦波:
+用一个循环和lambda在double的vector中生成正弦波:
 
 \begin{lstlisting}[style=styleCXX]
 auto sin_gen = [&index]{
@@ -59,7 +59,7 @@ for(auto& v : is) {
 这将从ds中取每个点，四舍五入，将其转换为int类型，并更新它在is容器中的位置。
 
 \item 
-我们用一个简单的循环来显示正弦波:
+用一个简单的循环来显示正弦波:
 
 \begin{lstlisting}[style=styleCXX]
 for(const auto& v : ds) cout << format("{:-5.2f} ", v);
@@ -113,7 +113,7 @@ error sum: 7.304
 
 \subsubsection{How it works…}
 
-inner\_product()算法计算第一个输入范围内的乘积之和，其签名为:
+inner\_product()算法计算第一个输入范围内的乘积之和，签名为:
 
 \begin{lstlisting}[style=styleCXX]
 T inner_product(InputIt1 first1, InputIt1 last1,

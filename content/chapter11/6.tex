@@ -8,7 +8,7 @@
 
 \begin{itemize}
 \item 
-bw命名空间中，先从一个检测空白的函数说起:
+bw命名空间中，先从一个检测空白的函数开始:
 
 \begin{lstlisting}[style=styleCXX]
 template<typename T>
@@ -76,7 +76,7 @@ auto its = unique(outstr.begin(), outstr.end(),
 	});
 \end{lstlisting}
 
-可以使用标准库中的isspace()函数，但它是一个标准C函数，依赖于从int到char的窄类型转换。这可能会在一些现代C++编译器上触发警告，并且不能保证在没有显式强制转换的情况下正常工作。我们的isws()函数使用了模板化的类型，应该适用于任何系统，以及std::string的任何特化。
+可以使用标准库中的isspace()函数，但这是一个标准C函数，依赖于从int到char的窄类型转换。这可能会在一些现代C++编译器上触发警告，并且不能保证在没有显式强制转换的情况下可以正常工作。我们的isws()函数使用了模板化的类型，应该适用于任何系统，以及std::string的任何特化。
 
 
 

@@ -19,7 +19,7 @@ sync:x:4:65534:sync:/bin:/bin/sync
 账号
 
 \item 
-可选加密的密码
+可加密的密码
 
 \item 
 用户名
@@ -34,7 +34,7 @@ sync:x:4:65534:sync:/bin:/bin/sync
 主目录
 
 \item 
-可选命令解释器
+可选的命令解释器
 \end{enumerate}
 
 这是基于POSIX的操作系统中的标准文件，还有其他类似的文件。大多数脚本语言都包含一个内置函数，用于在分隔符上分隔字符串。C++中有一些简单的方法可以做到这一点，但std::string只是STL中的另一个容器，在分隔符上分割容器的通用算法可能是有用补充。让我们来创建一个。
@@ -91,7 +91,7 @@ V分隔符类型。
 Pred为谓词函数。
 \end{itemize}
 
-我们的输出类型是容器的容器。它需要容纳切片的容器。可以是vector<string>，其中字符串值是切片，也可以是vector<vector<int>{}>，其中内部的vector<int>包含切片，所以需要从输出容器类型派生内部容器的类型。我们通过函数体中的using声明来做到这一点。
+输出类型是容器的容器，需要容纳切片的容器。可以是vector<string>，其中字符串值是切片，也可以是vector<vector<int>{}>，其中内部的vector<int>包含切片，所以需要从输出容器类型派生内部容器的类型。可以通过函数体中的using声明来做到这一点。
 
 \begin{lstlisting}[style=styleCXX]
 using SliceContainer = typename Oc::value_type;
@@ -99,14 +99,14 @@ using SliceContainer = typename Oc::value_type;
 
 这也是为什么不能为输出形参使用输出迭代器的原因。根据定义，输出迭代器不能确定其内容的类型，并且将其value\_type设置为void。
 
-我们使用SliceContainer定义一个临时容器，可以添加到输出容器中:
+使用SliceContainer定义一个临时容器，可以将其添加到输出容器中:
 
 \begin{lstlisting}[style=styleCXX]
 dest.push_back(dest_elm);
 \end{lstlisting}
 
 \item 
-谓词是一个二进制操作符，用于比较输入元素和分隔符。在bw命名空间中包含了一个默认的相等操作符:
+谓词是一个二元操作符，用于比较输入元素和分隔符。在bw命名空间中包含了一个默认的相等操作符:
 
 \begin{lstlisting}[style=styleCXX]
 constexpr auto eq = [](const auto& el, const auto& sep) {
@@ -126,7 +126,7 @@ It split(It it, const It end_it, Oc& dest, const V& sep)
 \end{lstlisting}
 
 \item 
-因为分割字符串对象是这个算法的常见用例，我们包含了一个用于特定目的的辅助函数:
+因为分割字符串对象是这个算法的常见用例，包含了一个用于特定目的的辅助函数:
 
 \begin{lstlisting}[style=styleCXX]
 template<typename Cin, typename Cout, typename V>
@@ -138,7 +138,7 @@ Cout& strsplit(const Cin& str, Cout& dest, const V& sep)
 \end{lstlisting}
 
 \item 
-我们测试拆分算法main()，从一个字符串对象开始:
+我们测试split算法main()函数:
 
 \begin{lstlisting}[style=styleCXX]
 int main() {
@@ -154,7 +154,7 @@ int main() {
 }
 \end{lstlisting}
 
-使用/etc/passwd文件中的字符串来测试我们的算法，结果如下:
+使用/etc/passwd文件中的字符串来测试算法，结果如下:
 
 \begin{tcblisting}{commandshell={}}
 [sync] [x] [4] [65534] [sync] [/bin] [/bin/sync]
@@ -179,7 +179,7 @@ cout << '\n';
 这样就可以很容易地解析/etc/passwd文件。
 
 \item 
-当然，可以对任何容器使用相同的算法:
+当然，可以对任何容器使用相同算法:
 
 \begin{lstlisting}[style=styleCXX]
 constexpr int intsep{ -1 };
@@ -204,7 +204,7 @@ cout << '\n';
 
 \subsubsection{How it works…}
 
-split算法本身比较简单。这个示例的神奇之处在于使用模板使其尽可能通用。
+split算法本身比较简单，这个示例的神奇之处在于，模板可使其通用。
 
 using声明中的派生类型，可以创建与输出容器一起使用的容器:
 
@@ -212,7 +212,7 @@ using声明中的派生类型，可以创建与输出容器一起使用的容器
 using SliceContainer = typename Oc::value_type;
 \end{lstlisting}
 
-这里别名一个SliceContainer类型，可以用它来为切片创建容器:
+这里别名一个SliceContainer类型，可以用它为切片创建容器:
 
 \begin{lstlisting}[style=styleCXX]
 SliceContainer dest_elm{};

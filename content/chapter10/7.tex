@@ -16,7 +16,7 @@ using de = fs::directory_entry;
 \end{lstlisting}
 
 \item 
-我们还对fs::path对象使用格式化特化:
+还对fs::path对象使用格式化特化:
 
 \begin{lstlisting}[style=styleCXX]
 template<>
@@ -30,7 +30,7 @@ std::formatter<std::string> {
 \end{lstlisting}
 
 \item 
-为了输出目录的大小，我们将使用make\_comma()函数:
+为了输出目录的大小，将使用make\_comma()函数:
 
 \begin{lstlisting}[style=styleCXX]
 string make_commas(const uintmax_t& num) {
@@ -129,17 +129,17 @@ int main(const int argc, const char** argv) {
 	cout << format("{}:\n", absolute(dir));
 \end{lstlisting}
 
-对于我们的目录路径dir，若有参数，则使用argv[1]。否则，对当前目录使用current\_path()。然后，为我们的用法计数器设置一个环境:
+对于目录路径dir，若有参数，则使用argv[1]。否则，对当前目录使用current\_path()。然后，为用法计数器设置环境:
 
 \begin{itemize}
 \item 
 directory\_entry对象的vector用于排序。
 
 \item 
-accum用于累积最终总大小的值。
+accum用于累积文件最终总大小的值。
 
 \item 
-在继续检查目录之前，需要确保dir存在，并且的确是一个目录。
+继续检查目录之前，需要确保dir存在，并且的确是一个目录。
 \end{itemize}
 
 \item 
@@ -205,7 +205,7 @@ total bytes: 1,484,398 (1M)
 
 \subsubsection{How it works…}
 
-fs::file\_size()函数的作用是:返回一个uintmax\_t值，该值表示文件的大小，为给定平台上最大的自然无符号整数。虽然，在大多数64位系统上这通常是一个64位整数，但Windows是一个例外，它使用32位整数。虽然，size\_t可能在某些系统上适用于这个值，但在Windows上无法编译，因为它可能试图将64位值提升为32位值。
+fs::file\_size()函数的作用是:返回一个uintmax\_t值，该值表示文件的大小，为给定平台上最大的自然无符号整数。虽然，在大多数64位系统上这通常是一个64位整数，但Windows是一个例外，其使用32位整数。虽然，size\_t可能在某些系统上适用于这个值，但在Windows上无法编译，因为这里可能试图将64位值提升为32位值。
 
 entry\_size()函数接受一个路径对象，并返回uintmax\_t值:
 
@@ -224,7 +224,7 @@ uintmax_t entry_size(const fs::path& p) {
 
 该函数检查常规文件并返回文件的大小。否则，将检查一个目录是否也是符号链接。我们只想知道目录中文件的大小，因此不希望有符号链接。(符号链接可能会出现引用循环)
 
-若找到一个目录，就循环遍历它，为遇到的每个文件使用entry\_size()。这是一个递归循环，所以我们最终会得到整个目录的大小。
+若找到一个目录，就循环遍历，为遇到的每个文件使用entry\_size()。这是一个递归循环，所以我们最终会得到整个目录的大小。
 
 
 

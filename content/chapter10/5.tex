@@ -3,11 +3,11 @@
 
 \subsubsection{How to do it…}
 
-在这个示例中，我们编写了一个简单的grep程序，可以遍历目录以使用正则表达式搜索文件:
+这个示例中，我们编写了一个简单的grep程序，可以遍历目录以使用正则表达式搜索文件:
 
 \begin{itemize}
 \item 
-我们从一些别名开始:
+先从一些别名开始:
 
 \begin{lstlisting}[style=styleCXX]
 namespace fs = std::filesystem;
@@ -19,7 +19,7 @@ using match_v = vector<std::pair<size_t, std::string>>;
 match\_v是一个正则表达式匹配结果的vector。
 
 \item 
-我们继续使用path对象的格式化特化:
+继续使用path对象的格式化特化:
 
 \begin{lstlisting}[style=styleCXX]
 template<>
@@ -50,7 +50,7 @@ match_v matches(const fs::path& fpath, const regex& re) {
 }
 \end{lstlisting}
 
-在这个函数中，我们使用ifstream打开文件，使用getline()从文件中读取行，并使用regex\_search()匹配正则表达式。在vector中收集结果并返回。
+在这个函数中，使用ifstream打开文件，使用getline()从文件中读取行，并使用regex\_search()匹配正则表达式。在vector中收集结果并返回。
 
 \item 
 现在可以在main()中使用这个函数:
@@ -87,9 +87,9 @@ std::formatter<std::string> {
 \end{tcblisting}
 
 \item 
-我们的程序需要接受regex模式和文件名的命令行参数，其能够遍历目录或获取文件名列表(这可能是命令行通配符展开的结果)。这需要main()函数中的一些逻辑处理。
+程序需要接受regex模式和文件名的命令行参数，其能够遍历目录或获取文件名列表(这可能是命令行通配符展开的结果)。这需要main()函数中的一些逻辑处理。
 
-首先，我们还需要一个辅助函数:
+首先，需要一个辅助函数:
 
 \begin{lstlisting}[style=styleCXX]
 size_t pmatches(const regex& re, const fs::path& epath,
@@ -114,7 +114,7 @@ const fs::path& search_path) {
 这个函数调用matches()函数并输出结果，其接受一个regex对象和两个path对象。epath是目录搜索的结果，而search\_path是搜索目录本身。我们将在main()中设置这些参数。
 
 \item 
-在main()中，我们使用argc和argv命令行参数，并声明了几个变量:
+在main()中，使用argc和argv命令行参数，并声明了几个变量:
 
 \begin{lstlisting}[style=styleCXX]
 int main(const int argc, const char** argv) {
@@ -171,7 +171,7 @@ try {
 使用icase标志告诉正则表达式解析器忽略大小写。
 
 \item 
-若argc == 2，我们只有一个参数，我们将其视为正则表达式模式，并且使用当前目录作为搜索路径:
+若argc == 2，只有一个参数，将其视为正则表达式模式，并且使用当前目录作为搜索路径:
 
 \begin{lstlisting}[style=styleCXX]
 if(argc == 2) {
@@ -184,10 +184,10 @@ if(argc == 2) {
 }
 \end{lstlisting}
 
-rdit是recursive\_directory\_iterator类的别名，该类从起始路径遍历目录树，为遇到的每个文件返回一个directory\_entry对象。然后创建一个path对象，并调用pmatches()遍历文件，从而打印所有正则表达式匹配项。
+rdit是recursive\_directory\_iterator类的别名，该类从起始路径遍历目录树，为遇到的每个文件返回一个directory\_entry对象。然后，创建一个path对象，并调用pmatches()遍历文件，从而打印所有正则表达式匹配项。
 
 \item 
-此时在main()中，我们知道argc是>=2。现在，处理命令行上有一个或多个文件路径的情况:
+此时在main()中，argc是>=2。现在，处理命令行上有一个或多个文件路径的情况:
 
 \begin{lstlisting}[style=styleCXX]
 int count{ argc - 2 };
@@ -213,7 +213,7 @@ while循环处理命令行上搜索模式以外的一个或多个参数，其检
 若是单个文件，则可在该文件上调用pmatches()。
 
 \item 
-可以用一个参数作为搜索模式运行我们的grep副本:
+可以用一个参数作为搜索模式运行我们的grep:
 
 \begin{tcblisting}{commandshell={}}
 $ ./bwgrep using

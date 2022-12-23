@@ -1,7 +1,7 @@
 
-path类在整个文件系统库中用于表示文件或目录路径。在符合posix的系统上，例如macOS和Linux，路径对象使用char类型来表示文件名。在Windows上，path使用wchar\_t。在Windows上，cout和format()不会显示wchar\_t字符的原始字符串。这意味着没有简单的方法来编写使用文件系统库，并且无法直接POSIX和Windows之间编写可移植的代码。
+path类在整个文件系统库中用于表示文件或目录路径。在符合posix的系统上，例如macOS和Linux，路径对象使用char类型来表示文件名。在Windows上，path使用wchar\_t。在Windows上，cout和format()不会显示wchar\_t字符的原始字符串，所以没有简单的方法来编写使用文件系统库，并且无法直接POSIX和Windows之间编写可移植的代码。
 
-我们需要使用预处理器指令为Windows编写特定版本的代码。对于某些代码库来说，这可能是一个合理的解决方案，但对于本书来说，它很丑陋，不能满足简单、可移植、可重用的特性。
+我们需要使用预处理器指令为Windows编写特定版本的代码。对于某些代码库来说，这可能是一个合理的解决方案，但对于本书来说，这样写出的代码很丑陋，不能满足简单、可移植、可重用的特性。
 
 优雅的解决方案是为path类使用C++20的format进行格式化特化。这就可以简单地、可移植地显示path对象。
 
@@ -11,7 +11,7 @@ path类在整个文件系统库中用于表示文件或目录路径。在符合p
 
 \begin{itemize}
 \item 
-方便起见，从命名空间别名开始。所有的文件系统名称都在std::filesystem命名空间中:
+从命名空间别名开始，所有的文件系统名称都在std::filesystem命名空间中:
 
 \begin{lstlisting}[style=styleCXX]
 namespace fs = std::filesystem;
@@ -31,12 +31,12 @@ std::formatter<std::string> {
 };
 \end{lstlisting}
 
-这里，专为fs::path类型设置了格式，使用其string()方法来获得可输出的字符表示。我们不能使用c\_str()方法，因为其无法在Windows上处理wchar\_t字符。
+这里，专为fs::path类型设置了格式，使用其string()方法来获得可输出的字符表示。我们不能使用c\_str()方法，因其无法在Windows上处理wchar\_t字符。
 
 本书的第1章中有关于格式化特化的更完整的解释。
 
 \item 
-在main()函数中，可以使用命令行传递文件名或路径:
+main()函数中，可以使用命令行传递文件名或路径:
 
 \begin{lstlisting}[style=styleCXX]
 int main(const int argc, const char** argv) {
@@ -65,20 +65,20 @@ argc和argv参数是标准的命令行参数。
 
 argv[0]始终是可执行文件本身的完整目录路径和文件名，若没有正确数量的参数，则显示argv[0]的文件名部分作为使用消息的一部分。
 
-这个例子中，我们使用了一些文件系统函数:
+这个例子中，使用了一些文件系统函数:
 
 \begin{itemize}
 \item 
 fs::exists()函数的作用是:检查目录或文件是否存在。
 
 \item 
-dir是一个路径对象。可以直接将它传递给format()，使用特化来显示路径的字符串表示形式。
+dir是一个path对象。可以直接将path传递给format()，使用特化来显示path的字符串表示形式。
 
 \item 
-filename()方法返回一个新的路径对象，直接将其传递给format()。
+filename()方法返回一个新的path对象，直接将其传递给format()。
 
 \item 
-fs::cannonical()函数的作用是:接受一个路径对象，并返回一个带有规范绝对目录路径的新路径对象。我们将这个路径对象直接传递给format()，然后就会从cannical()返回的目录路径，并进行显示。
+fs::cannonical()函数的作用是:接受一个path对象，并返回一个带有规范绝对目录路径的新path对象。我们将这个path对象直接传递给format()，然后就会从cannical()返回的目录路径，并进行显示。
 \end{itemize}
 
 输出为:
@@ -94,9 +94,9 @@ cannonical: /home/billw/working/chap10/formatter.cpp
 
 \subsubsection{How it works…}
 
-fs::path类在整个文件系统库中用于表示目录路径和文件名。通过提供格式化特化，可以轻松地跨平台一致地显示路径对象。
+fs::path类在整个文件系统库中用于表示目录路径和文件名。通过提供格式化特化，可以轻松地跨平台显示path对象。
 
-path类提供了一些有用的方法。可以遍历一个path对象，看看它的组成:
+path类提供了一些有用的方法，可以遍历一个path对象:
 
 \begin{lstlisting}[style=styleCXX]
 fs::path p{ "~/include/bwprint.h" };

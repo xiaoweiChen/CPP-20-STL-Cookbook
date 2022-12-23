@@ -1,9 +1,9 @@
 
-文件系统库包括用于操作路径对象内容的函数。本节中，我们将考虑其中的一些工具。
+文件系统库包括用于操作path对象内容的函数。本节中，我们将了解其中的一些工具。
 
 \subsubsection{How to do it…}
 
-这个示例中，我们检查了一些操作路径对象内容的函数:
+这个示例中，我们检查了一些操作path对象内容的函数:
 
 \begin{itemize}
 \item 
@@ -22,7 +22,7 @@ std::formatter<std::string> {
 \end{lstlisting}
 
 \item 
-可以使用current\_path()函数获取当前的工作目录，该函数返回一个路径对象:
+可以使用current\_path()函数获取当前的工作目录，该函数返回一个path对象:
 
 \begin{lstlisting}[style=styleCXX]
 cout << format("current_path: {}\n", fs::current_path());
@@ -132,10 +132,10 @@ path2: testdir/../testdir/foo.txt/y
 
 这是使用GCC在Debian上的输出。
 
-filesystem\_error类通过其path1()和path2()方法提供了更多的细节。这些方法可以返回path对象。
+filesystem\_error类通过其path1()和path2()方法提供了更多的细节，这些方法可以返回path对象。
 
 \item 
-也可以将std::error\_code用于一些文件系统函数:
+也可以将std::error\_code用于文件系统函数:
 
 \begin{lstlisting}[style=styleCXX]
 fs::path p{ fp };
@@ -175,7 +175,7 @@ path absolute(const path& p);
 path absolute(const path& p, std::error_code& ec);
 \end{lstlisting}
 
-equivalent()函数接受两个路径对象并返回bool类型:
+equivalent()函数接受两个path对象，并返回bool类型:
 
 \begin{lstlisting}[style=styleCXX]
 bool equivalent( const path& p1, const path& p2 );

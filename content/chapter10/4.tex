@@ -69,7 +69,7 @@ int main(const int argc, const char** argv) {
 }
 \end{lstlisting}
 
-若有命令行参数，可以用它来创建一个路径对象。否则，需要使用"."表示当前目录。
+若有命令行参数，可以用它来创建一个path对象。否则，需要使用"."表示当前目录。
 
 我们使用if\_exists()检查路径是否存在。若不存在，则打印错误消息并退出。错误信息包括来自argv[0]的cmdname。
 
@@ -90,19 +90,19 @@ working: foo.bar does not exist
 \item 
 若要对输出进行排序，可以将directory\_entry对象存储在可排序容器中。
 
-在文件的顶部，为fs::directory\_entry创建一个别名:
+文件的顶部，为fs::directory\_entry创建一个别名:
 
 \begin{lstlisting}[style=styleCXX]
 using de = fs::directory_entry;
 \end{lstlisting}
 
-在main()的顶部，我们声明了一个de对象的vector:
+在main()的顶部，声明了一个de的vector:
 
 \begin{lstlisting}[style=styleCXX]
 vector<de> entries{};
 \end{lstlisting}
 
-在is\_directory()块中，我们加载vector，对它排序，然后进行显示:
+在is\_directory()块中，我们加载vector对它排序，并进行显示:
 
 \begin{lstlisting}[style=styleCXX]
 if(is_directory(fp)) {
@@ -116,7 +116,7 @@ if(is_directory(fp)) {
 } else { ...
 \end{lstlisting}
 
-现在输出已排序:
+现在输出已排序vector:
 
 \begin{tcblisting}{commandshell={}}
 Makefile chrono chrono.cpp formatter formatter.cpp
@@ -126,7 +126,7 @@ include testdir working working.cpp
 注意，Makefile首先排序，显然是无序的。这是因为大写字母在小写字母之前按ASCII顺序排序。
 
 \item 
-若想要一个不区分大小写的排序，需要一个忽略大小写的比较函数。首先，需要一个函数返回一个小写字符串:
+若想要一个不区分大小写的排序，需要一个忽略大小写的比较函数。首先，需要一个函数返回小写字母的字符串:
 
 \begin{lstlisting}[style=styleCXX]
 string strlower(string s) {
@@ -164,7 +164,7 @@ Makefile testdir working working.cpp
 \end{tcblisting}
 
 \item 
-现在，我们有了一个简单的目录清单程序。
+现在，有了一个简单的目录清单程序。
 
 从文件系统库中可以获得更多信息。来创建一个print\_dir()函数来收集更多信息，并将其格式化为Unix的ls风格:
 
@@ -200,10 +200,10 @@ dir.symlink\_status()返回一个file\_status对象，无符号链接。
 fstat.permissions()返回一个perms对象.
 
 \item 
-ssize是文件的大小，fn是文件名字符串。使用它们的时候，再仔细地研究它们吧。
+ssize是文件的大小，fn是文件名字符串。使用的时候，再仔细地研究吧。
 \end{itemize}
 
-Unix ls使用文件名后面的尾随字符来表示目录或可执行文件。我们使用is\_directory()测试fstat对象，以查看文件是否是目录，并在文件名后面添加/。同样，可以用fperm对象测试文件是否可执行。
+Unix ls使用文件名后面的尾随字符来表示目录或可执行文件。使用is\_directory()测试fstat对象，以查看文件是否是目录，并在文件名后面添加/。同样，可以用fperm对象测试文件是否可执行。
 
 在sort()之后的for循环中调用print\_dir():
 
@@ -214,7 +214,7 @@ for(const auto& e : entries) {
 }
 \end{lstlisting}
 
-现在我们的输出是这样的:
+现在输出是这样的:
 
 \begin{tcblisting}{commandshell={}}
 chrono*
@@ -229,7 +229,7 @@ working.cpp
 \end{tcblisting}
 
 \item 
-注意include*，这实际上是一个符号链接。让我们通过链接来正确地标记它，以获得目标路径:
+注意include*，这实际上是一个符号链接。可以通过链接来正确地标记它，以获得目标路径:
 
 \begin{lstlisting}[style=styleCXX]
 string suffix{};
@@ -326,7 +326,7 @@ drwxr-xr-x testdir/
 \end{tcblisting}
 
 \item 
-现在，让我们添加一定长度的字符串。fsize值来自file\_size()函数，该函数返回std::uintmax\_t类型，这表示目标系统上的最大自然整数大小。Uintmax\_t并不总是与size\_t相同，并不总是可以转换。值得注意的是，uintmax\_t在Windows上是32位，而size\_t是64位:
+现在，让我们添加一定长度的字符串。fsize值来自file\_size()函数，该函数返回std::uintmax\_t类型，这表示目标系统上的最大自然整数大小。uintmax\_t并不总是与size\_t相同，并不总是可以转换。值得注意的是，uintmax\_t在Windows上是32位，而size\_t是64位:
 
 \begin{lstlisting}[style=styleCXX]
 string size_string(const uintmax_t fsize) {
@@ -368,14 +368,14 @@ drwxr-xr-x   0B testdir/
 \end{tcblisting}
 
 \begin{tcolorbox}[colback=webgreen!5!white,colframe=webgreen!75!black,title=Note]
-该程序是为POSIX系统设计的，例如Linux和macOS。可以在Windows系统上运行，但Windows权限系统与POSIX系统不同。所以在Windows上，权限位总是显示完全设置。
+该程序是为POSIX系统设计的，例如Linux和macOS。可以在Windows系统上运行，但Windows权限系统与POSIX系统不同。所以，在Windows上，权限位总是显示完全设置。
 \end{tcolorbox}
 
 \end{itemize}
 
 \subsubsection{How it works…}
 
-文件系统库通过其directory\_entry和相关类携带了一组丰富的信息。我们在这个示例中使用的主要类包括:
+文件系统库通过其directory\_entry和相关类携带了一组丰富的信息。在这个示例中使用的主要类包括:
 
 \begin{itemize}
 \item 
@@ -392,7 +392,7 @@ file\_status类携带有关文件类型和权限的信息。perms对象可以是
 
 \subsubsection{There's more…}
 
-我原本打算在目录清单中包括每个文件的最后写入时间。
+我原本打算在目录列表中包括每个文件的最后写入时间。
 
 directory\_entry类有一个成员函数last\_write\_time()，它返回一个file\_time\_type对象，表示最后一次写入文件的时间戳。
 
@@ -409,7 +409,7 @@ string time_string(const fs::directory_entry& dir) {
 }
 \end{lstlisting}
 
-建议用户代码使用std::chrono::clock\_cast，而非file::clock::to\_sys来转换时钟之间的时间点。但目前的可用实现中，都没有用于此目的的std::chrono::clock\_cast特化。
+建议用户代码使用std::chrono::clock\_cast，而非file::clock::to\_sys来转换时钟之间的时间点。目前的可用实现中，都没有用于此目的的std::chrono::clock\_cast特化。
 
 使用这个time\_string()函数，可以将时间添加到print\_dir():
 
@@ -439,7 +439,7 @@ drwxr-xr-x   0B 2022-03-09 10:38:39 testdir/
 -rw-r--r--   5K 2022-03-12 17:13:40 working.cpp
 \end{tcblisting}
 
-这适用于Debian的GCC-11。但不要指望它很容易的就能在任何其他系统上工作。
+这适用于Debian的GCC-11，但不要指望它很容易的就能在其他系统上工作。
 
 
 

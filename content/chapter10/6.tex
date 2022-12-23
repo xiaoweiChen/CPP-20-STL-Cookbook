@@ -1,6 +1,6 @@
 
 
-这是一个使用正则表达式重命名文件的简单实用程序，可使用目录\_iterator查找目录中的文件，并使用fs::rename()重命名。
+这是一个使用正则表达式重命名文件的简单实用程序，可使用directory\_iterator查找目录中的文件，并使用fs::rename()重命名。
 
 \subsubsection{How to do it…}
 
@@ -100,7 +100,7 @@ for(const auto& entry : dit{fs::current_path()}) {
 }
 \end{lstlisting}
 
-这个for循环中，调用replace\_str()来获取替换的文件名，然后检查新名称是不是目录中某个文件的副本。我们在path对象上使用replace\_filename()方法创建具有新文件名的路径，并使用fs::rename()重命名文件。
+这个for循环中，调用replace\_str()来获取替换的文件名，然后检查新名称是不是目录中某个文件的副本。在path对象上使用replace\_filename()方法创建具有新文件名的路径，并使用fs::rename()重命名文件。
 
 \item 
 为了测试这个工具，我创建了一个目录，里面有几个文件用于重命名:
@@ -123,7 +123,7 @@ working.cpp -> working.Cpp
 formatter.cpp -> formatter.Cpp
 \end{tcblisting}
 
-让我们再把它们改回来:
+再把它们改回来:
 
 \begin{tcblisting}{commandshell={}}
 $ ../rerename .Cpp .cpp
@@ -146,7 +146,7 @@ bwfoo.txt -> bwbwfoo.txt
 working.cpp -> bwworking.cpp
 \end{tcblisting}
 
-注意，它重命名了开头已经有“bw”的文件。我们不想让它这样做。所以首先，先恢复文件名:
+注意，它重命名了开头已经有“bw”的文件。我们不想让它这样做。所以，先恢复文件名:
 
 \begin{tcblisting}{commandshell={}}
 $ ../rerename '^bw' ''
@@ -190,7 +190,7 @@ for(const auto& entry : dit{fs::current_path()}) {
 }
 \end{lstlisting}
 
-然后，我们从directory\_entry对象构造一个path对象来处理文件。
+然后，使用directory\_entry对象构造一个path对象来处理文件。
 
 我们在path对象上使用replace\_filename()方法来创建重命名操作的目标:
 
@@ -199,7 +199,7 @@ fs::path rpath{ fpath };
 rpath.replace_filename(rname);
 \end{lstlisting}
 
-这里，我们创建一个副本并更改它的名称:
+这里，创建一个副本并更改它的名称:
 
 \begin{lstlisting}[style=styleCXX]
 fs::rename(fpath, rpath);
